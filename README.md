@@ -96,7 +96,6 @@ This application connects to a device, it looks for which interface a mac is lea
 
 When the last device is reached, it verifies all the interfaces in the path and shows if there are errors, drops, CRCs, etc.
 
-#####Screenshots:
    ![alt tag](https://github.com/josedeleoncordon/QNetworkCliQueries/blob/master/images/L2PathVerification.png)
    ![alt tag](https://github.com/josedeleoncordon/QNetworkCliQueries/blob/master/images/L2PathVerification2.png)
 
