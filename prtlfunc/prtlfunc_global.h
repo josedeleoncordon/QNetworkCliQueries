@@ -1,0 +1,12 @@
+#ifndef QPRTLFUNC_GLOBAL_H
+#define QPRTLFUNC_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(QPRTLFUNC_LIBRARY)
+#  define QPRTLFUNCSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define QPRTLFUNCSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // QPRTLFUNC_GLOBAL_H

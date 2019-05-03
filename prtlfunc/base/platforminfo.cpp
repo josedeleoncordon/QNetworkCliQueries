@@ -1,0 +1,116 @@
+#include "platforminfo.h"
+
+PlatformInfo::PlatformInfo(QRemoteShell *terminal, QObject *parent):
+    FuncionBase(terminal,parent)
+{}
+
+PlatformInfo::PlatformInfo(const PlatformInfo &other):
+    FuncionBase(other.term,other.parent())
+{
+    m_brand = other.m_brand;
+    m_platform = other.m_platform;
+    m_name = other.m_name;
+    m_ip = other.m_ip;
+}
+
+void PlatformInfo::getPlatformInfo()
+{
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
+
+    if ( m_brand == "Cisco" )
+    {        
+        //Como en esta funcion estamos consultando la plataforma no hay manera de saber que version de comando mandar
+        //la unica manera de por el nombre, si es un XR tendra la informacion de procesador, etc
+        //asi mandamos un show version brief y no tener que perder tiempo con el show version
+        //si es un NCS6000 fallara, no podemos diferenciar un CRS a un NCS6000 por el nombre.
+        if (m_name.contains(QRegExp("RP(_|/)0.+(_|:)")))
+            termSendText( "show version brief" );
+        else
+            termSendText( "show version" );
+    }
+    else if ( m_brand == "Huawei" )
+        termSendText("display version");
+    else
+        finished();
+}
+
+void PlatformInfo::on_term_receiveText()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    if ( m_brand == "Cisco" )
+    {
+        //si el equipo es un NCS6000 fallara el comando, le mandamos un show version
+        if (m_name.contains(QRegExp("RP(_|/)0.+(_|:)")) &&
+                lastCommandFailed)
+        {
+            termSendText("show version");
+            return;
+        }
+
+        exp.setPattern("^(c|C)isco .+ processor .+ memory");
+        exp2.setPattern(" *(c|C)isco .+ Chassis .+");
+        QRegExp exp3("(c|C)isco .+ processor$");
+        foreach (QString line, lines)
+        {
+            line = line.simplified();
+            if ( ! line.contains(exp) && !line.contains(exp2) && !line.contains(exp3) )
+                continue;
+
+            QStringList data = line.split(" ",QString::SkipEmptyParts);
+            m_platform = data.at(1).simplified();
+            break;
+        }
+    }
+    else if ( m_brand == "Huawei" )
+    {
+        exp.setPattern("software, Version \\d+(\\.\\d+)* \\((.+)\\)");
+        foreach (QString line, lines)
+        {
+            line = line.simplified();
+            if ( line.contains(exp) )
+            {
+                m_platform = exp.cap( 2 );
+                break;
+            }
+        }
+    }    
+
+    //si es xr verificamos el location a utilizar para comandos como la consulta de tablas de mac
+    if ( equipmentOSFromPlatform(m_platform) == "IOS XR" )
+    {
+        term->disconnectReceiveTextSignalConnections();
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_on_term_receiveText_xr_location()));
+        termSendText("show platform");
+    }
+    else
+        finished();
+}
+
+void PlatformInfo::on_term_on_term_receiveText_xr_location()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+
+    QRegExp exp("^\\d/\\d/CPU\\d ");
+    foreach (QString line, lines)
+    {
+        qDebug() << "line" << line;
+
+        if ( line.contains( exp ) )
+        {
+            qDebug() << "simon";
+
+            m_xr_location = line.split(" ").at(0);
+            break;
+        }
+    }
+
+    finished();
+}
