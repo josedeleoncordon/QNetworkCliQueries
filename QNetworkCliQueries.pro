@@ -3,7 +3,7 @@ CONFIG   += ordered
 
 SUBDIRS =   qssh \
             qremoteshell \
-            prtlfunc \
+            qnetworkcliqueries \
             testapps \
             apps
 

@@ -1,5 +1,5 @@
 include(../../base.pri)
-include(../../prtlfunc/prtlfunc.pri)
+include(../../qnetworkcliqueries/qnetworkcliqueries.pri)
 include(../../qremoteshell/qremoteshell.pri)
 
 QT -= gui

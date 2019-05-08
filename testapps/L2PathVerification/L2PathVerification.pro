@@ -6,7 +6,7 @@
 
 include(../../base.pri)
 include(../../qremoteshell/qremoteshell.pri)
-include(../../prtlfunc/prtlfunc.pri)
+include(../../qnetworkcliqueries/qnetworkcliqueries.pri)
 
 QT       += core gui
 DESTDIR = $$APP_BUILD_TREE

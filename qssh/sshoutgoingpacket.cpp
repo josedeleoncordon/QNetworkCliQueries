@@ -313,8 +313,6 @@ void SshOutgoingPacket::generateChannelOpenFailurePacket(quint32 remoteChannel, 
 void SshOutgoingPacket::generateDisconnectPacket(SshErrorCode reason,
     const QByteArray &reasonString)
 {
-    qDebug() << "SshOutgoingPacket::generateDisconnectPacket" << reason;
-
     init(SSH_MSG_DISCONNECT).appendInt(reason).appendString(reasonString)
         .appendString(QByteArray()).finalize();
 }
