@@ -133,7 +133,7 @@ void IPRouteInfo::on_term_receiveText()
         return;
 
     QStringList lines = txt.split("\n");
-    SIpRouteInfo *route = NULL;
+    SIpRouteInfo *route = nullptr;
     QString mask;
 
     foreach (QString line, lines)
@@ -240,7 +240,7 @@ QDataStream& operator<<(QDataStream& out, const IPRouteInfo* info)
 
 QDataStream& operator>>(QDataStream& in, IPRouteInfo*& info)
 {
-    info =new IPRouteInfo(NULL,NULL);
+    info =new IPRouteInfo(nullptr,nullptr);
     in >> info->m_lstRoutes;
     return in;
 }

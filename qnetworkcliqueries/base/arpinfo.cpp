@@ -129,7 +129,7 @@ QDataStream& operator<<(QDataStream& out, const ArpInfo* info)
 
 QDataStream& operator>>(QDataStream& in, ArpInfo*& info)
 {
-    info = new ArpInfo(NULL,NULL);
+    info = new ArpInfo(nullptr,nullptr);
     in >> info->m_lstArp;
     return in;
 }

@@ -3,7 +3,7 @@
 #include "properties.h"
 #include "funciones.h"
 
-BDHosts* BDHosts::m_instance = NULL;
+BDHosts* BDHosts::m_instance = nullptr;
 
 BDHosts::BDHosts()
 {

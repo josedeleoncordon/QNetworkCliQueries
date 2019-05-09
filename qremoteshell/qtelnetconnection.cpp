@@ -4,7 +4,7 @@
 QTelnetConnection::QTelnetConnection(QString ip, QString port, QString user, QString pwd, QString platform, QObject *parent):
     Connection(ip,port,user,pwd,platform,parent)
 {
-    m_connection=NULL;
+    m_connection=nullptr;
     m_connectToGTW=false;
     _ip = ip;
 
@@ -81,7 +81,7 @@ void QTelnetConnection::host_disconnected()
             m_connection->disconnect();
             m_connection->host_disconnect();
             m_connection->deleteLater();
-            m_connection=NULL;
+            m_connection=nullptr;
 
             host_connect();
         }

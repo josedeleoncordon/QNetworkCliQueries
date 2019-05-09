@@ -128,7 +128,7 @@ SOSPFInfo* OSPFInfo::interfaceOspfInfo(QString interface)
         if ( o->interfaz == interface )
             return o;
     }
-    return NULL;
+    return nullptr;
 }
 
 QDataStream& operator<<(QDataStream& out, const OSPFInfo* info)
@@ -139,7 +139,7 @@ QDataStream& operator<<(QDataStream& out, const OSPFInfo* info)
 
 QDataStream& operator>>(QDataStream& in, OSPFInfo*& info)
 {
-    info =new OSPFInfo(NULL,NULL);
+    info =new OSPFInfo(nullptr,nullptr);
     in >> info->m_lstOSPFInfo;
     return in;
 }

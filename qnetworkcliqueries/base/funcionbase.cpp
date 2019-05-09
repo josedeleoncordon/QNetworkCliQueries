@@ -1,7 +1,7 @@
 #include "funcionbase.h"
 #include "queries.h"
 
-QueriesConfiguration* QueriesConfiguration::m_instance = NULL;
+QueriesConfiguration* QueriesConfiguration::m_instance = nullptr;
 
 QueriesConfiguration::QueriesConfiguration()
 {

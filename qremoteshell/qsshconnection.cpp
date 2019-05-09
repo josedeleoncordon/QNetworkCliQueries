@@ -4,7 +4,7 @@
 QSshConnection::QSshConnection(QString ip, QString port, QString user, QString pwd, QString platform, QObject *parent):
     Connection(ip,port,user,pwd,platform,parent)
 {
-    m_connection=NULL;
+    m_connection=nullptr;
 //    m_timer_keepAlive = new QTimer;
 //    m_timer_keepAlive->setInterval( 8000 );
 //    connect(m_timer_keepAlive,SIGNAL(timeout()),SLOT(on_m_timer_keepAlive_time_out()));
@@ -148,7 +148,7 @@ void QSshConnection::host_disconnect()
         m_connection->disconnect();
         m_connection->closeAllChannels();
         m_connection->deleteLater();
-        m_connection = NULL;
+        m_connection = nullptr;
         emit disconnected();
     }
 }

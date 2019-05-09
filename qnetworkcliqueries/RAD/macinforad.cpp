@@ -4,7 +4,7 @@
 MacInfoRAD::MacInfoRAD(QRemoteShell *terminal, QObject *parent):
     MacInfo(terminal,parent)
 {
-    etxTimer = NULL;
+    etxTimer = nullptr;
     menuintentos=0;
 }
 

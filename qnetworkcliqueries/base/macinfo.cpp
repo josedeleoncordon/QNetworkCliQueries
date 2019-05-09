@@ -130,7 +130,7 @@ QDataStream& operator<<(QDataStream& out, const MacInfo* info)
 
 QDataStream& operator>>(QDataStream& in, MacInfo*& info)
 {
-    info =new MacInfo(NULL,NULL);
+    info =new MacInfo(nullptr,nullptr);
     in >> info->m_lstMacs;
     return in;
 }

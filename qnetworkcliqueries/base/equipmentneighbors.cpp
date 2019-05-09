@@ -132,7 +132,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_CDP()
             continue;                       
 
         QStringList lstValues = entry.split("\n");
-        SEquipmentNeighborsInfo *nuevo=NULL;
+        SEquipmentNeighborsInfo *nuevo=nullptr;
         foreach (QString line, lstValues)
         {
             line = line.simplified();
@@ -274,7 +274,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Cisco_detail()
             continue;
 
         QStringList lstValues = entry.split("\n",QString::SkipEmptyParts);
-        SEquipmentNeighborsInfo *nuevo=NULL;
+        SEquipmentNeighborsInfo *nuevo=nullptr;
         QString localint;
         QString otroint;
         bool systemdescriptiontxt=false; //cuando se ve este texto significa que la siguiente linea contiene la plataforma
@@ -383,7 +383,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Huawei()
     bool description=false;
     QString descriptionmie;
 
-    SEquipmentNeighborsInfo *nuevo=NULL;
+    SEquipmentNeighborsInfo *nuevo=nullptr;
     QString localint;
     foreach (QString line, txt.split("\n",QString::SkipEmptyParts))
     {
@@ -476,7 +476,7 @@ QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo* info)
 
 QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo*& info)
 {
-    info =new EquipmentNeighborsInfo(NULL,NULL);
+    info =new EquipmentNeighborsInfo(nullptr,nullptr);
     in >> info->m_lstEquipos;
     return in;
 }

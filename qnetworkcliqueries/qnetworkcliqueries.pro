@@ -38,7 +38,6 @@ HEADERS += \
     Huawei/macinfohuawei.h \
     Huawei/ospfinfohuawei.h \
     RAD/macinforad.h \
-    snmpget.h \
     base/config.h \    
     dbhosts.h \
     Cisco/arpinfocisco.h \
@@ -72,7 +71,6 @@ SOURCES += \
     Huawei/macinfohuawei.cpp \
     Huawei/ospfinfohuawei.cpp \
     RAD/macinforad.cpp \
-    snmpget.cpp \
     base/config.cpp \    
     dbhosts.cpp \
     Cisco/arpinfocisco.cpp \

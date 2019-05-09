@@ -308,7 +308,7 @@ QDataStream& operator<<(QDataStream& out, const PIMInfo* info)
 
 QDataStream& operator>>(QDataStream& in, PIMInfo*& info)
 {
-    info =new PIMInfo(NULL,NULL);
+    info =new PIMInfo(nullptr,nullptr);
     in >> info->m_lstPIMNeighbors;
     return in;
 }

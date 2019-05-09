@@ -3,7 +3,7 @@
 QTelnet::QTelnet(QString ip, QString port, QObject *parent):
     QObject(parent)
 {
-    socket = NULL;
+    socket = nullptr;
     sendAllData=false;
     _ip = ip;
     _port = port;    
@@ -43,7 +43,7 @@ void QTelnet::host_disconnect()
         socket->disconnectFromHost();
         socket->disconnect();
         socket->deleteLater();
-        socket = NULL;
+        socket = nullptr;
         emit disconnected();
     }    
 }

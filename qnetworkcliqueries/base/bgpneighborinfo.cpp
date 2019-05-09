@@ -67,7 +67,7 @@ QDataStream& operator<<(QDataStream& out, const BGPNeighborInfo* info)
 
 QDataStream& operator>>(QDataStream& in, BGPNeighborInfo*& info)
 {
-    info =new BGPNeighborInfo(NULL,NULL);
+    info =new BGPNeighborInfo(nullptr,nullptr);
     in >> info->m_lstIPs;
     return in;
 }

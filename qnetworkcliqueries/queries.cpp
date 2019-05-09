@@ -40,8 +40,6 @@ Queries::Queries(const Queries &other) : QObject(other.parent())
     m_gw = other.m_gw;
     m_pwd = other.m_pwd;
 
-//    if ( other.snmpGetName ) snmpGetName = new SnmpGet( *other.snmpGetName );
-//    if ( other.snmpGetPlatform ) snmpGetPlatform = new SnmpGet( *other.snmpGetPlatform );
     if ( other.pi ) pi = new PlatformInfo( *other.pi );
     if ( other.equipmentNeighborsInfoQuery ) equipmentNeighborsInfoQuery = new EquipmentNeighborsInfo( *other.equipmentNeighborsInfoQuery );
     if ( other.interfacesInfoQuery ) interfacesInfoQuery = new InterfaceInfo( *other.interfacesInfoQuery );
@@ -70,31 +68,29 @@ Queries::~Queries()
 
 void Queries::iniciar()
 {    
-    term = NULL;
-    pi = NULL;
-    m_keepAliveTimer=NULL;
-//    snmpGetName=NULL;
-//    snmpGetPlatform=NULL;
-    equipmentNeighborsInfoQuery = NULL;
-    interfacesInfoQuery = NULL;
-    interfacesPermitedVlansQuery = NULL;
-    interfacesDescriptionsQuery = NULL;
-    interfacesIpAddressesQuery = NULL;
-    ospfQuery = NULL;
-    mplsLdpDiscoveryQuery = NULL;
-    mplsLdpNeighborsQuery = NULL;
-    mplsLdpInterfacesQuery = NULL;
-//    pimNeighborsQuery = NULL;
-    pimInteracesQuery = NULL;
-    macsQuery = NULL;
-    portChannelInfoQuery = NULL;
-    vrfsFromVlansQuery = NULL;
-    vrfFromRTQuery = NULL;
-    vrfsQuery = NULL;
-    arpsQuery = NULL;
-    bgpNeighborsQuery = NULL;
-    ipRoutesQuery = NULL;
-    configQuery = NULL;
+    term = nullptr;
+    pi = nullptr;
+    m_keepAliveTimer=nullptr;
+    equipmentNeighborsInfoQuery = nullptr;
+    interfacesInfoQuery = nullptr;
+    interfacesPermitedVlansQuery = nullptr;
+    interfacesDescriptionsQuery = nullptr;
+    interfacesIpAddressesQuery = nullptr;
+    ospfQuery = nullptr;
+    mplsLdpDiscoveryQuery = nullptr;
+    mplsLdpNeighborsQuery = nullptr;
+    mplsLdpInterfacesQuery = nullptr;
+//    pimNeighborsQuery = nullptr;
+    pimInteracesQuery = nullptr;
+    macsQuery = nullptr;
+    portChannelInfoQuery = nullptr;
+    vrfsFromVlansQuery = nullptr;
+    vrfFromRTQuery = nullptr;
+    vrfsQuery = nullptr;
+    arpsQuery = nullptr;
+    bgpNeighborsQuery = nullptr;
+    ipRoutesQuery = nullptr;
+    configQuery = nullptr;
     m_connectionprotol = QRemoteShell::TelnetSSH;
     m_connectiontype = QRemoteShell::Lib;
 
@@ -123,104 +119,104 @@ void Queries::limpiarConsultas()
     if (pi)
     {
         delete pi;
-        pi=NULL;
+        pi=nullptr;
     }
     if (equipmentNeighborsInfoQuery)
     {
         delete equipmentNeighborsInfoQuery;
-        equipmentNeighborsInfoQuery=NULL;
+        equipmentNeighborsInfoQuery=nullptr;
     }
     if (interfacesInfoQuery)
     {
         delete interfacesInfoQuery;
-        interfacesInfoQuery=NULL;
+        interfacesInfoQuery=nullptr;
     }
     if (interfacesPermitedVlansQuery)
     {
         delete interfacesPermitedVlansQuery;
-        interfacesPermitedVlansQuery=NULL;
+        interfacesPermitedVlansQuery=nullptr;
     }
     if (interfacesDescriptionsQuery)
     {
         delete interfacesDescriptionsQuery;
-        interfacesDescriptionsQuery=NULL;
+        interfacesDescriptionsQuery=nullptr;
     }
     if (interfacesIpAddressesQuery)
     {
         delete interfacesIpAddressesQuery;
-        interfacesIpAddressesQuery=NULL;
+        interfacesIpAddressesQuery=nullptr;
     }
     if (ospfQuery)
     {
         delete ospfQuery;
-        ospfQuery=NULL;
+        ospfQuery=nullptr;
     }
     if (mplsLdpDiscoveryQuery)
     {
         delete mplsLdpDiscoveryQuery;
-        mplsLdpDiscoveryQuery=NULL;
+        mplsLdpDiscoveryQuery=nullptr;
     }
     if (mplsLdpNeighborsQuery)
     {
         delete mplsLdpNeighborsQuery;
-        mplsLdpNeighborsQuery=NULL;
+        mplsLdpNeighborsQuery=nullptr;
     }
     if (mplsLdpInterfacesQuery)
     {
         delete mplsLdpInterfacesQuery;
-        mplsLdpInterfacesQuery=NULL;
+        mplsLdpInterfacesQuery=nullptr;
     }
 //    if (pimNeighborsQuery)
 //        delete pimNeighborsQuery;
     if (pimInteracesQuery)
     {
         delete pimInteracesQuery;
-        pimInteracesQuery=NULL;
+        pimInteracesQuery=nullptr;
     }
     if (macsQuery)
     {
         delete macsQuery;
-        macsQuery=NULL;
+        macsQuery=nullptr;
     }
     if (portChannelInfoQuery)
     {
         delete portChannelInfoQuery;
-        portChannelInfoQuery=NULL;
+        portChannelInfoQuery=nullptr;
     }
     if (vrfsFromVlansQuery)
     {
         delete vrfsFromVlansQuery;
-        vrfsFromVlansQuery=NULL;
+        vrfsFromVlansQuery=nullptr;
     }
     if (vrfFromRTQuery)
     {
         delete vrfFromRTQuery;
-        vrfFromRTQuery=NULL;
+        vrfFromRTQuery=nullptr;
     }
     if (vrfsQuery)
     {
         delete vrfsQuery;
-        vrfsQuery=NULL;
+        vrfsQuery=nullptr;
     }
     if (arpsQuery)
     {
         delete arpsQuery;
-        arpsQuery=NULL;
+        arpsQuery=nullptr;
     }
     if (bgpNeighborsQuery)
     {
         delete bgpNeighborsQuery;
-        bgpNeighborsQuery=NULL;
+        bgpNeighborsQuery=nullptr;
     }
     if (ipRoutesQuery)
     {
         delete ipRoutesQuery;
-        ipRoutesQuery=NULL;
+        ipRoutesQuery=nullptr;
     }
     if (configQuery)
     {
         delete configQuery;
-        configQuery=NULL;
+        configQuery=nullptr;
     }
 }
 
@@ -272,7 +268,7 @@ void Queries::disconnectFromHost()
         term->disconnect();
         term->host_disconnect();
         term->deleteLater();
-        term = NULL;
+        term = nullptr;
     }
 }
 
@@ -294,7 +290,7 @@ void Queries::createQueries(Queries::Opcion option)
 
     unsigned int oActual = option;
     if ( !oActual )
-        oActual=SNMPName;
+        oActual=Platform;
 
     do
     {
@@ -461,7 +457,7 @@ void Queries::nextProcess()
             //estableciendo la siguiente opcion que se ejecutara
             if ( ! opcionActual )
                 //primera vez que se entra, se establece Connect para ser evaluada primero
-                opcionActual = SNMPName;
+                opcionActual = Connect;
             else
                 opcionActual = opcionActual << 1;
 
@@ -490,29 +486,6 @@ void Queries::nextProcess()
 
     if ( term )
         connect(term,SIGNAL(readyRead()),SLOT(on_term_readyRead()));
-
-    //consultas SNMP    
-
-//    if ( opcionActual & flags & SNMPName )
-//    {
-//        qDebug() << "SNMPName" << m_ip << m_name;
-//        queryTimer->setInterval( 5000 );
-//        snmpGetName = new SnmpGet(m_ip,QueriesConfiguration::instance()->mapQueriesToList("SNMP_communities"),
-//                                  "1.3.6.1.2.1.1.5.0",this);
-//        connect(snmpGetName,SIGNAL(finished()),SLOT(processSnmmpGetName()));
-//        snmpGetName->execute();
-//        return;
-//    }
-//    else if ( opcionActual & flags & SNMPPlatform )
-//    {
-//        qDebug() << "SNMPName" << m_ip << m_name;
-//        queryTimer->setInterval( 5000 );
-//        snmpGetPlatform = new SnmpGet(m_ip,QueriesConfiguration::instance()->mapQueriesToList("SNMP_communities"),
-//                                      "1.3.6.1.2.1.1.2.0",this);
-//        connect(snmpGetPlatform,SIGNAL(finished()),SLOT(processSnmmpGetPlatform()));
-//        snmpGetPlatform->execute();
-//        return;
-//    }
 
     //consultas CLI    
 
@@ -1019,7 +992,7 @@ void Queries::processConnectToHostDisconnected()
         term->disconnect();
         term->host_disconnect();
         term->deleteLater();
-        term = NULL;        
+        term = nullptr;        
     }
 
     if ( m_connected )
@@ -1078,41 +1051,14 @@ void Queries::processConnectToHostDisconnected()
         m_operativo=false;
         queryTimer->stop();
 
-        //si tiene informacion de nombre o plataforma por snmp creamos los queries vacios para que este
-        //disponible a la hora de graficar
-        if ( !m_platform.isEmpty() )
-            createQueries();
+//        //si tiene informacion de nombre o plataforma por snmp creamos los queries vacios para que este
+//        //disponible a la hora de graficar
+//        if ( !m_platform.isEmpty() )
+//            createQueries();
 
         emit finished(this);
     }
 }
-
-//void Queries::processSnmmpGetName()
-//{
-//    qDebug() << "Queries::processSnmmpGetName()";
-
-//    QStringList data = snmpGetName->response();
-//    if ( data.size() > 0 )
-//        m_name = m_fullName = data.first();
-//    snmpGetName->deleteLater();
-//    snmpGetName=NULL;
-//    nextProcess();
-//}
-
-//void Queries::processSnmmpGetPlatform()
-//{
-//    qDebug() << "Queries::processSnmmpGetPlatform()";
-
-//    QStringList data = snmpGetPlatform->response();
-//    if ( data.size() > 0 )
-//    {
-//        m_platform = snmpOID2platform( data.first() );
-//        m_brand = snmpOID2Brand( data.first() );
-//    }
-//    snmpGetPlatform->deleteLater();
-//    snmpGetPlatform=NULL;
-//    nextProcess();
-//}
 
 void Queries::processConnectToHostReachable()
 {
@@ -1268,10 +1214,10 @@ void Queries::on_queryTimer_timeout()
         qDebug() << "**ErrorDeConexion**" << m_ip;
         disconnectFromHost();
 
-        //si tiene informacion de nombre o plataforma por snmp creamos los queries vacios para que este
-        //disponible a la hora de graficar
-        if ( !m_platform.isEmpty() )
-            createQueries();
+//        //si tiene informacion de nombre o plataforma por snmp creamos los queries vacios para que este
+//        //disponible a la hora de graficar
+//        if ( !m_platform.isEmpty() )
+//            createQueries();
 
         finished(this);
     }

@@ -21,12 +21,6 @@ QStringList lstPaises();
 //devuelve el tipo de equipo desde la plataforma
 QString equipmentOSFromPlatform(QString platform);
 
-//devuelve la plataforma desde el OID de SNMP
-QString snmpOID2platform(QString oid);
-
-//devuelve la marca del equipo desde el IOD de SNMP
-QString snmpOID2Brand(QString oid);
-
 //Abre un archivo de texto
 QString openFile(QString path);
 

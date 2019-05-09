@@ -53,28 +53,21 @@ void MacInfoHuawei::on_term_receiveText()
         QString m = data.at(0).simplified();
         m.replace("-",".");
 
-        if ( m_platform.contains("ATN") )
+        mac = new SMacInfo;
+        mac->queryParent = m_queriesParent;
+        mac->datetime = QDateTime::currentDateTime();
+        mac->operativo = true;
+        mac->mac = m;
+
+        if ( data.size() == 7 )
         {
-            mac = new SMacInfo;
-            mac->queryParent = m_queriesParent;
-            mac->datetime = QDateTime::currentDateTime();
-            mac->operativo = true;
-            mac->mac = m;
             mac->vlan = data.at(1).simplified();
             mac->interfaz = interfazSimplifier(data.at(4).simplified());
         }
-        else if ( m_platform.contains("NE40E") )
+        else if ( data.size() > 7 )
         {
-            if ( data.size() > 3 )
-            {
-                mac = new SMacInfo;
-                mac->queryParent = m_queriesParent;
-                mac->datetime = QDateTime::currentDateTime();
-                mac->operativo = true;
-                mac->mac = m;
-                mac->vlan = data.at(2).simplified();
-                mac->interfaz = interfazSimplifier(data.at(5).simplified());
-            }
+            mac->vlan = data.at(2).simplified();
+            mac->interfaz = interfazSimplifier(data.at(5).simplified());
         }
 
         if ( !mac )

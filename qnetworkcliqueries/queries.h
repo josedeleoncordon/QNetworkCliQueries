@@ -1,7 +1,6 @@
 #ifndef QUERIES_H
 #define QUERIES_H
 
-//#include "snmpget.h"
 #include "equipmentneighbors.h"
 #include "interfaceinfo.h"
 #include "ospfinfo.h"
@@ -37,8 +36,6 @@ public:
 
     enum Opcion {
         Null = 0,
-        SNMPName = 1,
-        SNMPPlatform = 2,
         Connect = 4,
         Platform = 8,        
         MacAddress = 16,
@@ -66,8 +63,6 @@ public:
 
     QString mac; //mie para debug de graficar l2 por mac
 
-//    SnmpGet *snmpGetName;
-//    SnmpGet *snmpGetPlatform;
     PlatformInfo *pi;
     EquipmentNeighborsInfo *equipmentNeighborsInfoQuery;
     InterfaceInfo *interfacesInfoQuery;
@@ -158,8 +153,6 @@ public slots:
     void disconnectFromHost();
 
 protected slots:
-//    void processSnmmpGetName();
-//    void processSnmmpGetPlatform();
     void processConnectToHostReachable();
     void processConnectToHostConnected();
     void processConnectToHostDisconnected();

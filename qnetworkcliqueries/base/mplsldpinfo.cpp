@@ -254,7 +254,7 @@ QDataStream& operator<<(QDataStream& out, const MplsLdpInfo* info)
 
 QDataStream& operator>>(QDataStream& in, MplsLdpInfo*& info)
 {
-    info =new MplsLdpInfo(NULL,NULL);
+    info =new MplsLdpInfo(nullptr,nullptr);
     in >> info->m_localID;
     in >> info->m_lstMplsLdpInfo;
     return in;

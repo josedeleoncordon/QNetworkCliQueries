@@ -47,25 +47,6 @@ QString equipmentOSFromPlatform(QString platform)
         return "";
 }
 
-QString snmpOID2platform(QString oid)
-{
-    if ( oid == "1.3.6.1.4.1.164.6.1.3.174" ) return "ETX-1300";
-    if ( oid == "1.3.6.1.4.1.164.6.1.6.14" ) return "ETX-201";
-    if ( oid == "1.3.6.1.4.1.164.6.1.5.38" ) return "ETX-102";
-    if ( oid == "1.3.6.1.4.1.164.6.1.5.37" ) return "RiciE1";
-    if ( oid == "1.3.6.1.4.1.164.6.1.6.6" ) return "Rici4E1";
-    if ( oid == "1.3.6.1.4.1.164.6.1.3.160" ) return "ASMI-54L";
-    if ( oid == "1.3.6.1.4.1.164.6.1.3.99" ) return "ASMI-52A";
-    return oid;
-}
-
-QString snmpOID2Brand(QString oid)
-{
-    if ( oid.contains( "1.3.6.1.4.1.164" ) ) return "RAD";
-    if ( oid.contains( "1.3.6.1.4.1.2011" ) ) return "Huawei";
-    return "";
-}
-
 QString openFile(QString path)
 {
     QFile file(path);
@@ -200,7 +181,7 @@ Queries *buscarEquipoPorIPnombrePais(QList<Queries*> lst, QString ip,QString nom
         qDebug() << "buscarEquipos: no se encontro nombre del equipo en lst" << nombre <<
                     "no se se empezo a validar IP" << ip;
 
-    return NULL;
+    return nullptr;
 }
 
 Queries *buscarEquipoPorIP(QList<Queries*> lst, QString ip, QString pais)
@@ -210,7 +191,7 @@ Queries *buscarEquipoPorIP(QList<Queries*> lst, QString ip, QString pais)
         if ( validateIpQuery( qry,ip,pais ) )
             return qry;
     }
-    return NULL;
+    return nullptr;
 }
 
 Queries *buscarEquipoPorNombre(QList<Queries*> lst, QString nombre)
@@ -220,7 +201,7 @@ Queries *buscarEquipoPorNombre(QList<Queries*> lst, QString nombre)
         if ( qry->hostName() == nombre )
             return qry;
     }
-    return NULL;
+    return nullptr;
 }
 
 bool validateIpQuery(Queries *qry,QString ip,QString pais)
@@ -614,7 +595,7 @@ Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries *> lst,
                                                     QString ospfarea)
 {
     if ( ipBuscar.isEmpty() )
-        return NULL;
+        return nullptr;
 
     foreach (Queries *q, lst)
     {
@@ -708,7 +689,7 @@ Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries *> lst,
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 bool existeEquipmentNeighborsOperativoHaciaEquipo(QList<SEquipmentNeighborsInfo *> lst, QString hostname )
@@ -751,7 +732,7 @@ SIpInfo* buscarARP(QList<Queries *> lstQueries, QString IPoMAc)
     foreach (Queries *q, lstQueries)
     {
         if ( !q->arpsQuery )
-            return NULL; //si al primer queries no tiene info de arp se regresa null ya que los demas tampoco tendran
+            return nullptr; //si al primer queries no tiene info de arp se regresa null ya que los demas tampoco tendran
 
         foreach (SIpInfo *arp, q->arpsInfo())
         {

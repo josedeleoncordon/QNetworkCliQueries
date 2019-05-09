@@ -258,7 +258,7 @@ QDataStream& operator<<(QDataStream& out, const PortChannelsInfo* info)
 
 QDataStream& operator>>(QDataStream& in, PortChannelsInfo*& info)
 {
-    info =new PortChannelsInfo(NULL,NULL);
+    info =new PortChannelsInfo(nullptr,nullptr);
     in >> info->lstInfo;
     return in;
 }

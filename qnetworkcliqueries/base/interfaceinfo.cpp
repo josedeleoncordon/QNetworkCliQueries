@@ -281,7 +281,7 @@ void InterfaceInfo::on_term_receiveText_Info()
         return;
 
     QStringList lines = txt.split("\n");
-    SInterfaceInfo *id=NULL;
+    SInterfaceInfo *id=nullptr;
     QString interline,interstatus;
     QRegExp expInterface;
     foreach (QString line, lines)
@@ -426,7 +426,7 @@ void InterfaceInfo::on_term_receiveText_Info()
                     id->collisions = expInterface.cap(1);
 
                 //lo ultimo que se busca
-                id=NULL;
+                id=nullptr;
 
                 continue;
             }
@@ -596,7 +596,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
     QStringList lines = txt.split("\n");
 
     bool a = false;
-    SInterfaceVlans *iv = NULL;
+    SInterfaceVlans *iv = nullptr;
     QString temp;
 
     foreach (QString line, lines)
@@ -919,7 +919,7 @@ SInterfaceInfo *InterfaceInfo::interfaceInfo(QString interfaz)
         if ( interfaz == i->interfaz )
             return i;
     }
-    return NULL;
+    return nullptr;
 }
 
 QDataStream& operator<<(QDataStream& out, const InterfaceInfo* ii)
@@ -932,7 +932,7 @@ QDataStream& operator<<(QDataStream& out, const InterfaceInfo* ii)
 
 QDataStream& operator>>(QDataStream& in, InterfaceInfo*& ii)
 {
-    ii = new InterfaceInfo(NULL,NULL);
+    ii = new InterfaceInfo(nullptr,nullptr);
     in >> ii->m_lstInterfacesIPAddresses;
     in >> ii->m_lstInterfacesInfo;
     in >> ii->m_lstInterfacesPermitedVlans;

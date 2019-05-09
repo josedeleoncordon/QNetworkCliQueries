@@ -451,7 +451,7 @@ QDataStream& operator<<(QDataStream& out, const VrfInfo* info)
 
 QDataStream& operator>>(QDataStream& in, VrfInfo*& info)
 {
-    info =new VrfInfo(NULL,NULL);
+    info =new VrfInfo(nullptr,nullptr);
     in >> info->m_lstVrf;
     in >> info->m_vrf;
     in >> info->m_lstVrfInfo;

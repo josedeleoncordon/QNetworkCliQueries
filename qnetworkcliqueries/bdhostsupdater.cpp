@@ -18,7 +18,7 @@ void BDHostsUpdater::updateDB( QString path )
     lstPaises.append("NIC");
     lstPaises.append("SV");
     lstPaisesPos=-1;
-    queriesThread=NULL;
+    queriesThread=nullptr;
 
     consultarPEs_otroPais();
 }
