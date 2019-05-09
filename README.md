@@ -1,14 +1,14 @@
 QNetworkCliQueries
 ==========
 
-QNetworkCliQueries is a Qt5 library to connect to network devices through Telnet and SSH
+QNetworkCliQueries is a network automation library for C++/Qt5 which aims to query thousands of devices using CLI commands. It is useful when some specific information is not available through SNMP, the device does not support Netconf or is not enabled.
 
 This project is based on Qt Creator's SSH and Nokia's Telnet libraries.
 All the credits to them! 
 (https://github.com/qt-creator/qt-creator/tree/master/src/libs/ssh)
 (https://github.com/triochi/qttelnet-2.1-opensource)
 
-QNetworkCliQueries aims to query thousands devices using CLI commands. It is useful when some specific information is not available through SNMP, the device does not support Netconf or is not enabled. The library supports:
+The library supports:
  
    * Cisco IOS, IOS XE, IOS XR and Huawei VRP
    * multithreading for many simultaneous queries
