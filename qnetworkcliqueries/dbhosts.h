@@ -20,11 +20,16 @@ private:
     static DBHosts* _instance;
     QList<Host> _lstHosts;
 
+    void _load();
+    void _save();
+
 public:
     DBHosts();
     ~DBHosts();
 
-    static DBHosts *instance();
+    static DBHosts *instance();    
 };
+
+
 
 #endif // DBHOSTS_H

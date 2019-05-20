@@ -368,7 +368,7 @@ void InterfaceInfo::on_term_receiveText_Info()
             exp.setPattern("Description: (.+)$");
             if ( line.contains(exp) )
             {
-                id->description = exp.cap(1).simplified();
+                id->description = exp.cap(1).simplified().replace("\"","").replace("'","");
                 continue;
             }
 
@@ -470,7 +470,7 @@ void InterfaceInfo::on_term_receiveText_Info()
             exp.setPattern("^Description:(.+)$");
             if ( line.contains(exp) )
             {
-                id->description = exp.cap(1).simplified();
+                id->description = exp.cap(1).simplified().replace("\"","").replace("'","");
                 continue;
             }
         }
@@ -875,7 +875,7 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
                 for ( int c=3; c<data.size(); c++ )
                     desc.append(data.at(c).simplified());
 
-                id->description = desc.join(" ");
+                id->description = desc.join(" ").replace("\"","").replace("'","");
             }
             m_lstInterfacesInfo.append(id);
         }
@@ -894,7 +894,7 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
             id->interfaz = interfazSimplifier( data.at(0).simplified() );
             id->datetime = QDateTime::currentDateTime();
             id->operativo = true;
-            id->description = data.at(1).simplified();
+            id->description = data.at(1).simplified().replace("\"","").replace("'","");
             m_lstInterfacesInfo.append(id);
         }        
     }    

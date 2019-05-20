@@ -18,14 +18,14 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString backupspath;
         QString logspath;
 
-        void loadSettings();
-
     private:
         static Properties *m_instance;
 
         explicit Properties();
         Properties(const Properties &) {}
         ~Properties();
+
+        void loadSettings();
 };
 
 #endif

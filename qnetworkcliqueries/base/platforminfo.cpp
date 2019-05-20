@@ -100,13 +100,9 @@ void PlatformInfo::on_term_on_term_receiveText_xr_location()
 
     QRegExp exp("^\\d/\\d/CPU\\d ");
     foreach (QString line, lines)
-    {
-        qDebug() << "line" << line;
-
+    {        
         if ( line.contains( exp ) )
-        {
-            qDebug() << "simon";
-
+        {            
             m_xr_location = line.split(" ").at(0);
             break;
         }

@@ -316,13 +316,9 @@ bool equipmentNeighborsVecinoValidarEquipo(SEquipmentNeighborsInfo *e)
 }
 
 QString interfaceDescription(QList<SInterfaceInfo*> lstInterfaceDescriptions,QString interfaz)
-{       
-    qDebug() << "interfaceDescription" << lstInterfaceDescriptions.size() << interfaz;
-
+{
     foreach ( SInterfaceInfo* id, lstInterfaceDescriptions )
     {
-        qDebug() << "2222" << id->interfaz << interfaz;
-
         if ( id->interfaz == interfaz )
             return id->description;
     }
