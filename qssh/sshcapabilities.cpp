@@ -107,11 +107,6 @@ const QByteArray SshCapabilities::SshConnectionService("ssh-connection");
 QList<QByteArray> SshCapabilities::commonCapabilities(const QList<QByteArray> &myCapabilities,
                                                const QList<QByteArray> &serverCapabilities)
 {
-    //Jose
-//    qDebug() << "ssh Capabilities";
-//    qDebug() << "mycapabilities" << myCapabilities;
-//    qDebug() << "serverCapabilities" << serverCapabilities;
-
     QList<QByteArray> capabilities;
     foreach (const QByteArray &myCapability, myCapabilities) {
         if (serverCapabilities.contains(myCapability))
@@ -133,8 +128,10 @@ QList<QByteArray> SshCapabilities::commonCapabilities(const QList<QByteArray> &m
 
 QByteArray SshCapabilities::findBestMatch(const QList<QByteArray> &myCapabilities,
     const QList<QByteArray> &serverCapabilities)
-{
-    return commonCapabilities(myCapabilities, serverCapabilities).first();
+{        
+    QByteArray capability = commonCapabilities(myCapabilities, serverCapabilities).first();
+    qCDebug(sshLog) << "SshCapabilities::findBestMatch() capabilty:" << capability; //JOSE
+    return capability;
 }
 
 int SshCapabilities::ecdsaIntegerWidthInBytes(const QByteArray &ecdsaAlgo)

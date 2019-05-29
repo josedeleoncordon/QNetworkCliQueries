@@ -337,7 +337,7 @@ void SshConnectionPrivate::handleIncomingData()
         if (!canUseSocket())
             return;
         m_incomingData += m_socket->readAll();
-//        qCDebug(sshLog, "state = %d, remote data size = %d", m_state, m_incomingData.count());
+        qCDebug(sshLog, "state = %d, remote data size = %d", m_state, m_incomingData.count());
         if (m_serverId.isEmpty())
             handleServerId();
         handlePackets();
@@ -891,6 +891,7 @@ void SshConnectionPrivate::setAgentError()
 {
     m_error = SshAgentError;
     m_errorString = SshAgent::errorString();
+    qCDebug(sshLog, "SshConnectionPrivate::setAgentError()");
     emit error(m_error);
 }
 
@@ -919,6 +920,7 @@ void SshConnectionPrivate::connectToHost()
         } catch (const SshClientException &ex) {
             m_error = ex.error;
             m_errorString = ex.errorString;
+            qCDebug(sshLog, "SshConnectionPrivate::connectToHost() emit error");
             emit error(m_error);
             return;
         }
@@ -977,7 +979,10 @@ void SshConnectionPrivate::closeConnection(SshErrorCode sshError,
         } catch (...) {}  // Nothing sensible to be done here.
     }
     if (m_error != SshNoError)
+    {
+         qCDebug(sshLog, "SshConnectionPrivate::closeConnection(");
         emit error(userError);
+    }
     if (m_state == ConnectionEstablished)
         emit disconnected();
     if (canUseSocket())
