@@ -3,30 +3,24 @@ QNetworkCliQueries
 
 QNetworkCliQueries is a network automation library for C++/Qt5 which aims to query thousands of devices using CLI commands. It is useful when some specific information is not available through SNMP, the device does not support Netconf or is not enabled.
 
-This project is based on Qt Creator's SSH and Nokia's Telnet libraries.
+This project is based on QTermWidget library.
 All the credits to them! 
-(https://github.com/qt-creator/qt-creator/tree/master/src/libs/ssh)
-(https://github.com/triochi/qttelnet-2.1-opensource)
+(https://github.com/lxqt/qtermwidget)
+
+It is compatible with BSD, Linux and OS X.
 
 The library supports:
  
    * Cisco IOS, IOS XE, IOS XR and Huawei VRP
    * multithreading for many simultaneous queries
    * at the moment OSPF, MAC tables, ARP, VRFs, MPLS, CDP/LLDP, Interfaces, VLANs, PIM, Portchannel, BGP and IP routing table information
-   * Linux and Windows (Tested on Linux)
-   * Synchronous and Asynchronous functions
 
 ### Compiling QNetworkCliQueries
-
-Prerequisites:
-
-   * Botan 2.9.0
-   * Qt 5
 
 Steps:
 ```bash
 qmake QNetworkCliQueries.pro
-make (or mingw32-make or nmake depending on your platform)
+make
 ```
 
 Libraries and testapps will be in build folder

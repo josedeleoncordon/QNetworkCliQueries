@@ -13,6 +13,7 @@
 #include "portchannelsinfo.h"
 #include "vrfinfo.h"
 #include "config.h"
+#include "exitinfo.h"
 
 ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent);
 BGPNeighborInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent);
@@ -26,5 +27,6 @@ PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, 
 PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent);
 VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent);
 Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, QObject *parent);
+ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, QObject *parent);
 
 #endif // MACINFOFACTORY_H

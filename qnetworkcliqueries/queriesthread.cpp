@@ -97,13 +97,13 @@ void QueriesThread::on_timerActivity_timeOut()
 
 void QueriesThread::on_timer_timeOut()
 {
-    qDebug() << "QueriesThread::on_timer_timeOut()";
+//    qDebug() << "QueriesThread::on_timer_timeOut()";
 
     int paralelos;
-    if ( !m_debug )
+//    if ( !m_debug )
         paralelos= m_maxparalelos ;
-    else
-        paralelos=1;
+//    else
+//        paralelos=1;
 
     if ( m_consultaSimultaneos >= paralelos )
         return;
@@ -116,15 +116,15 @@ void QueriesThread::on_timer_timeOut()
     }
 
     int equiposAconectar;
-    if ( !m_debug )
-    {
+//    if ( !m_debug )
+//    {
         if ( m_lstIP.size() - ( m_lstIpPos+1 ) > m_simultaneos )
             equiposAconectar = m_simultaneos;
         else
             equiposAconectar = m_lstIP.size() - ( m_lstIpPos+1 );
-    }
-    else
-        equiposAconectar=1;
+//    }
+//    else
+//        equiposAconectar=1;
 
     int pos = m_lstIpPos+1;
     for ( int c=0; c<equiposAconectar; c++ )
@@ -133,7 +133,7 @@ void QueriesThread::on_timer_timeOut()
         conectarOtroEquipo();
     }
 
-    qDebug() << "QueriesThread::on_timer_timeOut() 2";
+//    qDebug() << "QueriesThread::on_timer_timeOut() 2";
 }
 
 void QueriesThread::conectarOtroEquipo()
@@ -145,9 +145,6 @@ void QueriesThread::conectarOtroEquipo()
     Queries *query = new Queries(ip,m_user,m_password);
     if ( m_debug )
         query->setLogPath( m_logpath );
-    query->setUserOtro( m_userother );
-    query->setPasswordOtro( m_pwdother );
-    query->setPrincipalUserFirst( m_principaluserfirst );
     query->setCountry( m_pais );
     query->setGW( m_gw );
     query->setOptions( m_opciones );
@@ -162,7 +159,7 @@ void QueriesThread::conectarOtroEquipo()
     query->moveToThread( thr );    
 
     connect(thr,SIGNAL(started()),query,SLOT( start()) );
-    connect(query,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)));
+    connect(query,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);
     connect(query,SIGNAL(finished(Queries*)),thr,SLOT(quit()));
     connect(thr,SIGNAL(finished()),thr,SLOT(deleteLater()));
 
@@ -200,8 +197,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
             m_equiposExitosos++;
 
             //se agregan los vecinos de equipmentNeighbors a la consulta
-            //la verificación de nombre y plataforma se realiza en el hilo correspondiente
-            //esto para evitar el mayor proceso en el hilo padre
+            //la verificación de nombre y plataforma se realiza en el hilo correspondiente            
             foreach (SEquipmentNeighborsInfo *equipmentNeighbors, qry->equipmentNeighborsNuevosEquipos())
             {
                 bool encontrado=false;
@@ -233,7 +229,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
             {
                 if ( qry->hostName() == q->hostName() &&
                      !qry->hostName().isEmpty() )
-                {
+                {                    
                     encontrado=true;
                     qry->deleteLater();
                     break;

@@ -31,8 +31,7 @@ Queries::Queries(const Queries &other) : QObject(other.parent())
     m_equipmenttype = other.m_equipmenttype;
     m_brand = other.m_brand;
     m_datetime = other.m_datetime;
-    m_connectionprotol = other.m_connectionprotol;
-    m_connectiontype = other.m_connectiontype;
+    m_connectionprotol = other.m_connectionprotol;   
     m_operativo = other.m_operativo;    
     m_contieneconsultas = other.m_contieneconsultas;
     m_ip = other.m_ip;
@@ -91,14 +90,13 @@ void Queries::iniciar()
     bgpNeighborsQuery = nullptr;
     ipRoutesQuery = nullptr;
     configQuery = nullptr;
-    m_connectionprotol = QRemoteShell::TelnetSSH;
-    m_connectiontype = QRemoteShell::Lib;
+    exitQuery = nullptr;
+    m_connectionprotol = QRemoteShell::TelnetSSH;    
 
     m_connected=false;
     m_error=false;
     m_queriescreated=false;
-    m_ipreachable=false;
-    m_principaluserfirst=true;
+    m_ipreachable=false;    
     m_conectionSecondTriedOtherUserPassword=false;    
     m_reintentandoConsulta=false;
     m_contieneconsultas=false;
@@ -218,6 +216,11 @@ void Queries::limpiarConsultas()
         delete configQuery;
         configQuery=nullptr;
     }
+    if (exitQuery)
+    {
+        delete exitQuery;
+        exitQuery=nullptr;
+    }
 }
 
 void Queries::clear()
@@ -256,19 +259,6 @@ void Queries::setOptions(unsigned int options)
         m_queriescreated=false;
         limpiarConsultas();
         createQueries();
-    }
-}
-
-void Queries::disconnectFromHost()
-{
-    if ( term )
-    {
-        qDebug() << "Queries::disconnectFromHost()";
-
-        term->disconnect();
-        term->host_disconnect();
-        term->deleteLater();
-        term = nullptr;
     }
 }
 
@@ -438,17 +428,47 @@ void Queries::createQueries(Queries::Opcion option)
 
             configQuery = factoryNewConfig(m_brand,m_equipmenttype,term,this);
         }
+        else if ( flags & Exit & oActual )
+        {
+            if (exitQuery)
+                delete exitQuery;
+
+            exitQuery = factoryNewExit(m_brand,m_equipmenttype,term,this);
+        }
 
         oActual = oActual << 1;
     }
-    while (oActual < Exit);
+    while (oActual <= Exit);
 
     m_queriescreated=true;
 }
 
+void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString platform)
+{
+    //borramos la terminal con conexion fallida
+    if ( term )
+    {
+        qDebug() << m_ip  << "borramos la terminal con conexion fallida" << m_ip << m_name;
+
+        term->disconnectReceiveTextSignalConnections();
+        term->disconnect();
+        term->host_disconnect();
+        delete term;
+    }
+
+    term = new QRemoteShell(ip,user,pwd,platform,this);
+    term->setConnectionProtocol( m_connectionprotol );
+    term->setGW(m_gw);
+    term->setLogPath( m_logPath );
+    connect(term,SIGNAL(reachable()),SLOT(processConnectToHostReachable()));
+    connect(term,SIGNAL(connected()),SLOT(processConnectToHostConnected()));
+    connect(term,SIGNAL(disconnected()),SLOT(processConnectToHostDisconnected()));
+    term->host_connect();
+}
+
 void Queries::nextProcess()
 {
-    qDebug() << "Queries::nextProcess()";
+    qDebug() << m_ip  << "Queries::nextProcess()";
 
     if ( !m_reintentandoConsulta )
     {
@@ -463,7 +483,7 @@ void Queries::nextProcess()
 
             if ( opcionActual > Exit )
             {
-                qDebug() << "Mayor a Exit" << m_ip;
+                qDebug() << m_ip  << "Mayor a Exit" << m_ip;
 
                 if ( m_logFile.isOpen() )
                     m_logFile.close();
@@ -478,7 +498,7 @@ void Queries::nextProcess()
     else
         m_queriescreated=false; //para que se creen nuevamente las consultas desde donde se quedo
 
-    qDebug() << "NextProcess:" << opcionActual;
+    qDebug() << m_ip  << "NextProcess:" << opcionActual;
     saveLog( "\n\nNextProcess: " + QString::number(opcionActual)+"\n\n" );
 
     queryTimer->setInterval( 20000 );
@@ -491,17 +511,11 @@ void Queries::nextProcess()
 
     if ( opcionActual & flags & Connect )
     {        
-        qDebug() << "creando term";
+        qDebug() << m_ip  << "creando term";
         saveLog( "creando term\n" );        
 
-        if ( m_principaluserfirst || m_userother.isEmpty() )
-            term = new QRemoteShell(m_ip,m_user,m_pwd,m_platform,this);
-        else
-            term = new QRemoteShell(m_ip,m_userother,m_pwdother,m_platform,this);
-
-        term->setCountry(m_country);
+        term = new QRemoteShell(m_ip,m_user,m_pwd,m_platform,this);
         term->setConnectionProtocol( m_connectionprotol );
-        term->setConnectionType( m_connectiontype );
         term->setGW(m_gw);
         term->setLogPath( m_logPath );
         connect(term,SIGNAL(reachable()),SLOT(processConnectToHostReachable()));
@@ -781,7 +795,7 @@ void Queries::nextProcess()
             createQueries( MacAddress );
         }
 
-        qDebug() << "Next: MacAddress";
+        qDebug() << m_ip  << "Next: MacAddress";
 
         macsQuery->setBrand( m_brand );
         macsQuery->setPlatform( m_platform );        
@@ -883,7 +897,7 @@ void Queries::nextProcess()
             createQueries( Arp );
         }
 
-        qDebug() << "empezando ARP";
+        qDebug() << m_ip  << "empezando ARP";
 
         arpsQuery->setBrand(m_brand);
         arpsQuery->setPlatform(m_platform);
@@ -959,9 +973,23 @@ void Queries::nextProcess()
     }
     else if ( opcionActual & flags & Exit )
     {
-        qDebug() << "opcionActual & flags & Exit";
-        disconnectFromHost();
-        processFinished();
+        if ( m_reintentandoConsulta )
+        {
+            m_reintentandoConsulta=false;
+            createQueries( Exit );
+        }
+
+        qDebug() << m_ip  << "exit" << exitQuery;
+
+        exitQuery->setPlatform(m_platform);
+        exitQuery->setBrand(m_brand);
+        exitQuery->setHostName(m_fullName);
+        exitQuery->setIp(m_ip);
+        exitQuery->setLogPath( m_logPath );
+        connect(exitQuery,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(exitQuery,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(exitQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        exitQuery->exit();
         return;
     }
 }
@@ -982,81 +1010,53 @@ void Queries::start() //ASync
 
 void Queries::processConnectToHostDisconnected()
 {
-    //borramos la terminal con conexion fallida
-    qDebug() << "Queries::processConnectToHostDisconnected()";
-    if ( term )
-    {
-        qDebug() << "borramos la terminal con conexion fallida";
+    //si se desconecto el equipo porque finalizo exitosamente
+    if ( opcionActual >= Exit )
+        return;
 
-        term->disconnectReceiveTextSignalConnections();
-        term->disconnect();
-        term->host_disconnect();
-        term->deleteLater();
-        term = nullptr;        
-    }
+    qDebug() << m_ip  << "Queries::processConnectToHostDisconnected()" << m_ip << m_name;
 
     if ( m_connected )
     {
         //se logro la conexion pero a media consulta se desconecto
-        qDebug() << "**Equipo desconectado a media consulta**" << m_ip << "opcionActual" << opcionActual;
+        qDebug() << m_ip  << "**Equipo desconectado a media consulta**" << m_ip << m_name <<
+                    "opcionActual" << opcionActual << "intentos" << m_consultaIntentos;
 
-        if ( m_consultaIntentos <= 0 )
+        if ( m_consultaIntentos <= 3 )
         {
-            qDebug() << "reconectando y continuando consulta donde se quedo";
+            qDebug() << m_ip  << "reconectando y continuando consulta donde se quedo" << m_ip << m_name;
             m_connected=false;
-            term = new QRemoteShell(m_ip,m_user,m_pwd,m_platform,this);
-            term->setCountry(m_country);
-            term->setConnectionProtocol( m_connectionprotol );
-            term->setGW(m_gw);
-            term->setLogPath( m_logPath );
-            connect(term,SIGNAL(reachable()),SLOT(processConnectToHostReachable()));
-            connect(term,SIGNAL(connected()),SLOT(processConnectToHostConnected()));
-            connect(term,SIGNAL(disconnected()),SLOT(processConnectToHostDisconnected()));
-            term->host_connect();
-            return;
+            conectarAequipo(m_ip,m_user,m_pwd,m_platform);
         }
         else
         {
-            qDebug() << "3 intentos de consulta, se finaliza";
+            qDebug() << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
             m_error=true;
             emit finished(this);
         }
     }
     else
     {
-        //probamos el otro usuario y password si fue configurado
-        if ( !m_conectionSecondTriedOtherUserPassword && !m_userother.isEmpty() ) //se cual se el caso m_userother no debe ser vacio
+        if ( m_ipreachable )
         {
-            qDebug() << "probando conexion con el otro usuario";
-
-            m_conectionSecondTriedOtherUserPassword=true;
-            if ( m_principaluserfirst ) //caso contrario al de la funcion nextProcess, aqui se invierte los usuarios
-                term = new QRemoteShell(m_ip,m_userother,m_pwdother,m_platform,this);
-            else
-                term = new QRemoteShell(m_ip,m_user,m_pwd,m_platform,this);
-            term->setCountry(m_country);
-            term->setConnectionProtocol( m_connectionprotol );
-            term->setGW(m_gw);
-            term->setLogPath( m_logPath );
-            connect(term,SIGNAL(reachable()),SLOT(processConnectToHostReachable()));
-            connect(term,SIGNAL(connected()),SLOT(processConnectToHostConnected()));
-            connect(term,SIGNAL(disconnected()),SLOT(processConnectToHostDisconnected()));
-            term->host_connect();
-            return;
+            if ( m_consultaIntentos <= 3 )
+                conectarAequipo(m_ip,m_user,m_pwd,m_platform);
         }
+        else
+        {
+            //no se logro la conexion
+            saveLog( "Equipo desconectado\n" );
+            qDebug() << m_ip  << "**NoConexion**" << m_ip;
+            m_operativo=false;
+            queryTimer->stop();
 
-        //no se logro la conexion
-        saveLog( "Equipo desconectado\n" );
-        qDebug() << "**NoConexion**" << m_ip;
-        m_operativo=false;
-        queryTimer->stop();
+            //        //si tiene informacion de nombre o plataforma por snmp creamos los queries vacios para que este
+            //        //disponible a la hora de graficar
+            //        if ( !m_platform.isEmpty() )
+            //            createQueries();
 
-//        //si tiene informacion de nombre o plataforma por snmp creamos los queries vacios para que este
-//        //disponible a la hora de graficar
-//        if ( !m_platform.isEmpty() )
-//            createQueries();
-
-        emit finished(this);
+            emit finished(this);
+        }
     }
 }
 
@@ -1070,7 +1070,7 @@ void Queries::processConnectToHostConnected()
     if ( m_connected )
         return;
 
-    qDebug() << "Equipo conectado" << m_ip << m_name;
+    qDebug() << m_ip  << "Equipo conectado" << m_ip << m_name;
     saveLog( "Equipo conectado\n" );
     m_connected=true;
     term->disconnectReceiveTextSignalConnections();
@@ -1081,6 +1081,7 @@ void Queries::processConnectToHostConnected()
     if ( m_consultaIntentos == 1 )
     {   
         //primer intento
+        qDebug() << m_ip  << "Conectado. Primer intento" << m_ip << m_name;
         m_brand = term->brandName();
         
         if ( m_platform.isEmpty() )
@@ -1100,7 +1101,7 @@ void Queries::processConnectToHostConnected()
     else    
     {
         //siguientes intentos    
-        qDebug() << "Conectado. Siguiente intento de consulta despues de falla" << m_ip << m_name;
+        qDebug() << m_ip  << "Conectado. Siguiente intento de consulta despues de falla" << m_ip << m_name;
         m_reintentandoConsulta=true;
     }
 
@@ -1175,7 +1176,7 @@ void Queries::processConfigFinished()
 
 void Queries::processFinished()
 {
-    qDebug() << "Queries::processFinished()";
+    qDebug() << m_ip  << "Queries::processFinished()";
     m_contieneconsultas=true;
     queryTimer->stop();
     nextProcess();
@@ -1189,7 +1190,7 @@ void Queries::processKeepWorking()
 
 void Queries::on_m_keepAliveTimer_timeout()
 {
-    qDebug() << "Queries::on_m_keepAliveTimer_timeout()";
+    qDebug() << m_ip  << "Queries::on_m_keepAliveTimer_timeout()";
     term->sendCommand( " " );
 }
 
@@ -1199,28 +1200,9 @@ void Queries::on_query_lastCommand(QString txt)
 }
 
 void Queries::on_queryTimer_timeout()
-{    
-    qDebug() << "Queries::on_queryTimer_timeout()";
-    if ( m_connected )
-    {
-        qDebug() << "**Error**" << m_ip << m_name << m_platform
-                 << "queryTimer tiempo finalizado. Consulta finalizo con errores";
-        m_error=true;
-        setOptions( Exit );
-        nextProcess();
-    }
-    else
-    {
-        qDebug() << "**ErrorDeConexion**" << m_ip;
-        disconnectFromHost();
-
-//        //si tiene informacion de nombre o plataforma por snmp creamos los queries vacios para que este
-//        //disponible a la hora de graficar
-//        if ( !m_platform.isEmpty() )
-//            createQueries();
-
-        finished(this);
-    }
+{
+    qDebug() << m_ip  << "Queries::on_queryTimer_timeout()" << m_ip << m_name;
+    processConnectToHostDisconnected();
 }
 
 void Queries::setLogPath(QString path)

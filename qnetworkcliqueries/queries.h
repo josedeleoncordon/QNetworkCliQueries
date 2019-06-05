@@ -14,6 +14,7 @@
 #include "bgpneighborinfo.h"
 #include "iprouteinfo.h"
 #include "config.h"
+#include "exitinfo.h"
 
 #include <QFile>
 
@@ -83,6 +84,7 @@ public:
     BGPNeighborInfo *bgpNeighborsQuery;
     IPRouteInfo *ipRoutesQuery;
     Config *configQuery;
+    ExitInfo *exitQuery;
 
     bool isConnected() { return m_connected; }
     bool successful() { return !m_error; }
@@ -91,8 +93,7 @@ public:
     QString country() { return m_country; }
     QString platform() { return m_platform; }
     QString brand() { return m_brand; }
-    void setConnectionProtocol(QRemoteShell::ConnectionProtocol cp) { m_connectionprotol = cp; }
-    void setConnectionType(QRemoteShell::ConnectionType ct) { m_connectiontype = ct; }
+    void setConnectionProtocol(QRemoteShell::ConnectionProtocol cp) { m_connectionprotol = cp; }    
     QDateTime dateTime() { return m_datetime; }
     bool operativo() { return m_operativo; }
     QString ip() { return m_ip; }
@@ -134,10 +135,7 @@ public:
     void setHostName(QString NAME) { m_name = NAME; }
     void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }
     void setLogPath(QString path);
-    void setLstHostsGeneralAconectar( QList<Host*> lst ) { m_lstHostsGeneralAconectar = lst; }
-    void setUserOtro(QString user) { m_userother=user; }
-    void setPasswordOtro(QString pwd) { m_pwdother=pwd; }
-    void setPrincipalUserFirst(bool principalfirst) { m_principaluserfirst=principalfirst; }
+    void setLstHostsGeneralAconectar( QList<Host*> lst ) { m_lstHostsGeneralAconectar = lst; }       
     void clear();
 
     void startSync();
@@ -149,8 +147,7 @@ public:
     friend QDebug operator<<(QDebug dbg, const Queries &info);
 
 public slots:
-    virtual void start();
-    void disconnectFromHost();
+    virtual void start();    
 
 protected slots:
     void processConnectToHostReachable();
@@ -193,18 +190,14 @@ protected:
     QString m_brand;
     QDateTime m_datetime;
     QString m_xr_location;
-    QRemoteShell::ConnectionProtocol m_connectionprotol;
-    QRemoteShell::ConnectionType m_connectiontype;
+    QRemoteShell::ConnectionProtocol m_connectionprotol;    
     bool m_operativo;
     QString m_ip;
 
     QTimer *m_keepAliveTimer;
     QString m_user;
     QString m_gw;
-    QString m_pwd;
-    QString m_userother;
-    QString m_pwdother;
-    bool m_principaluserfirst;
+    QString m_pwd;       
     bool m_conectionSecondTriedOtherUserPassword;
 
     //debug
@@ -219,7 +212,8 @@ protected:
 
     void iniciar();
     void createQueries(Queries::Opcion option = Queries::Null);    
-    void nextProcess();
+    void conectarAequipo(QString ip, QString user, QString pwd, QString platform);
+    void nextProcess();    
     void limpiarConsultas();
 };
 

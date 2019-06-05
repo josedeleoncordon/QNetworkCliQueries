@@ -131,12 +131,20 @@ void VrfInfo::getVRFfromRT()
 void VrfInfo::getVRFs()
 {
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextVRFs()));
-    if ( m_os == "IOS XR" )
-        termSendText( "show ipv4 vrf all interface" );
-    else if ( m_os == "IOS" )
-        termSendText("show ip vrf");
-    else if ( m_os == "VRP" )
-        termSendText("display ip vpn-instance verbose");
+    if ( m_brand == "CISCO" )
+    {
+        if ( m_os == "IOS XR" )
+            termSendText( "show ipv4 vrf all interface" );
+        else
+            termSendText("show ip vrf");
+    }
+    else if ( m_brand == "HUAWEI" )
+    {
+        if ( m_os == "VRP" )
+            termSendText("display ip vpn-instance verbose");
+    }
+    else
+        finished();
 }
 
 void VrfInfo::on_term_receiveTextFromVlans()

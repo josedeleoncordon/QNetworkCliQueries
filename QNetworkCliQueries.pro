@@ -1,8 +1,7 @@
 TEMPLATE  = subdirs
 CONFIG   += ordered
 
-SUBDIRS =   qssh \
-            qremoteshell \
+SUBDIRS =   qremoteshell \
             qnetworkcliqueries \
             testapps \
             apps

@@ -12,6 +12,7 @@ DEFINES += QNETWORKCLIQUERIES_LIBRARY
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
 HEADERS += \
+    base/exitinfo.h \
     base/portchannelsinfo.h \
     base/vrfinfo.h \
     base/arpinfo.h \
@@ -45,6 +46,7 @@ HEADERS += \
     qnetworkcliqueries_global.h
 
 SOURCES += \
+    base/exitinfo.cpp \
     base/portchannelsinfo.cpp \
     base/vrfinfo.cpp \
     base/arpinfo.cpp \

@@ -91,3 +91,8 @@ Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, QO
 {
     return new Config(term,parent);
 }
+
+ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+{
+    return new ExitInfo(term,parent);
+}
