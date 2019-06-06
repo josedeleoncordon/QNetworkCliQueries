@@ -214,6 +214,7 @@ protected:
     void createQueries(Queries::Opcion option = Queries::Null);    
     void conectarAequipo(QString ip, QString user, QString pwd, QString platform);
     void nextProcess();    
+    void borrarTerminal();
     void limpiarConsultas();
 };
 

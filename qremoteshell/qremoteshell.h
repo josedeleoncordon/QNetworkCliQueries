@@ -8,6 +8,7 @@
 #include "qremoteshell_global.h"
 
 class QTcpSocket;
+class QTimer;
 class Terminal;
 
 class QREMOTESHELLSHARED_EXPORT QRemoteShell : public QObject
@@ -46,15 +47,16 @@ private:
     QList<ConnectionProtocol> m_lstConnectionProtocol;
     QString m_ip;
     QString m_user;
-    QString m_pwd;    
+    QString m_pwd;
     QString m_platform;
-    QString m_gw;        
+    QString m_gw;
     QString m_vendor;
     QString m_host;
-    bool m_hostConnected;    
+    bool m_hostConnected;
     bool m_termle;
     QString m_dataReceived;
     QRegExp m_localprompt;
+    QTimer *m_timer;
 
     Terminal *m_terminal;
 
@@ -70,6 +72,7 @@ private slots:
     void m_terminal_ready();
     void m_terminal_detaReceived(QString);
     void m_terminal_finished();
+    void m_timerout();
 
 signals:
     void reachable();

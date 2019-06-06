@@ -1,6 +1,7 @@
 #include "qremoteshell.h"
 #include <QDebug>
 #include <QTcpSocket>
+#include <QTimer>
 #include "terminal/terminal.h"
 
 QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platform, QObject *parent):
@@ -15,6 +16,10 @@ QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platfo
     m_terminal = nullptr;
     setConnectionProtocol( SSHTelnet );
     m_localprompt.setPattern("\\[.+@.+:.+\\]\\$");
+    m_timer = new QTimer;
+    m_timer->setInterval(5000);
+    m_timer->setSingleShot(true);
+    connect(m_timer,SIGNAL(timeout()),SLOT(m_timerout()));
 }
 
 QRemoteShell::~QRemoteShell()
@@ -107,14 +112,15 @@ void QRemoteShell::m_nextTry()
 void QRemoteShell::m_terminal_detaReceived(QString txt)
 {    
     m_dataReceived = txt;
+    m_timer->stop();
+
+    qDebug().noquote() << m_ip << txt;
 
     if ( m_hostConnected )            
         emit readyRead();    
     else
     {
-        //no se ha autenticado, se envia usuario y password
-
-        qDebug().noquote() << m_ip << txt;
+        //no se ha autenticado, se envia usuario y password       
 
         QStringList data = m_dataReceived.split("\n",QString::SkipEmptyParts);
 
@@ -151,11 +157,14 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
         //si se rechaza la conexion
         //**************************************************************************
         if ( m_dataReceived.contains("Authorization failed") ||
-             m_dataReceived.contains("Connection closed by foreign host") ||
+             m_dataReceived.contains("Connection closed by") ||
              m_dataReceived.contains("Connection timed out") ||
              m_dataReceived.contains("remote host not responding") ||
              m_dataReceived.contains("Connection refused") ||
-             m_dataReceived.contains("Invalid key length") )
+             m_dataReceived.contains("Invalid key length") ||
+             m_dataReceived.contains("Connection reset by peer") ||
+             m_dataReceived.contains("Disconnected from") ||
+             m_dataReceived.contains("no matching host key type found") )
         {
             m_nextTry();
             return;
@@ -206,7 +215,6 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
         }
 
         //HUAWEI ATN
-
         exp.setPattern("^<.+> *$");
         if ( line.contains(exp) )
         {
@@ -230,6 +238,10 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
                 return;
             }
         }
+
+        //local prompt
+        if ( line.contains(m_localprompt) )
+            m_timer->start();
     }
 }
 
@@ -276,6 +288,13 @@ QString QRemoteShell::platform()
 void QRemoteShell::m_terminal_finished()
 {
     qDebug() << m_ip << "QRemoteShell::m_terminal_finished()";
+    m_hostConnected=false;
+    emit disconnected();
+}
+
+void QRemoteShell::m_timerout()
+{
+    qDebug() << m_ip << "QRemoteShell::m_timerout()";
     m_hostConnected=false;
     emit disconnected();
 }

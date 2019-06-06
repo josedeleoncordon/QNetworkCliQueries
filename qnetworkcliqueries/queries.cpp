@@ -445,17 +445,7 @@ void Queries::createQueries(Queries::Opcion option)
 
 void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString platform)
 {
-    //borramos la terminal con conexion fallida
-    if ( term )
-    {
-        qDebug() << m_ip  << "borramos la terminal con conexion fallida" << m_ip << m_name;
-
-        term->disconnectReceiveTextSignalConnections();
-        term->disconnect();
-        term->host_disconnect();
-        delete term;
-    }
-
+    m_consultaIntentos++;
     term = new QRemoteShell(ip,user,pwd,platform,this);
     term->setConnectionProtocol( m_connectionprotol );
     term->setGW(m_gw);
@@ -464,6 +454,19 @@ void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString plat
     connect(term,SIGNAL(connected()),SLOT(processConnectToHostConnected()));
     connect(term,SIGNAL(disconnected()),SLOT(processConnectToHostDisconnected()));
     term->host_connect();
+}
+
+void Queries::borrarTerminal()
+{
+    if ( term )
+    {
+        qDebug() << m_ip  << "borrando terminal";
+
+        term->disconnectReceiveTextSignalConnections();
+        term->disconnect();
+        term->host_disconnect();
+        delete term;
+    }
 }
 
 void Queries::nextProcess()
@@ -513,15 +516,7 @@ void Queries::nextProcess()
     {        
         qDebug() << m_ip  << "creando term";
         saveLog( "creando term\n" );        
-
-        term = new QRemoteShell(m_ip,m_user,m_pwd,m_platform,this);
-        term->setConnectionProtocol( m_connectionprotol );
-        term->setGW(m_gw);
-        term->setLogPath( m_logPath );
-        connect(term,SIGNAL(reachable()),SLOT(processConnectToHostReachable()));
-        connect(term,SIGNAL(connected()),SLOT(processConnectToHostConnected()));
-        connect(term,SIGNAL(disconnected()),SLOT(processConnectToHostDisconnected()));
-        term->host_connect();        
+        conectarAequipo(m_ip,m_user,m_pwd,m_platform);
         return;
     }
 
@@ -978,6 +973,7 @@ void Queries::nextProcess()
             m_reintentandoConsulta=false;
             createQueries( Exit );
         }
+        queryTimer->setInterval( 3000 );
 
         qDebug() << m_ip  << "exit" << exitQuery;
 
@@ -1026,6 +1022,7 @@ void Queries::processConnectToHostDisconnected()
         {
             qDebug() << m_ip  << "reconectando y continuando consulta donde se quedo" << m_ip << m_name;
             m_connected=false;
+            borrarTerminal();
             conectarAequipo(m_ip,m_user,m_pwd,m_platform);
         }
         else
@@ -1040,7 +1037,16 @@ void Queries::processConnectToHostDisconnected()
         if ( m_ipreachable )
         {
             if ( m_consultaIntentos <= 3 )
+            {
+                borrarTerminal();
                 conectarAequipo(m_ip,m_user,m_pwd,m_platform);
+            }
+            else
+            {
+                qDebug() << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
+                m_error=true;
+                emit finished(this);
+            }
         }
         else
         {
@@ -1074,8 +1080,7 @@ void Queries::processConnectToHostConnected()
     saveLog( "Equipo conectado\n" );
     m_connected=true;
     term->disconnectReceiveTextSignalConnections();
-    
-    m_consultaIntentos++;
+        
     queryTimer->stop();
     
     if ( m_consultaIntentos == 1 )
@@ -1202,6 +1207,16 @@ void Queries::on_query_lastCommand(QString txt)
 void Queries::on_queryTimer_timeout()
 {
     qDebug() << m_ip  << "Queries::on_queryTimer_timeout()" << m_ip << m_name;
+
+    //caso equipos que al salir de ellos no regresan al prompt del SO, simulamos que regreso para que se
+    //envie la señal de finalizacion
+    if ( opcionActual >= Exit )
+    {
+        nextProcess();
+        return;
+    }
+
+    //timeout consultas normales
     processConnectToHostDisconnected();
 }
 
