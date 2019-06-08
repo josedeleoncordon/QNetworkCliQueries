@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QMutex>
 
 #include "queries.h"
 
@@ -87,6 +88,7 @@ private:
    QTimer *m_timerActivity;
    int m_consultaSimultaneos;
    int m_equiposConsultados;
+   QMutex m_mutex;
 
    void conectarOtroEquipo();
 };

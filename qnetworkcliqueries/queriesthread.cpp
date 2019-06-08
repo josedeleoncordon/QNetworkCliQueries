@@ -176,6 +176,8 @@ void QueriesThread::conectarOtroEquipo()
 
 void QueriesThread::equipoConsultado(Queries *qry)
 {
+    QMutexLocker locker(&m_mutex);
+
     if ( m_cancelar )
         return;
 

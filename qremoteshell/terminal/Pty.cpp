@@ -274,6 +274,7 @@ void Pty::init()
 
 Pty::~Pty()
 {
+    qDebug() << "Pty::~Pty()";
 }
 
 void Pty::sendData(const char* data, int length)

@@ -69,7 +69,7 @@ private:
     void m_nextTry();
 
 private slots:
-    void m_terminal_ready();
+    void m_terminal_ready(bool ready);
     void m_terminal_detaReceived(QString);
     void m_terminal_finished();
     void m_timerout();

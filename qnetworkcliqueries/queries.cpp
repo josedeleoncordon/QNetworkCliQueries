@@ -465,7 +465,7 @@ void Queries::borrarTerminal()
         term->disconnectReceiveTextSignalConnections();
         term->disconnect();
         term->host_disconnect();
-        delete term;
+        term->deleteLater();
     }
 }
 
@@ -1034,10 +1034,13 @@ void Queries::processConnectToHostDisconnected()
     }
     else
     {
+        qDebug() << m_ip << "**No se ha logrado autenticar en el equipo: intentos" << m_consultaIntentos;
+
         if ( m_ipreachable )
         {
             if ( m_consultaIntentos <= 3 )
             {
+                qDebug() << m_ip  << "intentando nuevamente conectarse al equipo" << m_ip << m_name;
                 borrarTerminal();
                 conectarAequipo(m_ip,m_user,m_pwd,m_platform);
             }

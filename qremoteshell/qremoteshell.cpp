@@ -23,9 +23,10 @@ QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platfo
 }
 
 QRemoteShell::~QRemoteShell()
-{    
+{        
     if ( m_terminal )
         delete m_terminal;
+    qDebug() << m_ip << "QRemoteShell::~QRemoteShell()";
 }
 
 void QRemoteShell::setLogPath(QString path)
@@ -75,7 +76,7 @@ void QRemoteShell::host_connect()
             socket->close();
 
         m_terminal = new Terminal;
-        connect(m_terminal,SIGNAL(ready()),SLOT(m_terminal_ready()));
+        connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool)));
         connect(m_terminal,SIGNAL(receivedData(QString)),SLOT(m_terminal_detaReceived(QString)));
         connect(m_terminal,SIGNAL(finished()),SLOT(m_terminal_finished()));
     }
@@ -87,9 +88,13 @@ void QRemoteShell::host_connect()
     socket->deleteLater();
 }
 
-void QRemoteShell::m_terminal_ready()
+void QRemoteShell::m_terminal_ready(bool ready)
 {
-    m_nextTry();
+    if ( ready )
+        m_nextTry();
+    else {
+        emit disconnected();
+    }
 }
 
 void QRemoteShell::m_nextTry()
@@ -106,7 +111,10 @@ void QRemoteShell::m_nextTry()
         }
     }
     else
+    {
+        qDebug() << "QRemoteShell::m_nextTry() falla la conexion ssh o telnet";
         host_disconnect();
+    }
 }
 
 void QRemoteShell::m_terminal_detaReceived(QString txt)
@@ -114,7 +122,7 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
     m_dataReceived = txt;
     m_timer->stop();
 
-    qDebug().noquote() << m_ip << txt;
+//    qDebug().noquote() << m_ip << txt;
 
     if ( m_hostConnected )            
         emit readyRead();    
@@ -246,23 +254,22 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
 }
 
 void QRemoteShell::host_disconnect()
-{        
-    m_hostConnected=false;
+{            
+    qDebug() << m_ip << "QRemoteShell::host_disconnect()" << m_terminal;
+    m_hostConnected=false;    
 
-    qDebug() << m_ip << "QRemoteShell::host_disconnect() EXIT" << m_terminal;
-
-    m_terminal ? m_terminal->sendCommand("exit") : emit disconnected();
+    m_terminal ? m_terminal->close() : emit disconnected();
 }
 
 void QRemoteShell::sendData(const QByteArray &data)
 {
-    m_terminal->sendData( data );
+    if ( m_terminal ) m_terminal->sendData( data );
 }
 
 void QRemoteShell::sendCommand(QString cmd)
 {    
     qDebug() << m_ip << "QRemoteShell::sendCommand" << cmd;
-    m_terminal->sendCommand(cmd);
+    if ( m_terminal ) m_terminal->sendCommand(cmd);
 }
 
 void QRemoteShell::disconnectReceiveTextSignalConnections()
@@ -288,13 +295,17 @@ QString QRemoteShell::platform()
 void QRemoteShell::m_terminal_finished()
 {
     qDebug() << m_ip << "QRemoteShell::m_terminal_finished()";
-    m_hostConnected=false;
+    if ( m_terminal )
+    {
+        delete m_terminal;
+        m_terminal = nullptr;
+        m_hostConnected=false;
+    }
     emit disconnected();
 }
 
 void QRemoteShell::m_timerout()
 {
     qDebug() << m_ip << "QRemoteShell::m_timerout()";
-    m_hostConnected=false;
-    emit disconnected();
+    host_disconnect();
 }

@@ -2,6 +2,7 @@
 #define TERMINAL_H
 
 #include <QObject>
+#include <QTimer>
 
 namespace Konsole {
 class Pty;
@@ -14,22 +15,24 @@ class Terminal : public QObject
 private:
     Konsole::Pty *_shellProcess;
     bool _ready;
+    QTimer *_timer;
 
 public:
     explicit Terminal(QObject *parent = nullptr);
     ~Terminal();
     void sendCommand(QString text);
     void sendData(const QByteArray &data);
+    void close();
 
 private slots:
     void onReceiveBlock( const char * buf, int len );
+    void on_timerout();
     void shellProcess_finished();    
 
-public slots:
-    void terminate();
+public slots:    
 
 signals:
-    void ready();
+    void ready(bool);
     void receivedData(QString);
     void finished();
 };
