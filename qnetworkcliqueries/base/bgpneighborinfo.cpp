@@ -23,7 +23,9 @@ void BGPNeighborInfo::getBGPNeighbors()
     {
         finished();
         return;
-    }
+    }    
+
+    qDebug() << "ip" << m_ip << m_brand << m_platform << m_os;
 
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
 
@@ -34,7 +36,10 @@ void BGPNeighborInfo::getBGPNeighbors()
     if ( m_type == "VPNV4" )
     {
         if ( m_os == "IOS XR" )
+        {
+            qDebug() << m_ip << m_brand << m_platform << m_os << "fdasfdsafdsafdsafdsafdsafsad";
             termSendText("sh bgp vpnv4 unicast summary");
+        }
         else
             termSendText("sh ip bgp vpnv4 all summary");
     }

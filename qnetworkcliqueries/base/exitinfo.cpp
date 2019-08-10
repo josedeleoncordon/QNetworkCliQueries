@@ -18,7 +18,7 @@ void ExitInfo::exit()
 void ExitInfo::on_term_receiveText()
 {
     txt.append(term->dataReceived());
-    if ( !txt.contains(QRegExp("\\[.+@.+:.+\\]\\$")) )
+    if ( !txt.contains(QRegExp("\\[.+@.+\\]\\$")) )
         return;
 
     connect(term,SIGNAL(disconnected()),SLOT(on_term_disconnected()));

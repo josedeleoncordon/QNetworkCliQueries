@@ -58,7 +58,7 @@ void Terminal::onReceiveBlock( const char * buf, int len )
     if ( !_ready )
     {
         _timer->stop();
-        if ( received.split("\n").last().contains(QRegExp("\\[.+@.+:.+\\]\\$")) )
+        if ( received.split("\n").last().contains(QRegExp("\\[.+@.+\\]\\$")) )
         {
             _ready=true;
             emit ready(true);

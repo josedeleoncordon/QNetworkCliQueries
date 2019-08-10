@@ -54,9 +54,10 @@ private:
     QString m_host;
     bool m_hostConnected;
     bool m_termle;
+    bool m_pwdsent;
     QString m_dataReceived;
     QRegExp m_localprompt;
-    QTimer *m_timer;
+    QTimer *m_timerNoResponse;
 
     Terminal *m_terminal;
 
@@ -71,8 +72,8 @@ private:
 private slots:
     void m_terminal_ready(bool ready);
     void m_terminal_detaReceived(QString);
-    void m_terminal_finished();
-    void m_timerout();
+    void m_terminal_finished();    
+    void m_timeroutNoResponse();
 
 signals:
     void reachable();

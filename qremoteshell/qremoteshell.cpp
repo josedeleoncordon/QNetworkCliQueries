@@ -14,18 +14,21 @@ QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platfo
     m_hostConnected = false;       
     m_termle = false;
     m_terminal = nullptr;
+    m_pwdsent = false;
     setConnectionProtocol( SSHTelnet );
-    m_localprompt.setPattern("\\[.+@.+:.+\\]\\$");
-    m_timer = new QTimer;
-    m_timer->setInterval(5000);
-    m_timer->setSingleShot(true);
-    connect(m_timer,SIGNAL(timeout()),SLOT(m_timerout()));
+    m_localprompt.setPattern("\\[.+@.+\\]\\$");
+
+    m_timerNoResponse = new QTimer;
+    m_timerNoResponse->setInterval(5000);
+    m_timerNoResponse->setSingleShot(true);
+    connect(m_timerNoResponse,SIGNAL(timeout()),SLOT(m_timeroutNoResponse()));
 }
 
 QRemoteShell::~QRemoteShell()
 {        
     if ( m_terminal )
         delete m_terminal;
+    delete m_timerNoResponse;
     qDebug() << m_ip << "QRemoteShell::~QRemoteShell()";
 }
 
@@ -99,9 +102,13 @@ void QRemoteShell::m_terminal_ready(bool ready)
 
 void QRemoteShell::m_nextTry()
 {    
+    qDebug() << "QRemoteShell::m_nextTry()" << m_lstConnectionProtocol.size();
+
     if ( !m_lstConnectionProtocol.isEmpty() )
     {
         m_protocol = m_lstConnectionProtocol.takeFirst();
+
+        qDebug() << "QRemoteShell::m_nextTry()" << m_protocol;
 
         switch (m_protocol)
         {
@@ -119,16 +126,17 @@ void QRemoteShell::m_nextTry()
 
 void QRemoteShell::m_terminal_detaReceived(QString txt)
 {    
-    m_dataReceived = txt;
-    m_timer->stop();
+    m_dataReceived = txt;   
 
-//    qDebug().noquote() << m_ip << txt;
+    qDebug().noquote() << m_ip << txt;
 
     if ( m_hostConnected )            
         emit readyRead();    
     else
     {
         //no se ha autenticado, se envia usuario y password       
+
+        m_timerNoResponse->stop();        
 
         QStringList data = m_dataReceived.split("\n",QString::SkipEmptyParts);
 
@@ -157,26 +165,35 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
         exp.setPattern("(Password|password)+:");
         if ( line.contains(exp) )
         {
-            saveLog("\nenviando password\n");
-            sendCommand( m_pwd );
+            if ( !m_pwdsent )
+            {
+                m_pwdsent=true;
+                saveLog("\nenviando password\n");
+                sendCommand( m_pwd );
+            }
+            else
+            {
+                qDebug() << m_ip << "QRemoteShell::m_terminal_detaReceived: se pide nuevamente el pwd";
+                host_disconnect();
+            }
             return;
         }
 
         //si se rechaza la conexion
         //**************************************************************************
-        if ( m_dataReceived.contains("Authorization failed") ||
-             m_dataReceived.contains("Connection closed by") ||
-             m_dataReceived.contains("Connection timed out") ||
-             m_dataReceived.contains("remote host not responding") ||
-             m_dataReceived.contains("Connection refused") ||
-             m_dataReceived.contains("Invalid key length") ||
-             m_dataReceived.contains("Connection reset by peer") ||
-             m_dataReceived.contains("Disconnected from") ||
-             m_dataReceived.contains("no matching host key type found") )
-        {
-            m_nextTry();
-            return;
-        }
+//        if ( m_dataReceived.contains("Authorization failed") ||
+//             m_dataReceived.contains("Connection closed by") ||
+//             m_dataReceived.contains("Connection timed out") ||
+//             m_dataReceived.contains("remote host not responding") ||
+//             m_dataReceived.contains("Connection refused") ||
+//             m_dataReceived.contains("Invalid key length") ||
+//             m_dataReceived.contains("Connection reset by peer") ||
+//             m_dataReceived.contains("Disconnected from") ||
+//             m_dataReceived.contains("no matching host key type found") )
+//        {
+//            m_nextTry();
+//            return;
+//        }
         //**************************************************************************
 
         //verificamos si ya miramos el promt del equipo para saber que ya nos conectamos
@@ -249,7 +266,13 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
 
         //local prompt
         if ( line.contains(m_localprompt) )
-            m_timer->start();
+        {
+            qDebug() << "---------- localprompt ----------------";
+            m_nextTry();
+        }
+
+        qDebug() << "m_timerNoResponse start";
+        m_timerNoResponse->start();
     }
 }
 
@@ -257,6 +280,7 @@ void QRemoteShell::host_disconnect()
 {            
     qDebug() << m_ip << "QRemoteShell::host_disconnect()" << m_terminal;
     m_hostConnected=false;    
+    disconnect(m_terminal,SIGNAL(receivedData(QString)),this,SLOT(m_terminal_detaReceived(QString)));
 
     m_terminal ? m_terminal->close() : emit disconnected();
 }
@@ -304,8 +328,9 @@ void QRemoteShell::m_terminal_finished()
     emit disconnected();
 }
 
-void QRemoteShell::m_timerout()
+void QRemoteShell::m_timeroutNoResponse()
 {
-    qDebug() << m_ip << "QRemoteShell::m_timerout()";
-    host_disconnect();
+    qDebug() << m_ip << "QRemoteShell::m_timeroutNoResponse()";
+    QByteArray a(1,3);
+    sendData( a );
 }

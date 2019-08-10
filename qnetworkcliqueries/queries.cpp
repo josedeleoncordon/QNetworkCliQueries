@@ -463,9 +463,10 @@ void Queries::borrarTerminal()
         qDebug() << m_ip  << "borrando terminal";
 
         term->disconnectReceiveTextSignalConnections();
-        term->disconnect();
+        term->disconnect(); //para q no se emita la señal de desconectado
         term->host_disconnect();
         term->deleteLater();
+        term = nullptr;
     }
 }
 
@@ -514,7 +515,7 @@ void Queries::nextProcess()
 
     if ( opcionActual & flags & Connect )
     {        
-        qDebug() << m_ip  << "creando term";
+        qDebug() << m_ip  << "creando term";        
         saveLog( "creando term\n" );        
         conectarAequipo(m_ip,m_user,m_pwd,m_platform);
         return;
@@ -1012,6 +1013,8 @@ void Queries::processConnectToHostDisconnected()
 
     qDebug() << m_ip  << "Queries::processConnectToHostDisconnected()" << m_ip << m_name;
 
+    borrarTerminal();
+
     if ( m_connected )
     {
         //se logro la conexion pero a media consulta se desconecto
@@ -1022,7 +1025,6 @@ void Queries::processConnectToHostDisconnected()
         {
             qDebug() << m_ip  << "reconectando y continuando consulta donde se quedo" << m_ip << m_name;
             m_connected=false;
-            borrarTerminal();
             conectarAequipo(m_ip,m_user,m_pwd,m_platform);
         }
         else
@@ -1041,7 +1043,6 @@ void Queries::processConnectToHostDisconnected()
             if ( m_consultaIntentos <= 3 )
             {
                 qDebug() << m_ip  << "intentando nuevamente conectarse al equipo" << m_ip << m_name;
-                borrarTerminal();
                 conectarAequipo(m_ip,m_user,m_pwd,m_platform);
             }
             else
@@ -1875,7 +1876,7 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const LstQueries &info)
     foreach (QString s, lstErrores)
         dbg.space() << s << "\n";
     dbg.space() << "--\n";
-    dbg.space() << "\nIPs consultadas:\n";
+    dbg.space() << "\nIPs consultadas:" << info.lstIPsAconsultadas.size() << "\n";
     dbg.space() << info.lstIPsAconsultadas;
     return dbg.maybeSpace();
 }

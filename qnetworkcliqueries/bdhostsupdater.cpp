@@ -37,6 +37,7 @@ void BDHostsUpdater::consultarPEs_otroPais()
         queriesThread->setUser( Properties::Instance()->user );
         queriesThread->setPassword( Properties::Instance()->password );
         queriesThread->setLstIP( BDHosts::instance()->rrFrom( pais ) );
+        queriesThread->setConnectionProtocol( QRemoteShell::SSHTelnet );
         queriesThread->setInterval( 1000 );
         queriesThread->setSimultaneos( 3 );
         queriesThread->setMaxParalelos( 10 );
