@@ -19,7 +19,7 @@ QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platfo
     m_localprompt.setPattern("\\[.+@.+\\]\\$");
 
     m_timerNoResponse = new QTimer;
-    m_timerNoResponse->setInterval(5000);
+    m_timerNoResponse->setInterval(10000);
     m_timerNoResponse->setSingleShot(true);
     connect(m_timerNoResponse,SIGNAL(timeout()),SLOT(m_timeroutNoResponse()));
 }

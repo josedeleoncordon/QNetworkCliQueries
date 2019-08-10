@@ -1112,6 +1112,8 @@ void Queries::processConnectToHostConnected()
         //siguientes intentos    
         qDebug() << m_ip  << "Conectado. Siguiente intento de consulta despues de falla" << m_ip << m_name;
         m_reintentandoConsulta=true;
+        if ( opcionActual == Connect  )
+            opcionActual = opcionActual << 1;
     }
 
     nextProcess();
