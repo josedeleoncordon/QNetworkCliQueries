@@ -15,14 +15,16 @@ class Terminal : public QObject
 private:
     Konsole::Pty *_shellProcess;
     bool _ready;
-    QTimer *_timer;
+    QTimer *_timer;   
+
+    QString _debugIP;
 
 public:
-    explicit Terminal(QObject *parent = nullptr);
+    explicit Terminal(QString debugIP, QObject *parent = nullptr);
     ~Terminal();
     void sendCommand(QString text);
     void sendData(const QByteArray &data);
-    void close();
+    void close();        
 
 private slots:
     void onReceiveBlock( const char * buf, int len );

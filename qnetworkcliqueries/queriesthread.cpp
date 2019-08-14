@@ -49,6 +49,8 @@ void QueriesThread::iniciar()
          m_lstIP.isEmpty() ||
          m_equiposConsultados > 0 )
     {
+        qDebug() << "QueriesThread::iniciar() emit finished ";
+
         emit finished(false);
         return;
     }

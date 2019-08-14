@@ -7,8 +7,10 @@
 
 using namespace Konsole;
 
-Terminal::Terminal(QObject *parent) : QObject(parent)
+Terminal::Terminal(QString debugIP, QObject *parent) : QObject(parent)
 {
+    _debugIP = debugIP;
+
     _ready=false;
     _shellProcess = new Pty();
 
@@ -39,7 +41,7 @@ Terminal::Terminal(QObject *parent) : QObject(parent)
 
     if (result < 0)
     {
-        qDebug() << "SHELL CRASHED! result: " << result;       
+        qDebug() << _debugIP << "SHELL CRASHED! result: " << result;
         return;
     }
     _shellProcess->setWriteable(false);  // We are reachable via kwrited.
@@ -47,7 +49,7 @@ Terminal::Terminal(QObject *parent) : QObject(parent)
 
 Terminal::~Terminal()
 {
-    qDebug() << "Terminal::~Terminal()";
+    qDebug() << _debugIP << "Terminal::~Terminal()";
     delete _timer;
 }
 
@@ -70,7 +72,7 @@ void Terminal::onReceiveBlock( const char * buf, int len )
 
 void Terminal::on_timerout()
 {
-    qDebug() << "Terminal::on_timerout()";
+    qDebug() << _debugIP << "Terminal::on_timerout()";
     emit ready(false);
 }
 
@@ -85,12 +87,12 @@ void Terminal::sendData(const QByteArray &data)
     if ( _ready )
         _shellProcess->sendData( data, data.size() );
     else
-        qDebug() << "Terminal::sendCommand() not ready";
+        qDebug() << _debugIP << "Terminal::sendCommand() not ready";
 }
 
 void Terminal::shellProcess_finished()
 {    
-    qDebug() << "Terminal::shellProcess_finished()";
+    qDebug() << _debugIP << "Terminal::shellProcess_finished()";
     _ready=false;
     _shellProcess->deleteLater();
     emit finished();
@@ -103,6 +105,6 @@ void Terminal::close()
     _shellProcess->close();
 
 //    int result = ::kill(_shellProcess->pid(),SIGHUP);
-    qDebug() << "Terminal::close()";
+    qDebug() << _debugIP << "Terminal::close()";
 }
 

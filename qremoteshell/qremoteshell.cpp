@@ -66,6 +66,14 @@ void QRemoteShell::setConnectionProtocol( ConnectionProtocol cp )
 
 void QRemoteShell::host_connect()
 {
+    m_terminal = new Terminal( m_ip );
+    connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool)));
+    connect(m_terminal,SIGNAL(receivedData(QString)),SLOT(m_terminal_detaReceived(QString)));
+    connect(m_terminal,SIGNAL(finished()),SLOT(m_terminal_finished()));
+
+    return;
+
+
     qDebug() << m_ip  << "QRemoteShell::host_connect()" << m_ip;
     QTcpSocket *socket = new QTcpSocket; //usamos un socket para ver si el equipo es alcanzable
     socket->connectToHost( m_ip, 1 );
@@ -75,10 +83,12 @@ void QRemoteShell::host_connect()
          socket->error() == QAbstractSocket::ConnectionRefusedError ) //si se rechaza la conexion es alcanzable
     {
         emit reachable();
-        if ( socket->state() == QAbstractSocket::ConnectedState )
-            socket->close();
+//        if ( socket->state() == QAbstractSocket::ConnectedState )
+//            socket->close();
 
-        m_terminal = new Terminal;
+//        socket->deleteLater();
+
+        m_terminal = new Terminal( m_ip );
         connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool)));
         connect(m_terminal,SIGNAL(receivedData(QString)),SLOT(m_terminal_detaReceived(QString)));
         connect(m_terminal,SIGNAL(finished()),SLOT(m_terminal_finished()));
@@ -87,7 +97,9 @@ void QRemoteShell::host_connect()
     {
         qDebug() << m_ip  << "equipo no alcanzable";
         host_disconnect();
-    }
+    }    
+
+    socket->close();
     socket->deleteLater();
 }
 
