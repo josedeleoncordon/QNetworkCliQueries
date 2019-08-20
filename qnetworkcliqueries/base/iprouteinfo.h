@@ -9,6 +9,7 @@ struct SIpRouteInfo : InfoBase
     QString mask;
     QString protocol;
     QStringList via;
+    QString vrf;
 };
 
 QDataStream& operator<<(QDataStream& out, const SIpRouteInfo* data);

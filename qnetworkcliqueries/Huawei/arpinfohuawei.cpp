@@ -79,7 +79,7 @@ void ArpInfoHuawei::on_term_receiveText()
             _ip = data.at(0).simplified();
             _mac = data.at(1).simplified().replace("-",".");
             _age = data.at(2).simplified();
-            _interfaz = interfazSimplifier( data.at(4).simplified() );
+            _interfaz = estandarizarInterfaz( data.at(4).simplified() );
 
             QString vlan = _interfaz;
             if ( vlan.contains("Vlan") )

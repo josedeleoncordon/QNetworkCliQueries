@@ -329,7 +329,7 @@ void VrfInfo::on_term_receiveTextVRFs()
             exp.setPattern("(\\S+) is (Up|Down|Shutdown)\\,.+");
             if ( line.contains(exp) )
             {
-                lastInterface = interfazSimplifier( exp.cap(1) );
+                lastInterface = estandarizarInterfaz( exp.cap(1) );
                 continue;
             }
 
@@ -364,12 +364,12 @@ void VrfInfo::on_term_receiveTextVRFs()
             if ( data.size() >= 3 )
             {
                 lastVrf = data.at(0).simplified();
-                lastInterface = interfazSimplifier( data.at(2).simplified() );
+                lastInterface = estandarizarInterfaz( data.at(2).simplified() );
             }
             else if ( data.size() == 2 )
                 lastVrf = data.at(0).simplified();
             else if ( data.size() == 1 )
-                lastInterface = interfazSimplifier( data.at(0).simplified() );            
+                lastInterface = estandarizarInterfaz( data.at(0).simplified() );            
 
             SVrfInfo *vi = new SVrfInfo;
             vi->queryParent = m_queriesParent;

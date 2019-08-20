@@ -293,7 +293,7 @@ void InterfaceInfo::on_term_receiveText_Info()
             expInterface.setPattern("^(.+) is (.+), line protocol is (\\w+)");
             if ( line.contains(expInterface) )
             {
-                QString interface = interfazSimplifier(expInterface.cap(1));
+                QString interface = estandarizarInterfaz(expInterface.cap(1));
 
                 id = new SInterfaceInfo;
                 id->queryParent = m_queriesParent;
@@ -319,7 +319,7 @@ void InterfaceInfo::on_term_receiveText_Info()
             expInterface.setPattern("^(.+) is (up|down)($| )+");
             if ( line.contains(expInterface) )
             {
-                QString interface = interfazSimplifier(expInterface.cap(1));
+                QString interface = estandarizarInterfaz(expInterface.cap(1));
 
                 id = new SInterfaceInfo;
                 id->queryParent = m_queriesParent;
@@ -436,7 +436,7 @@ void InterfaceInfo::on_term_receiveText_Info()
             expInterface.setPattern("^(.+) current state : (UP|DOWN|Administratively DOWN)");
             if ( line.contains(expInterface) )
             {
-                QString interface = interfazSimplifier(expInterface.cap(1));
+                QString interface = estandarizarInterfaz(expInterface.cap(1));
                 if ( interface == "Line protocol" )
                 {
                     interline = expInterface.cap(1).simplified().toLower();
@@ -578,7 +578,7 @@ void InterfaceInfo::on_term_receiveText_IpAddresses()
 
         SIpInfo *m = new SIpInfo;
         m->queryParent = m_queriesParent;
-        m->interfaz = interfazSimplifier( exp.cap( 1 ) );
+        m->interfaz = estandarizarInterfaz( exp.cap( 1 ) );
         m->ip = exp.cap(2);
         m->datetime = QDateTime::currentDateTime();
         m->operativo = true;
@@ -620,7 +620,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
                 continue;
 
             QStringList a = interface.split(".");
-            QString inter = interfazSimplifier( a.at(0) );
+            QString inter = estandarizarInterfaz( a.at(0) );
             QString vlan = a.at(1);
 
             if ( !iv || inter != temp )
@@ -670,7 +670,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
                     QStringList a = line.split(" ",QString::SkipEmptyParts);
                     iv = new SInterfaceVlans;
                     iv->queryParent = m_queriesParent;
-                    iv->interfaz =  interfazSimplifier( a.at(0) );
+                    iv->interfaz =  estandarizarInterfaz( a.at(0) );
                     iv->datetime = QDateTime::currentDateTime();
                     iv->operativo = true;
                     temp = a.at(1);
@@ -718,7 +718,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunkHuawei()
             int pos = 0;
             while ((pos = expinter.indexIn(line, pos)) != -1)
             {
-                QString interfaz = interfazSimplifier(expinter.cap(1));
+                QString interfaz = estandarizarInterfaz(expinter.cap(1));
                 map.insertMulti(interfaz,vlan);
                 pos += expinter.matchedLength();
             }
@@ -728,7 +728,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunkHuawei()
             int pos = 0;
             while ((pos = expinter.indexIn(line, pos)) != -1)
             {
-                QString interfaz = interfazSimplifier(expinter.cap(1));
+                QString interfaz = estandarizarInterfaz(expinter.cap(1));
                 map.insertMulti(interfaz,vlan);
                 pos += expinter.matchedLength();
             }
@@ -766,7 +766,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansBridge()
         {
             iv = new SInterfaceVlans;
             iv->queryParent = m_queriesParent;
-            iv->interfaz = interfazSimplifier( exp.cap(1) );
+            iv->interfaz = estandarizarInterfaz( exp.cap(1) );
             iv->datetime = QDateTime::currentDateTime();
             iv->operativo = true;
             continue;
@@ -823,7 +823,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansAccess()
                 QString interfaz = data.at(c);
                 interfaz.replace(",","");
 
-                iv->interfaz = interfazSimplifier( interfaz );
+                iv->interfaz = estandarizarInterfaz( interfaz );
                 iv->vlans = QStringList() << data.at(0);
                 iv->datetime = QDateTime::currentDateTime();
                 iv->operativo = true;
@@ -858,7 +858,7 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
 
             QStringList data = line.split("  ",QString::SkipEmptyParts);
 
-            id->interfaz = interfazSimplifier( data.at(0).simplified() );
+            id->interfaz = estandarizarInterfaz( data.at(0).simplified() );
             id->datetime = QDateTime::currentDateTime();
             id->operativo = true;
             QString status = data.at(1).simplified();
@@ -891,7 +891,7 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
 
             SInterfaceInfo *id = new SInterfaceInfo;
             id->queryParent = m_queriesParent;
-            id->interfaz = interfazSimplifier( data.at(0).simplified() );
+            id->interfaz = estandarizarInterfaz( data.at(0).simplified() );
             id->datetime = QDateTime::currentDateTime();
             id->operativo = true;
             id->description = data.at(1).simplified().replace("\"","").replace("'","");

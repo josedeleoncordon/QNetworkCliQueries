@@ -91,7 +91,7 @@ void MacInfoCisco::on_term_receiveText()
                 interfaz = data.at(2).simplified();
 
                 QStringList inter = interfaz.split(".",QString::SkipEmptyParts);
-                mac->interfaz = interfazSimplifier( inter.at(0) );
+                mac->interfaz = estandarizarInterfaz( inter.at(0) );
                 if ( inter.size() > 1 )
                     mac->vlan = inter.at(1);
                 else
@@ -106,7 +106,7 @@ void MacInfoCisco::on_term_receiveText()
             QString interface;            
             if ( line.contains("efp_id") )
                 //1666  0025.9ed3.10a8   dynamic  Yes          0   Te3/1 efp_id 1666
-                interface = interfazSimplifier( data.at(data.size()-3).simplified() );
+                interface = estandarizarInterfaz( data.at(data.size()-3).simplified() );
             else if ( line.contains(exp) )
             {
                 //3222  001a.302b.35c0   dynamic  Yes        160   Eth VLAN 3222
@@ -115,10 +115,10 @@ void MacInfoCisco::on_term_receiveText()
                 interface = "PW_"+data.last();
             }
             else if ( data.last().size() == 1 )
-                interface = interfazSimplifier( data.at(data.size()-2).simplified() );
+                interface = estandarizarInterfaz( data.at(data.size()-2).simplified() );
             else
                 //3737  00d0.d650.c84d   dynamic  Yes        190   Gi3/5
-                interface = interfazSimplifier( data.last().simplified() );
+                interface = estandarizarInterfaz( data.last().simplified() );
 
             if (interface.contains("."))
             {

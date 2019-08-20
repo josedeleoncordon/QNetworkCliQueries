@@ -47,7 +47,7 @@ void OSPFInfoCisco::on_term_receiveTextNeighbors()
         oii->id = lstColumns.at(0).simplified();
         oii->state = lstColumns.at(2).simplified();
         oii->address = lstColumns.at( lstColumns.size()-2 ).simplified();
-        oii->interfaz = interfazSimplifier( lstColumns.last().simplified() );
+        oii->interfaz = estandarizarInterfaz( lstColumns.last().simplified() );
 
         m_lstOSPFInfo.append(oii);
     }
@@ -91,7 +91,7 @@ void OSPFInfoCisco::on_term_receiveTextInterfaces()
 
         for ( SOSPFInfo *oii : m_lstOSPFInfo )
         {            
-            if ( oii->interfaz == interfazSimplifier( interfaz ) )
+            if ( oii->interfaz == estandarizarInterfaz( interfaz ) )
             {                
                 oii->process = lstColumns.at(1).simplified();
                 oii->cost = lstColumns.at(4).simplified();

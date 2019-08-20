@@ -139,7 +139,7 @@ void PortChannelsInfo::on_term_receiveText()
             {
                 SPortChannel *pc = new SPortChannel;
                 pc->queryParent = m_queriesParent;
-                pc->interfaz = interfazSimplifier( line.split(" ",QString::SkipEmptyParts).at(0).simplified() );
+                pc->interfaz = estandarizarInterfaz( line.split(" ",QString::SkipEmptyParts).at(0).simplified() );
                 pc->group = lastBundle;
                 pc->datetime = QDateTime::currentDateTime();
                 pc->operativo = true;
@@ -187,7 +187,7 @@ void PortChannelsInfo::on_term_receiveText()
                     if ( interfaz.contains(exp) )
                     {
                         interfaz.replace(exp,"");
-                        interfaz = interfazSimplifier( interfaz );
+                        interfaz = estandarizarInterfaz( interfaz );
 
                         SPortChannel *pc=new SPortChannel;
                         pc->queryParent = m_queriesParent;
@@ -230,7 +230,7 @@ void PortChannelsInfo::on_term_receiveTextHuawei()
         {
             SPortChannel *pc=new SPortChannel;
             pc->queryParent = m_queriesParent;
-            pc->interfaz = interfazSimplifier(exp.cap(1));
+            pc->interfaz = estandarizarInterfaz(exp.cap(1));
             pc->group = lastBundle;
             pc->datetime = QDateTime::currentDateTime();
             pc->operativo = true;

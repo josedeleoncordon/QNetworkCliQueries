@@ -128,7 +128,7 @@ void PIMInfo::getPIMInterfaces()
 //        if ( line.contains(exp) )
 //        {
 //            SPIMInfo *pi = new SPIMInfo;
-//            pi->interface = interfazSimplifier( exp.cap(0) );
+//            pi->interface = estandarizarInterfaz( exp.cap(0) );
 //            lstPIMNeighbors.append(pi);
 //        }
 //    }
@@ -154,7 +154,7 @@ void PIMInfo::on_term_receiveTextInterfaces()
 
             SPIMInfo *pi = new SPIMInfo;
             pi->queryParent = m_queriesParent;
-            pi->interfaz = interfazSimplifier( data.at(1) );
+            pi->interfaz = estandarizarInterfaz( data.at(1) );
             pi->nbrCount = data.at(3);
             pi->datetime = QDateTime::currentDateTime();
             pi->operativo = true;
@@ -195,7 +195,7 @@ void PIMInfo::on_term_receiveTextRouterPim()
         //Se verifica la interfaz
         if ( line.contains(exp) )
         {
-            lastInterface=interfazSimplifier(exp.cap(1));
+            lastInterface=estandarizarInterfaz(exp.cap(1));
             continue;
         }
 
@@ -232,7 +232,7 @@ void PIMInfo::on_term_receiveTextMulticastRouting()
         //Se verifica la interfaz
         if ( line.contains(exp) )
         {
-            lastInterface=interfazSimplifier(exp.cap(1));
+            lastInterface=estandarizarInterfaz(exp.cap(1));
             continue;
         }
 

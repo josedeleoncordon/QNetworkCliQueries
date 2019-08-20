@@ -36,9 +36,6 @@ void saveLstQueries(LstQueries *lst, QString path);
 //simplifica el nombre de un host eliminado del mismo el CPU, modulo, etx. por ejemplo los nombre de Cisco IOS XR
 QString simplicateName(QString name);
 
-//simplifica el nombre de las interfaces, por ejemplo GigabitEthernet0/1 a Gi0/1
-QString interfazSimplifier(QString interfaz);
-
 //Convierte un rango de numeros a una lista, se usa para convertir los rangos de las vlans, ejemplo:
 //2,4,7-10 --> 2,4,7,8,9,10
 QStringList numberRangeToLST(QString str);
@@ -132,5 +129,11 @@ QString buscarArchivoConsultasActual(QString pais,QString path,QString filelabel
 
 //crea el nombre del archivo de consultas
 QString nombreArchivoLstQueries(LstQueries*);
+
+//simplifica el nombre de las interfaces, por ejemplo GigabitEthernet0/1 a Gi0/1
+QString estandarizarInterfaz(QString interfaz);
+
+//convierte el nombre de los protocolos de las consultas de tablas de enrutamiento
+QString estandarizarProtocoloEnrutamiento(QString proto);
 
 #endif // FUNCIONES_H

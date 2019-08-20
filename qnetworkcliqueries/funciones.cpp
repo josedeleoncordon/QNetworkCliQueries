@@ -110,28 +110,6 @@ QString simplicateName(QString name)
     return name;
 }
 
-QString interfazSimplifier(QString interfaz)
-{
-    interfaz.replace("nGigabitEthernet","");
-    interfaz.replace("Bundle-Ether","BE");
-    interfaz.replace("Port-channel","Po",Qt::CaseInsensitive);
-    interfaz.replace("gabitEthernet","");
-    interfaz.replace("stEthernet","");
-    interfaz.replace("ndredGigE","");
-    interfaz.replace("rtyGigE","");
-    interfaz.replace("opback","");
-    interfaz.replace("nGigE","");
-    interfaz.replace("GigE","");
-    interfaz.replace("POS","PO");
-    interfaz.replace("Ethernet","Eth");
-    interfaz.replace("Vlanif","Vlan");
-    interfaz.replace("VLAN","Vlan");    
-    interfaz.replace("Po0/0/","Po");
-    if ( !interfaz.contains("100GE") ) interfaz.replace("GE","Gi",Qt::CaseSensitive);
-
-    return interfaz;
-}
-
 QStringList numberRangeToLST(QString str)
 {
     QStringList lst = str.split(",",QString::SkipEmptyParts);
@@ -830,4 +808,34 @@ QString nombreArchivoLstQueries(LstQueries* lstQ)
             "_Queries"+
             (lstQ->grupoconsulta.isEmpty()?"":"_"+lstQ->grupoconsulta)+
             "_"+QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss")+".dat";
+}
+
+QString estandarizarInterfaz(QString interfaz)
+{
+    interfaz.replace("nGigabitEthernet","");
+    interfaz.replace("Bundle-Ether","BE");
+    interfaz.replace("Port-channel","Po",Qt::CaseInsensitive);
+    interfaz.replace("gabitEthernet","");
+    interfaz.replace("stEthernet","");
+    interfaz.replace("ndredGigE","");
+    interfaz.replace("rtyGigE","");
+    interfaz.replace("opback","");
+    interfaz.replace("nGigE","");
+    interfaz.replace("GigE","");
+    interfaz.replace("POS","PO");
+    interfaz.replace("Ethernet","Eth");
+    interfaz.replace("Vlanif","Vlan");
+    interfaz.replace("VLAN","Vlan");
+    interfaz.replace("Po0/0/","Po");
+    if ( !interfaz.contains("100GE") ) interfaz.replace("GE","Gi",Qt::CaseSensitive);
+
+    return interfaz;
+}
+
+QString estandarizarProtocoloEnrutamiento(QString proto)
+{
+    if ( proto == "S" || proto == "Static" ) return "STATIC";
+    //TODO agregar los demas
+
+    return proto;
 }

@@ -170,8 +170,8 @@ void EquipmentNeighborsInfo::on_term_receiveText_CDP()
                     QString segundo = lst.at(1);
                     segundo.replace(" ","");
 
-                    nuevo->interfazestesalida = interfazSimplifier( primero.split(":").at(1).simplified() );
-                    nuevo->interfazotroentrada = interfazSimplifier( segundo.split(":").at(1).simplified() );
+                    nuevo->interfazestesalida = estandarizarInterfaz( primero.split(":").at(1).simplified() );
+                    nuevo->interfazotroentrada = estandarizarInterfaz( segundo.split(":").at(1).simplified() );
                 }
 
                 //XR
@@ -179,7 +179,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_CDP()
                 {
                     QString primero = lst.at(0);
                     primero.replace(" ","");
-                    nuevo->interfazestesalida = interfazSimplifier( primero.split(":").at(1).simplified() );
+                    nuevo->interfazestesalida = estandarizarInterfaz( primero.split(":").at(1).simplified() );
                 }
             }
 
@@ -190,7 +190,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_CDP()
                 {
                     line.replace(" ","");
                     QStringList lst = line.split(":");
-                    nuevo->interfazotroentrada = interfazSimplifier( lst.at(1).simplified() );
+                    nuevo->interfazotroentrada = estandarizarInterfaz( lst.at(1).simplified() );
                 }
             }
 
@@ -241,14 +241,14 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Cisco()
             con++;
             QStringList col = line.split("  ",QString::SkipEmptyParts);
             if ( col.size() == 5  )
-                mapInterfazLocales.insert(col.at(0)+"_"+QString::number(con),interfazSimplifier(col.at(1)));            
+                mapInterfazLocales.insert(col.at(0)+"_"+QString::number(con),estandarizarInterfaz(col.at(1)));            
             if ( col.size() == 4 )
             {
                 //nombre de equipo muy largo pegado a la interfaz como se ve arriba
                 QString equipo = col.at(0).left(20);
                 QString interfaz = col.at(0);
                 interfaz.replace(equipo,"");
-                mapInterfazLocales.insert(equipo+"_"+QString::number(con),interfazSimplifier(interfaz));
+                mapInterfazLocales.insert(equipo+"_"+QString::number(con),estandarizarInterfaz(interfaz));
             }
         }
     }
@@ -286,14 +286,14 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Cisco_detail()
             exp.setPattern("Local (Intf|Interface): (.+)$");
             if ( line.contains(exp) )
             {
-                localint = interfazSimplifier(exp.cap(2).simplified());
+                localint = estandarizarInterfaz(exp.cap(2).simplified());
                 continue;
             }
 
             exp.setPattern("Port id: (.+)$");
             if ( line.contains(exp) )
             {
-                otroint = interfazSimplifier(exp.cap(1).simplified());
+                otroint = estandarizarInterfaz(exp.cap(1).simplified());
                 continue;
             }
 
@@ -401,7 +401,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Huawei()
         {            
             nuevo = new SEquipmentNeighborsInfo;
             nuevo->queryParent = m_queriesParent;
-            nuevo->interfazestesalida = interfazSimplifier(localint);
+            nuevo->interfazestesalida = estandarizarInterfaz(localint);
             nuevo->datetime = QDateTime::currentDateTime();
             nuevo->operativo = true;
             m_lstEquipos.append(nuevo);
@@ -414,7 +414,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Huawei()
         exp.setPattern("(PortId|Port ID) *: *(.+)$");
         if ( line.contains(exp) )
         {
-            nuevo->interfazotroentrada = interfazSimplifier(exp.cap(2).simplified());
+            nuevo->interfazotroentrada = estandarizarInterfaz(exp.cap(2).simplified());
             continue;
         }
 

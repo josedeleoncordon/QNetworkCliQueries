@@ -62,12 +62,12 @@ void MacInfoHuawei::on_term_receiveText()
         if ( data.size() == 7 )
         {
             mac->vlan = data.at(1).simplified();
-            mac->interfaz = interfazSimplifier(data.at(4).simplified());
+            mac->interfaz = estandarizarInterfaz(data.at(4).simplified());
         }
         else if ( data.size() > 7 )
         {
             mac->vlan = data.at(2).simplified();
-            mac->interfaz = interfazSimplifier(data.at(5).simplified());
+            mac->interfaz = estandarizarInterfaz(data.at(5).simplified());
         }
 
         if ( !mac )

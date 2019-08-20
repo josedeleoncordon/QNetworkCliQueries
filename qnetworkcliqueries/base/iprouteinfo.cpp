@@ -4,6 +4,7 @@ QDataStream& operator<<(QDataStream& out, const SIpRouteInfo* data)
 {
     out << data->mask;
     out << data->network;
+    out << data->vrf;
     out << data->protocol;
     out << data->via;
     //infobase
@@ -17,6 +18,7 @@ QDataStream& operator>>(QDataStream& in, SIpRouteInfo*& data)
     data = new SIpRouteInfo;
     in >> data->mask;
     in >> data->network;
+    in >> data->vrf;
     in >> data->protocol;
     in >> data->via;
     //infobase
@@ -51,7 +53,8 @@ void updateInfoList(QList<SIpRouteInfo *> &lstDest, QList<SIpRouteInfo *> &lstOr
         foreach ( SIpRouteInfo *dest, lstDest )
         {
             if ( origin->network == dest->network &&
-                 origin->mask == dest->mask )
+                 origin->mask == dest->mask /*&&
+                 origin->vrf == dest->vrf*/ )
             {
                 //Si se encontro, actualizamos los datos
                 dest->datetime = origin->datetime;
@@ -80,7 +83,7 @@ IPRouteInfo::IPRouteInfo(const IPRouteInfo &other):
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
-    m_ip = other.m_ip;
+    m_ip = other.m_ip;    
     foreach (SIpRouteInfo *ii, other.m_lstRoutes)
     {
         SIpRouteInfo *ii2 = new SIpRouteInfo(*ii);
@@ -97,7 +100,7 @@ IPRouteInfo::~IPRouteInfo()
 
 void IPRouteInfo::getIPRouteInfo()
 {
-    if ( m_brand != "Cisco" )
+    if ( m_brand != "Cisco" && m_brand != "Huawei" )
     {
         finished();
         return;
@@ -120,7 +123,12 @@ void IPRouteInfo::m_siguienteVRF()
         m_vrfsPos++;
         m_vrf = m_vrfs.at( m_vrfsPos );
 
-        termSendText("sh ip route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" "+m_protocol );
+        if ( m_brand == "Cisco" )
+            termSendText("sh ip route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" "+m_protocol );
+        else if ( m_brand == "Huawei" )
+            termSendText("display ip routing-table "+
+                         ( !m_vrf.isEmpty()?" vpn-instance "+m_vrf:"" )+
+                         ( !m_protocol.isEmpty()?" protocol "+m_protocol:"" ) );
     }
     else
         finished();
@@ -138,95 +146,134 @@ void IPRouteInfo::on_term_receiveText()
 
     foreach (QString line, lines)
     {
-        line = line.simplified();
+        line = line.simplified();       
 
         exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
         if ( ! line.contains(exp) )
             continue;
 
-        //  10.0.0.0/8 is variably subnetted, 4762 subnets, 16 masks
-        exp.setPattern("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/(\\d{1,2}).+ subnetted.+");
-        if ( line.contains(exp) )
+        if ( m_brand == "Cisco" )
         {
-            mask = exp.cap(1);
-            continue;
+            //  10.0.0.0/8 is variably subnetted, 4762 subnets, 16 masks
+            exp.setPattern("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/(\\d{1,2}).+ subnetted.+");
+            if ( line.contains(exp) )
+            {
+                mask = exp.cap(1);
+                continue;
+            }
+
+            //O E2     10.0.0.0/24 [110/20] via 10.192.56.42, 7w0d, TenGigabitEthernet8/2   --> con mascara
+            //S        10.110.163.14/32 [1/0] via 10.110.162.14
+            exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}).+ via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(,.+)*$");
+            if ( line.contains(exp) )
+            {
+                route = new SIpRouteInfo;
+                route->queryParent = m_queriesParent;
+                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
+                route->network = exp.cap(2);
+                route->mask = exp.cap(3);
+                route->vrf = m_vrf;
+                route->via.append( exp.cap(4) );
+                route->datetime = QDateTime::currentDateTime();
+                route->operativo = true;
+                m_lstRoutes.append(route);
+                continue;
+            }
+
+            //O E2     10.0.0.0 [110/20] via 10.192.56.42, 7w0d, TenGigabitEthernet8/2   --> sin mascara
+            exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).+ via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}),.+$");
+            if ( line.contains(exp) )
+            {
+                route = new SIpRouteInfo;
+                route->queryParent = m_queriesParent;
+                route->datetime = QDateTime::currentDateTime();
+                route->operativo = true;
+
+                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
+                route->network = exp.cap(2);
+                route->mask = mask;
+                route->vrf = m_vrf;
+                route->via.append( exp.cap(3) );
+                m_lstRoutes.append(route);
+                continue;
+            }
+
+            //[110/20] via 10.9.2.126, 7w0d, TenGigabitEthernet1/0/0
+            //[1/0] via 10.110.162.14, Vlan1667
+            exp.setPattern("^\\[.+\\] via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(,.+)$");
+            if ( line.contains(exp) )
+            {
+                QString via = exp.cap(1);
+                if ( !route->via.contains( via ) )
+                    route->via.append( via );
+                continue;
+            }
+
+            //O E2     129.250.207.152/30  --> con mascara
+            exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2})$");
+
+            if ( line.contains(exp) )
+            {
+                route = new SIpRouteInfo;
+                route->queryParent = m_queriesParent;
+                route->datetime = QDateTime::currentDateTime();
+                route->operativo = true;
+                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
+                route->network = exp.cap(2);
+                route->mask = exp.cap(3);
+                route->vrf = m_vrf;
+                m_lstRoutes.append(route);
+                continue;
+            }
+
+            //O E2     129.250.207.152  --> sin mascara
+            exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3})$");
+
+            if ( line.contains(exp) )
+            {
+                route = new SIpRouteInfo;
+                route->queryParent = m_queriesParent;
+                route->datetime = QDateTime::currentDateTime();
+                route->operativo = true;
+                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
+                route->network = exp.cap(2);
+                route->vrf = m_vrf;
+                route->mask = mask;
+                m_lstRoutes.append(route);
+                continue;
+            }
         }
-
-        //O E2     10.0.0.0/24 [110/20] via 10.192.56.42, 7w0d, TenGigabitEthernet8/2   --> con mascara
-        //S        10.110.163.14/32 [1/0] via 10.110.162.14
-        exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}).+ via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(,.+)*$");
-        if ( line.contains(exp) )
+        else if ( m_brand == "Huawei" )
         {
-            route = new SIpRouteInfo;
-            route->queryParent = m_queriesParent;
-            route->protocol = exp.cap(1);
-            route->network = exp.cap(2);
-            route->mask = exp.cap(3);
-            route->via.append( exp.cap(4) );
-            route->datetime = QDateTime::currentDateTime();
-            route->operativo = true;
-            m_lstRoutes.append(route);
-            continue;
-        }
+            //10.10.22.0/24  IBGP    200  20            RD  10.192.33.7     100GE8/0/0
+            exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}) (\\w+) .+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) ");
+            if ( line.contains(exp) )
+            {
+                route = new SIpRouteInfo;
+                route->queryParent = m_queriesParent;
+                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(3));
+                route->network = exp.cap(1);
+                route->mask = exp.cap(2);
+                route->via.append( exp.cap(4) );
+                route->vrf = m_vrf;
+                route->datetime = QDateTime::currentDateTime();
+                route->operativo = true;
+                m_lstRoutes.append(route);
+                continue;
+            }
 
-        //O E2     10.0.0.0 [110/20] via 10.192.56.42, 7w0d, TenGigabitEthernet8/2   --> sin mascara
-        exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).+ via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}),.+$");
-        if ( line.contains(exp) )
-        {
-            route = new SIpRouteInfo;
-            route->queryParent = m_queriesParent;
-            route->datetime = QDateTime::currentDateTime();
-            route->operativo = true;
+            // IBGP    200  20            RD  10.192.32. 7    100GE8/0/0    //otra interfaz o ip de destino de la ruta anterior
+            exp.setPattern("(\\w+) .+(\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3}) ");
+            if ( line.contains(exp) )
+            {
+                if ( !route )
+                    continue;
 
-            route->protocol = exp.cap(1);
-            route->network = exp.cap(2);
-            route->mask = mask;
-            route->via.append( exp.cap(3) );
-            m_lstRoutes.append(route);
-            continue;
-        }
-
-        //[110/20] via 10.9.2.126, 7w0d, TenGigabitEthernet1/0/0
-        //[1/0] via 10.110.162.14, Vlan1667
-        exp.setPattern("^\\[.+\\] via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(,.+)$");
-        if ( line.contains(exp) )
-        {
-            QString via = exp.cap(1);
-            if ( !route->via.contains( via ) )
-                route->via.append( via );
-            continue;
-        }
-
-        //O E2     129.250.207.152/30  --> con mascara
-        exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2})$");
-
-        if ( line.contains(exp) )
-        {
-            route = new SIpRouteInfo;
-            route->queryParent = m_queriesParent;
-            route->datetime = QDateTime::currentDateTime();
-            route->operativo = true;
-            route->protocol = exp.cap(1);
-            route->network = exp.cap(2);
-            route->mask = exp.cap(3);
-            m_lstRoutes.append(route);
-            continue;
-        }
-
-        //O E2     129.250.207.152  --> sin mascara
-        exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3})$");
-
-        if ( line.contains(exp) )
-        {
-            route = new SIpRouteInfo;
-            route->queryParent = m_queriesParent;
-            route->datetime = QDateTime::currentDateTime();
-            route->operativo = true;
-            route->protocol = exp.cap(1);
-            route->network = exp.cap(2);
-            route->mask = mask;
-            m_lstRoutes.append(route);
-            continue;
+                QString via = exp.cap(2);
+                if ( !route->via.contains(via) )
+                    route->via.append(via);
+                continue;
+            }
         }
     }
     m_siguienteVRF();
@@ -249,7 +296,7 @@ QDebug operator<<(QDebug dbg, const IPRouteInfo &info)
 {
     dbg.nospace() << "IPRouteInfo:\n";
     foreach (SIpRouteInfo *i, info.m_lstRoutes)    
-        dbg.space() << i->network << i->mask << i->via << i->protocol << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << i->operativo << "\n";
+        dbg.space() << i->vrf << i->network << i->mask << i->via << i->protocol << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << i->operativo << "\n";
 
     dbg.nospace() << "\n";
 

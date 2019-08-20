@@ -52,7 +52,7 @@ void OSPFInfoHuawei::on_term_receiveTextNeighbors()
         oii->id = lstColumns.at(2).simplified();
         oii->state = lstColumns.at(3).simplified();
         oii->area = lstColumns.at(0).simplified();
-        oii->interfaz = interfazSimplifier( lstColumns.at(1).simplified() );
+        oii->interfaz = estandarizarInterfaz( lstColumns.at(1).simplified() );
         oii->process = proceso;
 
         m_lstOSPFInfo.append(oii);
@@ -81,7 +81,7 @@ void OSPFInfoHuawei::on_term_receiveTextInterfaces()
 
         for ( SOSPFInfo *oii : m_lstOSPFInfo )
         {
-            if ( oii->interfaz == interfazSimplifier( lstColumns.at(0).simplified() ) )
+            if ( oii->interfaz == estandarizarInterfaz( lstColumns.at(0).simplified() ) )
             {
                 oii->cost = lstColumns.at(4).simplified();
                 oii->address = lstColumns.at(1).simplified();

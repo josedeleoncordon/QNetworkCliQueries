@@ -183,7 +183,7 @@ void MplsLdpInfo::on_term_receiveTextDiscovery()
             {
                 SMplsLdpInfo *sm = new SMplsLdpInfo;
                 sm->queryParent = m_queriesParent;
-                sm->interfaz = interfazSimplifier( exp.cap(1) );
+                sm->interfaz = estandarizarInterfaz( exp.cap(1) );
                 sm->datetime = QDateTime::currentDateTime();
                 sm->operativo = true;
                 m_lstMplsLdpInfo.append(sm);
@@ -210,7 +210,7 @@ void MplsLdpInfo::on_term_receiveTextNeighbors()
         {            
             SMplsLdpInfo *sm = new SMplsLdpInfo;
             sm->queryParent = m_queriesParent;
-            sm->interfaz = interfazSimplifier( exp.cap(0) );
+            sm->interfaz = estandarizarInterfaz( exp.cap(0) );
             sm->datetime = QDateTime::currentDateTime();
             sm->operativo = true;
             m_lstMplsLdpInfo.append(sm);
@@ -237,7 +237,7 @@ void MplsLdpInfo::on_term_receiveTextInterfaces()
 
         SMplsLdpInfo *sm = new SMplsLdpInfo;
         sm->queryParent = m_queriesParent;
-        sm->interfaz = interfazSimplifier( line.split(" ",QString::SkipEmptyParts).at(0) );
+        sm->interfaz = estandarizarInterfaz( line.split(" ",QString::SkipEmptyParts).at(0) );
         sm->datetime = QDateTime::currentDateTime();
         sm->operativo = true;
         m_lstMplsLdpInfo.append(sm);
