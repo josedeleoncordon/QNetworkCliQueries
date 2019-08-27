@@ -34,6 +34,7 @@ void Properties::loadSettings()
     mnemonicspath = settings.value("MnemonicsPath").toString();
     backupspath = settings.value("BackupsPath").toString();
     logspath = settings.value("LogsPath").toString();
+    linuxpromt = settings.value("LinuxPropmt").toString();
 }
 
 void Properties::saveSettings()
@@ -46,10 +47,10 @@ void Properties::saveSettings()
     settings.setValue("ConnectionPassword",password);
 //    settings.endGroup();
 
-
     settings.setValue("QueriesPath",queriespath);
     settings.setValue("MnemonicsPath",mnemonicspath);
     settings.setValue("BackupsPath",backupspath);
     settings.setValue("LogsPath",logspath);
+    settings.setValue("LinuxPropmt",linuxpromt);
 }
 

@@ -25,7 +25,7 @@ public:
         SSHTelnet
     };
 
-    QRemoteShell( QString ip, QString user, QString pwd, QString platform, QObject *parent=0 );
+    QRemoteShell( QString ip, QString user, QString pwd, QString platform, QString linuxprompt,QObject *parent=0 );
     ~QRemoteShell();
 
     void setConnectionProtocol( ConnectionProtocol cp );
@@ -52,6 +52,7 @@ private:
     QString m_gw;
     QString m_vendor;
     QString m_host;
+    QString m_linuxprompt;
     bool m_hostConnected;
     bool m_termle;
     bool m_pwdsent;

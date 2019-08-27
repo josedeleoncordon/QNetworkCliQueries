@@ -6,13 +6,24 @@
 #include "funciones.h"
 #include "bdhosts.h"
 #include "factory.h"
+#include "properties.h"
 
-Queries::Queries(QString IP, QString user, QString pwd, QObject *parent) : QObject(parent)
+Queries::Queries(QString IP, QObject *parent) : QObject(parent)
+{
+    iniciar();
+    m_ip = IP;
+    m_user = Properties::Instance()->user;
+    m_pwd = Properties::Instance()->password;
+    m_linuxprompt = Properties::Instance()->linuxpromt;
+}
+
+Queries::Queries(QString IP, QString user, QString pwd, QString linuxprompt, QObject *parent) : QObject(parent)
 {    
     iniciar();
     m_ip=IP;
     m_user=user;
     m_pwd=pwd;   
+    m_linuxprompt=linuxprompt;
 }
 
 Queries::Queries()
@@ -443,10 +454,10 @@ void Queries::createQueries(Queries::Opcion option)
     m_queriescreated=true;
 }
 
-void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString platform)
+void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString platform, QString linuxprompt)
 {
     m_consultaIntentos++;
-    term = new QRemoteShell(ip,user,pwd,platform,this);
+    term = new QRemoteShell(ip,user,pwd,platform,linuxprompt,this);
     term->setConnectionProtocol( m_connectionprotol );
     term->setGW(m_gw);
     term->setLogPath( m_logPath );
@@ -517,7 +528,7 @@ void Queries::nextProcess()
     {        
         qDebug() << m_ip  << "creando term";        
         saveLog( "creando term\n" );        
-        conectarAequipo(m_ip,m_user,m_pwd,m_platform);
+        conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
         return;
     }
 
@@ -1025,7 +1036,7 @@ void Queries::processConnectToHostDisconnected()
         {
             qDebug() << m_ip  << "reconectando y continuando consulta donde se quedo" << m_ip << m_name;
             m_connected=false;
-            conectarAequipo(m_ip,m_user,m_pwd,m_platform);
+            conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
         }
         else
         {
@@ -1043,7 +1054,7 @@ void Queries::processConnectToHostDisconnected()
             if ( m_consultaIntentos <= 3 )
             {
                 qDebug() << m_ip  << "intentando nuevamente conectarse al equipo" << m_ip << m_name;
-                conectarAequipo(m_ip,m_user,m_pwd,m_platform);
+                conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
             }
             else
             {

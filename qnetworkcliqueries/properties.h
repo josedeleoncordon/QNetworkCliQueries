@@ -17,6 +17,7 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString mnemonicspath;
         QString backupspath;
         QString logspath;
+        QString linuxpromt;
 
     private:
         static Properties *m_instance;

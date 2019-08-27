@@ -112,7 +112,7 @@ void MainWindow::descubrirSiguienteEquipo()
 
     qDebug() << "iniciamos" << ui->ledPE->text() << ui->ledGW->text() << ui->ledMAC->text();
 
-    Queries *qry = new Queries( siguienteIP, ui->ledUsuario->text(), ui->ledPWD->text(),this );
+    Queries *qry = new Queries( siguienteIP,this );
     unsigned int opciones;    
     opciones = Queries::Connect |
             Queries::Platform |

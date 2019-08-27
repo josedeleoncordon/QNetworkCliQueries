@@ -4,19 +4,20 @@
 #include <QTimer>
 #include "terminal/terminal.h"
 
-QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platform, QObject *parent):
+QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platform, QString linuxprompt, QObject *parent):
     QObject(parent)
 {
     m_ip = ip;
     m_user = user;
     m_pwd = pwd;
     m_platform = platform;
+    m_linuxprompt = linuxprompt;
     m_hostConnected = false;       
     m_termle = false;
     m_terminal = nullptr;
     m_pwdsent = false;
     setConnectionProtocol( SSHTelnet );
-    m_localprompt.setPattern("\\[.+@.+\\]\\$");
+    m_localprompt.setPattern(linuxprompt);
 
     m_timerNoResponse = new QTimer;
     m_timerNoResponse->setInterval(10000);
@@ -66,7 +67,7 @@ void QRemoteShell::setConnectionProtocol( ConnectionProtocol cp )
 
 void QRemoteShell::host_connect()
 {
-    m_terminal = new Terminal( m_ip );
+    m_terminal = new Terminal( m_ip,m_linuxprompt );
     connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool)));
     connect(m_terminal,SIGNAL(receivedData(QString)),SLOT(m_terminal_detaReceived(QString)));
     connect(m_terminal,SIGNAL(finished()),SLOT(m_terminal_finished()));
@@ -88,7 +89,7 @@ void QRemoteShell::host_connect()
 
 //        socket->deleteLater();
 
-        m_terminal = new Terminal( m_ip );
+        m_terminal = new Terminal( m_ip,m_linuxprompt );
         connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool)));
         connect(m_terminal,SIGNAL(receivedData(QString)),SLOT(m_terminal_detaReceived(QString)));
         connect(m_terminal,SIGNAL(finished()),SLOT(m_terminal_finished()));

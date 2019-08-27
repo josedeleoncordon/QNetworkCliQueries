@@ -1,6 +1,7 @@
 #include "queriesthread.h"
 #include "funciones.h"
 #include "bdhosts.h"
+#include "properties.h"
 
 QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
 {
@@ -21,6 +22,10 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_cancelar=false;
     m_principaluserfirst=true;
     m_equipmentNeighborsConsultarVecinos=false;
+
+    m_user = Properties::Instance()->user;
+    m_password = Properties::Instance()->password;
+    m_linuxprompt = Properties::Instance()->linuxpromt;
 }
 
 QueriesThread::~QueriesThread()
@@ -144,7 +149,7 @@ void QueriesThread::conectarOtroEquipo()
 
     qDebug() << "QueriesThread::conectarOtroEquipo()" << ip;
 
-    Queries *query = new Queries(ip,m_user,m_password);
+    Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);
     if ( m_debug )
         query->setLogPath( m_logpath );
     query->setCountry( m_pais );

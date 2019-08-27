@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    Queries *qry = new Queries("10.192.9.212","jideleon","JoC!sRael+mar+2019");
+    Queries *qry = new Queries("10.192.9.212","jideleon","JoC!sRael+mar+2019","\\[.+@.+\\]\\$");
     qry->setConnectionProtocol(QRemoteShell::SSHTelnet); //SSh first if it fails then telnet
     qry->setOptions( Queries::Connect |
                      Queries::Platform |

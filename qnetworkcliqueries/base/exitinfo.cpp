@@ -1,4 +1,5 @@
 #include "exitinfo.h"
+#include "properties.h"
 
 ExitInfo::ExitInfo(QRemoteShell *terminal, QObject *parent):
     FuncionBase(terminal,parent)
@@ -18,7 +19,7 @@ void ExitInfo::exit()
 void ExitInfo::on_term_receiveText()
 {
     txt.append(term->dataReceived());
-    if ( !txt.contains(QRegExp("\\[.+@.+\\]\\$")) )
+    if ( !txt.contains(QRegExp(Properties::Instance()->linuxpromt)) )
         return;
 
     connect(term,SIGNAL(disconnected()),SLOT(on_term_disconnected()));

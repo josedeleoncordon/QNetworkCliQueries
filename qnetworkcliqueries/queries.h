@@ -30,7 +30,8 @@ class QNETWORKCLIQUERIES_EXPORT Queries : public QObject
     Q_PROPERTY(QString brand READ brand)
 
 public:
-    explicit Queries(QString IP, QString user, QString pwd, QObject *parent = 0);
+    explicit Queries(QString IP, QObject *parent = nullptr);
+    explicit Queries(QString IP, QString user, QString pwd, QString linuxprompt, QObject *parent = 0);
     explicit Queries();
     Queries(const Queries &other);
     ~Queries();
@@ -198,6 +199,7 @@ protected:
     QString m_user;
     QString m_gw;
     QString m_pwd;       
+    QString m_linuxprompt;
     bool m_conectionSecondTriedOtherUserPassword;
 
     //debug
@@ -212,7 +214,7 @@ protected:
 
     void iniciar();
     void createQueries(Queries::Opcion option = Queries::Null);    
-    void conectarAequipo(QString ip, QString user, QString pwd, QString platform);
+    void conectarAequipo(QString ip, QString user, QString pwd, QString platform, QString linuxprompt);
     void nextProcess();    
     void borrarTerminal();
     void limpiarConsultas();

@@ -16,11 +16,12 @@ private:
     Konsole::Pty *_shellProcess;
     bool _ready;
     QTimer *_timer;   
+    QString m_linuxprompt;
 
     QString _debugIP;
 
 public:
-    explicit Terminal(QString debugIP, QObject *parent = nullptr);
+    explicit Terminal(QString debugIP, QString linuxprompt, QObject *parent = nullptr);
     ~Terminal();
     void sendCommand(QString text);
     void sendData(const QByteArray &data);

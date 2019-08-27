@@ -22,6 +22,7 @@ public:
     void setUserOtro(QString user) { m_userother=user; }
     void setPasswordOtro(QString pwd) { m_pwdother=pwd; }
     void setPrincipalUserFirst(bool principalfirst) { m_principaluserfirst=principalfirst; }
+    void setLinuxPrompt(QString prompt) { m_linuxprompt = prompt; }
     void setConnectionProtocol( QRemoteShell::ConnectionProtocol cp ) { m_connectionprotocol = cp; }
     void setLstIP(QStringList lst);
     void setInterval(int interval) { m_interval = interval; }
@@ -62,6 +63,7 @@ private:
    QString m_password;
    QString m_userother;
    QString m_pwdother;
+   QString m_linuxprompt;
    QList<Host*> m_lstIP;
    QStringList lstIPsAgregadosPorVecinos;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;

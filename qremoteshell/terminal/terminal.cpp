@@ -7,7 +7,7 @@
 
 using namespace Konsole;
 
-Terminal::Terminal(QString debugIP, QObject *parent) : QObject(parent)
+Terminal::Terminal(QString debugIP, QString linuxprompt, QObject *parent) : QObject(parent)
 {
     _debugIP = debugIP;
 
@@ -17,6 +17,8 @@ Terminal::Terminal(QString debugIP, QObject *parent) : QObject(parent)
     connect( _shellProcess,SIGNAL(receivedData(const char *,int)),this,
              SLOT(onReceiveBlock(const char *,int)) );
     connect( _shellProcess,SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(shellProcess_finished()) );
+
+    m_linuxprompt = linuxprompt;
 
     _timer=new QTimer;
     _timer->setInterval(3000);
@@ -60,7 +62,7 @@ void Terminal::onReceiveBlock( const char * buf, int len )
     if ( !_ready )
     {
         _timer->stop();
-        if ( received.split("\n").last().contains(QRegExp("\\[.+@.+\\]\\$")) )
+        if ( received.split("\n").last().contains(QRegExp(m_linuxprompt)) )
         {
             _ready=true;
             emit ready(true);
@@ -77,7 +79,7 @@ void Terminal::on_timerout()
 }
 
 void Terminal::sendCommand(QString txt)
-{    
+{
     txt.append("\n");
     sendData( txt.toLocal8Bit() );
 }
@@ -105,6 +107,6 @@ void Terminal::close()
     _shellProcess->close();
 
 //    int result = ::kill(_shellProcess->pid(),SIGHUP);
-    qDebug() << _debugIP << "Terminal::close()";
+//    qDebug() << _debugIP << "Terminal::close()";
 }
 
