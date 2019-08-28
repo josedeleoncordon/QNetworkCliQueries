@@ -469,6 +469,8 @@ void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString plat
 
 void Queries::borrarTerminal()
 {
+    qDebug() << "Queries::borrarTerminal()" << term;
+
     if ( term )
     {
         qDebug() << m_ip  << "borrando terminal";
@@ -503,6 +505,7 @@ void Queries::nextProcess()
                 if ( m_logFile.isOpen() )
                     m_logFile.close();
 
+                borrarTerminal();
                 emit finished(this);
                 disconnect();
                 return;

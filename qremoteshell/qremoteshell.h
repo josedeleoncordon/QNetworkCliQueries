@@ -59,6 +59,7 @@ private:
     QString m_dataReceived;
     QRegExp m_localprompt;
     QTimer *m_timerNoResponse;
+    QTcpSocket *m_socket;
 
     Terminal *m_terminal;
 
