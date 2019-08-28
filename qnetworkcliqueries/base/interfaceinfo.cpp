@@ -1,6 +1,28 @@
 #include "interfaceinfo.h"
 #include "funciones.h"
 
+SInterfaceInfo::SInterfaceInfo(const SInterfaceInfo &other)
+{
+    interfaz = other.interfaz;
+    status = other.status;
+    mac = other.mac;
+    ratein = other.ratein;
+    rateout = other.rateout;
+    dropsin = other.dropsin;
+    dropsout = other.dropsout;
+    errorsin = other.errorsin;
+    errorsout = other.errorsout;
+    CRC = other.CRC;
+    overrun = other.overrun;
+    collisions = other.collisions;
+    bandwidth = other.bandwidth;
+    mtu = other.mtu;
+    duplex = other.duplex;
+    speed = other.speed;
+    opticalRx = other.opticalRx;
+    mediaType = other.mediaType;
+}
+
 QDataStream& operator<<(QDataStream& out, const SInterfaceInfo* data)
 {
     out << data->interfaz;

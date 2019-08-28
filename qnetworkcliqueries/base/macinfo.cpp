@@ -3,6 +3,14 @@
 
 #include "queries.h"
 
+SMacInfo::SMacInfo(const SMacInfo &other)
+{
+    mac = other.mac;
+    vlan = other.vlan;
+    interfaz = other.interfaz;
+    age = other.age;
+}
+
 QDataStream& operator<<(QDataStream& out, const SMacInfo* data)
 {
     out << data->mac;

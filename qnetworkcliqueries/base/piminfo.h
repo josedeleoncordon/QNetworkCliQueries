@@ -7,6 +7,9 @@ struct SPIMInfo : InfoBase
 {
     QString interfaz;
     QString nbrCount;
+
+    SPIMInfo() {}
+    SPIMInfo(const SPIMInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SPIMInfo* data);

@@ -8,6 +8,9 @@ struct SIpInfo : SMacInfo
 {
     QString ip;
     QString vrf;
+
+    SIpInfo() {}
+    SIpInfo(const SIpInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SIpInfo* data);

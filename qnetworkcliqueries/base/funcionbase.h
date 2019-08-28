@@ -28,6 +28,7 @@ struct InfoBase
     Queries* queryParent;   
 
     InfoBase() { operativo=true; queryParent=nullptr; }
+    InfoBase(const InfoBase &other);
 };
 
 class QNETWORKCLIQUERIES_EXPORT QueriesConfiguration

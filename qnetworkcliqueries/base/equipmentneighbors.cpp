@@ -1,6 +1,21 @@
 #include "equipmentneighbors.h"
 #include "funciones.h"
 
+SEquipmentNeighborsInfo::SEquipmentNeighborsInfo(const SEquipmentNeighborsInfo &other)
+{
+    nombreequipo = other.nombreequipo;
+    ip = other.ip;
+    interfazestesalida = other.interfazestesalida;
+    interfazotroentrada = other.interfazotroentrada;
+    plataforma = other.plataforma;
+
+    for ( SEquipmentNeighborsInfo *i : other.lstEquipos )
+    {
+        SEquipmentNeighborsInfo *n = new SEquipmentNeighborsInfo(*i);
+        lstEquipos.append( n );
+    }
+}
+
 QDataStream& operator<<(QDataStream& out, const SEquipmentNeighborsInfo* data)
 {
     out << data->nombreequipo;

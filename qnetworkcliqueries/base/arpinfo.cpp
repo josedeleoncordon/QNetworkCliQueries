@@ -1,5 +1,11 @@
 #include "arpinfo.h"
 
+SIpInfo::SIpInfo(const SIpInfo &other)
+{
+    ip = other.ip;
+    vrf = other.vrf;
+}
+
 QDataStream& operator<<(QDataStream& out, const SIpInfo* data)
 {
     out << data->ip;

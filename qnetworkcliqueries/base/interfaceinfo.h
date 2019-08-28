@@ -25,6 +25,9 @@ struct SInterfaceInfo : InfoBase
     QString speed;
     QString opticalRx;
     QString mediaType;
+
+    SInterfaceInfo() {}
+    SInterfaceInfo(const SInterfaceInfo &other);
 };
 
 struct SInterfaceVlans : InfoBase

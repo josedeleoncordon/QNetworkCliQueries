@@ -1,6 +1,12 @@
 #include "portchannelsinfo.h"
 #include "funciones.h"
 
+SPortChannel::SPortChannel(const SPortChannel &other)
+{
+    interfaz = other.interfaz;
+    group = other.group;
+}
+
 QDataStream& operator<<(QDataStream& out, const SPortChannel* data)
 {
     out << data->group;

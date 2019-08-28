@@ -1,6 +1,12 @@
 #include "piminfo.h"
 #include "funciones.h"
 
+SPIMInfo::SPIMInfo(const SPIMInfo &other)
+{
+    interfaz = other.interfaz;
+    nbrCount = other.nbrCount;
+}
+
 QDataStream& operator<<(QDataStream& out, const SPIMInfo* data)
 {
     out << data->interfaz;

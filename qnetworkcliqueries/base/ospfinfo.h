@@ -12,6 +12,9 @@ struct SOSPFInfo : InfoBase
    QString address;
    QString process;
    QString area;
+
+   SOSPFInfo() {}
+   SOSPFInfo(const SOSPFInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SOSPFInfo* data);

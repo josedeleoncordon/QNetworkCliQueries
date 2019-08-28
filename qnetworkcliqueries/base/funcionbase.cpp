@@ -1,6 +1,13 @@
 #include "funcionbase.h"
 #include "queries.h"
 
+InfoBase::InfoBase(const InfoBase &other)
+{
+    datetime = other.datetime;
+    operativo = other.operativo;
+    queryParent = other.queryParent;
+}
+
 QueriesConfiguration* QueriesConfiguration::m_instance = nullptr;
 
 QueriesConfiguration::QueriesConfiguration()

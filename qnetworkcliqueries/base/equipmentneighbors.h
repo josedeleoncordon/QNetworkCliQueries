@@ -11,6 +11,9 @@ struct SEquipmentNeighborsInfo : public InfoBase
     QString interfazotroentrada;
     QString plataforma;
     QList<SEquipmentNeighborsInfo*> lstEquipos;
+
+    SEquipmentNeighborsInfo() {}
+    SEquipmentNeighborsInfo(const SEquipmentNeighborsInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SEquipmentNeighborsInfo* data);
