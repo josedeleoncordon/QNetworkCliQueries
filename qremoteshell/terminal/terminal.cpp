@@ -105,7 +105,6 @@ void Terminal::close()
     //_shellProcess emitira finished y se ejecutara shellProcess_finished()
 
     _shellProcess->close();
-
 //    int result = ::kill(_shellProcess->pid(),SIGHUP);
 //    qDebug() << _debugIP << "Terminal::close()";
 }

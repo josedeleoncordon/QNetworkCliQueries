@@ -1,6 +1,6 @@
 #include "properties.h"
 
-Properties * Properties::m_instance = 0;
+Properties * Properties::m_instance = nullptr;
 
 Properties * Properties::Instance()
 {
@@ -14,6 +14,7 @@ Properties * Properties::Instance()
 
 Properties::Properties()
 {
+    savelogs=false;
 }
 
 Properties::~Properties()
@@ -35,6 +36,13 @@ void Properties::loadSettings()
     backupspath = settings.value("BackupsPath").toString();
     logspath = settings.value("LogsPath").toString();
     linuxpromt = settings.value("LinuxPropmt").toString();
+
+    topologiaconfpath = settings.value("topologiaconfpath").toString();
+    topologiaiconpath = settings.value("topologiaiconpath").toString();
+
+#ifdef QT_DEBUG
+    savelogs = settings.value("savelogs").toBool();
+#endif
 }
 
 void Properties::saveSettings()
@@ -52,5 +60,9 @@ void Properties::saveSettings()
     settings.setValue("BackupsPath",backupspath);
     settings.setValue("LogsPath",logspath);
     settings.setValue("LinuxPropmt",linuxpromt);
+    settings.setValue("savelogs",savelogs);
+
+    settings.setValue("topologiaconfpath",topologiaconfpath);
+    settings.setValue("topologiaiconpath",topologiaiconpath);
 }
 

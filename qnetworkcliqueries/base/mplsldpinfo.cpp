@@ -97,6 +97,7 @@ void MplsLdpInfo::getMplsLdpDiscovery()
 {
     if ( m_brand != "Cisco" )
     {
+        qDebug() << "MplsLdpInfo::getMplsLdpDiscovery()" << m_brand << "no soportado";
         finished();
         return;
     }
@@ -109,6 +110,7 @@ void MplsLdpInfo::getMplsLdpNeighbors()
 {
     if ( m_brand != "Cisco" )
     {
+        qDebug() << "MplsLdpInfo::getMplsLdpNeighbors()" << m_brand << "no soportado";
         finished();
         return;
     }
@@ -121,6 +123,7 @@ void MplsLdpInfo::getMplsLdpInterfaces()
 {
     if ( m_brand != "Cisco" )
     {
+        qDebug() << "MplsLdpInfo::getMplsLdpInterfaces()" << m_brand << "no soportado";
         finished();
         return;
     }

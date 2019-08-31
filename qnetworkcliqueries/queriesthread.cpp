@@ -17,7 +17,6 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_conexionerrores=0;
     m_lstIpPos=-1;
     m_connectionprotocol = QRemoteShell::TelnetSSH;
-    m_debug=false;
     m_detener=false;
     m_cancelar=false;
     m_principaluserfirst=true;
@@ -32,12 +31,6 @@ QueriesThread::~QueriesThread()
 {
     //TODO verificar porq truena al eliminar m_lstIP
 //    qDeleteAll(m_lstIP);
-}
-
-void QueriesThread::setLogPath(QString path)
-{
-    m_logpath = path;
-    m_debug=true;
 }
 
 void QueriesThread::setLstIP(QStringList lst)
@@ -104,13 +97,9 @@ void QueriesThread::on_timerActivity_timeOut()
 
 void QueriesThread::on_timer_timeOut()
 {
-//    qDebug() << "QueriesThread::on_timer_timeOut()";
 
     int paralelos;
-//    if ( !m_debug )
-        paralelos= m_maxparalelos ;
-//    else
-//        paralelos=1;
+    paralelos= m_maxparalelos ;
 
     if ( m_consultaSimultaneos >= paralelos )
         return;
@@ -123,15 +112,10 @@ void QueriesThread::on_timer_timeOut()
     }
 
     int equiposAconectar;
-//    if ( !m_debug )
-//    {
-        if ( m_lstIP.size() - ( m_lstIpPos+1 ) > m_simultaneos )
-            equiposAconectar = m_simultaneos;
-        else
-            equiposAconectar = m_lstIP.size() - ( m_lstIpPos+1 );
-//    }
-//    else
-//        equiposAconectar=1;
+    if ( m_lstIP.size() - ( m_lstIpPos+1 ) > m_simultaneos )
+        equiposAconectar = m_simultaneos;
+    else
+        equiposAconectar = m_lstIP.size() - ( m_lstIpPos+1 );
 
     int pos = m_lstIpPos+1;
     for ( int c=0; c<equiposAconectar; c++ )
@@ -139,8 +123,6 @@ void QueriesThread::on_timer_timeOut()
         m_lstIpPos = pos+c;
         conectarOtroEquipo();
     }
-
-//    qDebug() << "QueriesThread::on_timer_timeOut() 2";
 }
 
 void QueriesThread::conectarOtroEquipo()
@@ -150,8 +132,6 @@ void QueriesThread::conectarOtroEquipo()
     qDebug() << "QueriesThread::conectarOtroEquipo()" << ip;
 
     Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);
-    if ( m_debug )
-        query->setLogPath( m_logpath );
     query->setCountry( m_pais );
     query->setGW( m_gw );
     query->setOptions( m_opciones );
@@ -342,7 +322,7 @@ QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QStr
         }
         break;
     }
-    };
+    }
 
     return salida;
 }

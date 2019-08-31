@@ -58,15 +58,9 @@ protected:
     QString m_platform;
     QString m_os;
     QString m_xr_location;
-    QString m_name; //para debug
-    QString m_ip; //para debug
+    QString m_name;
+    QString m_ip;
     Queries* m_queriesParent;
-    bool debug;    
-
-    //debug
-    QString m_logPath;
-    QFile m_logFile;
-    QTextStream m_out;
 
     QString m_lastCommand;
 
@@ -74,7 +68,6 @@ protected:
     void finished();
     bool allTextReceived();
     bool lastCommandFailed;
-    void saveLog(QString);
 
 public:
     FuncionBase(QRemoteShell *terminal,QObject *parent = 0);
@@ -85,7 +78,6 @@ public:
     void setXRLocation(QString location) { m_xr_location=location; }
     void setHostName(QString name) { m_name=name; }
     void setIp(QString ip) { m_ip = ip; }
-    void setLogPath(QString path);
 
 signals:
     void lastCommand(QString);

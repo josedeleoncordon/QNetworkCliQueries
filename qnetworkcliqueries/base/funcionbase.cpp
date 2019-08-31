@@ -31,7 +31,6 @@ QStringList QueriesConfiguration::mapQueriesToList(QString value)
 FuncionBase::FuncionBase(QRemoteShell *terminal,QObject *parent):
     QObject(parent)
 {
-    debug = true;
     term=terminal;
     lastCommandFailed=false;
     m_brand="Cisco";
@@ -106,31 +105,9 @@ bool FuncionBase::allTextReceived()
     return true;
 }
 
-void FuncionBase::setLogPath(QString path)
-{
-    if ( !path.isEmpty() )
-    {
-        m_logPath = path;
-        m_logFile.setFileName( m_logPath );
-        m_logFile.open(QIODevice::Append | QIODevice::Text);
-        m_out.setDevice(&m_logFile);
-    }
-}
-
-void FuncionBase::saveLog(QString txt)
-{
-    if ( m_logFile.isOpen() )
-    {
-        m_out << txt;
-        m_out.flush();
-    }
-}
-
 void FuncionBase::finished()
 {
     qDebug() << "FuncionBase::finished()";
-    if ( m_logFile.isOpen() )
-        m_logFile.close();
 
     txt.clear();
     term->disconnectReceiveTextSignalConnections();

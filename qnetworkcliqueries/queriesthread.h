@@ -29,7 +29,6 @@ public:
     void setSimultaneos(int simultaneos) { m_simultaneos = simultaneos; }
     void setMaxParalelos(int max) { m_maxparalelos = max; }
     void setOpciones(int opciones) { m_opciones = opciones; }
-    void setLogPath(QString path);
     void setEquipmentNeighborsConsultarVecinos(bool consultar) { m_equipmentNeighborsConsultarVecinos=consultar; }
 
     void iniciar();
@@ -79,7 +78,6 @@ private:
    int m_conexionerrores;
    int m_sinconexion;   
    QString m_logpath;
-   bool m_debug;
    bool m_detener;
    bool m_cancelar;
    bool m_equipmentNeighborsConsultarVecinos;

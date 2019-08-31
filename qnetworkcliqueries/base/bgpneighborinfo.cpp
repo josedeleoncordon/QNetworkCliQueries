@@ -21,6 +21,7 @@ void BGPNeighborInfo::getBGPNeighbors()
 {
     if ( m_brand != "Cisco" )
     {
+        qDebug() << "BGPNeighborInfo::getBGPNeighbors():" << m_brand << "no soportado";
         finished();
         return;
     }    

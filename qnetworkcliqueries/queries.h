@@ -134,13 +134,13 @@ public:
     void setCountry(QString COUNTRY) { m_country = COUNTRY; }
     void setIP(QString IP) { m_ip = IP; }
     void setHostName(QString NAME) { m_name = NAME; }
-    void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }
-    void setLogPath(QString path);
+    void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }    
     void setLstHostsGeneralAconectar( QList<Host*> lst ) { m_lstHostsGeneralAconectar = lst; }       
     void clear();
 
     void startSync();
 
+    static QMap<QString,QString> queriesArgumentosAceptados();
     static void updateInfoQueries( QList<Queries*> &lstDest, QList<Queries*> &lstOrigin, QStringList lstIPsConsulta );
 
     friend QDataStream& operator<<(QDataStream& out, const Queries* query);
@@ -163,7 +163,6 @@ protected slots:
     void on_query_lastCommand(QString);
     void on_queryTimer_timeout();
     void on_term_readyRead();
-    void saveLog(QString);
 
 signals:
     void lastCommand(Queries*,QString);
@@ -201,11 +200,6 @@ protected:
     QString m_pwd;       
     QString m_linuxprompt;
     bool m_conectionSecondTriedOtherUserPassword;
-
-    //debug
-    QString m_logPath;
-    QFile m_logFile;
-    QTextStream m_out;
 
     //si se busca informacion de EquipmentNeighbors sirve para saber el listado de equipos al que nos conectaremos y devolver solo las
     //nuevas IPs. Esto para poder descubrir equipos nuevos a los que no nos conectariamos

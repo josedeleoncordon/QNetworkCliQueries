@@ -111,6 +111,7 @@ void IPRouteInfo::getIPRouteInfo()
 {
     if ( m_brand != "Cisco" && m_brand != "Huawei" )
     {
+        qDebug() << "IPRouteInfo::getIPRouteInfo()" << m_brand << "no soportado";
         finished();
         return;
     }

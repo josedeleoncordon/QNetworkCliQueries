@@ -121,6 +121,7 @@ void VrfInfo::getVRFfromRT()
 {
     if ( m_brand != "Cisco" )
     {
+        qDebug() << "VrfInfo::getVRFfromRT()" << m_brand << "no soportado";
         finished();
         return;
     }

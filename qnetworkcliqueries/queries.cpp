@@ -460,7 +460,6 @@ void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString plat
     term = new QRemoteShell(ip,user,pwd,platform,linuxprompt,this);
     term->setConnectionProtocol( m_connectionprotol );
     term->setGW(m_gw);
-    term->setLogPath( m_logPath );
     connect(term,SIGNAL(reachable()),SLOT(processConnectToHostReachable()));
     connect(term,SIGNAL(connected()),SLOT(processConnectToHostConnected()));
     connect(term,SIGNAL(disconnected()),SLOT(processConnectToHostDisconnected()));
@@ -502,12 +501,11 @@ void Queries::nextProcess()
             {
                 qDebug() << m_ip  << "Mayor a Exit" << m_ip;
 
-                if ( m_logFile.isOpen() )
-                    m_logFile.close();
-
                 borrarTerminal();
                 emit finished(this);
                 disconnect();
+
+                qDebug() << m_ip << "Queries_finished"; //No eliminar. Cierra el archivo de log
                 return;
             }
         }
@@ -517,7 +515,6 @@ void Queries::nextProcess()
         m_queriescreated=false; //para que se creen nuevamente las consultas desde donde se quedo
 
     qDebug() << m_ip  << "NextProcess:" << opcionActual;
-    saveLog( "\n\nNextProcess: " + QString::number(opcionActual)+"\n\n" );
 
     queryTimer->setInterval( 20000 );
     queryTimer->start();
@@ -529,8 +526,7 @@ void Queries::nextProcess()
 
     if ( opcionActual & flags & Connect )
     {        
-        qDebug() << m_ip  << "creando term";        
-        saveLog( "creando term\n" );        
+        qDebug() << m_ip  << "creando term";          
         conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
         return;
     }
@@ -551,7 +547,6 @@ void Queries::nextProcess()
             pi->setBrand(m_brand);
             pi->setHostName(m_fullName);
             pi->setIp(m_ip);
-            pi->setLogPath( m_logPath );
             connect(pi,SIGNAL(processFinished()),SLOT(processPlatform()));
             connect(pi,SIGNAL(working()),SLOT(processKeepWorking()));
             connect(pi,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -578,7 +573,6 @@ void Queries::nextProcess()
         equipmentNeighborsInfoQuery->setXRLocation(m_xr_location);
         equipmentNeighborsInfoQuery->setHostName(m_fullName);
         equipmentNeighborsInfoQuery->setIp(m_ip);
-        equipmentNeighborsInfoQuery->setLogPath( m_logPath );
         connect(equipmentNeighborsInfoQuery,SIGNAL(processFinished()),SLOT(processEquipmentNeighbors()));
         connect(equipmentNeighborsInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(equipmentNeighborsInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -603,7 +597,6 @@ void Queries::nextProcess()
         interfacesInfoQuery->setXRLocation(m_xr_location);
         interfacesInfoQuery->setHostName(m_fullName);
         interfacesInfoQuery->setIp(m_ip);
-        interfacesInfoQuery->setLogPath( m_logPath );
         connect(interfacesInfoQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(interfacesInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(interfacesInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -628,7 +621,6 @@ void Queries::nextProcess()
         interfacesDescriptionsQuery->setXRLocation(m_xr_location);
         interfacesDescriptionsQuery->setHostName(m_fullName);
         interfacesDescriptionsQuery->setIp(m_ip);
-        interfacesDescriptionsQuery->setLogPath( m_logPath );
         connect(interfacesDescriptionsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(interfacesDescriptionsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(interfacesDescriptionsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));        
@@ -653,7 +645,6 @@ void Queries::nextProcess()
         interfacesIpAddressesQuery->setXRLocation(m_xr_location);
         interfacesIpAddressesQuery->setHostName(m_fullName);
         interfacesIpAddressesQuery->setIp(m_ip);
-        interfacesIpAddressesQuery->setLogPath( m_logPath );
         connect(interfacesIpAddressesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(interfacesIpAddressesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(interfacesIpAddressesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -678,7 +669,6 @@ void Queries::nextProcess()
         interfacesPermitedVlansQuery->setXRLocation(m_xr_location);
         interfacesPermitedVlansQuery->setHostName(m_fullName);
         interfacesPermitedVlansQuery->setIp(m_ip);
-        interfacesPermitedVlansQuery->setLogPath( m_logPath );
         connect(interfacesPermitedVlansQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(interfacesPermitedVlansQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(interfacesPermitedVlansQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -698,7 +688,6 @@ void Queries::nextProcess()
         ospfQuery->setBrand(m_brand);
         ospfQuery->setHostName(m_fullName);
         ospfQuery->setIp(m_ip);
-        ospfQuery->setLogPath( m_logPath );
         connect(ospfQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(ospfQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(ospfQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -718,7 +707,6 @@ void Queries::nextProcess()
         mplsLdpDiscoveryQuery->setBrand(m_brand);
         mplsLdpDiscoveryQuery->setHostName(m_fullName);
         mplsLdpDiscoveryQuery->setIp(m_ip);
-        mplsLdpDiscoveryQuery->setLogPath( m_logPath );
         connect(mplsLdpDiscoveryQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(mplsLdpDiscoveryQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(mplsLdpDiscoveryQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -738,7 +726,6 @@ void Queries::nextProcess()
         mplsLdpNeighborsQuery->setBrand(m_brand);
         mplsLdpNeighborsQuery->setHostName(m_fullName);
         mplsLdpNeighborsQuery->setIp(m_ip);
-        mplsLdpNeighborsQuery->setLogPath( m_logPath );
         connect(mplsLdpNeighborsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(mplsLdpNeighborsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(mplsLdpNeighborsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -758,7 +745,6 @@ void Queries::nextProcess()
         mplsLdpInterfacesQuery->setBrand(m_brand);
         mplsLdpInterfacesQuery->setHostName(m_fullName);
         mplsLdpInterfacesQuery->setIp(m_ip);
-        mplsLdpInterfacesQuery->setLogPath( m_logPath );
         connect(mplsLdpInterfacesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(mplsLdpInterfacesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(mplsLdpInterfacesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -784,7 +770,6 @@ void Queries::nextProcess()
         pimInteracesQuery->setBrand(m_brand);
         pimInteracesQuery->setHostName(m_fullName);
         pimInteracesQuery->setIp(m_ip);
-        pimInteracesQuery->setLogPath( m_logPath );
         connect(pimInteracesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(pimInteracesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(pimInteracesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -812,7 +797,6 @@ void Queries::nextProcess()
         macsQuery->setXRLocation(m_xr_location);
         macsQuery->setHostName(m_fullName);
         macsQuery->setIp(m_ip);
-        macsQuery->setLogPath( m_logPath );
         connect(macsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(macsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(macsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -832,7 +816,6 @@ void Queries::nextProcess()
         portChannelInfoQuery->setXRLocation(m_xr_location);
         portChannelInfoQuery->setHostName(m_fullName);
         portChannelInfoQuery->setIp(m_ip);
-        portChannelInfoQuery->setLogPath( m_logPath );
         connect(portChannelInfoQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(portChannelInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(portChannelInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -852,7 +835,6 @@ void Queries::nextProcess()
         vrfsFromVlansQuery->setXRLocation(m_xr_location);
         vrfsFromVlansQuery->setHostName(m_fullName);
         vrfsFromVlansQuery->setIp(m_ip);
-        vrfsFromVlansQuery->setLogPath( m_logPath );
         connect(vrfsFromVlansQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(vrfsFromVlansQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(vrfsFromVlansQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -872,7 +854,6 @@ void Queries::nextProcess()
         vrfFromRTQuery->setXRLocation(m_xr_location);
         vrfFromRTQuery->setHostName(m_fullName);
         vrfFromRTQuery->setIp(m_ip);
-        vrfFromRTQuery->setLogPath( m_logPath );
         connect(vrfFromRTQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(vrfFromRTQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(vrfFromRTQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -892,7 +873,6 @@ void Queries::nextProcess()
         vrfsQuery->setXRLocation(m_xr_location);
         vrfsQuery->setHostName(m_fullName);
         vrfsQuery->setIp(m_ip);
-        vrfsQuery->setLogPath( m_logPath );
         connect(vrfsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(vrfsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(vrfsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -914,7 +894,6 @@ void Queries::nextProcess()
         arpsQuery->setXRLocation(m_xr_location);
         arpsQuery->setHostName(m_fullName);
         arpsQuery->setIp(m_ip);
-        arpsQuery->setLogPath( m_logPath );
         connect(arpsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(arpsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(arpsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -934,7 +913,6 @@ void Queries::nextProcess()
         bgpNeighborsQuery->setBrand(m_brand);
         bgpNeighborsQuery->setHostName(m_fullName);
         bgpNeighborsQuery->setIp(m_ip);
-        bgpNeighborsQuery->setLogPath( m_logPath );
         connect(bgpNeighborsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(bgpNeighborsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(bgpNeighborsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -954,7 +932,6 @@ void Queries::nextProcess()
         ipRoutesQuery->setBrand(m_brand);
         ipRoutesQuery->setHostName(m_fullName);
         ipRoutesQuery->setIp(m_ip);
-        ipRoutesQuery->setLogPath( m_logPath );
         connect(ipRoutesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(ipRoutesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(ipRoutesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -974,7 +951,6 @@ void Queries::nextProcess()
         configQuery->setBrand(m_brand);
         configQuery->setHostName(m_fullName);
         configQuery->setIp(m_ip);
-        configQuery->setLogPath( m_logPath );
         connect(configQuery,SIGNAL(processFinished()),SLOT(processConfigFinished()));
         connect(configQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(configQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -996,7 +972,6 @@ void Queries::nextProcess()
         exitQuery->setBrand(m_brand);
         exitQuery->setHostName(m_fullName);
         exitQuery->setIp(m_ip);
-        exitQuery->setLogPath( m_logPath );
         connect(exitQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(exitQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(exitQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -1069,7 +1044,6 @@ void Queries::processConnectToHostDisconnected()
         else
         {
             //no se logro la conexion
-            saveLog( "Equipo desconectado\n" );
             qDebug() << m_ip  << "**NoConexion**" << m_ip;
             m_operativo=false;
             queryTimer->stop();
@@ -1095,7 +1069,6 @@ void Queries::processConnectToHostConnected()
         return;
 
     qDebug() << m_ip  << "Equipo conectado" << m_ip << m_name;
-    saveLog( "Equipo conectado\n" );
     m_connected=true;
     term->disconnectReceiveTextSignalConnections();
         
@@ -1240,29 +1213,23 @@ void Queries::on_queryTimer_timeout()
     processConnectToHostDisconnected();
 }
 
-void Queries::setLogPath(QString path)
-{
-    if ( !path.isEmpty() )
-    {
-        m_logPath = path+"/"+m_ip+".txt";
-        m_logFile.setFileName( m_logPath );
-        m_logFile.open(QIODevice::Append | QIODevice::Text);
-        m_out.setDevice(&m_logFile);
-    }
-}
-
 void Queries::on_term_readyRead()
 {
-    saveLog( term->dataReceived() );
+    qDebug() << m_ip << term->dataReceived();
 }
 
-void Queries::saveLog(QString txt)
+QMap<QString,QString> Queries::queriesArgumentosAceptados()
 {
-    if ( m_logFile.isOpen() )
-    {
-        m_out << txt;
-        m_out.flush();
-    }
+    QMap<QString,QString> map;
+    map.insert("ARP_MacIP","Indicar aqui la MAC o IP en una consulta de ARP: 192.168.1.1 o 044e.0676.12bc");
+    map.insert("Arp_VRFs","Indicar aqui las VRFs en una consulta de ARP, VRFs separadas por comas: VRF1,VRF2,VRF3");
+    map.insert("BGPNeig_Type","Indicar aqui la familia: VPNV4");
+    map.insert("IPRoutes_protocol","Indicar aqui el protocolo para una consulta de tabla de enrutamiento: ospf static bgp");
+    map.insert("IPRoutes_VRFs","Indicar aqui las VRFs en una consulta de tablas de enrutamiento: VRF1,VRF2,VRF3");
+    map.insert("MAC_MAC","Indicar aqui la MAC en una consulta de tabla de MAC: 044e.0676.12bc");
+    map.insert("VRFfRT_RT","Indicar la RT para una consulta donde se quiere saber la VRF desde la RT: 6458:17350");
+    map.insert("VRFfVlans_Vlans","Indicar las Vlans para una consulta donde se quiere saber las VRFs a las que pertenecen: 136,3019,456,122");
+    return map;
 }
 
 void Queries::updateInfoQueries(QList<Queries*> &lstDest, QList<Queries *> &lstOrigin , QStringList lstIPsConsulta)

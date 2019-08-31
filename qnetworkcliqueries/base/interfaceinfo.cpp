@@ -246,6 +246,7 @@ void InterfaceInfo::getInterfacesIpAddresses()
 {
     if ( m_brand != "Cisco" )
     {
+        qDebug() << "InterfaceInfo::getInterfacesIpAddresses()" << m_brand << "no soportado";
         finished();
         return;
     }

@@ -5,12 +5,15 @@
 
 #include "qnetworkcliqueries_global.h"
 
+
+
 class QNETWORKCLIQUERIES_EXPORT Properties
 {
     public:
         static Properties *Instance();
         void saveSettings();
 
+        bool savelogs;
         QString user;
         QString password;
         QString queriespath;
@@ -18,6 +21,11 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString backupspath;
         QString logspath;
         QString linuxpromt;
+
+        QString topologiaconfpath;
+        QString topologiaiconpath;
+
+        QMap<QString,QString> funcionesargumentos;
 
     private:
         static Properties *m_instance;

@@ -110,6 +110,7 @@ void PIMInfo::getPIMInterfaces()
 {
     if ( m_brand != "Cisco" )
     {
+        qDebug() << "PIMInfo::getPIMInterfaces()" << m_brand << "no soportado";
         finished();
         return;
     }

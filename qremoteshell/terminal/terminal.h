@@ -18,7 +18,7 @@ private:
     QTimer *_timer;   
     QString m_linuxprompt;
 
-    QString _debugIP;
+    QString _debugIP; //unicamente para separar el debug por IP
 
 public:
     explicit Terminal(QString debugIP, QString linuxprompt, QObject *parent = nullptr);

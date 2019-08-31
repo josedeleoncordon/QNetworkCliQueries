@@ -31,7 +31,10 @@ void PlatformInfo::getPlatformInfo()
     else if ( m_brand == "Huawei" )
         termSendText("display version");
     else
+    {
+        qDebug() << "PlatformInfo::getPlatformInfo()" << m_brand << "no soportado";
         finished();
+    }
 }
 
 void PlatformInfo::on_term_receiveText()
