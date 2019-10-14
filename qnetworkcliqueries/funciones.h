@@ -15,8 +15,8 @@ struct SMplsLdpInfo;
 struct SOSPFInfo;
 struct MacBuscando;
 
-//listado de paises
-QStringList lstPaises();
+//listado de grupos
+QStringList lstGrupos();
 
 //devuelve el tipo de equipo desde la plataforma
 QString equipmentOSFromPlatform(QString platform);
@@ -42,16 +42,16 @@ QStringList numberRangeToLST(QString str);
 
 //Busca un equipo en el listado de queries, ip y nombre
 //primero busca el nombre y luego confirma si la ip pertenece al equipo, ya que puede ser un equipo L3 con varias IPs
-Queries *buscarEquipoPorIPnombrePais(QList<Queries*> lst, QString ip, QString nombre, QString pais);
+Queries *buscarEquipoPorIPnombreGrupo(QList<Queries*> lst, QString ip, QString nombre, QString grupo);
 
 //Busca un equipo en el listado de queries, solo ip
-Queries *buscarEquipoPorIP(QList<Queries*> lst, QString ip,QString pais);
+Queries *buscarEquipoPorIP(QList<Queries*> lst, QString ip,QString grupo);
 
 //Busca un equipo en el listado de queries, solo nombre
 Queries *buscarEquipoPorNombre(QList<Queries*> lst, QString nombre);
 
 //verifica si la ip indicada pertenece al equipo indicado
-bool validateIpQuery(Queries *qry, QString ip, QString pais);
+bool validateIpQuery(Queries *qry, QString ip, QString grupo);
 
 //un equipo puede tener varias IPs configuradas y se usa, por ejemplo, para saber si la IP
 //q reporto EquipmentNeighbors pertenece al mismo equipo
@@ -60,7 +60,7 @@ bool validateIpHost(QString ip,QString name,QString country);
 //valida que la plataforma del equipo sea valido. No equipos de clientes
 bool platformValidate(QString platform);
 
-//Regresa el pais al que pertenece la ip del equipo, para saber si el vecino por equipmentNeighbors sigue siendo del mismo pais por ejemplo
+//Regresa el grupo al que pertenece la ip del equipo, para saber si el vecino por equipmentNeighbors sigue siendo del mismo grupo por ejemplo
 QString ipToCountry(QString ip);
 
 //valida que el equipo aprendido por EquipmentNeighbors sea un equipo de la red.
@@ -71,10 +71,10 @@ bool equipmentNeighborsVecinoValidarEquipo(SEquipmentNeighborsInfo *e);
 QString interfaceDescription(QList<SInterfaceInfo*> lstInterfaceDescriptions,QString interfaz);
 
 //devuelve el listado de vecinos que se conocen por una interfaz
-QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipmentNeighborsInfo*> lstEquipmentNeighborsInfo, QList<SPortChannel *> lstPCInfo, QString i, QString pais="");
+QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipmentNeighborsInfo*> lstEquipmentNeighborsInfo, QList<SPortChannel *> lstPCInfo, QString i, QString grupo="");
 
 //devulve las macs en la vlan de gestion de switches que se aprenden en una interfaz
-QList<SMacInfo*> interfaceLearnedManagementVlans(QList<SMacInfo*> lst, QString interfaz, QString codigopais);
+QList<SMacInfo*> interfaceLearnedManagementVlans(QList<SMacInfo*> lst, QString interfaz, QString codigogrupo);
 
 //verifica si la interfa es l2
 bool interfaceIsL2(Queries *q, QString interfaz);
@@ -125,7 +125,7 @@ bool ospfInterfaceStatus(QString interface,
                          QList<SOSPFInfo*> lstOspfInfo);
 
 //Busca el archivo consultas mas actual en un directorio
-QString buscarArchivoConsultasActual(QString pais,QString path,QString filelabel);
+QString buscarArchivoConsultasActual(QString grupo,QString path,QString filelabel);
 
 //crea el nombre del archivo de consultas
 QString nombreArchivoLstQueries(LstQueries*);

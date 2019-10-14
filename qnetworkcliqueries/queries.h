@@ -39,9 +39,9 @@ public:
     enum Opcion {
         Null = 0,
         Connect = 4,
-        Platform = 8,        
-        MacAddress = 16,
-        EquipmentNeighbors = 32,
+        Platform = 8,                
+        EquipmentNeighbors = 16,
+        MacAddress = 32,
         InterfaceInformation = 64,
         InterfacePermitedVlans = 128,
         InterfaceDescription = 256,
@@ -93,6 +93,7 @@ public:
     QString hostName() { return m_name; }
     QString country() { return m_country; }
     QString platform() { return m_platform; }
+    QString location() { return m_location; }
     QString brand() { return m_brand; }
     void setConnectionProtocol(QRemoteShell::ConnectionProtocol cp) { m_connectionprotol = cp; }    
     QDateTime dateTime() { return m_datetime; }
@@ -190,6 +191,7 @@ protected:
     QString m_brand;
     QDateTime m_datetime;
     QString m_xr_location;
+    QString m_location;
     QRemoteShell::ConnectionProtocol m_connectionprotol;    
     bool m_operativo;
     QString m_ip;
@@ -217,7 +219,7 @@ protected:
 class QNETWORKCLIQUERIES_EXPORT LstQueries
 {
 public:
-    QString pais;
+    QString grupo;
     int opcionesConsulta;
     QList<Queries*> lstQueries;
     QStringList lstIPsAconsultadas;

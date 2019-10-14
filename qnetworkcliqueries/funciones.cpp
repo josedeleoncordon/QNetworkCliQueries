@@ -6,15 +6,11 @@
 #include "portchannelsinfo.h"
 #include "arpinfo.h"
 
-QStringList lstPaises()
+QStringList lstGrupos()
 {
-    QStringList lstPaises;
-    lstPaises.append("GT");
-    lstPaises.append("SV");
-    lstPaises.append("HN");
-    lstPaises.append("NIC");
-    lstPaises.append("CR");
-    return lstPaises;
+    QStringList lstGrupos;
+    lstGrupos.append("Region");
+    return lstGrupos;
 }
 
 QString equipmentOSFromPlatform(QString platform)
@@ -135,7 +131,7 @@ QStringList numberRangeToLST(QString str)
     return salida;
 }
 
-Queries *buscarEquipoPorIPnombrePais(QList<Queries*> lst, QString ip,QString nombre,QString pais)
+Queries *buscarEquipoPorIPnombreGrupo(QList<Queries*> lst, QString ip,QString nombre,QString grupo)
 {
     bool nom=false;
     foreach (Queries *qry, lst)
@@ -148,9 +144,9 @@ Queries *buscarEquipoPorIPnombrePais(QList<Queries*> lst, QString ip,QString nom
         {
             nom=true;
 
-            if ( validateIpQuery( qry,ip,pais ) )
+            if ( validateIpQuery( qry,ip,grupo ) )
                 return qry;
-            else if ( validateIpHost( ip, nombre,pais ) ) //el query no tiene informacion de las ips, validamos en el backup
+            else if ( validateIpHost( ip, nombre,grupo ) ) //el query no tiene informacion de las ips, validamos en el backup
                 return qry;
         }
     }
@@ -162,11 +158,11 @@ Queries *buscarEquipoPorIPnombrePais(QList<Queries*> lst, QString ip,QString nom
     return nullptr;
 }
 
-Queries *buscarEquipoPorIP(QList<Queries*> lst, QString ip, QString pais)
+Queries *buscarEquipoPorIP(QList<Queries*> lst, QString ip, QString grupo)
 {
     foreach (Queries *qry, lst)
     {
-        if ( validateIpQuery( qry,ip,pais ) )
+        if ( validateIpQuery( qry,ip,grupo ) )
             return qry;
     }
     return nullptr;
@@ -182,7 +178,7 @@ Queries *buscarEquipoPorNombre(QList<Queries*> lst, QString nombre)
     return nullptr;
 }
 
-bool validateIpQuery(Queries *qry,QString ip,QString pais)
+bool validateIpQuery(Queries *qry,QString ip,QString grupo)
 {
     //validamos primero la ip, si la enviada concide exactamente se devuleve
     if ( qry->ip() == ip )
@@ -250,20 +246,13 @@ bool platformValidate(QString platform)
 
 QString ipToCountry(QString ip)
 {
-    QStringList lstPaises;
-    lstPaises.append("GT");
-    lstPaises.append("SV");
-    lstPaises.append("HN");
-    lstPaises.append("NIC");
-    lstPaises.append("CR");
-
-    foreach (QString pais, lstPaises)
+    foreach (QString grupo, lstGrupos())
     {
-        foreach (Host *host, BDHosts::instance()->hostsAllInterfacesIPs(pais))
+        foreach (Host *host, BDHosts::instance()->hostsAllInterfacesIPs(grupo))
         {
             if ( host->ip == ip &&
                  !host->interfaceIsShutdown )
-                return host->pais;
+                return host->grupo;
         }
     }
     return "";
@@ -303,7 +292,7 @@ QString interfaceDescription(QList<SInterfaceInfo*> lstInterfaceDescriptions,QSt
     return "";
 }
 
-QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipmentNeighborsInfo *> lstEquipmentNeighborsInfo, QList<SPortChannel *> lstPCInfo, QString i, QString pais)
+QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipmentNeighborsInfo *> lstEquipmentNeighborsInfo, QList<SPortChannel *> lstPCInfo, QString i, QString grupo)
 {
     QStringList lstVecinos;
     QList<SEquipmentNeighborsInfo*> lstSalida;
@@ -338,11 +327,11 @@ QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipm
         else
             lstVecinos.append( vecinonombre );
 
-        //si se establecio el pais se verifica que el vecino pertenezca al mismo para saltarse a equipos de otro.
-        if ( !pais.isEmpty() )
+        //si se establecio el grupo se verifica que el vecino pertenezca al mismo para saltarse a equipos de otro.
+        if ( !grupo.isEmpty() )
         {
-            QString vecinopais = BDHosts::instance()->hostCountry( vecinonombre );
-            if (  vecinopais != pais && !vecinopais.isEmpty() )
+            QString vecinogrupo = BDHosts::instance()->hostCountry( vecinonombre );
+            if (  vecinogrupo != grupo && !vecinogrupo.isEmpty() )
                 continue;
         }
 
@@ -352,13 +341,13 @@ QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipm
     return lstSalida;
 }
 
-QList<SMacInfo*> interfaceLearnedManagementVlans(QList<SMacInfo*> lst, QString interfaz,QString codigopais)
+QList<SMacInfo*> interfaceLearnedManagementVlans(QList<SMacInfo*> lst, QString interfaz,QString codigogrupo)
 {
     QList<SMacInfo*> lstsalida;
 
     foreach (SMacInfo *m, lst)
     {
-        if ( codigopais == "GT" )
+        if ( codigogrupo == "GT" )
         {
 //            m->vlan == "3579" huawei
             if ( m->interfaz == interfaz &&
@@ -366,7 +355,7 @@ QList<SMacInfo*> interfaceLearnedManagementVlans(QList<SMacInfo*> lst, QString i
                  )
                 lstsalida.append( m );
         }
-        else if ( codigopais == "SV" )
+        else if ( codigogrupo == "SV" )
         {
             if ( m->interfaz == interfaz &&
                  ( m->vlan == "161" ||
@@ -376,7 +365,7 @@ QList<SMacInfo*> interfaceLearnedManagementVlans(QList<SMacInfo*> lst, QString i
                  )
                 lstsalida.append( m );
         }
-        else if ( codigopais == "HN" )
+        else if ( codigogrupo == "HN" )
         {
             if ( m->interfaz == interfaz &&
                  ( m->vlan == "120" ||
@@ -390,12 +379,12 @@ QList<SMacInfo*> interfaceLearnedManagementVlans(QList<SMacInfo*> lst, QString i
                  )
                 lstsalida.append( m );
         }
-        else if ( codigopais == "NIC" )
+        else if ( codigogrupo == "NIC" )
         {
             if ( m->interfaz == interfaz && m->vlan == "173" )
                 lstsalida.append( m );
         }
-        else if ( codigopais == "CR" )
+        else if ( codigogrupo == "CR" )
         {
             if ( m->interfaz == interfaz && m->vlan == "189" )
                 lstsalida.append( m );
@@ -776,14 +765,14 @@ bool ospfInterfaceStatus(QString interface,
     return true;
 }
 
-QString buscarArchivoConsultasActual(QString pais,QString path,QString filelabel)
+QString buscarArchivoConsultasActual(QString grupo,QString path,QString filelabel)
 {
     //buscando el archivo de consultas mas actual a actualizar
     QString file;
     QDateTime mieDateTime;
     QDir dir(path);
     QDirIterator dirIter( path, QDir::Files );
-    QRegExp exp(pais+"_"+filelabel+"_*Queries_"+dir.dirName()+"_(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})\\.dat");
+    QRegExp exp(grupo+"_"+filelabel+"_*Queries_"+dir.dirName()+"_(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})\\.dat");
     while (dirIter.hasNext())
     {
         QString filepath = dirIter.next();
@@ -803,7 +792,7 @@ QString buscarArchivoConsultasActual(QString pais,QString path,QString filelabel
 
 QString nombreArchivoLstQueries(LstQueries* lstQ)
 {
-    return lstQ->pais +
+    return lstQ->grupo +
             (lstQ->label.isEmpty()?"":"_"+lstQ->label)+
             "_Queries"+
             (lstQ->grupoconsulta.isEmpty()?"":"_"+lstQ->grupoconsulta)+

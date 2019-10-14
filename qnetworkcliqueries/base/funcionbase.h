@@ -58,6 +58,7 @@ protected:
     QString m_platform;
     QString m_os;
     QString m_xr_location;
+    QString m_location;
     QString m_name;
     QString m_ip;
     Queries* m_queriesParent;

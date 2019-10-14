@@ -25,7 +25,7 @@ BDHosts::BDHosts()
         host->ip = lst.at(0).simplified();
         host->nombre = lst.at(1).simplified();
         if ( lst.size() == 3 )
-            host->pais = lst.at(2).simplified();
+            host->grupo = lst.at(2).simplified();
 
         lstHosts.append(host);
 
@@ -47,7 +47,7 @@ BDHosts::BDHosts()
 
         Host *host = new Host;
         QStringList lst = line.split("\t");
-        host->pais = lst.at(0).simplified();
+        host->grupo = lst.at(0).simplified();
         host->nombre = lst.at(1).simplified();
         host->interfaz = lst.at(2).simplified();
         host->vrf = lst.at(3).simplified();
@@ -62,15 +62,15 @@ BDHosts::BDHosts()
         line = in2.readLine();
     }
 
-    foreach (QString pais, lstPaises())
+    foreach (QString grupo, lstGrupos())
     {
         QList<Host*> lst;
         foreach (Host *host, lstHostsInterfacesIPs)
         {
-            if ( host->pais == pais )
+            if ( host->grupo == grupo )
                 lst.append( host );
         }
-        mapHostsInterfacesIPs.insert(pais,lst);
+        mapHostsInterfacesIPs.insert(grupo,lst);
     }
 }
 
@@ -78,8 +78,8 @@ BDHosts::~BDHosts()
 {
     qDeleteAll(lstHosts);
 
-    foreach (QString pais, lstPaises())
-        qDeleteAll(mapHostsInterfacesIPs.value(pais));
+    foreach (QString grupo, lstGrupos())
+        qDeleteAll(mapHostsInterfacesIPs.value(grupo));
 }
 
 BDHosts *BDHosts::instance()
@@ -108,13 +108,13 @@ QString BDHosts::hostIPAddress(QString nombre)
     return "";
 }
 
-QString BDHosts::hostName(QString ip, QString pais)
+QString BDHosts::hostName(QString ip, QString grupo)
 {
     QList<Host*> lst;
-    if ( pais.isEmpty() )
+    if ( grupo.isEmpty() )
         lst = lstHostsInterfacesIPs;
     else
-        lst = mapHostsInterfacesIPs.value( pais );
+        lst = mapHostsInterfacesIPs.value( grupo );
 
     foreach (Host *h, lst)
     {
@@ -129,7 +129,7 @@ QString BDHosts::hostCountry(QString nombre)
     foreach (Host *h, lstHosts)
     {
         if ( nombre == h->nombre )
-            return h->pais;
+            return h->grupo;
     }
     return "";
 }

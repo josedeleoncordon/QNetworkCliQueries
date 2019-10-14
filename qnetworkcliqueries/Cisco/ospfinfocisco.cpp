@@ -19,7 +19,10 @@ OSPFInfoCisco::~OSPFInfoCisco()
 void OSPFInfoCisco::getOSPFInfo()
 {
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextNeighbors()));
-    termSendText("sh ip ospf "+ (m_process > 0 ? QString::number(m_process) : "") + " neighbor");
+    if ( m_os == "IOS XR" )
+        termSendText("sh ospf "+ (m_process > 0 ? QString::number(m_process) : "") + " neighbor");
+    else
+        termSendText("sh ip ospf "+ (m_process > 0 ? QString::number(m_process) : "") + " neighbor");
 }
 
 void OSPFInfoCisco::on_term_receiveTextNeighbors()
@@ -63,7 +66,10 @@ void OSPFInfoCisco::on_term_receiveTextNeighbors()
         m_XRconsultaVRFs=false;
         term->disconnectReceiveTextSignalConnections();
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextInterfaces()));
-        termSendText("sh ip ospf "+ (m_process > 0 ? QString::number(m_process) : "") + " interface brief");
+        if ( m_os == "IOS XR" )
+            termSendText("sh ospf "+ (m_process > 0 ? QString::number(m_process) : "") + " interface brief");
+        else
+            termSendText("sh ip ospf "+ (m_process > 0 ? QString::number(m_process) : "") + " interface brief");
     }
 }
 
@@ -74,6 +80,8 @@ void OSPFInfoCisco::on_term_receiveTextInterfaces()
         return;
 
     QStringList lines = txt.split("\n");
+    QString lastArea;
+    QString lastPID;
 
     foreach (QString line, lines)
     {
@@ -96,6 +104,16 @@ void OSPFInfoCisco::on_term_receiveTextInterfaces()
                 oii->process = lstColumns.at(1).simplified();
                 oii->cost = lstColumns.at(4).simplified();
                 oii->area = lstColumns.at(2).simplified();
+
+                if ( lastArea.isEmpty() )
+                    lastArea = oii->area;
+                else if ( lastArea != oii->area )
+                    m_abr=true;
+
+                if ( lastPID.isEmpty() )
+                    lastPID = oii->process;
+                else if ( lastPID != oii->process )
+                    m_asbr=true;
             }
         }
     }

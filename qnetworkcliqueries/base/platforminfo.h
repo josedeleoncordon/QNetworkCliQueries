@@ -14,6 +14,7 @@ public:
     //
     QString& platformInfo() { return m_platform; }
     QString& xr_location() { return m_xr_location; }
+    QString& location() { return m_location; }
 
 private slots:
     void on_term_receiveText();

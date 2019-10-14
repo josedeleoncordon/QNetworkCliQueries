@@ -12,31 +12,27 @@ void BDHostsUpdater::updateDB( QString path )
 {
     m_path = path;
 
-    lstPaises.append("CR");
-    lstPaises.append("GT");
-    lstPaises.append("HN");
-    lstPaises.append("NIC");
-    lstPaises.append("SV");
-    lstPaisesPos=-1;
+    m_lstGrupos = lstGrupos();
+    lstGruposPos=-1;
     queriesThread=nullptr;
 
-    consultarPEs_otroPais();
+    consultarPEs_otroGrupo();
 }
 
-void BDHostsUpdater::consultarPEs_otroPais()
+void BDHostsUpdater::consultarPEs_otroGrupo()
 {
     //consultar los RR para sacar las IPs de los PEs
-    if ( lstPaisesPos < lstPaises.size()-1 )
+    if ( lstGruposPos < m_lstGrupos.size()-1 )
     {
-        lstPaisesPos++;
-        pais = lstPaises.at( lstPaisesPos );
+        lstGruposPos++;
+        grupo = m_lstGrupos.at( lstGruposPos );
         queriesThread = new QueriesThread(this);
         connect( queriesThread,SIGNAL(finished(bool)),SLOT(on_actualizarPEs_finished(bool)));
 
-        queriesThread->setPais( pais );
+        queriesThread->setGrupo( grupo );
         queriesThread->setUser( Properties::Instance()->user );
         queriesThread->setPassword( Properties::Instance()->password );
-        queriesThread->setLstIP( BDHosts::instance()->rrFrom( pais ) );
+        queriesThread->setLstIP( BDHosts::instance()->rrFrom( grupo ) );
         queriesThread->setConnectionProtocol( QRemoteShell::SSHTelnet );
         queriesThread->setInterval( 1000 );
         queriesThread->setSimultaneos( 3 );
@@ -60,7 +56,7 @@ void BDHostsUpdater::consultarPEs_otroPais()
 
 void BDHostsUpdater::on_actualizarPEs_finished(bool ok)
 {
-    //se termina la consulta, se guardan las IPs de los PEs de ese pais
+    //se termina la consulta, se guardan las IPs de los PEs de ese grupo
     if ( ok )
     {
         QList<Queries*> lstRRs = queriesThread->lstQueries();        
@@ -76,11 +72,11 @@ void BDHostsUpdater::on_actualizarPEs_finished(bool ok)
             }
         }
 
-        saveFile( lstPEIPs.join("\n"), m_path+"/"+pais+"_PEs.txt" );
+        saveFile( lstPEIPs.join("\n"), m_path+"/"+grupo+"_PEs.txt" );
         lstPEIPsGeneral.append( lstPEIPs );
         lstPEIPs.clear();
     }
-    consultarPEs_otroPais();
+    consultarPEs_otroGrupo();
 }
 
 void BDHostsUpdater::on_actualizarPEsPs_finished()
@@ -88,7 +84,7 @@ void BDHostsUpdater::on_actualizarPEsPs_finished()
     //generar los P y PEs
 
     QStringList lstPEsPsIPs;
-    foreach (QString pais, lstPaises)
+    foreach (QString grupo, m_lstGrupos)
     {
         QDirIterator it( m_path , QDir::Files, QDirIterator::Subdirectories);
         while (it.hasNext())
@@ -96,7 +92,7 @@ void BDHostsUpdater::on_actualizarPEsPs_finished()
             QString filetxt = it.next();
             filetxt.remove( m_path );
 
-            if ( ! filetxt.contains( pais+"_" ) )
+            if ( ! filetxt.contains( grupo+"_" ) )
                 continue;
 
             QRegExp exp;
@@ -130,7 +126,7 @@ void BDHostsUpdater::on_actualizarPEsPs_finished()
             salida.append(ip+"\n");
 
         lstPEsPsIPs.clear();
-        saveFile( salida, m_path+"/"+pais+"_PEsPs.txt" );
+        saveFile( salida, m_path+"/"+grupo+"_PEsPs.txt" );
     }
 
     on_actualizarETCHosts_finished();
@@ -164,7 +160,7 @@ void BDHostsUpdater::on_actualizarETCHosts_finished()
             Host h;
             h.nombre = exp.cap(1);
             h.ip = exp.cap(2);
-            h.pais = country;
+            h.grupo = country;
 
             foreach (Host hh, lstHosts)
             {
@@ -190,7 +186,7 @@ void BDHostsUpdater::on_actualizarETCHosts_finished()
                         Host h2;
                         h2.nombre = hostnuevo;
                         h2.ip = h.ip;
-                        h2.pais = h.pais;
+                        h2.grupo = h.grupo;
 
                         bool encontrado=false;
                         foreach (Host hh, lstHosts)
@@ -214,7 +210,7 @@ void BDHostsUpdater::on_actualizarETCHosts_finished()
                 Host oh;
                 oh.nombre = simplicateName( h.nombre );
                 oh.ip = h.ip;
-                oh.pais = country;
+                oh.grupo = country;
 
                 bool encontrado=false;
                 foreach (Host hh, lstHosts)
@@ -260,7 +256,7 @@ void BDHostsUpdater::on_actualizarETCHosts_finished()
         host->ip = lst.at(0).simplified();
         host->nombre = lst.at(1).simplified();
         if ( lst.size() == 3 )
-            host->pais = lst.at(2).simplified();
+            host->grupo = lst.at(2).simplified();
 
         lstEtcHosts.append(host);
 
@@ -294,7 +290,7 @@ void BDHostsUpdater::on_actualizarETCHosts_finished()
     foreach (Host h, lstHosts)
     {
         salidaEtc.append( h.ip +" "+ h.nombre+ "\n" );
-        salidaBD.append( h.ip +" "+ h.nombre+" "+ h.pais + "\n" );
+        salidaBD.append( h.ip +" "+ h.nombre+" "+ h.grupo + "\n" );
     }
 
     saveFile(salidaEtc,m_path+"/hosts");

@@ -93,6 +93,8 @@ OSPFInfo::OSPFInfo(QRemoteShell *terminal, QObject *parent):
     FuncionBase(terminal,parent)
 {
     m_process = 0;    
+    m_abr = false;
+    m_asbr = false;
 
     //actualizar para neighbors, para que consulte los de las vrfs
 }
@@ -104,7 +106,8 @@ OSPFInfo::OSPFInfo(const OSPFInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_process = other.m_process;
+    m_abr = other.m_abr;
+    m_asbr = other.m_asbr;
     foreach (SOSPFInfo *ii, other.m_lstOSPFInfo)
     {
         SOSPFInfo *ii2 = new SOSPFInfo(*ii);
@@ -145,6 +148,8 @@ SOSPFInfo* OSPFInfo::interfaceOspfInfo(QString interface)
 QDataStream& operator<<(QDataStream& out, const OSPFInfo* info)
 {
     out << info->m_lstOSPFInfo;
+    out << info->m_abr;
+    out << info->m_asbr;
     return out;
 }
 
@@ -152,14 +157,16 @@ QDataStream& operator>>(QDataStream& in, OSPFInfo*& info)
 {
     info =new OSPFInfo(nullptr,nullptr);
     in >> info->m_lstOSPFInfo;
+    in >> info->m_abr;
+    in >> info->m_asbr;
     return in;
 }
 
 QDebug operator<<(QDebug dbg, const OSPFInfo &info)
 {
-    dbg.nospace() << "OSPFInfo:\n";
+    dbg.space() << "OSPFInfo" << "ABR:" << info.m_abr << "ASBR:" << info.m_asbr << ":\n";
     foreach (SOSPFInfo *i, info.m_lstOSPFInfo)
-        dbg.space() << i->interfaz << i->process << i->state << i->id << i->address << i->area
+        dbg.space() << "Id:" << i->id << i->interfaz << i->process << i->area << i->state << "Ad:" << i->address
                     << i->cost << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     dbg.nospace() << "\n";

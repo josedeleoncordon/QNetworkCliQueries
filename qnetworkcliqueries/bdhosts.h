@@ -17,7 +17,7 @@ struct Host
     QString interfaz;
     bool interfaceIsShutdown;
     QString ip;
-    QString pais;
+    QString grupo;
     QString vrf;    
 };
 
@@ -39,10 +39,10 @@ public:
     static void reload();
 
     QString hostIPAddress(QString nombre); //devuelve la IP del equipo segun el nombre
-    QString hostName(QString ip,QString pais=""); //devuelve el nombre del equipo segun la IP
-    QString hostCountry(QString nombre); //devuelve el pais del equipo segun el nombre
+    QString hostName(QString ip,QString grupo=""); //devuelve el nombre del equipo segun la IP
+    QString hostCountry(QString nombre); //devuelve el grupo del equipo segun el nombre
 
-    const QList<Host*> hostsAllInterfacesIPs(QString pais) { return mapHostsInterfacesIPs.value(pais); }
+    const QList<Host*> hostsAllInterfacesIPs(QString grupo) { return mapHostsInterfacesIPs.value(grupo); }
 
     QStringList rrFrom(QString);
     QStringList accessFrom(QString);

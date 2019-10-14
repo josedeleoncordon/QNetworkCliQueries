@@ -15,7 +15,7 @@ class QNETWORKCLIQUERIES_EXPORT QueriesThread : public QObject
 public:
     explicit QueriesThread(QObject *parent = 0);
     ~QueriesThread();
-    void setPais(QString pais) { m_pais = pais; }
+    void setGrupo(QString grupo) { m_grupo = grupo; }
     void setUser(QString user) { m_user = user; }
     void setGW(QString gw) { m_gw = gw; }
     void setPassword(QString password) { m_password=password; }
@@ -56,7 +56,7 @@ private slots:
     void equipoConsultado(Queries *qry);
 
 private:
-   QString m_pais;
+   QString m_grupo;
    QString m_user;
    QString m_gw;
    QString m_password;

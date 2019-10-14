@@ -26,12 +26,12 @@ private slots:
 private:
     QString m_path;
     QueriesThread *queriesThread;
-    QStringList lstPaises;
-    QString pais;
-    int lstPaisesPos;
+    QStringList m_lstGrupos;
+    QString grupo;
+    int lstGruposPos;
     QStringList lstPEIPsGeneral;
 
-    void consultarPEs_otroPais();    
+    void consultarPEs_otroGrupo();    
 };
 
 #endif // BDHOSTSUPDATER_H
