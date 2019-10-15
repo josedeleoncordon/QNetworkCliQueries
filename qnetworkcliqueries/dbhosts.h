@@ -2,23 +2,29 @@
 #define DBHOSTS_H
 
 #include <QString>
-#include <QList>
+#include <QMap>
 
 #include "qnetworkcliqueries_global.h"
+
+enum dbhoststype
+{
+    BackupGrupoSubgrupo,
+    ListadoGrupoSubgrupo
+};
 
 struct Host
 {
     QString grupo;
-    QString subgrupo;
-    QString nombre;
+    QString subgrupo;    
     QString ip;
+    QString nombre;
 };
 
 class QNETWORKCLIQUERIES_EXPORT DBHosts
 {
 private:
     static DBHosts* _instance;
-    QList<Host> _lstHosts;
+    QList<Host*> _lstHost;
 
     void _load();
     void _save();

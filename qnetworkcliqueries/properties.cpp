@@ -29,20 +29,25 @@ void Properties::loadSettings()
     QSettings settings;
     settings.setDefaultFormat(QSettings::NativeFormat);
 
+    settings.beginGroup("Connection");
     user = settings.value("ConnectionUser").toString();
     password = settings.value("ConnectionPassword").toString();
+    settings.endGroup();
+
+    settings.beginGroup("Queries");
     queriespath = settings.value("QueriesPath").toString();
-    mnemonicspath = settings.value("MnemonicsPath").toString();
-    backupspath = settings.value("BackupsPath").toString();
     logspath = settings.value("LogsPath").toString();
     linuxpromt = settings.value("LinuxPropmt").toString();
-
-    topologiaconfpath = settings.value("topologiaconfpath").toString();
-    topologiaiconpath = settings.value("topologiaiconpath").toString();
-
 #ifdef QT_DEBUG
     savelogs = settings.value("savelogs").toBool();
 #endif
+    settings.endGroup();
+
+    settings.beginGroup("Topology");
+    mnemonicspath = settings.value("MnemonicsPath").toString();
+    topologiaconfpath = settings.value("topologiaconfpath").toString();
+    topologiaiconpath = settings.value("topologiaiconpath").toString();
+    settings.endGroup();
 }
 
 void Properties::saveSettings()
@@ -50,19 +55,22 @@ void Properties::saveSettings()
     QSettings settings;
     settings.setDefaultFormat(QSettings::NativeFormat);
 
-//    settings.beginGroup("Connection");
+    settings.beginGroup("Connection");
     settings.setValue("ConnectionUser",user);
     settings.setValue("ConnectionPassword",password);
-//    settings.endGroup();
+    settings.endGroup();
 
+    settings.beginGroup("Queries");
     settings.setValue("QueriesPath",queriespath);
-    settings.setValue("MnemonicsPath",mnemonicspath);
-    settings.setValue("BackupsPath",backupspath);
     settings.setValue("LogsPath",logspath);
     settings.setValue("LinuxPropmt",linuxpromt);
     settings.setValue("savelogs",savelogs);
+    settings.endGroup();
 
+    settings.beginGroup("Topology");
+    settings.setValue("MnemonicsPath",mnemonicspath);
     settings.setValue("topologiaconfpath",topologiaconfpath);
     settings.setValue("topologiaiconpath",topologiaiconpath);
+    settings.endGroup();
 }
 

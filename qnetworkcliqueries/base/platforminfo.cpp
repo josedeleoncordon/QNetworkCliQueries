@@ -1,4 +1,5 @@
 #include "platforminfo.h"
+#include "properties.h"
 
 PlatformInfo::PlatformInfo(QRemoteShell *terminal, QObject *parent):
     FuncionBase(terminal,parent)
@@ -90,7 +91,19 @@ void PlatformInfo::on_term_receiveText()
         termSendText("show platform");
     }
     else
-        finished();
+    {
+        if ( m_brand == "Cisco" )
+        {
+            term->disconnectReceiveTextSignalConnections();
+            connect(term,SIGNAL(readyRead()),SLOT(on_term_on_term_receiveTextSnmpLocation()));
+            termSendText("show snmp location");
+        }
+        else
+        {
+            qDebug() << "CLI SNMP Location no soportado" << m_brand;
+            finished();
+        }
+    }
 }
 
 void PlatformInfo::on_term_on_term_receiveText_xr_location()
@@ -109,6 +122,40 @@ void PlatformInfo::on_term_on_term_receiveText_xr_location()
             m_xr_location = line.split(" ").at(0);
             break;
         }
+    }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_on_term_receiveTextSnmpLocation()));
+    termSendText("sh running-config snmp-server location location");
+}
+
+void PlatformInfo::on_term_on_term_receiveTextSnmpLocation()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n",QString::SkipEmptyParts);
+
+    if ( equipmentOSFromPlatform(m_platform) == "IOS XR" )
+    {
+        for ( QString line : lines )
+        {
+            if ( line.contains("sh run") )
+                continue;
+
+            if ( line.contains("snmp-server location") )
+            {
+                m_location = line.replace("snmp-server location","").simplified();
+                break;
+            }
+        }
+    }
+    else
+    {
+        lines.removeLast();
+        if ( !lines.last().contains("sh snmp") )
+            m_location = lines.last().simplified();
     }
 
     finished();

@@ -80,6 +80,7 @@ public:
     //
     QStringList interfacePermitedVlans(QString);
     SInterfaceInfo *interfaceInfo(QString interfaz);
+    QString ipFromInterfaz(QString interfaz);
 
     //
     friend QDataStream& operator<<(QDataStream& out, const InterfaceInfo* ii);

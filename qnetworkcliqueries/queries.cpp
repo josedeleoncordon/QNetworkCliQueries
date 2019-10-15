@@ -292,158 +292,167 @@ void Queries::createQueries(Queries::Opcion option)
     if ( m_queriescreated )
         return;
 
-    bool todos=false;
-    if ( !option ) todos=true;
+    unsigned int oActual = option;
+    if ( !oActual )
+        oActual=Platform;
 
-    qDebug() << m_ip << "Queries::createQueries" << todos << option;
-
-    if ( todos || (Platform & option) )
+    do
     {
-        if (pi)
-            delete pi;
+        if ( flags & Platform & oActual )
+        {
+            if (pi)
+                delete pi;
 
-        pi = new PlatformInfo(term,this);
-    }
-    if ( todos || (EquipmentNeighbors & option) )
-    {
-        if (equipmentNeighborsInfoQuery)
-            delete equipmentNeighborsInfoQuery;
+            pi = new PlatformInfo(term,this);
+        }
+        else if ( flags & EquipmentNeighbors & oActual )
+        {
+            if (equipmentNeighborsInfoQuery)
+                delete equipmentNeighborsInfoQuery;
 
-        equipmentNeighborsInfoQuery = factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (InterfaceInformation & option) )
-    {
-        if (interfacesInfoQuery)
-            delete interfacesInfoQuery;
+            equipmentNeighborsInfoQuery = factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & InterfaceInformation & oActual )
+        {
+            if (interfacesInfoQuery)
+                delete interfacesInfoQuery;
 
-        interfacesInfoQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (InterfacePermitedVlans & option) )
-    {
-        if (interfacesPermitedVlansQuery)
-            delete interfacesPermitedVlansQuery;
+            interfacesInfoQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & InterfacePermitedVlans & oActual )
+        {
+            if (interfacesPermitedVlansQuery)
+                delete interfacesPermitedVlansQuery;
 
-        interfacesPermitedVlansQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (InterfaceDescription & option) )
-    {
-        if (interfacesDescriptionsQuery)
-            delete interfacesDescriptionsQuery;
+            interfacesPermitedVlansQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & InterfaceDescription & oActual )
+        {
+            if (interfacesDescriptionsQuery)
+                delete interfacesDescriptionsQuery;
 
-        interfacesDescriptionsQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (InterfaceIpAddresses & option) )
-    {
-        if (interfacesIpAddressesQuery)
-            delete interfacesIpAddressesQuery;
+            interfacesDescriptionsQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & InterfaceIpAddresses & oActual )
+        {
+            if (interfacesIpAddressesQuery)
+                delete interfacesIpAddressesQuery;
 
-        interfacesIpAddressesQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (Ospf & option) )
-    {
-        if (ospfQuery)
-            delete ospfQuery;
+            interfacesIpAddressesQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & Ospf & oActual )
+        {
+            if (ospfQuery)
+                delete ospfQuery;
 
-        ospfQuery = factoryNewOSPFInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (MplsLdpDiscovery & option) )
-    {
-        if (mplsLdpDiscoveryQuery)
-            delete mplsLdpDiscoveryQuery;
+            ospfQuery = factoryNewOSPFInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & MplsLdpDiscovery & oActual )
+        {
+            if (mplsLdpDiscoveryQuery)
+                delete mplsLdpDiscoveryQuery;
 
-        mplsLdpDiscoveryQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (MplsLdpNeighbors & option) )
-    {
-        if (mplsLdpNeighborsQuery)
-            delete mplsLdpNeighborsQuery;
+            mplsLdpDiscoveryQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & MplsLdpNeighbors & oActual )
+        {
+            if (mplsLdpNeighborsQuery)
+                delete mplsLdpNeighborsQuery;
 
-        mplsLdpNeighborsQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (MplsLdpInterfaces & option) )
-    {
-        if (mplsLdpInterfacesQuery)
-            delete mplsLdpInterfacesQuery;
+            mplsLdpNeighborsQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & MplsLdpInterfaces & oActual )
+        {
+            if (mplsLdpInterfacesQuery)
+                delete mplsLdpInterfacesQuery;
 
-        mplsLdpInterfacesQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (PimInterfaces & option) )
-    {
-        if (pimInteracesQuery)
-            delete pimInteracesQuery;
+            mplsLdpInterfacesQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & PimInterfaces & oActual )
+        {
+            if (pimInteracesQuery)
+                delete pimInteracesQuery;
 
-        pimInteracesQuery = factoryNewPIMInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (MacAddress & option) )
-    {
-        if (macsQuery)
-            delete macsQuery;
+            pimInteracesQuery = factoryNewPIMInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & MacAddress & oActual )
+        {
+            if (macsQuery)
+                delete macsQuery;
 
-        macsQuery = factoryNewMacInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (PortChannel & option) )
-    {
-        if (portChannelInfoQuery)
-            delete portChannelInfoQuery;
+            macsQuery = factoryNewMacInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & PortChannel & oActual )
+        {
+            if (portChannelInfoQuery)
+                delete portChannelInfoQuery;
 
-        portChannelInfoQuery = factoryNewPortChannelsInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (VRFfVlans & option) )
-    {
-        if (vrfsFromVlansQuery)
-            delete vrfsFromVlansQuery;
+            portChannelInfoQuery = factoryNewPortChannelsInfo(m_brand,m_equipmenttype,term,this);
+        }
 
-        vrfsFromVlansQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (VRFfRT & option) )
-    {
-        if (vrfFromRTQuery)
-            delete vrfFromRTQuery;
+        else if ( flags & VRFfVlans & oActual )
+        {
+            if (vrfsFromVlansQuery)
+                delete vrfsFromVlansQuery;
 
-        vrfFromRTQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (VRFs & option) )
-    {
-        if (vrfsQuery)
-            delete vrfsQuery;
+            vrfsFromVlansQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,this);
+        }
 
-        vrfsQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (Arp & option) )
-    {
-        if (arpsQuery)
-            delete arpsQuery;
+        else if ( flags & VRFfRT & oActual )
+        {
+            if (vrfFromRTQuery)
+                delete vrfFromRTQuery;
 
-        arpsQuery = factoryNewArpInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (BGPNeig & option) )
-    {
-        if (bgpNeighborsQuery)
-            delete bgpNeighborsQuery;
+            vrfFromRTQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,this);
+        }
 
-        bgpNeighborsQuery = factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (IpRoutes & option) )
-    {
-        if (ipRoutesQuery)
-            delete ipRoutesQuery;
+        else if ( flags & VRFs & oActual )
+        {
+            if (vrfsQuery)
+                delete vrfsQuery;
 
-        ipRoutesQuery = factoryNewIPRouteInfo(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (Configuration & option) )
-    {
-        if (configQuery)
-            delete configQuery;
+            vrfsQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,this);
+        }
 
-        configQuery = factoryNewConfig(m_brand,m_equipmenttype,term,this);
-    }
-    if ( todos || (Exit & option) )
-    {
-        if (exitQuery)
-            delete exitQuery;
+        else if ( flags & Arp & oActual )
+        {
+            if (arpsQuery)
+                delete arpsQuery;
 
-        exitQuery = factoryNewExit(m_brand,m_equipmenttype,term,this);
+            arpsQuery = factoryNewArpInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & BGPNeig & oActual )
+        {
+            if (bgpNeighborsQuery)
+                delete bgpNeighborsQuery;
+
+            bgpNeighborsQuery = factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & IpRoutes & oActual )
+        {
+            if (ipRoutesQuery)
+                delete ipRoutesQuery;
+
+            ipRoutesQuery = factoryNewIPRouteInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & Configuration & oActual )
+        {
+            if (configQuery)
+                delete configQuery;
+
+            configQuery = factoryNewConfig(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & Exit & oActual )
+        {
+            if (exitQuery)
+                delete exitQuery;
+
+            exitQuery = factoryNewExit(m_brand,m_equipmenttype,term,this);
+        }
+
+        oActual = oActual << 1;
     }
+    while (oActual <= Exit);
 
     m_queriescreated=true;
 }
@@ -496,6 +505,8 @@ void Queries::nextProcess()
                 qDebug() << m_ip  << "Mayor a Exit" << m_ip;
 
                 borrarTerminal();
+                crearFuncionesFaltantes();
+
                 emit finished(this);
                 disconnect();
 
@@ -1205,6 +1216,57 @@ void Queries::on_queryTimer_timeout()
 
     //timeout consultas normales
     processConnectToHostDisconnected();
+}
+
+void Queries::crearFuncionesFaltantes()
+{
+    //TODO no se crean al principio en CreateQueries por el crash de QSocketNotifier, :V investigar
+
+    if (!equipmentNeighborsInfoQuery)
+        equipmentNeighborsInfoQuery = factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term,this);
+    if (!interfacesInfoQuery)
+        interfacesInfoQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
+    if (!interfacesPermitedVlansQuery)
+        interfacesPermitedVlansQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
+    if (!interfacesDescriptionsQuery)
+        interfacesDescriptionsQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
+    if (!interfacesIpAddressesQuery)
+        interfacesIpAddressesQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
+    if (!ospfQuery)
+        ospfQuery = factoryNewOSPFInfo(m_brand,m_equipmenttype,term,this);
+    if (!mplsLdpDiscoveryQuery)
+        mplsLdpDiscoveryQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
+    if (!mplsLdpNeighborsQuery)
+        mplsLdpNeighborsQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
+    if (!mplsLdpInterfacesQuery)
+        mplsLdpInterfacesQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
+    if (!pimInteracesQuery)
+        pimInteracesQuery = factoryNewPIMInfo(m_brand,m_equipmenttype,term,this);
+    if (!macsQuery)
+        macsQuery = factoryNewMacInfo(m_brand,m_equipmenttype,term,this);
+    if (!portChannelInfoQuery)
+        portChannelInfoQuery = factoryNewPortChannelsInfo(m_brand,m_equipmenttype,term,this);
+    if (!vrfsFromVlansQuery)
+        vrfsFromVlansQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,this);
+    if (!vrfFromRTQuery)
+        vrfFromRTQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,this);
+    if (!vrfsQuery)
+        vrfsQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,this);
+    if (!arpsQuery)
+        arpsQuery = factoryNewArpInfo(m_brand,m_equipmenttype,term,this);
+    if (!bgpNeighborsQuery)
+        bgpNeighborsQuery = factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term,this);
+    if (!ipRoutesQuery)
+        ipRoutesQuery = factoryNewIPRouteInfo(m_brand,m_equipmenttype,term,this);
+    if (!configQuery)
+        configQuery = factoryNewConfig(m_brand,m_equipmenttype,term,this);
+    if (!exitQuery)
+        exitQuery = factoryNewExit(m_brand,m_equipmenttype,term,this);
+}
+
+void Queries::createEmptyQueries()
+{
+    crearFuncionesFaltantes();
 }
 
 void Queries::on_term_readyRead()

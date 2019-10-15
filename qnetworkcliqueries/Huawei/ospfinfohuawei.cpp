@@ -28,6 +28,8 @@ void OSPFInfoHuawei::on_term_receiveTextNeighbors()
     QStringList lines = txt.split("\n");
 
     QString proceso;
+    QString lastArea;
+    QString lastPID;
     foreach (QString line, lines)
     {
         line = line.simplified();
@@ -54,6 +56,16 @@ void OSPFInfoHuawei::on_term_receiveTextNeighbors()
         oii->area = lstColumns.at(0).simplified();
         oii->interfaz = estandarizarInterfaz( lstColumns.at(1).simplified() );
         oii->process = proceso;
+
+        if ( lastArea.isEmpty() )
+            lastArea = oii->area;
+        else if ( lastArea != oii->area )
+            m_abr=true;
+
+        if ( lastPID.isEmpty() )
+            lastPID = oii->process;
+        else if ( lastPID != oii->process )
+            m_asbr=true;
 
         m_lstOSPFInfo.append(oii);
     }

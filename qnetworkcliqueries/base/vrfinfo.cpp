@@ -138,7 +138,7 @@ void VrfInfo::getVRFfromRT()
 void VrfInfo::getVRFs()
 {
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextVRFs()));
-    if ( m_brand == "CISCO" )
+    if ( m_brand == "Cisco" )
     {
         if ( m_os == "IOS XR" )
             termSendText( "show ipv4 vrf all interface" );
@@ -337,6 +337,7 @@ void VrfInfo::on_term_receiveTextVRFs()
             if ( line.contains(exp) )
             {
                 lastInterface = estandarizarInterfaz( exp.cap(1) );
+                qDebug() << "line interfaz" <<  lastInterface;
                 continue;
             }
 
@@ -354,6 +355,8 @@ void VrfInfo::on_term_receiveTextVRFs()
                 vi->datetime = QDateTime::currentDateTime();
                 vi->operativo = true;
                 m_lstVrfInfo.append(vi);
+
+                qDebug() << "agrgando vrf";
 
                 continue;
             }

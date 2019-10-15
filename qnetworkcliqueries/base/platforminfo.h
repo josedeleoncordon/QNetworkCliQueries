@@ -19,6 +19,7 @@ public:
 private slots:
     void on_term_receiveText();
     void on_term_on_term_receiveText_xr_location();
+    void on_term_on_term_receiveTextSnmpLocation();
 };
 
 #endif // PLATFORMINFO_H

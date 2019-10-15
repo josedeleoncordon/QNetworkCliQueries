@@ -99,7 +99,7 @@ QString simplicateName(QString name)
     if ( pos > 0 )
         name = name.left( pos );
 
-    QRegExp exp2("RP(_|/)0.+(_|:)");
+    QRegExp exp2("RP.+CPU\\d\\:");
     if ( name.contains(exp2) )
         name.replace(exp2,"");
 
@@ -508,6 +508,20 @@ QString interfaceOspfArea(Queries *q, QString interfaz)
     return "";
 }
 
+QString interfaceOspfProceso(Queries *q, QString interfaz)
+{
+    QString interfazPO1 = interfaceToPortChannelInterface( q->portChannelInfo(),
+                                                        interfaz,
+                                                        q->platform() );
+
+    foreach (SOSPFInfo *io, q->ospfInfo())
+    {
+        if ( io->interfaz == interfazPO1 )
+            return io->process;
+    }
+    return "";
+}
+
 QString interfaceToPortChannelInterface(QList<SPortChannel *> lst, QString interface, QString plataforma)
 {
     //regresa la Po interfaz a la que pertenece la interfaz.
@@ -802,6 +816,7 @@ QString nombreArchivoLstQueries(LstQueries* lstQ)
 QString estandarizarInterfaz(QString interfaz)
 {
     interfaz.replace("nGigabitEthernet","");
+    interfaz.replace("rtyGigabitEthernet","");
     interfaz.replace("Bundle-Ether","BE");
     interfaz.replace("Port-channel","Po",Qt::CaseInsensitive);
     interfaz.replace("gabitEthernet","");

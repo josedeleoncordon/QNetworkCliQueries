@@ -91,6 +91,9 @@ bool interfaceIsInVRF(Queries *q, QString interfaz);
 //devuelve el area de ospf de una interfaz
 QString interfaceOspfArea(Queries *q, QString interfaz);
 
+//devuelve el proceso de ospf de una interfaz
+QString interfaceOspfProceso(Queries *q, QString interfaz);
+
 //regresa la Po interfaz a la que pertenece la interfaz.
 //Si no pertenece a alguno PO se regresa la misma interfaz enviada.
 QString interfaceToPortChannelInterface(QList<SPortChannel *> lst, QString interface, QString plataforma);

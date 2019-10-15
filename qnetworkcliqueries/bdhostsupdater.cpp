@@ -12,7 +12,11 @@ void BDHostsUpdater::updateDB( QString path )
 {
     m_path = path;
 
-    m_lstGrupos = lstGrupos();
+    lstGrupos.append("CR");
+    lstGrupos.append("GT");
+    lstGrupos.append("HN");
+    lstGrupos.append("NIC");
+    lstGrupos.append("SV");
     lstGruposPos=-1;
     queriesThread=nullptr;
 
@@ -22,10 +26,10 @@ void BDHostsUpdater::updateDB( QString path )
 void BDHostsUpdater::consultarPEs_otroGrupo()
 {
     //consultar los RR para sacar las IPs de los PEs
-    if ( lstGruposPos < m_lstGrupos.size()-1 )
+    if ( lstGruposPos < lstGrupos.size()-1 )
     {
         lstGruposPos++;
-        grupo = m_lstGrupos.at( lstGruposPos );
+        grupo = lstGrupos.at( lstGruposPos );
         queriesThread = new QueriesThread(this);
         connect( queriesThread,SIGNAL(finished(bool)),SLOT(on_actualizarPEs_finished(bool)));
 
@@ -84,7 +88,7 @@ void BDHostsUpdater::on_actualizarPEsPs_finished()
     //generar los P y PEs
 
     QStringList lstPEsPsIPs;
-    foreach (QString grupo, m_lstGrupos)
+    foreach (QString grupo, lstGrupos)
     {
         QDirIterator it( m_path , QDir::Files, QDirIterator::Subdirectories);
         while (it.hasNext())

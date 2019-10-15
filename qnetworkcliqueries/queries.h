@@ -136,7 +136,8 @@ public:
     void setIP(QString IP) { m_ip = IP; }
     void setHostName(QString NAME) { m_name = NAME; }
     void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }    
-    void setLstHostsGeneralAconectar( QList<Host*> lst ) { m_lstHostsGeneralAconectar = lst; }       
+    void setLstHostsGeneralAconectar( QList<Host*> lst ) { m_lstHostsGeneralAconectar = lst; }
+    void createEmptyQueries();
     void clear();
 
     void startSync();
@@ -214,6 +215,10 @@ protected:
     void nextProcess();    
     void borrarTerminal();
     void limpiarConsultas();
+
+    //despues de terminar una consulta se crean las funciones que no se configuraron
+    //por si el usuario trata a accesder a ellas tenga consultas vacias
+    void crearFuncionesFaltantes();
 };
 
 class QNETWORKCLIQUERIES_EXPORT LstQueries

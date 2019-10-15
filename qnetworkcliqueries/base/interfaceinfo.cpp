@@ -29,6 +29,10 @@ QDataStream& operator<<(QDataStream& out, const SInterfaceInfo* data)
     out << data->status;
     out << data->description;
     out << data->mac;
+    out << data->bandwidth;
+    out << data->ratein;
+    out << data->rateout;
+    out << data->bandwidth;
     //infobase
     out << data->datetime;
     out << data->operativo;
@@ -42,6 +46,10 @@ QDataStream& operator>>(QDataStream& in, SInterfaceInfo*& data)
     in >> data->status;
     in >> data->description;
     in >> data->mac;
+    in >> data->bandwidth;
+    in >> data->ratein;
+    in >> data->rateout;
+    in >> data->bandwidth;
     //infobase
     in >> data->datetime;
     in >> data->operativo;
@@ -102,6 +110,9 @@ void updateInfoList(QList<SInterfaceInfo *> &lstDest, QList<SInterfaceInfo *> &l
                 dest->status = origin->status;
                 dest->description = origin->description;
                 dest->mac = origin->mac;
+                dest->ratein = origin->ratein;
+                dest->rateout = origin->rateout;
+                dest->bandwidth = origin->bandwidth;
                 encontrado=true;
                 break;
             }
@@ -363,7 +374,7 @@ void InterfaceInfo::on_term_receiveText_Info()
             if ( line.contains(exp) )
             {
                 id->mtu = exp.cap(1);
-                id->bandwidth = exp.cap(2);
+                id->bandwidth = exp.cap(2).append("000"); //kilo2bit
                 continue;
             }
 
@@ -943,6 +954,16 @@ SInterfaceInfo *InterfaceInfo::interfaceInfo(QString interfaz)
             return i;
     }
     return nullptr;
+}
+
+QString InterfaceInfo::ipFromInterfaz(QString interfaz)
+{
+    foreach (SIpInfo *i, m_lstInterfacesIPAddresses)
+    {
+        if ( interfaz == i->interfaz )
+            return i->ip;
+    }
+    return "";
 }
 
 QDataStream& operator<<(QDataStream& out, const InterfaceInfo* ii)

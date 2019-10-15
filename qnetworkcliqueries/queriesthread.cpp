@@ -99,7 +99,7 @@ void QueriesThread::on_timer_timeOut()
 {
 
     int paralelos;
-    paralelos= m_maxparalelos ;
+    paralelos = m_maxparalelos ;
 
     if ( m_consultaSimultaneos >= paralelos )
         return;
@@ -185,8 +185,9 @@ void QueriesThread::equipoConsultado(Queries *qry)
 
             m_equiposExitosos++;
 
-//            //se agregan los vecinos de equipmentNeighbors a la consulta
-//            //la verificación de nombre y plataforma se realiza en el hilo correspondiente
+            //se agregan los vecinos de equipmentNeighbors y los IDs de OSPF a la consulta
+            //la verificación de nombre y plataforma se realiza en el hilo correspondiente
+            //***********************************************************************************************
 //            foreach (SEquipmentNeighborsInfo *equipmentNeighbors, qry->equipmentNeighborsNuevosEquipos())
 //            {
 //                bool encontrado=false;
@@ -261,16 +262,13 @@ void QueriesThread::equipoConsultado(Queries *qry)
     {
         if ( qry->isReachable() )
         {
-            if ( qry->isReachable() )
-            {
-                m_errorMap.insert( qry->ip(), "Conexion Error" );
-                m_conexionerrores++;
-            }
-            else
-            {
-                m_errorMap.insert( qry->ip(), "No conexion" );
-                m_sinconexion++;
-            }
+            m_errorMap.insert( qry->ip(), "Conexion Error" );
+            m_conexionerrores++;
+        }
+        else
+        {
+            m_errorMap.insert( qry->ip(), "No conexion" );
+            m_sinconexion++;
         }
 
         //si la plataforma y el nombre no estan vacios significa que se pudo consultar la informacion por SNMP

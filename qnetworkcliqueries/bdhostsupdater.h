@@ -5,6 +5,8 @@
 
 #include "qnetworkcliqueries_global.h"
 
+/*Analiza los archivos de backup de un arbol de directorios, Directorio grupo y directorios hijos como subgrupos*/
+
 class QueriesThread;
 
 class QNETWORKCLIQUERIES_EXPORT BDHostsUpdater : public QObject
@@ -26,7 +28,7 @@ private slots:
 private:
     QString m_path;
     QueriesThread *queriesThread;
-    QStringList m_lstGrupos;
+    QStringList lstGrupos;
     QString grupo;
     int lstGruposPos;
     QStringList lstPEIPsGeneral;

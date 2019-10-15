@@ -119,6 +119,8 @@ EquipmentNeighborsInfo::~EquipmentNeighborsInfo()
 
 void EquipmentNeighborsInfo::getEquipmentNeighborsInfo()
 {
+    qDebug() << "EquipmentNeighborsInfo::getEquipmentNeighborsInfo()";
+
     if ( m_brand == "Cisco" )
     {
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_CDP()));

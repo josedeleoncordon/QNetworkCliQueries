@@ -24,12 +24,22 @@ void DBHosts::_load()
     QSettings settings;
     settings.setDefaultFormat(QSettings::NativeFormat);
 
-//    user = settings.value("ConnectionUser").toString();
-//    password = settings.value("ConnectionPassword").toString();
-//    queriespath = settings.value("QueriesPath").toString();
-//    mnemonicspath = settings.value("MnemonicsPath").toString();
-//    backupspath = settings.value("BackupsPath").toString();
-//    logspath = settings.value("LogsPath").toString();
+    QStringList lst;
+
+    settings.beginGroup("Hosts");
+    lst = settings.value("Hosts").toStringList();
+    settings.endGroup();
+
+    for (QString s : lst)
+    {
+        QStringList data = s.split(",");
+        Host *h = new Host;
+        h->grupo = data.at(0);
+        h->subgrupo = data.at(1);
+        h->ip = data.at(2);
+        h->nombre = data.at(3);
+        _lstHost.append(h);
+    }
 }
 
 void DBHosts::_save()
@@ -37,8 +47,11 @@ void DBHosts::_save()
     QSettings settings;
     settings.setDefaultFormat(QSettings::NativeFormat);
 
-//    settings.beginGroup("Connection");
-//    settings.setValue("ConnectionUser",user);
-//    settings.setValue("ConnectionPassword",password);
-//    settings.endGroup();
+    QStringList lst;
+    for ( Host *h : _lstHost )
+        lst.append( h->grupo+","+h->subgrupo+","+h->ip+","+h->nombre );
+
+    settings.beginGroup("Hosts");
+    settings.setValue("Hosts",lst);
+    settings.endGroup();
 }

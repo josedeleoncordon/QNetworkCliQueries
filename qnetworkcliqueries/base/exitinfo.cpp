@@ -22,6 +22,8 @@ void ExitInfo::on_term_receiveText()
     if ( !txt.contains(QRegExp(Properties::Instance()->linuxpromt)) )
         return;
 
+    qDebug() << "ExitInfo::on_term_receiveText()" << txt;
+
     connect(term,SIGNAL(disconnected()),SLOT(on_term_disconnected()));
     term->host_disconnect();
 }
