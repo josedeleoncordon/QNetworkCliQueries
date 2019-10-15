@@ -45,6 +45,7 @@ public:
 private:
     ConnectionProtocol m_protocol;    
     QList<ConnectionProtocol> m_lstConnectionProtocol;
+    QList<ConnectionProtocol> m_lstConnectionProtocolgw;
     QString m_ip;
     QString m_user;
     QString m_pwd;
@@ -56,6 +57,7 @@ private:
     bool m_hostConnected;
     bool m_termle;
     bool m_pwdsent;
+    bool m_gwConnected;
     QString m_dataReceived;
     QRegExp m_localprompt;
     QTimer *m_timerNoResponse;
@@ -70,6 +72,8 @@ private:
 
     void saveLog(QString);
     void m_nextTry();
+
+    void finalizado();
 
 private slots:
     void m_terminal_ready(bool ready);
