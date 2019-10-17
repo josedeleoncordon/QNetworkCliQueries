@@ -55,6 +55,13 @@ MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, 
         return new MacInfo(term,parent);
 }
 
+MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+{
+    Q_UNUSED( type )
+
+    return new MplsTEtunnelsInfo(term,parent);
+}
+
 MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
 {
     return new MplsLdpInfo(term,parent);

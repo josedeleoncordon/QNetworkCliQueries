@@ -5,6 +5,7 @@
 #include "interfaceinfo.h"
 #include "ospfinfo.h"
 #include "mplsldpinfo.h"
+#include "mplstetunnelsinfo.h"
 #include "piminfo.h"
 #include "macinfo.h"
 #include "platforminfo.h"
@@ -47,7 +48,7 @@ public:
         InterfaceDescription = 256,
         InterfaceIpAddresses = 512,
         Ospf = 1024,
-//        OspfNeighbors = 2048,
+        MplsTEtunnels = 2048,
         MplsLdpDiscovery = 4096,
         MplsLdpNeighbors = 8192,
         MplsLdpInterfaces = 16384,
@@ -72,6 +73,7 @@ public:
     InterfaceInfo *interfacesDescriptionsQuery;
     InterfaceInfo *interfacesIpAddressesQuery;
     OSPFInfo* ospfQuery;
+    MplsTEtunnelsInfo *mplsTEtunnelsQuery;
     MplsLdpInfo* mplsLdpDiscoveryQuery;
     MplsLdpInfo* mplsLdpNeighborsQuery;
     MplsLdpInfo* mplsLdpInterfacesQuery;
@@ -111,6 +113,7 @@ public:
     QList<SIpInfo*>& interfacesIpAddressesInfo() { return interfacesIpAddressesQuery->interfacesIpAddressesInfo(); }
     QList<SOSPFInfo*>& ospfInfo() { return ospfQuery->ospfInfo(); } //
     QString& mplsLdpLocalIDInfo() { return mplsLdpDiscoveryQuery->ldpLocalIDInfo(); } //
+    QList<SMplsTETunnelInfo*>& mplsLdpTunnelsInfo() { return mplsTEtunnelsQuery->mplsTEtunnelsInfo(); } //
     QList<SMplsLdpInfo*>& mplsLdpDiscoveryInfo() { return mplsLdpDiscoveryQuery->mplsLdpDiscoveryInfo(); } //
     QList<SMplsLdpInfo*>& mplsLdpNeighborsInfo() { return mplsLdpNeighborsQuery->mplsLdpNeighborsInfo(); }
     QList<SMplsLdpInfo*>& mplsLdpInterfacesInfo() { return mplsLdpInterfacesQuery->mplsLdpInterfacesInfo(); }

@@ -20,6 +20,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_detener=false;
     m_cancelar=false;
     m_principaluserfirst=true;
+    m_soloequiposnuevos=false;
     m_equipmentNeighborsConsultarVecinos=false;
 
     m_user = Properties::Instance()->user;
@@ -137,8 +138,6 @@ void QueriesThread::conectarOtroEquipo()
     query->setOptions( m_opciones );
     query->setConnectionProtocol( m_connectionprotocol );
 
-    //si el listado de equipos a consultar es 1 significa que se configuro para que solo actualizará un equipo
-    //no queremos que por equipmentNeighbors se conozcan nuevos vecinos y empezar a consultarlos
     if ( m_equipmentNeighborsConsultarVecinos )
         query->setLstHostsGeneralAconectar( m_lstIP );
 
@@ -181,59 +180,64 @@ void QueriesThread::equipoConsultado(Queries *qry)
     {
         if ( qry->successful() )
         {
-            qDebug() << "Equipo consultado exitosamente" << qry->ip() << qry->hostName();
+            qDebug() << "Equipo consultado exitosamente" << qry->ip() << qry->hostName()
+                     << m_equipmentNeighborsConsultarVecinos;
 
             m_equiposExitosos++;
 
-            //se agregan los vecinos de equipmentNeighbors y los IDs de OSPF a la consulta
-            //la verificación de nombre y plataforma se realiza en el hilo correspondiente
-            //***********************************************************************************************
-//            foreach (SEquipmentNeighborsInfo *equipmentNeighbors, qry->equipmentNeighborsNuevosEquipos())
-//            {
-//                bool encontrado=false;
-//                QString equipmentNeighborsnombre = simplicateName( equipmentNeighbors->nombreequipo );
-//                foreach (Host *host, m_lstIP)
+            if ( m_equipmentNeighborsConsultarVecinos )
+            {
+//                //se agregan los vecinos de equipmentNeighbors y los IDs de OSPF a la consulta
+//                //la verificación de nombre y plataforma se realiza en el hilo correspondiente
+//                //***********************************************************************************************
+//                foreach (SEquipmentNeighborsInfo *equipmentNeighbors, qry->equipmentNeighborsNuevosEquipos())
 //                {
-//                    if ( host->nombre == equipmentNeighborsnombre )
+//                    bool encontrado=false;
+//                    QString equipmentNeighborsnombre = simplicateName( equipmentNeighbors->nombreequipo );
+//                    foreach (Host *host, m_lstIP)
 //                    {
-//                        encontrado=true;
-//                        break;
+//                        if ( host->nombre == equipmentNeighborsnombre )
+//                        {
+//                            encontrado=true;
+//                            break;
+//                        }
+//                    }
+//                    if ( !encontrado )
+//                    {
+//                        Host *host = new Host;
+//                        host->ip = equipmentNeighbors->ip;
+//                        host->nombre = equipmentNeighborsnombre;
+//                        m_lstIP.append( host );
+//                        lstIPsAgregadosPorVecinos.append( host->ip );
+
+//                        qDebug() << "equipmentNeighbors Equipo agregado" << equipmentNeighbors->nombreequipo << equipmentNeighbors->ip;
 //                    }
 //                }
-//                if ( !encontrado )
-//                {
-//                    Host *host = new Host;
-//                    host->ip = equipmentNeighbors->ip;
-//                    host->nombre = equipmentNeighborsnombre;
-//                    m_lstIP.append( host );
-//                    lstIPsAgregadosPorVecinos.append( host->ip );
 
-//                    qDebug() << "equipmentNeighbors Equipo agregado" << equipmentNeighbors->nombreequipo << equipmentNeighbors->ip;
-//                }
-//            }
-
-            for ( SOSPFInfo *o : qry->ospfInfo() )
-            {
-                bool encontrado=false;
-                foreach (Host *host, m_lstIP)
+                for ( SOSPFInfo *o : qry->ospfInfo() )
                 {
-                    if ( host->ip == o->id )
+                    bool encontrado=false;
+                    foreach (Host *host, m_lstIP)
                     {
-                        encontrado=true;
-                        break;
+                        if ( host->ip == o->id ||
+                             ( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( o->id ) ) )
+                        {
+                            encontrado=true;
+                            break;
+                        }
+                    }
+                    if ( !encontrado )
+                    {
+                        Host *host = new Host;
+                        host->ip = o->id;
+                        m_lstIP.append( host );
+                        lstIPsAgregadosPorVecinos.append( o->id );
+                        if ( !m_timer->isActive() )
+                            m_timer->start();
                     }
                 }
-                if ( !encontrado )
-                {
-                    Host *host = new Host;
-                    host->ip = o->id;
-                    m_lstIP.append( host );
-                    lstIPsAgregadosPorVecinos.append( o->id );
-                    if ( !m_timer->isActive() )
-                        m_timer->start();
-                }
+                //***********************************************************************************************
             }
-            //***********************************************************************************************
 
             //si ya hubiera otra consulta del mismo equipo se elimina porque puedo haberse realizado debido a que
             //se agrego el equipo por equipmentNeighbors cuando aun no existia el mismo, esto ya que hay varios equipos en consulta a la vez

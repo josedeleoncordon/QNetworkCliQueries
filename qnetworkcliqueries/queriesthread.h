@@ -25,6 +25,8 @@ public:
     void setLinuxPrompt(QString prompt) { m_linuxprompt = prompt; }
     void setConnectionProtocol( QRemoteShell::ConnectionProtocol cp ) { m_connectionprotocol = cp; }
     void setLstIP(QStringList lst);
+    void setLstIPsConsultaAnterior(QStringList lst) { lstIPsConsultaAnterior=lst; }
+    void setConsultaSoloEquiposNuevos(bool enable) { m_soloequiposnuevos = enable; }
     void setInterval(int interval) { m_interval = interval; }
     void setSimultaneos(int simultaneos) { m_simultaneos = simultaneos; }
     void setMaxParalelos(int max) { m_maxparalelos = max; }
@@ -65,6 +67,7 @@ private:
    QString m_linuxprompt;
    QList<Host*> m_lstIP;
    QStringList lstIPsAgregadosPorVecinos;
+   QStringList lstIPsConsultaAnterior;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;
    int m_lstIpPos;
    int m_opciones;
@@ -81,6 +84,7 @@ private:
    bool m_detener;
    bool m_cancelar;
    bool m_equipmentNeighborsConsultarVecinos;
+   bool m_soloequiposnuevos;
    bool m_principaluserfirst;
    QList<Queries*> m_lstQueries;
    QMap<QString, QString> m_errorMap;

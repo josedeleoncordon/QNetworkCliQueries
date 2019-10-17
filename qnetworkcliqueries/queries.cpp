@@ -59,6 +59,7 @@ Queries::Queries(const Queries &other) : QObject(other.parent())
     if ( other.interfacesDescriptionsQuery ) interfacesDescriptionsQuery = new InterfaceInfo( *other.interfacesDescriptionsQuery );
     if ( other.interfacesIpAddressesQuery ) interfacesIpAddressesQuery = new InterfaceInfo( *other.interfacesIpAddressesQuery );
     if ( other.ospfQuery ) ospfQuery = new OSPFInfo( *other.ospfQuery );
+    if ( other.mplsTEtunnelsQuery ) mplsTEtunnelsQuery = new MplsTEtunnelsInfo( *other.mplsTEtunnelsQuery );
     if ( other.mplsLdpDiscoveryQuery ) mplsLdpDiscoveryQuery = new MplsLdpInfo( *other.mplsLdpDiscoveryQuery );
     if ( other.mplsLdpNeighborsQuery ) mplsLdpNeighborsQuery = new MplsLdpInfo( *other.mplsLdpNeighborsQuery );
     if ( other.mplsLdpInterfacesQuery ) mplsLdpInterfacesQuery = new MplsLdpInfo( *other.mplsLdpInterfacesQuery );
@@ -90,6 +91,7 @@ void Queries::iniciar()
     interfacesDescriptionsQuery = nullptr;
     interfacesIpAddressesQuery = nullptr;
     ospfQuery = nullptr;
+    mplsTEtunnelsQuery = nullptr;
     mplsLdpDiscoveryQuery = nullptr;
     mplsLdpNeighborsQuery = nullptr;
     mplsLdpInterfacesQuery = nullptr;
@@ -162,6 +164,11 @@ void Queries::limpiarConsultas()
     {
         delete ospfQuery;
         ospfQuery=nullptr;
+    }
+    if (mplsTEtunnelsQuery)
+    {
+        delete mplsTEtunnelsQuery;
+        mplsTEtunnelsQuery=nullptr;
     }
     if (mplsLdpDiscoveryQuery)
     {
@@ -346,6 +353,13 @@ void Queries::createQueries(Queries::Opcion option)
                 delete ospfQuery;
 
             ospfQuery = factoryNewOSPFInfo(m_brand,m_equipmenttype,term,this);
+        }
+        else if ( flags & MplsTEtunnels & oActual )
+        {
+            if (mplsTEtunnelsQuery)
+                delete mplsTEtunnelsQuery;
+
+            mplsTEtunnelsQuery = factoryNewMplsTEtunnelsInfo(m_brand,m_equipmenttype,term,this);
         }
         else if ( flags & MplsLdpDiscovery & oActual )
         {
@@ -699,6 +713,25 @@ void Queries::nextProcess()
         ospfQuery->getOSPFInfo();
         return;
     }    
+    else if (  opcionActual & flags & MplsTEtunnels )
+    {
+        if ( m_reintentandoConsulta )
+        {
+            m_reintentandoConsulta=false;
+            createQueries( MplsTEtunnels );
+        }
+
+        mplsTEtunnelsQuery->setPlatform(m_platform);
+        mplsTEtunnelsQuery->setXRLocation(m_xr_location);
+        mplsTEtunnelsQuery->setBrand(m_brand);
+        mplsTEtunnelsQuery->setHostName(m_fullName);
+        mplsTEtunnelsQuery->setIp(m_ip);
+        connect(mplsTEtunnelsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(mplsTEtunnelsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(mplsTEtunnelsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        mplsTEtunnelsQuery->getMplsTETunnels();
+        return;
+    }
     else if (  opcionActual & flags & MplsLdpDiscovery )
     {
         if ( m_reintentandoConsulta )
@@ -1234,6 +1267,8 @@ void Queries::crearFuncionesFaltantes()
         interfacesIpAddressesQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
     if (!ospfQuery)
         ospfQuery = factoryNewOSPFInfo(m_brand,m_equipmenttype,term,this);
+    if (!mplsTEtunnelsQuery)
+        mplsTEtunnelsQuery = factoryNewMplsTEtunnelsInfo(m_brand,m_equipmenttype,term,this);
     if (!mplsLdpDiscoveryQuery)
         mplsLdpDiscoveryQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,this);
     if (!mplsLdpNeighborsQuery)
@@ -1375,6 +1410,13 @@ void Queries::updateInfoQueries(QList<Queries*> &lstDest, QList<Queries *> &lstO
                     }
                     else
                         dest->ospfQuery = origin->ospfQuery ;
+                }
+                if ( origin->mplsTEtunnelsQuery )
+                {
+                    if ( dest->mplsTEtunnelsQuery )
+                        updateInfoList( dest->mplsLdpTunnelsInfo(), origin->mplsLdpTunnelsInfo() );
+                    else
+                        dest->mplsTEtunnelsQuery = origin->mplsTEtunnelsQuery;
                 }
                 if ( origin->mplsLdpDiscoveryQuery )
                 {
@@ -1530,6 +1572,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     }
     else
         out << false;    
+    if ( query->mplsTEtunnelsQuery )
+    {
+        out << true;
+        out << query->mplsTEtunnelsQuery;
+    }
+    else
+        out << false;
     if ( query->mplsLdpDiscoveryQuery )
     {
         out << true;
@@ -1688,6 +1737,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries*& que
     in >> a;
     if ( a )
     {
+        in >> query->mplsTEtunnelsQuery;
+        foreach (SMplsTETunnelInfo *i, query->mplsLdpTunnelsInfo() )
+            i->queryParent = query;
+    }
+    in >> a;
+    if ( a )
+    {
         in >> query->mplsLdpDiscoveryQuery;
         foreach (SMplsLdpInfo *i, query->mplsLdpDiscoveryInfo() )
             i->queryParent = query;
@@ -1803,6 +1859,9 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
 
     if ( info.ospfQuery )
         dbg.space() << "ospfQuery" << *info.ospfQuery;
+
+    if ( info.mplsTEtunnelsQuery )
+        dbg.space() << "mplsTEtunnelsQuery" << *info.mplsTEtunnelsQuery;
 
     if ( info.mplsLdpDiscoveryQuery )
         dbg.space() << "mplsLdpDiscoveryQuery" << *info.mplsLdpDiscoveryQuery;

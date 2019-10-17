@@ -346,6 +346,7 @@ void QRemoteShell::finalizado()
 
             m_gwConnected=true;
             m_pwdsent=false;
+            m_termle=false;
             m_lstConnectionProtocol = m_lstConnectionProtocolgw;
             host_connect();
         }
