@@ -41,7 +41,7 @@ QDataStream& operator>>(QDataStream& in, SMplsTETunnelInfo*& data)
     in >> data->role;
     in >> data->InterfaceIn;
     in >> data->InterfaceOut;
-//    in >> data->status;
+    in >> data->status;
     //infobase
     in >> data->datetime;
     in >> data->operativo;
@@ -190,7 +190,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 {
                     exp.setPattern(".+ (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})$");
                     if ( line.contains(exp) )
-                        tunel->route.append(" "+exp.cap(1));
+                        tunel->route.append(" "+exp.cap(1).replace("*",""));
                 }
                 continue;
             }
@@ -199,7 +199,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             exp.setPattern("Admin: (.+) Oper: (.+) Path:");
             if ( line.contains(exp) )
             {
-                tunel->status = exp.cap(1).simplified();
+                tunel->status = exp.cap(2).simplified();
                 continue;
             }
 
@@ -223,7 +223,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             exp.setPattern("Outgoing Interface: (.+) $");
             if ( line.contains(exp) )
             {
-                tunel->InterfaceOut = exp.cap(1).simplified();
+                tunel->InterfaceOut = estandarizarInterfaz( exp.cap(1).simplified() );
                 continue;
             }
 
@@ -231,7 +231,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             exp.setPattern("Hop\\d+: (.+)$");
             if ( line.contains(exp) )
             {
-                tunel->route.append(" "+exp.cap(1).simplified());
+                tunel->route.append(" "+exp.cap(1).replace("*","").simplified());
                 continue;
             }
 
@@ -252,13 +252,13 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             exp.setPattern("InLabel: (.+), ");
             if ( line.contains(exp) )
             {
-                tunel->InterfaceIn = exp.cap(1).simplified();
+                tunel->InterfaceIn = estandarizarInterfaz(exp.cap(1).simplified());
                 continue;
             }
             exp.setPattern("OutLabel: (.+), ");
             if ( line.contains(exp) )
             {
-                tunel->InterfaceOut = exp.cap(1).simplified();
+                tunel->InterfaceOut = estandarizarInterfaz(exp.cap(1).simplified());
                 continue;
             }
 
@@ -318,7 +318,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 if ( line.contains("Record Route") )
                     route = false;
                 else
-                    tunel->route.append( " "+line.simplified() );
+                    tunel->route.append( " "+line.replace("*","").simplified() );
                 continue;
             }
 
@@ -336,7 +336,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             {
                 tunel->origen = exp.cap(1).simplified();
                 tunel->destino = exp.cap(2).simplified();
-                tunel->TuID = exp.cap(3).simplified();
+                tunel->TuID = (tunel->role=="Head"?"Tunnel":"")+exp.cap(3).simplified();
                 continue;
             }
 
@@ -349,7 +349,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
 
                 if ( !route.contains("NONE") )
                 {
-                    tunel->route.append(exp.cap(1));
+                    tunel->route.append(exp.cap(1).replace("*",""));
                     if ( tunel->role.isEmpty() ) tunel->role = "Mid";
                     route=true;
                 }
@@ -363,7 +363,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             exp.setPattern("InLabel : (.+), .+");
             if ( line.contains(exp) )
             {
-                tunel->InterfaceIn=exp.cap(1).simplified();
+                tunel->InterfaceIn=estandarizarInterfaz(exp.cap(1).simplified());
                 continue;
             }
 
@@ -371,12 +371,22 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             exp.setPattern("OutLabel : (.+), .+");
             if ( line.contains(exp) )
             {
-                tunel->InterfaceOut=exp.cap(1).simplified();
+                tunel->InterfaceOut=estandarizarInterfaz(exp.cap(1).simplified());
                 continue;
             }
         }
     }
     finished();
+}
+
+SMplsTETunnelInfo *MplsTEtunnelsInfo::mplsTEsFromTunnel(QString interfaz)
+{
+    for ( SMplsTETunnelInfo* mi : m_lstMplsTEtunnels )
+    {
+        if ( mi->TuID == interfaz )
+            return mi;
+    }
+    return nullptr;
 }
 
 QDataStream& operator<<(QDataStream& out, const MplsTEtunnelsInfo* info)

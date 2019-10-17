@@ -113,7 +113,7 @@ public:
     QList<SIpInfo*>& interfacesIpAddressesInfo() { return interfacesIpAddressesQuery->interfacesIpAddressesInfo(); }
     QList<SOSPFInfo*>& ospfInfo() { return ospfQuery->ospfInfo(); } //
     QString& mplsLdpLocalIDInfo() { return mplsLdpDiscoveryQuery->ldpLocalIDInfo(); } //
-    QList<SMplsTETunnelInfo*>& mplsLdpTunnelsInfo() { return mplsTEtunnelsQuery->mplsTEtunnelsInfo(); } //
+    QList<SMplsTETunnelInfo*>& mplsTETunnelsInfo() { return mplsTEtunnelsQuery->mplsTEtunnelsInfo(); } //
     QList<SMplsLdpInfo*>& mplsLdpDiscoveryInfo() { return mplsLdpDiscoveryQuery->mplsLdpDiscoveryInfo(); } //
     QList<SMplsLdpInfo*>& mplsLdpNeighborsInfo() { return mplsLdpNeighborsQuery->mplsLdpNeighborsInfo(); }
     QList<SMplsLdpInfo*>& mplsLdpInterfacesInfo() { return mplsLdpInterfacesQuery->mplsLdpInterfacesInfo(); }

@@ -41,6 +41,7 @@ public:
     QList<SMplsTETunnelInfo*>& mplsTEtunnelsInfo() { return m_lstMplsTEtunnels; }
 
     //
+    SMplsTETunnelInfo *mplsTEsFromTunnel(QString interfaz);
 
     //
     friend QDataStream& operator<<(QDataStream& out, const MplsTEtunnelsInfo* info);

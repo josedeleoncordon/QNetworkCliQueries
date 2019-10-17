@@ -1414,7 +1414,7 @@ void Queries::updateInfoQueries(QList<Queries*> &lstDest, QList<Queries *> &lstO
                 if ( origin->mplsTEtunnelsQuery )
                 {
                     if ( dest->mplsTEtunnelsQuery )
-                        updateInfoList( dest->mplsLdpTunnelsInfo(), origin->mplsLdpTunnelsInfo() );
+                        updateInfoList( dest->mplsTETunnelsInfo(), origin->mplsTETunnelsInfo() );
                     else
                         dest->mplsTEtunnelsQuery = origin->mplsTEtunnelsQuery;
                 }
@@ -1738,7 +1738,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries*& que
     if ( a )
     {
         in >> query->mplsTEtunnelsQuery;
-        foreach (SMplsTETunnelInfo *i, query->mplsLdpTunnelsInfo() )
+        foreach (SMplsTETunnelInfo *i, query->mplsTETunnelsInfo() )
             i->queryParent = query;
     }
     in >> a;
