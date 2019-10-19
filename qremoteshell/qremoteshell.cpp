@@ -108,12 +108,8 @@ void QRemoteShell::host_connect()
             //conexion al gw
             //no se necesita probar con qtcpsocket si es alcanzable ya que no es el equipo objetivo
 
-            QString mie = m_gw;
-            m_gw = m_ip;
-            m_ip = mie;
-
-            qDebug() << "QRemoteShell::host_connect() conectando al GW" << m_gw;
-            m_terminal = new Terminal( m_ip,m_linuxprompt );
+            qDebug() << m_ip << "QRemoteShell::host_connect() conectando al GW" << m_gw;
+            m_terminal = new Terminal( m_ip,m_linuxprompt ); //IP es solo para separar el debug
             connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool)));
             connect(m_terminal,SIGNAL(receivedData(QString)),SLOT(m_terminal_detaReceived(QString)));
             connect(m_terminal,SIGNAL(finished()),SLOT(m_terminal_finished()));
@@ -135,29 +131,32 @@ void QRemoteShell::m_terminal_ready(bool ready)
 
 void QRemoteShell::m_nextTry()
 {    
-    qDebug() << "QRemoteShell::m_nextTry()" << m_lstConnectionProtocol.size();
+    qDebug() << m_ip << "QRemoteShell::m_nextTry()" << m_lstConnectionProtocol.size();
+
+    emit working();
 
     if ( !m_lstConnectionProtocol.isEmpty() )
     {
         m_protocol = m_lstConnectionProtocol.takeFirst();
 
-        qDebug() << "QRemoteShell::m_nextTry()" << m_protocol;
+        qDebug() << m_ip << "QRemoteShell::m_nextTry()" << m_protocol;
 
         if ( !m_gwConnected ) //m_gwConnected va a ser falso la primera conexion, o no si no se usa un gw
         {
             //conexion al equipo o gw
-            qDebug() << "aaaaa";
+
+            QString ip = m_gw.isEmpty()?m_ip:m_gw;
+
             switch (m_protocol)
             {
-            case Telnet: m_terminal->sendCommand( "telnet -l "+m_user+" "+m_ip ); break;
-            case SSH: m_terminal->sendCommand( "ssh "+m_user+"@"+m_ip ); break;
+            case Telnet: m_terminal->sendCommand( "telnet -l "+m_user+" "+ip ); break;
+            case SSH: m_terminal->sendCommand( "ssh "+m_user+"@"+ip ); break;
             default: Q_UNREACHABLE();
             }
         }
         else
         {
             //conexion del gw al equipo
-            qDebug() << "bbbbb";
             switch (m_protocol)
             {
             case Telnet: m_terminal->sendCommand( "telnet "+m_ip ); break;
@@ -168,16 +167,16 @@ void QRemoteShell::m_nextTry()
     }
     else
     {
-        qDebug() << "QRemoteShell::m_nextTry() falla la conexion ssh o telnet";
+        qDebug() << m_ip << "QRemoteShell::m_nextTry() falla la conexion ssh o telnet";
         host_disconnect();
     }
 }
 
 void QRemoteShell::m_terminal_detaReceived(QString txt)
 {    
-    m_dataReceived = txt;   
+    m_dataReceived = txt;
 
-//    qDebug().noquote() << m_ip << txt;
+    qDebug().noquote() << m_ip << txt;
 
     if ( m_hostConnected )            
         emit readyRead();    
@@ -319,7 +318,7 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
             m_nextTry();
         }
 
-        qDebug() << "m_timerNoResponse start";
+//        qDebug() << m_ip << "m_timerNoResponse start";
         m_timerNoResponse->start();
     }
 }
@@ -328,7 +327,7 @@ void QRemoteShell::finalizado()
 {
     if ( m_gw.isEmpty() )
     {
-        qDebug() << "QRemoteShell::finalizado() conectado";
+        qDebug() << m_ip << "QRemoteShell::finalizado() conectado";
         m_hostConnected=true;
         emit connected();
     }
@@ -338,11 +337,7 @@ void QRemoteShell::finalizado()
         {
             //conectado al GW, a conectarse al equipo fin
 
-            qDebug() << "QRemoteShell::finalizado() conectado al gw, a empezar conexion con el equipo";
-
-            QString mie = m_gw;
-            m_gw = m_ip;
-            m_ip = mie;
+            qDebug() << m_ip << "QRemoteShell::finalizado() conectado al gw, a empezar conexion con el equipo";
 
             m_gwConnected=true;
             m_pwdsent=false;
@@ -352,7 +347,7 @@ void QRemoteShell::finalizado()
         }
         else
         {
-            qDebug() << "QRemoteShell::finalizado() conectado al equipo a traves del gw";
+            qDebug() << m_ip << "QRemoteShell::finalizado() conectado al equipo a traves del gw";
 
             m_hostConnected=true;
             emit connected();

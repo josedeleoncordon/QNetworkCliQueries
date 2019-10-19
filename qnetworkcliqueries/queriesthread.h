@@ -47,6 +47,7 @@ public:
     QStringList equiposEnConsulta() { return m_equiposenconsulta; }
     QList<Queries*> lstQueries() { return m_lstQueries; }
     QMap<QString, QString> errorMap() { return m_errorMap; }
+    QStringList lstIPsConectadosPorGW() { return m_lstIPsConectadosPorGW; }
 
 signals:
     void newInformation();
@@ -66,6 +67,8 @@ private:
    QString m_pwdother;
    QString m_linuxprompt;
    QList<Host*> m_lstIP;
+   QStringList m_lstIPsAintentarPorGW;
+   QStringList m_lstIPsConectadosPorGW;
    QStringList lstIPsAgregadosPorVecinos;
    QStringList lstIPsConsultaAnterior;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;
@@ -78,6 +81,7 @@ private:
    int m_equiposExitosos;
    int m_interval;
    int m_conerrores;
+   int m_equiposPorGWenConsulta;
    int m_conexionerrores;
    int m_sinconexion;   
    QString m_logpath;
@@ -94,7 +98,7 @@ private:
    int m_equiposConsultados;
    QMutex m_mutex;
 
-   void conectarOtroEquipo();
+   void conectarOtroEquipo(QString ip, bool gw=false);
 };
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,

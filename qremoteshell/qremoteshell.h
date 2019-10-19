@@ -86,6 +86,7 @@ signals:
     void connected();
     void disconnected();
     void readyRead();
+    void working();
 };
 
 #endif // QREMOTESHELL_H

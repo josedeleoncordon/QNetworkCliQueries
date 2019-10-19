@@ -16,6 +16,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_equiposExitosos=0;
     m_conexionerrores=0;
     m_lstIpPos=-1;
+    m_equiposPorGWenConsulta=0;
     m_connectionprotocol = QRemoteShell::TelnetSSH;
     m_detener=false;
     m_cancelar=false;
@@ -122,19 +123,19 @@ void QueriesThread::on_timer_timeOut()
     for ( int c=0; c<equiposAconectar; c++ )
     {
         m_lstIpPos = pos+c;
-        conectarOtroEquipo();
+        conectarOtroEquipo( m_lstIP.at( m_lstIpPos )->ip );
     }
 }
 
-void QueriesThread::conectarOtroEquipo()
+void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
 {
-    QString ip = m_lstIP.at( m_lstIpPos )->ip;
-
-    qDebug() << "QueriesThread::conectarOtroEquipo()" << ip;
+    qDebug() << "QueriesThread::conectarOtroEquipo()" << ip << "GW" << gw;
+    qDebug() << ip << "QueriesThread::conectarOtroEquipo()" << "GW" << gw;
 
     Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);
     query->setCountry( m_grupo );
-    query->setGW( m_gw );
+    if ( gw )
+        query->setGW( m_gw );
     query->setOptions( m_opciones );
     query->setConnectionProtocol( m_connectionprotocol );
 
@@ -171,16 +172,21 @@ void QueriesThread::equipoConsultado(Queries *qry)
     m_timerActivity->start();
 
     m_consultaSimultaneos--;
-    m_equiposConsultados++;
 
     m_equiposenconsulta.removeOne( qry->ip() );
     m_queriesenconsulta.removeOne( qry );
+
+    if ( qry->gw().isEmpty() )
+        m_equiposConsultados++;
+    else
+        m_equiposPorGWenConsulta--;
 
     if ( qry->isConnected() )
     {
         if ( qry->successful() )
         {
-            qDebug() << "Equipo consultado exitosamente" << qry->ip() << qry->hostName()
+            qDebug() << qry->ip() << "QueriesThread::equipoConsultado Equipo consultado exitosamente"
+                     << qry->hostName()
                      << m_equipmentNeighborsConsultarVecinos;
 
             m_equiposExitosos++;
@@ -253,11 +259,15 @@ void QueriesThread::equipoConsultado(Queries *qry)
                 }
             }
             if ( !encontrado )
+            {
+                m_lstIPsConectadosPorGW.append( qry->ip() );
                 m_lstQueries.append( qry );
+            }
         }
         else
         {
             m_conerrores++;
+            qDebug() << qry->ip() << "QueriesThread::equipoConsultado -- Error";
             m_errorMap.insert( qry->ip(), "Error" );
             qry->deleteLater();
         }
@@ -266,22 +276,33 @@ void QueriesThread::equipoConsultado(Queries *qry)
     {
         if ( qry->isReachable() )
         {
+            qDebug() << qry->ip() << "QueriesThread::equipoConsultado -- Conexion Error";
             m_errorMap.insert( qry->ip(), "Conexion Error" );
             m_conexionerrores++;
         }
         else
         {
-            m_errorMap.insert( qry->ip(), "No conexion" );
-            m_sinconexion++;
+            if ( qry->gw().isEmpty() && !m_gw.isEmpty() )
+            {
+                qDebug() << qry->ip() << "QueriesThread::equipoConsultado -- se agrega a lista de equipos a consultar por GW";
+                m_lstIPsAintentarPorGW.append(qry->ip());
+            }
+            else
+            {
+                qDebug() << qry->ip() << "QueriesThread::equipoConsultado -- No conexion";
+                m_errorMap.insert( qry->ip(), "No conexion" );
+                m_sinconexion++;
+                qry->deleteLater();
+            }
         }
 
-        //si la plataforma y el nombre no estan vacios significa que se pudo consultar la informacion por SNMP
-        //por lo que no lo borramos para que pueda estar disponible a la hora de graficar
-        if ( qry->platform().isEmpty() ||
-             qry->hostName().isEmpty() )
-            qry->deleteLater();
-        else
-            m_lstQueries.append( qry );
+//        //si la plataforma y el nombre no estan vacios significa que se pudo consultar la informacion por SNMP
+//        //por lo que no lo borramos para que pueda estar disponible a la hora de graficar
+//        if ( qry->platform().isEmpty() ||
+//             qry->hostName().isEmpty() )
+//            qry->deleteLater();
+//        else
+//            m_lstQueries.append( qry );
     }
 
     emit newInformation();
@@ -289,16 +310,33 @@ void QueriesThread::equipoConsultado(Queries *qry)
     if ( !m_detener )
     {
         //Si se termino de consultar los equipos se finaliza
-        if ( m_equiposConsultados == m_lstIP.size() )
+        if ( m_equiposConsultados >= m_lstIP.size() &&
+             m_lstIPsAintentarPorGW.isEmpty() &&
+             !m_equiposPorGWenConsulta )
             emit finished(true);
         else
         {
             //conectar al siguiente equipo
-            if ( m_lstIpPos < m_lstIP.size()-1 )
+
+            qDebug() << "probando empezar uno por GW" << m_lstIPsAintentarPorGW << m_equiposPorGWenConsulta;
+
+            if ( !m_lstIPsAintentarPorGW.isEmpty() && m_equiposPorGWenConsulta < 10 )
             {
-                m_lstIpPos++;
-                conectarOtroEquipo();
+                QString IP = m_lstIPsAintentarPorGW.takeFirst();
+                qDebug() << "se intenta la conexion por GW" << IP;
+                qDebug() << IP << "se intenta la conexion por GW";
+
+                //tratamos de conectar a un equipo q fallo por medio del gw
+                m_equiposPorGWenConsulta++;
+                conectarOtroEquipo( IP, true );
             }
+            else
+                if ( m_lstIpPos < m_lstIP.size()-1 )
+                {
+                    //continuamos con la consulta normal
+                    m_lstIpPos++;
+                    conectarOtroEquipo( m_lstIP.at( m_lstIpPos )->ip );
+                }
         }
     }
     else

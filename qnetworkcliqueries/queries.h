@@ -97,6 +97,7 @@ public:
     QString platform() { return m_platform; }
     QString location() { return m_location; }
     QString brand() { return m_brand; }
+    QString gw() { return m_gw; }
     void setConnectionProtocol(QRemoteShell::ConnectionProtocol cp) { m_connectionprotol = cp; }    
     QDateTime dateTime() { return m_datetime; }
     bool operativo() { return m_operativo; }
@@ -229,8 +230,10 @@ class QNETWORKCLIQUERIES_EXPORT LstQueries
 public:
     QString grupo;
     int opcionesConsulta;
+    QString gw;
     QList<Queries*> lstQueries;
     QStringList lstIPsAconsultadas;
+    QStringList lstIPsConectadasPorGW;
     QMap<QString, QString> errorMap;
     QMap<QString, QString> queriesParametrosMap;
     QDateTime dateTime;

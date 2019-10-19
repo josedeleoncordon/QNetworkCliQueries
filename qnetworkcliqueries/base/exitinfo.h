@@ -7,9 +7,11 @@ class QNETWORKCLIQUERIES_EXPORT ExitInfo : public FuncionBase
 {
     Q_OBJECT
 protected:
+    bool m_gw;
 
 public:
     ExitInfo(QRemoteShell *terminal, QObject *parent=0);
+    void setConnectedByGW(bool enable) { m_gw = enable; }
     void exit();
 
     //

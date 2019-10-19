@@ -480,6 +480,7 @@ void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString plat
     connect(term,SIGNAL(reachable()),SLOT(processConnectToHostReachable()));
     connect(term,SIGNAL(connected()),SLOT(processConnectToHostConnected()));
     connect(term,SIGNAL(disconnected()),SLOT(processConnectToHostDisconnected()));
+    connect(term,SIGNAL(working()),SLOT(processKeepWorking()));
     term->host_connect();
 }
 
@@ -538,6 +539,7 @@ void Queries::nextProcess()
     queryTimer->setInterval( 20000 );
     queryTimer->start();
 
+    //mostrar en el debug el texto de la terminal
 //    if ( term )
 //        connect(term,SIGNAL(readyRead()),SLOT(on_term_readyRead()));
 
@@ -1010,6 +1012,7 @@ void Queries::nextProcess()
         exitQuery->setBrand(m_brand);
         exitQuery->setHostName(m_fullName);
         exitQuery->setIp(m_ip);
+        exitQuery->setConnectedByGW( !m_gw.isEmpty() );
         connect(exitQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(exitQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(exitQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -1306,7 +1309,7 @@ void Queries::createEmptyQueries()
 
 void Queries::on_term_readyRead()
 {
-    qDebug() << m_ip << term->dataReceived();
+    qDebug().noquote() << m_ip << term->dataReceived();
 }
 
 QMap<QString,QString> Queries::queriesArgumentosAceptados()
@@ -1919,6 +1922,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const LstQue
     out << lstquery->grupoconsulta;
     out << lstquery->queriesParametrosMap;
     out << lstquery->lstIPsAconsultadas;
+    out << lstquery->gw;
     return out;
 }
 
@@ -1935,6 +1939,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, LstQueries*& 
     in >> lstquery->grupoconsulta;
     in >> lstquery->queriesParametrosMap;
     in >> lstquery->lstIPsAconsultadas;
+    in >> lstquery->gw;
     return in;
 }
 
@@ -1961,7 +1966,8 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const LstQueries &info)
     dbg.space() << "Fecha" << info.dateTime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
     dbg.space() << "Label" << info.label << "\n";
     dbg.space() << "Grupo" << info.grupoconsulta << "\n";
-    dbg.space() << "OpcionesConsulta" << info.opcionesConsulta << "\n\n";
+    dbg.space() << "OpcionesConsulta" << info.opcionesConsulta << "\n";
+    dbg.space() << "GW" << info.gw << "\n\n";
     dbg.space() << "ParametrosMap:\n";
     QMapIterator<QString, QString> ipar(info.queriesParametrosMap);
     while (ipar.hasNext())
@@ -1985,6 +1991,9 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const LstQueries &info)
     dbg.space() << "--\n";
     dbg.space() << "\nIPs consultadas:" << info.lstIPsAconsultadas.size() << "\n";
     dbg.space() << info.lstIPsAconsultadas;
+    dbg.space() << "--\n";
+    dbg.space() << "\nIPs consultadas por medio de GW:" << info.lstIPsConectadasPorGW.size() << "\n";
+    dbg.space() << info.lstIPsConectadasPorGW;
     return dbg.maybeSpace();
 }
 
