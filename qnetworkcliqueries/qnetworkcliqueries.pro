@@ -26,9 +26,6 @@ HEADERS += \
     base/mplsldpinfo.h \
     base/ospfinfo.h \
     base/piminfo.h \
-#    base/placeinfo.h \
-    bdhosts.h \
-    bdhostsupdater.h \
     factory.h \
     funciones.h \
     properties.h \
@@ -41,7 +38,6 @@ HEADERS += \
     Huawei/ospfinfohuawei.h \
     RAD/macinforad.h \
     base/config.h \    
-    dbhosts.h \
     Cisco/arpinfocisco.h \
     Huawei/arpinfohuawei.h \
     qnetworkcliqueries_global.h
@@ -61,9 +57,6 @@ SOURCES += \
     base/mplsldpinfo.cpp \
     base/ospfinfo.cpp \
     base/piminfo.cpp \
-#    base/placeinfo.cpp \
-    bdhosts.cpp \
-    bdhostsupdater.cpp \
     factory.cpp \
     funciones.cpp \
     properties.cpp \
@@ -76,6 +69,5 @@ SOURCES += \
     Huawei/ospfinfohuawei.cpp \
     RAD/macinforad.cpp \
     base/config.cpp \    
-    dbhosts.cpp \
     Cisco/arpinfocisco.cpp \
     Huawei/arpinfohuawei.cpp

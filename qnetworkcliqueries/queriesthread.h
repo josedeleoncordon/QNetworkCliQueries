@@ -24,7 +24,7 @@ public:
     void setPrincipalUserFirst(bool principalfirst) { m_principaluserfirst=principalfirst; }
     void setLinuxPrompt(QString prompt) { m_linuxprompt = prompt; }
     void setConnectionProtocol( QRemoteShell::ConnectionProtocol cp ) { m_connectionprotocol = cp; }
-    void setLstIP(QStringList lst);
+    void setLstIP(QStringList lst) { m_lstIP = lst; }
     void setLstIPsConsultaAnterior(QStringList lst) { lstIPsConsultaAnterior=lst; }
     void setConsultaSoloEquiposNuevos(bool enable) { m_soloequiposnuevos = enable; }
     void setInterval(int interval) { m_interval = interval; }
@@ -32,6 +32,7 @@ public:
     void setMaxParalelos(int max) { m_maxparalelos = max; }
     void setOpciones(int opciones) { m_opciones = opciones; }
     void setEquipmentNeighborsConsultarVecinos(bool consultar) { m_equipmentNeighborsConsultarVecinos=consultar; }
+    void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
 
     void iniciar();
     void detener(); //no se consultan nuevos equipos y espera a que se terminen las consultas ya en ejeucución.
@@ -66,10 +67,9 @@ private:
    QString m_userother;
    QString m_pwdother;
    QString m_linuxprompt;
-   QList<Host*> m_lstIP;
+   QStringList m_lstIP;
    QStringList m_lstIPsAintentarPorGW;
    QStringList m_lstIPsConectadosPorGW;
-   QStringList lstIPsAgregadosPorVecinos;
    QStringList lstIPsConsultaAnterior;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;
    int m_lstIpPos;
@@ -88,6 +88,7 @@ private:
    bool m_detener;
    bool m_cancelar;
    bool m_equipmentNeighborsConsultarVecinos;
+   bool m_consultarVecinosOSPFMismoDominio;
    bool m_soloequiposnuevos;
    bool m_principaluserfirst;
    QList<Queries*> m_lstQueries;
@@ -97,6 +98,7 @@ private:
    int m_consultaSimultaneos;
    int m_equiposConsultados;
    QMutex m_mutex;
+   QMap<QString,QString> m_mapOSPFVecinosInterfazDondeVienen;
 
    void conectarOtroEquipo(QString ip, bool gw=false);
 };

@@ -102,10 +102,7 @@ public:
     QDateTime dateTime() { return m_datetime; }
     bool operativo() { return m_operativo; }
     QString ip() { return m_ip; }
-
-    //se debio establecer m_lstIPsGeneralAconectar para poder verificar equipos que no se encuentran en el listado de equipos
-    //a conectar
-    QList<SEquipmentNeighborsInfo*> equipmentNeighborsNuevosEquipos() { return m_lstEquipmentNeighborsNuevosVecinos; }
+    QString ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; }
 
     QList<SEquipmentNeighborsInfo*>& equipmentNeighborsInfo() { return equipmentNeighborsInfoQuery->equipmentNeighborsInfo(); }
     QList<SInterfaceInfo*>& interfacesInfo() { return interfacesInfoQuery->interfacesInfo(); }
@@ -140,7 +137,7 @@ public:
     void setIP(QString IP) { m_ip = IP; }
     void setHostName(QString NAME) { m_name = NAME; }
     void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }    
-    void setLstHostsGeneralAconectar( QList<Host*> lst ) { m_lstHostsGeneralAconectar = lst; }
+    void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; }
     void createEmptyQueries();
     void clear();
 
@@ -161,7 +158,6 @@ protected slots:
     void processConnectToHostConnected();
     void processConnectToHostDisconnected();
     void processPlatform();
-    void processEquipmentNeighbors();
     void processConfigFinished();
     void processFinished();
     void processKeepWorking();
@@ -208,10 +204,7 @@ protected:
     QString m_linuxprompt;
     bool m_conectionSecondTriedOtherUserPassword;
 
-    //si se busca informacion de EquipmentNeighbors sirve para saber el listado de equipos al que nos conectaremos y devolver solo las
-    //nuevas IPs. Esto para poder descubrir equipos nuevos a los que no nos conectariamos
-    QList<Host*> m_lstHostsGeneralAconectar;
-    QList<SEquipmentNeighborsInfo*> m_lstEquipmentNeighborsNuevosVecinos;
+    QString m_ipOinterfazMismoDominioOSPFdondeSeViene;
 
     void iniciar();
     void createQueries(Queries::Opcion option = Queries::Null);    
@@ -238,7 +231,7 @@ public:
     QMap<QString, QString> queriesParametrosMap;
     QDateTime dateTime;
     QString label;
-    QString grupoconsulta;
+    QString tipoconsulta;
 
     friend QDataStream& operator<<(QDataStream& out, const LstQueries* lstquery);
     friend QDataStream& operator>>(QDataStream& in, LstQueries*& lstquery);

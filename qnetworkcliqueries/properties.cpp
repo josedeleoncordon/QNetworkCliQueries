@@ -48,6 +48,10 @@ void Properties::loadSettings()
     topologiaconfpath = settings.value("topologiaconfpath").toString();
     topologiaiconpath = settings.value("topologiaiconpath").toString();
     settings.endGroup();
+
+    settings.beginGroup("GroupRoots");
+    mapGrupoRaizIP = settings.value("mapGrupoRaizIP").toMap();
+    settings.endGroup();
 }
 
 void Properties::saveSettings()
@@ -71,6 +75,10 @@ void Properties::saveSettings()
     settings.setValue("MnemonicsPath",mnemonicspath);
     settings.setValue("topologiaconfpath",topologiaconfpath);
     settings.setValue("topologiaiconpath",topologiaiconpath);
+    settings.endGroup();
+
+    settings.beginGroup("GroupRoots");
+    settings.setValue("mapGrupoRaizIP",mapGrupoRaizIP);
     settings.endGroup();
 }
 

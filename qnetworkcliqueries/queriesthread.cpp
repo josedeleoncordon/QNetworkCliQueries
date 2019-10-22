@@ -1,6 +1,5 @@
 #include "queriesthread.h"
 #include "funciones.h"
-#include "bdhosts.h"
 #include "properties.h"
 
 QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
@@ -22,6 +21,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_cancelar=false;
     m_principaluserfirst=true;
     m_soloequiposnuevos=false;
+    m_consultarVecinosOSPFMismoDominio=false;
     m_equipmentNeighborsConsultarVecinos=false;
 
     m_user = Properties::Instance()->user;
@@ -33,11 +33,6 @@ QueriesThread::~QueriesThread()
 {
     //TODO verificar porq truena al eliminar m_lstIP
 //    qDeleteAll(m_lstIP);
-}
-
-void QueriesThread::setLstIP(QStringList lst)
-{
-    m_lstIP = BDHosts::instance()->lstIPs2lstHosts( lst );
 }
 
 void QueriesThread::iniciar()
@@ -73,6 +68,7 @@ void QueriesThread::detener()
 {
     m_timer->stop();
     m_detener=true;
+    m_equipmentNeighborsConsultarVecinos=false;
 }
 
 void QueriesThread::cancelar()
@@ -123,24 +119,22 @@ void QueriesThread::on_timer_timeOut()
     for ( int c=0; c<equiposAconectar; c++ )
     {
         m_lstIpPos = pos+c;
-        conectarOtroEquipo( m_lstIP.at( m_lstIpPos )->ip );
+        conectarOtroEquipo( m_lstIP.at( m_lstIpPos ) );
     }
 }
 
 void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
 {
-    qDebug() << "QueriesThread::conectarOtroEquipo()" << ip << "GW" << gw;
     qDebug() << ip << "QueriesThread::conectarOtroEquipo()" << "GW" << gw;
 
     Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);
     query->setCountry( m_grupo );
     if ( gw )
         query->setGW( m_gw );
+    if ( m_consultarVecinosOSPFMismoDominio )
+        query->setIpOInterfazMismoDominioOSPFDondeSeViene( m_mapOSPFVecinosInterfazDondeVienen.value( ip ) );
     query->setOptions( m_opciones );
     query->setConnectionProtocol( m_connectionprotocol );
-
-    if ( m_equipmentNeighborsConsultarVecinos )
-        query->setLstHostsGeneralAconectar( m_lstIP );
 
     QThread *thr = new QThread(this);
     query->moveToThread( thr );    
@@ -193,59 +187,82 @@ void QueriesThread::equipoConsultado(Queries *qry)
 
             if ( m_equipmentNeighborsConsultarVecinos )
             {
-//                //se agregan los vecinos de equipmentNeighbors y los IDs de OSPF a la consulta
-//                //la verificación de nombre y plataforma se realiza en el hilo correspondiente
-//                //***********************************************************************************************
-//                foreach (SEquipmentNeighborsInfo *equipmentNeighbors, qry->equipmentNeighborsNuevosEquipos())
-//                {
-//                    bool encontrado=false;
-//                    QString equipmentNeighborsnombre = simplicateName( equipmentNeighbors->nombreequipo );
-//                    foreach (Host *host, m_lstIP)
-//                    {
-//                        if ( host->nombre == equipmentNeighborsnombre )
-//                        {
-//                            encontrado=true;
-//                            break;
-//                        }
-//                    }
-//                    if ( !encontrado )
-//                    {
-//                        Host *host = new Host;
-//                        host->ip = equipmentNeighbors->ip;
-//                        host->nombre = equipmentNeighborsnombre;
-//                        m_lstIP.append( host );
-//                        lstIPsAgregadosPorVecinos.append( host->ip );
-
-//                        qDebug() << "equipmentNeighbors Equipo agregado" << equipmentNeighbors->nombreequipo << equipmentNeighbors->ip;
-//                    }
-//                }
-
-                for ( SOSPFInfo *o : qry->ospfInfo() )
+                //agregando vecinos de cdp/llp a la consulta
+                foreach (SEquipmentNeighborsInfo *e, qry->equipmentNeighborsInfo())
                 {
-                    bool encontrado=false;
-                    foreach (Host *host, m_lstIP)
+                    if ( !m_lstIP.contains(e->ip) &&
+                         !( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( e->ip ) ) )
                     {
-                        if ( host->ip == o->id ||
-                             ( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( o->id ) ) )
+                        if ( m_consultarVecinosOSPFMismoDominio )
                         {
-                            encontrado=true;
-                            break;
+                            if ( !qry->ipOinterfazMismoDominioOSPFDondeSeViene().isEmpty() )
+                            {
+                                if ( continuarPorsiguienteInterfazMismoDominioOSPF( qry,
+                                                                                    qry->
+                                                                                    ipOinterfazMismoDominioOSPFDondeSeViene(),
+                                                                                    e->interfazestesalida ) )
+                                {
+                                    //siguientes equipos. Trae interfaz de donde viene, se agrega el siguiente vecino con su
+                                    //la interfaz de donde vendria
+                                    m_lstIP.append( e->ip );
+                                    m_mapOSPFVecinosInterfazDondeVienen.insert( e->ip, e->interfazotroentrada );
+                                }
+                            }
+                            else
+                            {
+                                //primer equipo, no trae interfaz de donde se viene
+                                //se agrega este vecino a la consulta y con sus interfaz de donde vendria
+                                m_lstIP.append( e->ip );
+                                m_mapOSPFVecinosInterfazDondeVienen.insert( e->ip, e->interfazotroentrada );
+                            }
                         }
-                    }
-                    if ( !encontrado )
-                    {
-                        Host *host = new Host;
-                        host->ip = o->id;
-                        m_lstIP.append( host );
-                        lstIPsAgregadosPorVecinos.append( o->id );
-                        if ( !m_timer->isActive() )
-                            m_timer->start();
+                        else
+                            //se agrega a la consulta
+                            m_lstIP.append( e->ip );
                     }
                 }
-                //***********************************************************************************************
+
+                //agregando los vecinos de ospf que no se agregaron por cdp/llp a la consulta
+                for ( SOSPFInfo *o : qry->ospfInfo() )
+                {
+                    if ( !m_lstIP.contains(o->id) &&
+                         !( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( o->id ) ) )
+                    {
+                        if ( m_consultarVecinosOSPFMismoDominio )
+                        {
+                            QString ipInterfazSiguiente = qry->interfacesIpAddressesQuery->ipFromInterfaz(o->interfaz);
+                            if ( !qry->ipOinterfazMismoDominioOSPFDondeSeViene().isEmpty() )
+                            {
+                                if ( continuarPorsiguienteInterfazMismoDominioOSPF( qry,
+                                                                                    qry->
+                                                                                    ipOinterfazMismoDominioOSPFDondeSeViene(),
+                                                                                    ipInterfazSiguiente ) )
+                                {
+                                    //siguientes equipos. Trae interfaz de donde viene, se agrega el siguiente vecino con su
+                                    //la interfaz de donde vendria
+                                    m_lstIP.append( o->id );
+                                    m_mapOSPFVecinosInterfazDondeVienen.insert( o->id, ipInterfazSiguiente );
+                                }
+                            }
+                            else
+                            {
+                                //primer equipo, no trae interfaz de donde se viene
+                                //se agrega este vecino a la consulta y con sus interfaz de donde vendria
+                                m_lstIP.append( o->id );
+                                m_mapOSPFVecinosInterfazDondeVienen.insert( o->id, ipInterfazSiguiente );
+                            }
+                        }
+                        else
+                            //se agrega a la consulta
+                            m_lstIP.append( o->id );
+                    }
+                }
+
+                if ( !m_timer->isActive() )
+                    m_timer->start();
             }
 
-            //si ya hubiera otra consulta del mismo equipo se elimina porque puedo haberse realizado debido a que
+            //si ya hubiera otra consulta del mismo equipo se elimina porque pudo haberse realizado debido a que
             //se agrego el equipo por equipmentNeighbors cuando aun no existia el mismo, esto ya que hay varios equipos en consulta a la vez
             bool encontrado=false;
             foreach (Queries *q, lstQueries())
@@ -323,7 +340,6 @@ void QueriesThread::equipoConsultado(Queries *qry)
             if ( !m_lstIPsAintentarPorGW.isEmpty() && m_equiposPorGWenConsulta < 10 )
             {
                 QString IP = m_lstIPsAintentarPorGW.takeFirst();
-                qDebug() << "se intenta la conexion por GW" << IP;
                 qDebug() << IP << "se intenta la conexion por GW";
 
                 //tratamos de conectar a un equipo q fallo por medio del gw
@@ -335,7 +351,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
                 {
                     //continuamos con la consulta normal
                     m_lstIpPos++;
-                    conectarOtroEquipo( m_lstIP.at( m_lstIpPos )->ip );
+                    conectarOtroEquipo( m_lstIP.at( m_lstIpPos ) );
                 }
         }
     }

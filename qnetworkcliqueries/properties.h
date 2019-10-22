@@ -5,8 +5,6 @@
 
 #include "qnetworkcliqueries_global.h"
 
-
-
 class QNETWORKCLIQUERIES_EXPORT Properties
 {
     public:
@@ -25,7 +23,9 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString topologiaconfpath;
         QString topologiaiconpath;
 
-        QMap<QString,QString> funcionesargumentos;
+        QMap<QString,QString> mapFuncionesArgumentos;
+
+        QMap<QString,QVariant> mapGrupoRaizIP;
 
     private:
         static Properties *m_instance;

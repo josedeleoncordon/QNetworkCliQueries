@@ -4,7 +4,6 @@
 #include <QEventLoop>
 
 #include "funciones.h"
-#include "bdhosts.h"
 #include "factory.h"
 #include "properties.h"
 
@@ -522,6 +521,18 @@ void Queries::nextProcess()
                 borrarTerminal();
                 crearFuncionesFaltantes();
 
+                //si hay informacion de OSPF se cambia la IP de la interfaz que se conoce por cdp/lldp
+                //y se reemplaza por el ID
+                for ( SEquipmentNeighborsInfo *e : equipmentNeighborsInfo() )
+                    for ( SOSPFInfo *oi : ospfInfo() )
+                    {
+                        if ( oi->interfaz == e->interfazestesalida )
+                        {
+                            e->ip = oi->id;
+                            break;
+                        }
+                    }
+
                 emit finished(this);
                 disconnect();
 
@@ -594,7 +605,7 @@ void Queries::nextProcess()
         equipmentNeighborsInfoQuery->setXRLocation(m_xr_location);
         equipmentNeighborsInfoQuery->setHostName(m_fullName);
         equipmentNeighborsInfoQuery->setIp(m_ip);
-        connect(equipmentNeighborsInfoQuery,SIGNAL(processFinished()),SLOT(processEquipmentNeighbors()));
+        connect(equipmentNeighborsInfoQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(equipmentNeighborsInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(equipmentNeighborsInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
         equipmentNeighborsInfoQuery->getEquipmentNeighborsInfo();
@@ -1157,46 +1168,6 @@ void Queries::processPlatform()
         m_location=pi->location();
         m_equipmenttype=equipmentOSFromPlatform( m_platform );
     }
-    nextProcess();
-}
-
-void Queries::processEquipmentNeighbors()
-{
-    queryTimer->stop();
-    m_contieneconsultas=true;
-
-    if ( !m_lstHostsGeneralAconectar.isEmpty() )
-    {
-        foreach (SEquipmentNeighborsInfo *vecino, equipmentNeighborsInfo())
-        {
-            //se verifica por partes para no gastar recursos, si la plataforma y nombre del equipo no son validos
-            //no recorremos todo el listado de equipos
-            if ( equipmentNeighborsVecinoValidarEquipo( vecino ) )
-            {
-                QString equipmentNeighborsnombre = simplicateName(vecino->nombreequipo);
-                QString equipmentNeighborsgrupo = BDHosts::instance()->hostCountry( equipmentNeighborsnombre );
-                if ( equipmentNeighborsgrupo == m_country || equipmentNeighborsgrupo.isEmpty() )
-                {
-                    //nombre, plataforma y grupo son correctos
-
-                    //verificamos si el equipo que tiene la IP ya esta agregado a la lista con otra IP
-                    //casos de equipos con varias interfaces L3
-                    bool encontrado=false;
-                    foreach (Host *host, m_lstHostsGeneralAconectar)
-                    {
-                        if ( host->nombre == equipmentNeighborsnombre )
-                        {
-                            encontrado=true;
-                            break;
-                        }
-                    }
-                    if ( !encontrado )
-                        m_lstEquipmentNeighborsNuevosVecinos.append( vecino );
-                }
-            }
-        }
-    }
-
     nextProcess();
 }
 
@@ -1919,7 +1890,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const LstQue
     out << lstquery->errorMap;
     out << lstquery->dateTime;
     out << lstquery->label;
-    out << lstquery->grupoconsulta;
+    out << lstquery->tipoconsulta;
     out << lstquery->queriesParametrosMap;
     out << lstquery->lstIPsAconsultadas;
     out << lstquery->gw;
@@ -1936,7 +1907,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, LstQueries*& 
     in >> lstquery->errorMap;
     in >> lstquery->dateTime;
     in >> lstquery->label;
-    in >> lstquery->grupoconsulta;
+    in >> lstquery->tipoconsulta;
     in >> lstquery->queriesParametrosMap;
     in >> lstquery->lstIPsAconsultadas;
     in >> lstquery->gw;
@@ -1965,7 +1936,7 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const LstQueries &info)
     dbg.space() << "Grupo" << info.grupo << "\n";
     dbg.space() << "Fecha" << info.dateTime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
     dbg.space() << "Label" << info.label << "\n";
-    dbg.space() << "Grupo" << info.grupoconsulta << "\n";
+    dbg.space() << "Grupo" << info.tipoconsulta << "\n";
     dbg.space() << "OpcionesConsulta" << info.opcionesConsulta << "\n";
     dbg.space() << "GW" << info.gw << "\n\n";
     dbg.space() << "ParametrosMap:\n";
