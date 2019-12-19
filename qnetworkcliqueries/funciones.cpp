@@ -769,10 +769,13 @@ QString estandarizarProtocoloEnrutamiento(QString proto)
     return proto;
 }
 
-bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *qq,
+bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *q,
                                                     QString interfazOipDondeViene,
                                                     QString interfazSiguienteEquipo )
 {
+    if ( interfazOipDondeViene.isEmpty() ) //primer equipo
+        return true;
+
     QString ospfProceso;
     QString interfazDeDondeSeViene;
     QRegExp expIP("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
@@ -782,7 +785,7 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *qq,
     else
     {
         //como se paso una ip de ospf hay que buscar la interfaz a la que pertenece
-        for ( SIpInfo *ii : qq->interfacesIpAddressesInfo() )
+        for ( SIpInfo *ii : q->interfacesIpAddressesInfo() )
         {
             if ( sonIPsParejaMascara30_31( ii->ip, interfazOipDondeViene ) )
             {
@@ -795,11 +798,13 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *qq,
         return false;
     }
 
+//    qDebug() << "interfazOipDondeViene" << interfazOipDondeViene << "interfazDeDondeSeViene" << interfazDeDondeSeViene;
+
     //buscamos el proceso de la interfaz de donde se viene
-    interfazDeDondeSeViene = interfaceToPortChannelInterface(qq->portChannelInfo(),
+    interfazDeDondeSeViene = interfaceToPortChannelInterface(q->portChannelInfo(),
                                                              interfazDeDondeSeViene,
-                                                             qq->platform());
-    for ( SOSPFInfo *oi : qq->ospfInfo() )
+                                                             q->platform());
+    for ( SOSPFInfo *oi : q->ospfInfo() )
     {
         if ( oi->interfaz == interfazDeDondeSeViene )
         {
@@ -809,15 +814,15 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *qq,
     }
     if ( ospfProceso.isEmpty() )
     {
-        qDebug() << "Error interfaz de donde se viene no tiene informacion de ospf";
+        qDebug() << "Error interfaz de donde se viene no tiene informacion de ospf" << interfazDeDondeSeViene;
         return false;
     }
 
     //verificamos si la interfaz siguiente pertenece al mismo proceso que la interfaz donde se viene
-    interfazSiguienteEquipo = interfaceToPortChannelInterface(qq->portChannelInfo(),
+    interfazSiguienteEquipo = interfaceToPortChannelInterface(q->portChannelInfo(),
                                                               interfazSiguienteEquipo,
-                                                              qq->platform());
-    for ( SOSPFInfo *oi : qq->ospfInfo() )
+                                                              q->platform());
+    for ( SOSPFInfo *oi : q->ospfInfo() )
     {
         if ( oi->interfaz == interfazSiguienteEquipo )
         {

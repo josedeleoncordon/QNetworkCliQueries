@@ -92,6 +92,7 @@ public:
     bool isConnected() { return m_connected; }
     bool successful() { return !m_error; }
     bool isReachable() { return m_ipreachable; }
+    QString id() { return m_id; }
     QString hostName() { return m_name; }
     QString country() { return m_country; }
     QString platform() { return m_platform; }
@@ -126,6 +127,7 @@ public:
     QStringList& bgpNeighborsInfo() { return bgpNeighborsQuery->bgpNeighborInfo(); } //
     QList<SIpRouteInfo*>& ipRoutesInfo() { return ipRoutesQuery->ipRouteInfo(); }
 
+    void setId(QString id) { m_id = id; }
     void setGW(QString GW);
     void updateDate() { m_datetime = QDateTime::currentDateTime(); }
     void setKeepAlive(bool enable);
@@ -186,6 +188,7 @@ protected:
 
     QString m_name;
     QString m_fullName;
+    QString m_id;
     QString m_country;
     QString m_platform;
     QString m_equipmenttype;

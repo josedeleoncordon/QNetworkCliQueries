@@ -104,6 +104,6 @@ private:
 };
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,
-                                          QStringList &lstIPs, short modo);
+                                          QStringList &lstIPs);
 
 #endif // QUERIESTHREAD_H

@@ -176,7 +176,7 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
 {    
     m_dataReceived = txt;
 
-    qDebug().noquote() << m_ip << txt;
+//    qDebug().noquote() << m_ip << txt;
 
     if ( m_hostConnected )            
         emit readyRead();    

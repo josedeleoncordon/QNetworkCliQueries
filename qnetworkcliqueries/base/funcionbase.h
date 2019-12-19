@@ -25,7 +25,9 @@ struct InfoBase
 {
     QDateTime datetime;
     bool operativo;
-    Queries* queryParent;   
+    Queries* queryParent;
+
+    QString id;
 
     InfoBase() { operativo=true; queryParent=nullptr; }
     InfoBase(const InfoBase &other);

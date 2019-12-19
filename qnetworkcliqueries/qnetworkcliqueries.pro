@@ -14,6 +14,7 @@ CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 HEADERS += \
     base/exitinfo.h \
     base/mplstetunnelsinfo.h \
+    base/mplsvpnl2info.h \
     base/portchannelsinfo.h \
     base/vrfinfo.h \
     base/arpinfo.h \
@@ -45,6 +46,7 @@ HEADERS += \
 SOURCES += \
     base/exitinfo.cpp \
     base/mplstetunnelsinfo.cpp \
+    base/mplsvpnl2info.cpp \
     base/portchannelsinfo.cpp \
     base/vrfinfo.cpp \
     base/arpinfo.cpp \

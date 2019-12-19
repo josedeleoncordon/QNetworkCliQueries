@@ -1,0 +1,108 @@
+sh ethernet service instance detail | i Service Instance ID|Encapsulation: dot1q|Bridge-domain:|Associated Interface
+
+sh xconnect all 
+
+UP pri   ac Te0/3/0:102(Eth VLAN)        UP mpls 172.17.24.19:504102          UP
+UP pri   ac Te0/3/0:104(Eth VLAN)        UP mpls 172.19.16.2:504104           UP
+UP pri   bd 2500                         UP  vfi VLAN2500                     UP
+UP pri   bd 3737                         UP  vfi VLAN3737                     UP
+UP pri   bd 3804                         UP  vfi VLAN3804                     UP
+
+Gi0/0/0:3998   --> instancia
+
+
+
+
+
+show mpls l2transport vc detail
+
+Preferred path: Tunnel50757,   --> ruta preferida, el tunel que queremos
+
+
+
+
+
+show l2vpn bridge-domain 
+
+Bridge group: L3SERVICES, bridge-domain: VLAN520, id: 47, state: up, ShgId: 0, MSTi: 0
+  Aging: 300 s, MAC limit: 4000, Action: none, Notification: syslog
+  Filter MAC addresses: 0
+  ACs: 1 (1 up), VFIs: 1, PWs: 2 (2 up), PBBs: 0 (0 up), VNIs: 0 (0 up)
+  List of ACs:
+    BV520, state: up, BVI MAC addresses: 1
+  List of Access PWs:
+  List of VFIs:
+    VFI V3LAN520 (up)
+      Neighbor 172.17.28.139 pw-id 520, state: up, Static MAC addresses: 0
+      Neighbor 172.17.28.219 pw-id 520, state: up, Static MAC addresses: 0
+  List of Access VFIs:
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+XR:
+  
+interfaz tiene subinterfaz:
+  
+sh run int Bundle-Ether402.3229     --> L2 hacia equipo 1, aqui se levanta el xconnect hacia equipo 2 a traves de mpls
+interface Bundle-Ether402.3229 l2transport
+ description COCOIFX10043982C|IFX|DIAN         
+ encapsulation dot1q 3229
+ rewrite ingress tag pop 1 symmetric
+!
+
+xconnect group L2VPN_SERVICES
+  p2p L2VPN-12
+   interface Bundle-Ether403.3229
+   neighbor ipv4 172.17.28.219 pw-id 5721301
+   !
+  !
+
+
+  
+bridge-domain
+
+bridge-domain VLAN839
+   mtu 9180
+   vfi VLAN839
+    neighbor 172.17.28.88 pw-id 57839001
+     pw-class MPLS_DEFAULT
+    !
+    neighbor 172.17.28.143 pw-id 57839002
+     pw-class MPLS_DEFAULT
+    !
+   !
+   routed interface BVI839   <----- para levantar el pw para la svi local
+   
+   ó
+   
+   interface Bundle-Ether403.2979  
+   !
+  !
+  
+  
+  
+RO-PRA-A9K-EDG1
+ROCOBOGTERASR900601
+ROBOGWBPASR900601
+
+
+
+
+
+
+

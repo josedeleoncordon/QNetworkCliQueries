@@ -56,6 +56,12 @@ QDataStream& operator>>(QDataStream& in, SInterfaceInfo*& data)
     return in;
 }
 
+SInterfaceVlans::SInterfaceVlans(const SInterfaceVlans &other)
+{
+    interfaz = other.interfaz;
+    vlans = other.vlans;
+}
+
 QDataStream& operator<<(QDataStream& out, const SInterfaceVlans* data)
 {
     out << data->interfaz;
@@ -71,6 +77,42 @@ QDataStream& operator>>(QDataStream& in, SInterfaceVlans*& data)
     data = new SInterfaceVlans;
     in >> data->interfaz;
     in >> data->vlans;
+    //infobase
+    in >> data->datetime;
+    in >> data->operativo;
+    return in;
+}
+
+SInterfaceIOSServiceInstanceInfo::SInterfaceIOSServiceInstanceInfo(const SInterfaceIOSServiceInstanceInfo &other)
+{
+   interfaz = other.interfaz;
+   serviceinstance = other.serviceinstance;
+   description = other.description;
+   vlan = other.vlan;
+   bridgedomain = other.bridgedomain;
+}
+
+QDataStream& operator<<(QDataStream& out, const SInterfaceIOSServiceInstanceInfo* data)
+{
+    out << data->interfaz;
+    out << data->serviceinstance;
+    out << data->description;
+    out << data->vlan;
+    out << data->bridgedomain;
+    //infobase
+    out << data->datetime;
+    out << data->operativo;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, SInterfaceIOSServiceInstanceInfo*& data)
+{
+    data = new SInterfaceIOSServiceInstanceInfo;
+    in >> data->interfaz;
+    in >> data->serviceinstance;
+    in >> data->description;
+    in >> data->vlan;
+    in >> data->bridgedomain;
     //infobase
     in >> data->datetime;
     in >> data->operativo;
@@ -154,6 +196,50 @@ void updateInfoList(QList<SInterfaceVlans *> &lstDest, QList<SInterfaceVlans *> 
                 dest->datetime = origin->datetime;
                 dest->operativo = true;
                 dest->vlans = origin->vlans;
+                encontrado=true;
+                break;
+            }
+        }
+        if ( !encontrado )
+            //no se encontro, se agrega
+            lstDest.append( origin );
+    }
+}
+
+void updateInfoList(QList<SInterfaceIOSServiceInstanceInfo*> &lstDest, QList<SInterfaceIOSServiceInstanceInfo*> &lstOrigin )
+{
+    //actualiza la lista anterior con la información de la nueva
+    //origen = nuevo
+    //destino = anterior
+
+    //borramos los datos anteriores que tengan mas de 30 dias
+    for ( int c=0; c<lstDest.size(); )
+    {
+        SInterfaceIOSServiceInstanceInfo *dest = lstDest.at(c);
+        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+             lstDest.removeAt( c );
+        else
+        {
+            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            c++;
+        }
+    }
+
+    //actualizamos los datos del anterior con la nueva, se agrega la nueva
+    foreach ( SInterfaceIOSServiceInstanceInfo *origin, lstOrigin )
+    {
+        bool encontrado=false;
+        foreach ( SInterfaceIOSServiceInstanceInfo *dest, lstDest )
+        {
+            if ( origin->interfaz == dest->interfaz &&
+                 origin->serviceinstance == dest->serviceinstance )
+            {
+                //Si se encontro, actualizamos los datos
+                dest->datetime = origin->datetime;
+                dest->operativo = true;
+                dest->description = origin->description;
+                dest->vlan = origin->vlan;
+                dest->bridgedomain = origin->bridgedomain;
                 encontrado=true;
                 break;
             }
@@ -306,6 +392,20 @@ void InterfaceInfo::getInterfacesDescriptions()
         termSendText("display interface description");
     else
         finished();
+}
+
+void InterfaceInfo::getInterfacesServiceInstancesInfo()
+{
+    if ( m_brand != "Cisco" )
+    {
+        qDebug() << "InterfaceInfo::getInterfacesServiceInstancesInfo()" << m_brand << "no soportado";
+        finished();
+        return;
+    }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_ServiceInstances()));
+    termSendText("sh ethernet service instance detail | i Service Instance ID|Encapsulation: dot1q|Bridge-domain:|Associated Interface|Description:");
 }
 
 void InterfaceInfo::on_term_receiveText_Info()
@@ -725,7 +825,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
         term->disconnectReceiveTextSignalConnections();
         m_continueShowVlan=true;
 		connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_PermitedVlansBridge()));
-        termSendText("show ethernet service interface detail | i Interface:|Bridge-domains:");
+        termSendText("sh ethernet service instance detail | i Service Instance ID|Encapsulation: dot1q|Bridge-domain:|Associated Interface");
     }
     else
         finished();
@@ -791,27 +891,36 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansBridge()
     QStringList lines = txt.split("\n");
 
     SInterfaceVlans *iv = nullptr;
+    QString lastInterface;
     for (QString line : lines)
     {
         line = line.simplified();
 
-        exp.setPattern("Interface: (.+)\\, Type:.+"); //Interface: GigabitEthernet0/1, Type: UNI
+        exp.setPattern("Associated Interface: (.+)$"); //Associated Interface: GigabitEthernet0/0/0
         if ( line.contains(exp) )
         {
-            iv = new SInterfaceVlans;
-            iv->queryParent = m_queriesParent;
-            iv->interfaz = estandarizarInterfaz( exp.cap(1) );
-            iv->datetime = QDateTime::currentDateTime();
-            iv->operativo = true;
-            continue;
+            QString interfaz = estandarizarInterfaz( exp.cap(1) );
+            if ( lastInterface != interfaz )
+            {
+                iv = new SInterfaceVlans;
+                iv->queryParent = m_queriesParent;
+                iv->interfaz = interfaz;
+                iv->datetime = QDateTime::currentDateTime();
+                iv->operativo = true;
+                m_lstInterfacesPermitedVlans.append( iv );
+                lastInterface = interfaz;
+
+                continue;
+            }
         }
 
-        exp.setPattern("Bridge-domains: (.+)$"); //Bridge-domains: 1-5,7,10-11,14-16,18-22,24,28-29,32,34
+        if ( !iv )
+            continue;
+
+        exp.setPattern("Encapsulation: dot1q (.+) "); //Encapsulation: dot1q 1194 vlan protocol type 0x8100
         if ( line.contains(exp) && iv )
         {
-            iv->vlans = numberRangeToLST( exp.cap(1) );
-            m_lstInterfacesPermitedVlans.append( iv );
-            iv = nullptr;
+            iv->vlans.append( exp.cap(1) );
             continue;
         }
     }
@@ -932,7 +1041,65 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
             m_lstInterfacesInfo.append(id);
         }        
     }    
+    finished();
+}
 
+void InterfaceInfo::on_term_receiveText_ServiceInstances()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+
+    SInterfaceIOSServiceInstanceInfo *sii = nullptr;
+    for (QString line : lines)
+    {
+        line = line.simplified();
+
+        exp.setPattern("Service Instance ID: (.+)$"); //Service Instance ID: 1194
+        if ( line.contains(exp) )
+        {
+            sii = new SInterfaceIOSServiceInstanceInfo;
+            sii->queryParent = m_queriesParent;
+            sii->serviceinstance = exp.cap(1);
+            sii->datetime = QDateTime::currentDateTime();
+            sii->operativo = true;
+            m_lstInterfaceServiceInstance.append( sii );
+            continue;
+        }
+
+        if ( !sii )
+            continue;
+
+        exp.setPattern("Description: (.+)$"); //Description: ENLACE_INTERNET_WIFINIC_SanJuan_DelSur
+        if ( line.contains(exp) )
+        {
+            sii->description = exp.cap(1);
+            continue;
+        }
+
+        exp.setPattern("Associated Interface: (.+)$"); //Associated Interface: GigabitEthernet0/0/0
+        if ( line.contains(exp) )
+        {
+            sii->interfaz = exp.cap(1);
+            continue;
+        }
+
+        exp.setPattern("Encapsulation: dot1q (.+) "); //Encapsulation: dot1q 1194 vlan protocol type 0x8100
+        if ( line.contains(exp) )
+        {
+            sii->vlan = exp.cap(1);
+            continue;
+        }
+
+        exp.setPattern("Bridge-domain: (.+)$"); //Bridge-domain: 3046
+        if ( line.contains(exp) )
+        {
+            sii->bridgedomain = exp.cap(1);
+            continue;
+        }
+    }
     finished();
 }
 
@@ -997,6 +1164,9 @@ QDebug operator<<(QDebug dbg, const InterfaceInfo &info)
 
     foreach (SInterfaceVlans *i, info.m_lstInterfacesPermitedVlans)
         dbg.space() << i->interfaz << i->vlans << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+
+    for ( SInterfaceIOSServiceInstanceInfo *i : info.m_lstInterfaceServiceInstance )
+        dbg.space() << i->serviceinstance << i->description << i->interfaz << i->vlan << i->bridgedomain;
 
     dbg.nospace() << "\n";
 

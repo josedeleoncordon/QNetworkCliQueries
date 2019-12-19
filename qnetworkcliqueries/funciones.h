@@ -134,7 +134,7 @@ QString estandarizarProtocoloEnrutamiento(QString proto);
 
 //Indica si la interfaz hacia un segundo equipo pertenece al mismo dominio de OSPF de la interfaz por donde se
 //vino del equipo anterior
-bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries *qq,
+bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries *q,
                                                    QString interfazOipDondeViene,
                                                    QString interfazSiguienteEquipo );
 

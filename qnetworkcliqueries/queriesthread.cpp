@@ -16,7 +16,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_conexionerrores=0;
     m_lstIpPos=-1;
     m_equiposPorGWenConsulta=0;
-    m_connectionprotocol = QRemoteShell::TelnetSSH;
+    m_connectionprotocol = QRemoteShell::SSHTelnet;
     m_detener=false;
     m_cancelar=false;
     m_principaluserfirst=true;
@@ -363,44 +363,29 @@ void QueriesThread::equipoConsultado(Queries *qry)
 }
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,
-                                          QStringList &lstIPs, short modo)
+                                          QStringList &lstIPs)
 {
     QMap<QString, QString> salida;
 
-    switch (modo)
+    QMapIterator<QString, QString> iant(ant);
+    while (iant.hasNext())
     {
-    case 0: //debug, nunca tendria que venir este
-    case 1: //todos los equipos la primera vez, no hay que actualizar
-    case 2: //se actualizan todos los equipos, se manda completo el nuevo
-    case 6: //consulta por primera vez de un listado de IPs
-    case 10: //actualizar formato de archivo, nunca tendria que venir este
-        return nue;
-    case 3: //se actualizan todos los equipos pendientes
-    case 4: //actualizar un equipo o listado de IPs en archivo
-    case 5: //actualizar todos los equipos con errores
-    {      
-        QMapIterator<QString, QString> iant(ant);
-        while (iant.hasNext())
+        iant.next();
+        if ( !lstIPs.contains( iant.key() ) )
+            salida.insert( iant.key(),iant.value() );
+        else
         {
-            iant.next();
-            if ( !lstIPs.contains( iant.key() ) )
-                salida.insert( iant.key(),iant.value() );
-            else
+            QMapIterator<QString, QString> inue(nue);
+            while (inue.hasNext())
             {
-                QMapIterator<QString, QString> inue(nue);
-                while (inue.hasNext())
+                inue.next();
+                if ( iant.key() == inue.key() )
                 {
-                    inue.next();
-                    if ( iant.key() == inue.key() )
-                    {
-                        salida.insert( inue.key(),inue.value() );
-                        break;
-                    }
+                    salida.insert( inue.key(),inue.value() );
+                    break;
                 }
             }
         }
-        break;
-    }
     }
 
     return salida;

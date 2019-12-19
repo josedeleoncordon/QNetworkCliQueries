@@ -1,4 +1,4 @@
-#ifndef INTERFACEINFO_H
+﻿#ifndef INTERFACEINFO_H
 #define INTERFACEINFO_H
 
 #include "funcionbase.h"
@@ -34,6 +34,21 @@ struct SInterfaceVlans : InfoBase
 {
     QString interfaz;
     QStringList vlans;
+
+    SInterfaceVlans() {}
+    SInterfaceVlans(const SInterfaceVlans &other);
+};
+
+struct SInterfaceIOSServiceInstanceInfo : InfoBase
+{
+    QString interfaz;
+    QString serviceinstance;
+    QString description;
+    QString vlan;
+    QString bridgedomain;
+
+    SInterfaceIOSServiceInstanceInfo() {}
+    SInterfaceIOSServiceInstanceInfo(const SInterfaceIOSServiceInstanceInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SInterfaceInfo* data);
@@ -42,8 +57,12 @@ QDataStream& operator>>(QDataStream& in, SInterfaceInfo*& data);
 QDataStream& operator<<(QDataStream& out, const SInterfaceVlans* data);
 QDataStream& operator>>(QDataStream& in, SInterfaceVlans*& data);
 
+QDataStream& operator<<(QDataStream& out, const SInterfaceIOSServiceInstanceInfo* data);
+QDataStream& operator>>(QDataStream& in, SInterfaceIOSServiceInstanceInfo*& data);
+
 void updateInfoList(QList<SInterfaceInfo*> &lstDest, QList<SInterfaceInfo*> &lstOrigin );
 void updateInfoList(QList<SInterfaceVlans*> &lstDest, QList<SInterfaceVlans*> &lstOrigin );
+void updateInfoList(QList<SInterfaceIOSServiceInstanceInfo*> &lstDest, QList<SInterfaceIOSServiceInstanceInfo*> &lstOrigin );
 
 class QNETWORKCLIQUERIES_EXPORT InterfaceInfo : public FuncionBase
 {
@@ -53,6 +72,7 @@ protected:
     QList<SIpInfo*> m_lstInterfacesIPAddresses;
     QList<SInterfaceInfo*> m_lstInterfacesInfo;
     QList<SInterfaceVlans*> m_lstInterfacesPermitedVlans;
+    QList<SInterfaceIOSServiceInstanceInfo*> m_lstInterfaceServiceInstance;
     bool m_continueShowVlan;
     bool m_continueShowVlanBridge;
 
@@ -71,6 +91,7 @@ public:
     virtual void getInterfacesIpAddresses();
     virtual void getInterfacesPermitedVlans();
     virtual void getInterfacesDescriptions();
+    virtual void getInterfacesServiceInstancesInfo();
 
     //
     QList<SInterfaceInfo*>& interfacesInfo() { return m_lstInterfacesInfo; }
@@ -96,6 +117,7 @@ private slots:
     void on_term_receiveText_PermitedVlansBridge();
     void on_term_receiveText_PermitedVlansAccess();
     void on_term_receiveText_Descriptions();
+    void on_term_receiveText_ServiceInstances();
 };
 
 #endif // INTERFACEINFO_H
