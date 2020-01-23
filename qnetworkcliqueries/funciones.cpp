@@ -162,9 +162,9 @@ Queries *buscarEquipoPorIPnombre(QList<Queries*> lst, QString ip,QString nombre)
         }
     }
 
-    if ( !nom )
-        qDebug() << "buscarEquipos: no se encontro nombre del equipo en lst" << nombre <<
-                    "no se se empezo a validar IP" << ip;
+//    if ( !nom )
+//        qDebug() << "buscarEquipos: no se encontro nombre del equipo en lst" << nombre <<
+//                    "no se se empezo a validar IP" << ip;
 
     return nullptr;
 }
@@ -319,15 +319,11 @@ bool interfaceIsL2(Queries* q, QString interfaz)
                                                         interfaz,
                                                         q->platform() );
 
-    qDebug() << "verificando si la interfaz es L2" << q->hostName() << q->ip() << interfazPO;
-
     foreach (SInterfaceVlans *ipv, q->interfacesPermitedVlansInfo())
     {
         if ( ipv->interfaz == interfazPO )
         {
             int vlans = ipv->vlans.size();
-
-            qDebug() << "vlans permitidas" << vlans;
 
             if ( vlans > 0 )
                 return true;
@@ -350,9 +346,6 @@ bool interfacesAreL2OneVlanMatches(Queries *q1, QString interfaz1, Queries *q2, 
     QString interfazPO2 = interfaceToPortChannelInterface( q2->portChannelInfo(),
                                                         interfaz2,
                                                         q2->platform() );
-
-    qDebug() << "verificando si las dos interfaces son L2 y una vlan tienen al menos en comun" <<
-                q1->hostName() << interfazPO1 << q2->hostName() << interfazPO2;
 
     //por lo menos una vlan tiene que se ser comun en ambos
     foreach (SInterfaceVlans *ipv1, q1->interfacesPermitedVlansInfo())
@@ -584,9 +577,6 @@ Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries *> lst,
             //Las IPs pertenecen al mismo segmento /30
             interfaz=ii->interfaz;
 
-            qDebug() << "buscar vecino mascara 30: se encontro" << ipBuscar << q->hostName() << q->ip()
-                     << ii->vrf << ii->interfaz;
-
             return q;
         }
     }
@@ -798,8 +788,6 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *q,
         return false;
     }
 
-//    qDebug() << "interfazOipDondeViene" << interfazOipDondeViene << "interfazDeDondeSeViene" << interfazDeDondeSeViene;
-
     //buscamos el proceso de la interfaz de donde se viene
     interfazDeDondeSeViene = interfaceToPortChannelInterface(q->portChannelInfo(),
                                                              interfazDeDondeSeViene,
@@ -813,10 +801,7 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *q,
         }
     }
     if ( ospfProceso.isEmpty() )
-    {
-        qDebug() << "Error interfaz de donde se viene no tiene informacion de ospf" << interfazDeDondeSeViene;
         return false;
-    }
 
     //verificamos si la interfaz siguiente pertenece al mismo proceso que la interfaz donde se viene
     interfazSiguienteEquipo = interfaceToPortChannelInterface(q->portChannelInfo(),
@@ -826,9 +811,9 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *q,
     {
         if ( oi->interfaz == interfazSiguienteEquipo )
         {
-            if ( ospfProceso == oi->process )
-                return true;
+            if ( ospfProceso == oi->process ) return true; else return false;
         }
     }
+
     return false;
 }

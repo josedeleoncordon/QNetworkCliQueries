@@ -6,6 +6,7 @@
 #include "funciones.h"
 #include "factory.h"
 #include "properties.h"
+#include "qnetworkquerieslogging.h"
 
 Queries::Queries(QString IP, QObject *parent) : QObject(parent)
 {
@@ -75,7 +76,7 @@ Queries::Queries(const Queries &other) : QObject(other.parent())
 
 Queries::~Queries()
 {
-    qDebug() << m_ip << "Queries::~Queries()";
+    qCDebug(queries) << m_ip << "Queries::~Queries()";
     limpiarConsultas();
 }
 
@@ -485,11 +486,11 @@ void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString plat
 
 void Queries::borrarTerminal()
 {
-    qDebug() << m_ip << "Queries::borrarTerminal()" << term;
+    qCDebug(queries) << m_ip << "Queries::borrarTerminal()" << term;
 
     if ( term )
     {
-        qDebug() << m_ip  << "borrando terminal";
+        qCDebug(queries) << m_ip  << "borrando terminal";
 
         term->disconnectReceiveTextSignalConnections();
         term->disconnect(); //para q no se emita la señal de desconectado
@@ -501,7 +502,7 @@ void Queries::borrarTerminal()
 
 void Queries::nextProcess()
 {
-    qDebug() << m_ip  << "Queries::nextProcess()";
+    qCDebug(queries) << m_ip  << "Queries::nextProcess()";
 
     if ( !m_reintentandoConsulta )
     {
@@ -516,7 +517,7 @@ void Queries::nextProcess()
 
             if ( opcionActual > Exit )
             {
-                qDebug() << m_ip  << "Mayor a Exit" << m_ip;
+                qCDebug(queries) << m_ip  << "Mayor a Exit" << m_ip;
 
                 borrarTerminal();
                 crearFuncionesFaltantes();
@@ -536,7 +537,7 @@ void Queries::nextProcess()
                 emit finished(this);
                 disconnect();
 
-                qDebug() << m_ip << "Queries_finished"; //No eliminar. Cierra el archivo de log
+                qCDebug(queries) << m_ip << "Queries_finished"; //No eliminar. Cierra el archivo de log
                 return;
             }
         }
@@ -545,20 +546,16 @@ void Queries::nextProcess()
     else
         m_queriescreated=false; //para que se creen nuevamente las consultas desde donde se quedo
 
-    qDebug() << m_ip  << "NextProcess:" << opcionActual;
+    qCDebug(queries) << m_ip  << "NextProcess:" << opcionActual;
 
     queryTimer->setInterval( 20000 );
     queryTimer->start();
-
-    //mostrar en el debug el texto de la terminal
-//    if ( term )
-//        connect(term,SIGNAL(readyRead()),SLOT(on_term_readyRead()));
 
     //consultas CLI    
 
     if ( opcionActual & flags & Connect )
     {        
-        qDebug() << m_ip  << "creando term";          
+        qCDebug(queries) << m_ip  << "creando term";
         conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
         return;
     }
@@ -841,7 +838,7 @@ void Queries::nextProcess()
             createQueries( MacAddress );
         }
 
-        qDebug() << m_ip  << "Next: MacAddress";
+        qCDebug(queries) << m_ip  << "Next: MacAddress";
 
         macsQuery->setBrand( m_brand );
         macsQuery->setPlatform( m_platform );        
@@ -938,7 +935,7 @@ void Queries::nextProcess()
             createQueries( Arp );
         }
 
-        qDebug() << m_ip  << "empezando ARP";
+        qCDebug(queries) << m_ip  << "empezando ARP";
 
         arpsQuery->setBrand(m_brand);
         arpsQuery->setPlatform(m_platform);
@@ -1017,7 +1014,7 @@ void Queries::nextProcess()
         }
         queryTimer->setInterval( 3000 );
 
-        qDebug() << m_ip  << "exit" << exitQuery;
+        qCDebug(queries) << m_ip  << "exit" << exitQuery;
 
         exitQuery->setPlatform(m_platform);
         exitQuery->setBrand(m_brand);
@@ -1052,43 +1049,43 @@ void Queries::processConnectToHostDisconnected()
     if ( opcionActual >= Exit )
         return;
 
-    qDebug() << m_ip  << "Queries::processConnectToHostDisconnected()" << m_ip << m_name;
+    qCDebug(queries) << m_ip  << "Queries::processConnectToHostDisconnected()" << m_ip << m_name;
 
     borrarTerminal();
 
     if ( m_connected )
     {
         //se logro la conexion pero a media consulta se desconecto
-        qDebug() << m_ip  << "**Equipo desconectado a media consulta**" << m_ip << m_name <<
+        qCDebug(queries) << m_ip  << "**Equipo desconectado a media consulta**" << m_ip << m_name <<
                     "opcionActual" << opcionActual << "intentos" << m_consultaIntentos;
 
         if ( m_consultaIntentos <= 3 )
         {
-            qDebug() << m_ip  << "reconectando y continuando consulta donde se quedo" << m_ip << m_name;
+            qCDebug(queries) << m_ip  << "reconectando y continuando consulta donde se quedo" << m_ip << m_name;
             m_connected=false;
             conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
         }
         else
         {
-            qDebug() << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
+            qCDebug(queries) << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
             m_error=true;
             emit finished(this);
         }
     }
     else
     {
-        qDebug() << m_ip << "**No se ha logrado autenticar en el equipo: intentos" << m_consultaIntentos;
+        qCDebug(queries) << m_ip << "**No se ha logrado autenticar en el equipo: intentos" << m_consultaIntentos;
 
         if ( m_ipreachable )
         {
             if ( m_consultaIntentos <= 3 )
             {
-                qDebug() << m_ip  << "intentando nuevamente conectarse al equipo" << m_ip << m_name;
+                qCDebug(queries) << m_ip  << "intentando nuevamente conectarse al equipo" << m_ip << m_name;
                 conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
             }
             else
             {
-                qDebug() << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
+                qCDebug(queries) << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
                 m_error=true;
                 emit finished(this);
             }
@@ -1096,7 +1093,7 @@ void Queries::processConnectToHostDisconnected()
         else
         {
             //no se logro la conexion
-            qDebug() << m_ip  << "**NoConexion**" << m_ip;
+            qCDebug(queries) << m_ip  << "**NoConexion**" << m_ip;
             m_operativo=false;
             queryTimer->stop();
 
@@ -1106,7 +1103,7 @@ void Queries::processConnectToHostDisconnected()
             //            createQueries();
 
             emit finished(this);
-            qDebug() << m_ip << "Queries_finished"; //No eliminar. Cierra el archivo de log
+            qCDebug(queries) << m_ip << "Queries_finished"; //No eliminar. Cierra el archivo de log
         }
     }
 }
@@ -1121,7 +1118,7 @@ void Queries::processConnectToHostConnected()
     if ( m_connected )
         return;
 
-    qDebug() << m_ip  << "Equipo conectado" << m_ip << m_name;
+    qCDebug(queries) << m_ip  << "Equipo conectado" << m_ip << m_name;
     term->disconnectReceiveTextSignalConnections();
         
     queryTimer->stop();
@@ -1129,7 +1126,7 @@ void Queries::processConnectToHostConnected()
     if ( opcionActual == Connect )
     {   
         //no se ha logrado conectar
-        qDebug() << m_ip  << "Conectado. Primer intento" << m_ip << m_name;
+        qCDebug(queries) << m_ip  << "Conectado. Primer intento" << m_ip << m_name;
         m_brand = term->brandName();
         
         if ( m_platform.isEmpty() )
@@ -1149,7 +1146,7 @@ void Queries::processConnectToHostConnected()
     else    
     {
         //siguientes intentos    
-        qDebug() << m_ip  << "Conectado. Siguiente intento de consulta despues de falla" << m_ip << m_name;
+        qCDebug(queries) << m_ip  << "Conectado. Siguiente intento de consulta despues de falla" << m_ip << m_name;
         m_reintentandoConsulta=true;
     }
 
@@ -1186,7 +1183,7 @@ void Queries::processConfigFinished()
 
 void Queries::processFinished()
 {
-    qDebug() << m_ip  << "Queries::processFinished()";
+    qCDebug(queries) << m_ip  << "Queries::processFinished()";
     m_contieneconsultas=true;
     queryTimer->stop();
     nextProcess();
@@ -1200,7 +1197,7 @@ void Queries::processKeepWorking()
 
 void Queries::on_m_keepAliveTimer_timeout()
 {
-    qDebug() << m_ip  << "Queries::on_m_keepAliveTimer_timeout()";
+    qCDebug(queries) << m_ip  << "Queries::on_m_keepAliveTimer_timeout()";
     term->sendCommand( " " );
 }
 
@@ -1211,7 +1208,7 @@ void Queries::on_query_lastCommand(QString txt)
 
 void Queries::on_queryTimer_timeout()
 {
-    qDebug() << m_ip  << "Queries::on_queryTimer_timeout()" << m_ip << m_name;
+    qCDebug(queries) << m_ip  << "Queries::on_queryTimer_timeout()" << m_ip << m_name;
 
     //caso equipos que al salir de ellos no regresan al prompt del SO, simulamos que regreso para que se
     //envie la señal de finalizacion
@@ -1276,11 +1273,6 @@ void Queries::crearFuncionesFaltantes()
 void Queries::createEmptyQueries()
 {
     crearFuncionesFaltantes();
-}
-
-void Queries::on_term_readyRead()
-{
-    qDebug().noquote() << m_ip << term->dataReceived();
 }
 
 QMap<QString,QString> Queries::queriesArgumentosAceptados()

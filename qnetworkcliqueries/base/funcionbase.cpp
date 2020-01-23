@@ -73,7 +73,7 @@ bool FuncionBase::allTextReceived()
          txt.right(15).contains("---- More ----") ||
          txt.right(7).contains("more.."))
     {
-        qDebug() << "Enviando espacio para continuar";
+//        qDebug() << "Enviando espacio para continuar";
         QByteArray a(1,32);
         term->sendData( a );
         return false;
@@ -95,19 +95,19 @@ bool FuncionBase::allTextReceived()
          txt.contains(QRegExp("Translating .+domain server")) )
     {
         lastCommandFailed=true;
-        qDebug() << "**ErrorMenor**" << m_ip << m_name << m_platform << "No se pudo ejecutar comando:" << m_lastCommand;
+//        qDebug() << "**ErrorMenor**" << m_ip << m_name << m_platform << "No se pudo ejecutar comando:" << m_lastCommand;
     }
     else
         lastCommandFailed=false;
 
-    qDebug() << "true" << m_lastCommand << lastCommandFailed;
+//    qDebug() << "true" << m_lastCommand << lastCommandFailed;
 
     return true;
 }
 
 void FuncionBase::finished()
 {
-    qDebug() << "FuncionBase::finished()";
+//    qDebug() << "FuncionBase::finished()";
 
     txt.clear();
     term->disconnectReceiveTextSignalConnections();

@@ -30,6 +30,7 @@ DEFINES += HAVE_POSIX_OPENPT HAVE_SYS_TIME_H HAVE_UPDWTMPX #Pty
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    qremoteshelllogging.cpp \
     terminal/Pty.cpp \
     terminal/kprocess.cpp \
     terminal/kpty.cpp \
@@ -39,6 +40,7 @@ SOURCES += \
     qremoteshell.cpp
 
 HEADERS += \
+    qremoteshelllogging.h \
     terminal/Pty.h \
     terminal/kprocess.h \
     terminal/kpty.h \

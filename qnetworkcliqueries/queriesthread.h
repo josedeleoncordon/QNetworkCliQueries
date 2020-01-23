@@ -33,6 +33,7 @@ public:
     void setOpciones(int opciones) { m_opciones = opciones; }
     void setEquipmentNeighborsConsultarVecinos(bool consultar) { m_equipmentNeighborsConsultarVecinos=consultar; }
     void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
+    void setEquipmentNeighborsOSPFArea(QString area) { m_consultaOSPFArea=area; }
 
     void iniciar();
     void detener(); //no se consultan nuevos equipos y espera a que se terminen las consultas ya en ejeucución.
@@ -67,6 +68,7 @@ private:
    QString m_userother;
    QString m_pwdother;
    QString m_linuxprompt;
+   QString m_consultaOSPFArea;
    QStringList m_lstIP;
    QStringList m_lstIPsAintentarPorGW;
    QStringList m_lstIPsConectadosPorGW;
@@ -101,6 +103,11 @@ private:
    QMap<QString,QString> m_mapOSPFVecinosInterfazDondeVienen;
 
    void conectarOtroEquipo(QString ip, bool gw=false);
+   void validarYagregarVecinoAconsulta(Queries *qry,
+                                       QString ip,
+                                       QString ipOinterfazDondeSeViene,
+                                       QString interfazEsteEquipoSalida,
+                                       QString interfazSiguienteEquipoEntrada);
 };
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,

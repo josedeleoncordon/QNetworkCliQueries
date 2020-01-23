@@ -1,6 +1,7 @@
 #include "queriesthread.h"
 #include "funciones.h"
 #include "properties.h"
+#include "qnetworkquerieslogging.h"
 
 QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
 {
@@ -44,7 +45,7 @@ void QueriesThread::iniciar()
          m_lstIP.isEmpty() ||
          m_equiposConsultados > 0 )
     {
-        qDebug() << "QueriesThread::iniciar() emit finished ";
+        qCDebug(queriesthread) << "QueriesThread::iniciar() emit finished ";
 
         emit finished(false);
         return;
@@ -125,7 +126,7 @@ void QueriesThread::on_timer_timeOut()
 
 void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
 {
-    qDebug() << ip << "QueriesThread::conectarOtroEquipo()" << "GW" << gw;
+    qCDebug(queriesthread) << ip << "QueriesThread::conectarOtroEquipo()" << "GW" << gw;
 
     Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);
     query->setCountry( m_grupo );
@@ -152,7 +153,7 @@ void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
 
     thr->start();
 
-    qDebug() << "Iniciando conexion equipo" << ip;
+    qCDebug(queriesthread) << "Iniciando conexion equipo" << ip;
 }
 
 void QueriesThread::equipoConsultado(Queries *qry)
@@ -179,8 +180,12 @@ void QueriesThread::equipoConsultado(Queries *qry)
     {
         if ( qry->successful() )
         {
-            qDebug() << qry->ip() << "QueriesThread::equipoConsultado Equipo consultado exitosamente"
+            //para que esten en el log del equipo y el general
+            qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado Equipo consultado exitosamente"
                      << qry->hostName()
+                     << m_equipmentNeighborsConsultarVecinos;
+            qCDebug(queriesthread) << "QueriesThread::equipoConsultado Equipo consultado exitosamente"
+                     << qry->ip() << qry->hostName()
                      << m_equipmentNeighborsConsultarVecinos;
 
             m_equiposExitosos++;
@@ -188,74 +193,24 @@ void QueriesThread::equipoConsultado(Queries *qry)
             if ( m_equipmentNeighborsConsultarVecinos )
             {
                 //agregando vecinos de cdp/llp a la consulta
-                foreach (SEquipmentNeighborsInfo *e, qry->equipmentNeighborsInfo())
+                for (SEquipmentNeighborsInfo *e : qry->equipmentNeighborsInfo())
                 {
-                    if ( !m_lstIP.contains(e->ip) &&
-                         !( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( e->ip ) ) )
-                    {
-                        if ( m_consultarVecinosOSPFMismoDominio )
-                        {
-                            if ( !qry->ipOinterfazMismoDominioOSPFDondeSeViene().isEmpty() )
-                            {
-                                if ( continuarPorsiguienteInterfazMismoDominioOSPF( qry,
-                                                                                    qry->
-                                                                                    ipOinterfazMismoDominioOSPFDondeSeViene(),
-                                                                                    e->interfazestesalida ) )
-                                {
-                                    //siguientes equipos. Trae interfaz de donde viene, se agrega el siguiente vecino con su
-                                    //la interfaz de donde vendria
-                                    m_lstIP.append( e->ip );
-                                    m_mapOSPFVecinosInterfazDondeVienen.insert( e->ip, e->interfazotroentrada );
-                                }
-                            }
-                            else
-                            {
-                                //primer equipo, no trae interfaz de donde se viene
-                                //se agrega este vecino a la consulta y con sus interfaz de donde vendria
-                                m_lstIP.append( e->ip );
-                                m_mapOSPFVecinosInterfazDondeVienen.insert( e->ip, e->interfazotroentrada );
-                            }
-                        }
-                        else
-                            //se agrega a la consulta
-                            m_lstIP.append( e->ip );
-                    }
+                    validarYagregarVecinoAconsulta( qry,
+                                                    e->ip,
+                                                    qry->ipOinterfazMismoDominioOSPFDondeSeViene(),
+                                                    e->interfazestesalida,
+                                                    e->interfazotroentrada);
                 }
 
                 //agregando los vecinos de ospf que no se agregaron por cdp/llp a la consulta
                 for ( SOSPFInfo *o : qry->ospfInfo() )
                 {
-                    if ( !m_lstIP.contains(o->id) &&
-                         !( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( o->id ) ) )
-                    {
-                        if ( m_consultarVecinosOSPFMismoDominio )
-                        {
-                            QString ipInterfazSiguiente = qry->interfacesIpAddressesQuery->ipFromInterfaz(o->interfaz);
-                            if ( !qry->ipOinterfazMismoDominioOSPFDondeSeViene().isEmpty() )
-                            {
-                                if ( continuarPorsiguienteInterfazMismoDominioOSPF( qry,
-                                                                                    qry->
-                                                                                    ipOinterfazMismoDominioOSPFDondeSeViene(),
-                                                                                    ipInterfazSiguiente ) )
-                                {
-                                    //siguientes equipos. Trae interfaz de donde viene, se agrega el siguiente vecino con su
-                                    //la interfaz de donde vendria
-                                    m_lstIP.append( o->id );
-                                    m_mapOSPFVecinosInterfazDondeVienen.insert( o->id, ipInterfazSiguiente );
-                                }
-                            }
-                            else
-                            {
-                                //primer equipo, no trae interfaz de donde se viene
-                                //se agrega este vecino a la consulta y con sus interfaz de donde vendria
-                                m_lstIP.append( o->id );
-                                m_mapOSPFVecinosInterfazDondeVienen.insert( o->id, ipInterfazSiguiente );
-                            }
-                        }
-                        else
-                            //se agrega a la consulta
-                            m_lstIP.append( o->id );
-                    }
+                    QString ipInterfazSiguiente = qry->interfacesIpAddressesQuery->ipFromInterfaz(o->interfaz);
+                    validarYagregarVecinoAconsulta( qry,
+                                                    o->id,
+                                                    qry->ipOinterfazMismoDominioOSPFDondeSeViene(),
+                                                    o->interfaz,
+                                                    ipInterfazSiguiente );
                 }
 
                 if ( !m_timer->isActive() )
@@ -284,7 +239,8 @@ void QueriesThread::equipoConsultado(Queries *qry)
         else
         {
             m_conerrores++;
-            qDebug() << qry->ip() << "QueriesThread::equipoConsultado -- Error";
+            qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado -- Consulta con errores";
+            qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- consulta con errores" << qry->ip();
             m_errorMap.insert( qry->ip(), "Error" );
             qry->deleteLater();
         }
@@ -293,7 +249,8 @@ void QueriesThread::equipoConsultado(Queries *qry)
     {
         if ( qry->isReachable() )
         {
-            qDebug() << qry->ip() << "QueriesThread::equipoConsultado -- Conexion Error";
+            qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado -- Conexion Error";
+            qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- Conexion Error" << qry->ip();
             m_errorMap.insert( qry->ip(), "Conexion Error" );
             m_conexionerrores++;
         }
@@ -301,12 +258,16 @@ void QueriesThread::equipoConsultado(Queries *qry)
         {
             if ( qry->gw().isEmpty() && !m_gw.isEmpty() )
             {
-                qDebug() << qry->ip() << "QueriesThread::equipoConsultado -- se agrega a lista de equipos a consultar por GW";
+                qCDebug(queriesthread) << qry->ip()
+                                       << "QueriesThread::equipoConsultado -- se agrega a lista de equipos a consultar por GW";
+                qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- se agrega a lista de equipos a consultar por GW"
+                                       << qry->ip();
                 m_lstIPsAintentarPorGW.append(qry->ip());
             }
             else
             {
-                qDebug() << qry->ip() << "QueriesThread::equipoConsultado -- No conexion";
+                qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado -- No conexion";
+                qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- No conexion" << qry->ip();
                 m_errorMap.insert( qry->ip(), "No conexion" );
                 m_sinconexion++;
                 qry->deleteLater();
@@ -335,12 +296,12 @@ void QueriesThread::equipoConsultado(Queries *qry)
         {
             //conectar al siguiente equipo
 
-            qDebug() << "probando empezar uno por GW" << m_lstIPsAintentarPorGW << m_equiposPorGWenConsulta;
+            qCDebug(queriesthread) << "probando empezar uno por GW" << m_lstIPsAintentarPorGW << m_equiposPorGWenConsulta;
 
             if ( !m_lstIPsAintentarPorGW.isEmpty() && m_equiposPorGWenConsulta < 10 )
             {
                 QString IP = m_lstIPsAintentarPorGW.takeFirst();
-                qDebug() << IP << "se intenta la conexion por GW";
+                qCDebug(queriesthread) << IP << "se intenta la conexion por GW";
 
                 //tratamos de conectar a un equipo q fallo por medio del gw
                 m_equiposPorGWenConsulta++;
@@ -351,7 +312,9 @@ void QueriesThread::equipoConsultado(Queries *qry)
                 {
                     //continuamos con la consulta normal
                     m_lstIpPos++;
-                    conectarOtroEquipo( m_lstIP.at( m_lstIpPos ) );
+                    QString ip = m_lstIP.at( m_lstIpPos );
+                    qCDebug(queriesthread) << ip << "siguiente conexion normal";
+                    conectarOtroEquipo( ip );
                 }
         }
     }
@@ -360,6 +323,44 @@ void QueriesThread::equipoConsultado(Queries *qry)
         if ( m_consultaSimultaneos == 0 )
             emit finished(true);
     }
+}
+
+void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
+                                                   QString ip,
+                                                   QString ipOinterfazDondeSeViene,
+                                                   QString interfazEsteEquipoSalida,
+                                                   QString interfazSiguienteEquipoEntrada)
+{
+    //no esta en el listado actual a consultar
+    //no pasa si solo equipos nuevos y ya esta en el listado de anteriores
+    if ( !m_lstIP.contains(ip) &&
+         !( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( ip ) ) )
+    {
+        //ospf area
+        if ( !m_consultaOSPFArea.isEmpty() )
+        {
+            for ( SOSPFInfo *oi : qry->ospfInfo() )
+                if ( oi->interfaz == interfazEsteEquipoSalida &&
+                     oi->area != m_consultaOSPFArea )
+                    return;
+        }
+
+        //ospf mismo dominio
+        if ( m_consultarVecinosOSPFMismoDominio )
+        {
+            if ( !continuarPorsiguienteInterfazMismoDominioOSPF( qry,
+                                                                 ipOinterfazDondeSeViene,
+                                                                 interfazEsteEquipoSalida ) )
+                return;
+        }
+
+        //se agrega al listado de equipos a consultar
+        qCDebug(queriesthreadNeighbors) << qry->ip()
+                                        << "Agregando vecino a la consulta" << ip;
+        m_lstIP.append( ip );
+        m_mapOSPFVecinosInterfazDondeVienen.insert( ip, interfazSiguienteEquipoEntrada );
+    }
+    return;
 }
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,

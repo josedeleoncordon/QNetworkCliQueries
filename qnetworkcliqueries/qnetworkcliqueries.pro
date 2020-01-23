@@ -27,10 +27,13 @@ HEADERS += \
     base/mplsldpinfo.h \
     base/ospfinfo.h \
     base/piminfo.h \
+    consultaequipos.h \
     factory.h \
     funciones.h \
     properties.h \
+    qnetworkquerieslogging.h \
     queries.h \
+    queriesmessagehandler.h \
     queriesthread.h \
     base/platforminfo.h \
     Cisco/macinfocisco.h \
@@ -59,10 +62,13 @@ SOURCES += \
     base/mplsldpinfo.cpp \
     base/ospfinfo.cpp \
     base/piminfo.cpp \
+    consultaequipos.cpp \
     factory.cpp \
     funciones.cpp \
     properties.cpp \
+    qnetworkquerieslogging.cpp \
     queries.cpp \
+    queriesmessagehandler.cpp \
     queriesthread.cpp \
     base/platforminfo.cpp \
     Cisco/macinfocisco.cpp \

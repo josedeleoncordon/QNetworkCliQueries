@@ -5,6 +5,8 @@
 
 #include "Pty.h"
 
+#include "../qremoteshelllogging.h"
+
 using namespace Konsole;
 
 Terminal::Terminal(QString debugIP, QString linuxprompt, QObject *parent) : QObject(parent)
@@ -43,7 +45,7 @@ Terminal::Terminal(QString debugIP, QString linuxprompt, QObject *parent) : QObj
 
     if (result < 0)
     {
-        qDebug() << _debugIP << "SHELL CRASHED! result: " << result;
+        qCDebug(terminal) << _debugIP << "SHELL CRASHED! result: " << result;
         return;
     }
     _shellProcess->setWriteable(false);  // We are reachable via kwrited.
@@ -51,7 +53,7 @@ Terminal::Terminal(QString debugIP, QString linuxprompt, QObject *parent) : QObj
 
 Terminal::~Terminal()
 {
-    qDebug() << _debugIP << "Terminal::~Terminal()";
+    qCDebug(terminal) << _debugIP << "Terminal::~Terminal()";
     delete _timer;
 }
 
@@ -74,7 +76,7 @@ void Terminal::onReceiveBlock( const char * buf, int len )
 
 void Terminal::on_timerout()
 {
-    qDebug() << _debugIP << "Terminal::on_timerout()";
+    qCDebug(terminal) << _debugIP << "Terminal::on_timerout()";
     emit ready(false);
 }
 
@@ -89,12 +91,12 @@ void Terminal::sendData(const QByteArray &data)
     if ( _ready )
         _shellProcess->sendData( data, data.size() );
     else
-        qDebug() << _debugIP << "Terminal::sendCommand() not ready";
+        qCDebug(terminal) << _debugIP << "Terminal::sendCommand() not ready";
 }
 
 void Terminal::shellProcess_finished()
 {    
-    qDebug() << _debugIP << "Terminal::shellProcess_finished()";
+    qCDebug(terminal) << _debugIP << "Terminal::shellProcess_finished()";
     _ready=false;
     _shellProcess->deleteLater();
     emit finished();

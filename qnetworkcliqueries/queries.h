@@ -166,7 +166,6 @@ protected slots:
     void on_m_keepAliveTimer_timeout();
     void on_query_lastCommand(QString);
     void on_queryTimer_timeout();
-    void on_term_readyRead();
 
 signals:
     void lastCommand(Queries*,QString);
