@@ -19,6 +19,8 @@ QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platfo
     m_pwdsent = false;
     m_gwConnected = false;
     m_socket = nullptr;
+    m_user1sent = false;
+    m_pwd1sent = false;
     setConnectionProtocol( SSHTelnet );
     m_localprompt.setPattern(linuxprompt);
 
@@ -36,26 +38,6 @@ QRemoteShell::~QRemoteShell()
         delete m_socket;
     delete m_timerNoResponse;
     qDebug() << m_ip << "QRemoteShell::~QRemoteShell()"; //no con qCDebug ya que para cerrar el archivo debug del equipo es necesario est en QueriesMessageHandler. No Borrar. No usar con qCDebug ya que podria ser deshabilitado.
-}
-
-void QRemoteShell::setLogPath(QString path)
-{
-    if ( !path.isEmpty() )
-    {
-        m_logPath = path;
-        m_logFile.setFileName( m_logPath );
-        m_logFile.open(QIODevice::Append | QIODevice::Text);
-        m_out.setDevice(&m_logFile);
-    }
-}
-
-void QRemoteShell::saveLog(QString txt)
-{
-    if ( m_logFile.isOpen() )
-    {
-        m_out << txt;
-        m_out.flush();
-    }
 }
 
 void QRemoteShell::setConnectionProtocol( ConnectionProtocol cp )
@@ -82,7 +64,7 @@ void QRemoteShell::host_connect()
         qCDebug(qremoteshell) << m_ip  << "QRemoteShell::host_connect()" << m_ip;
         m_socket = new QTcpSocket(this); //usamos un socket para ver si el equipo es alcanzable
         m_socket->connectToHost( m_ip, 1 );
-        m_socket->waitForConnected(5000);
+        m_socket->waitForConnected(10000);
 
         if ( m_socket->state() == QAbstractSocket::ConnectedState ||
              m_socket->error() == QAbstractSocket::ConnectionRefusedError ) //si se rechaza la conexion es alcanzable
@@ -123,16 +105,16 @@ void QRemoteShell::host_connect()
 
 void QRemoteShell::m_terminal_ready(bool ready)
 {
+    qCDebug(qremoteshell) << m_ip << "QRemoteShell::m_terminal_ready" << ready;
     if ( ready )
         m_nextTry();
-    else {
+    else
         emit disconnected();
-    }
 }
 
 void QRemoteShell::m_nextTry()
 {    
-    qCDebug(qremoteshell) << m_ip << "QRemoteShell::m_nextTry()" << m_lstConnectionProtocol.size();
+    qCDebug(qremoteshell) << m_ip << "QRemoteShell::m_nextTry() size" << m_lstConnectionProtocol.size();
 
     emit working();
 
@@ -195,9 +177,6 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
         QString line = data.last();
         line = line.simplified();
 
-        //saveLog( "+++\n"+ m_dataReceived +"\n---" );
-        saveLog( m_dataReceived );
-
         QRegExp exp;
         exp.setMinimal(true);
 
@@ -207,7 +186,22 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
         exp.setPattern("(username|login|Username|Login)+:");
         if ( line.contains(exp) )
         {
-            sendCommand( m_user );
+            QString user;
+            if ( m_user2.isEmpty() )
+                user = m_user;
+            else
+            {
+                if ( !m_user1sent )
+                {
+                    user = m_user;
+                    m_user1sent=true;
+                }
+                else
+                    user = m_user2;
+            }
+
+            qCDebug(qremoteshell) << m_ip << "enviando usuario" << user;
+            sendCommand( user );
             return;
         }
         //enviamos el password
@@ -216,9 +210,28 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
         {
             if ( !m_pwdsent )
             {
-                m_pwdsent=true;
-                saveLog("\nenviando password\n");
-                sendCommand( m_pwd );
+                QString pwd;
+                if ( m_pwd2.isEmpty() )
+                {
+                    pwd = m_pwd;
+                    m_pwdsent=true;
+                }
+                else
+                {
+                    if ( !m_pwd1sent )
+                    {
+                        pwd = m_pwd;
+                        m_pwd1sent=true;
+                    }
+                    else
+                    {
+                        pwd = m_pwd2;
+                        m_pwdsent=true;
+                    }
+                }
+
+                qCDebug(qremoteshell) << m_ip << "enviando password" << pwd;
+                sendCommand( pwd );
             }
             else
             {
@@ -229,31 +242,34 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
         }
 
         //si se rechaza la conexion
-        //**************************************************************************
-//        if ( m_dataReceived.contains("Authorization failed") ||
-//             m_dataReceived.contains("Connection closed by") ||
-//             m_dataReceived.contains("Connection timed out") ||
-//             m_dataReceived.contains("remote host not responding") ||
-//             m_dataReceived.contains("Connection refused") ||
-//             m_dataReceived.contains("Invalid key length") ||
-//             m_dataReceived.contains("Connection reset by peer") ||
-//             m_dataReceived.contains("Disconnected from") ||
-//             m_dataReceived.contains("no matching host key type found") )
-//        {
-//            m_nextTry();
-//            return;
-//        }
-        //**************************************************************************
+        if ( !m_gw.isEmpty() && !m_user2.isEmpty() )
+        {
+            //se esta conectado al GW y se rechazo el intento de conexion por el protocolo (Telnet SSH). Se intenta con el siguiente
+            if ( m_dataReceived.contains("Authorization failed") ||
+                 m_dataReceived.contains("Connection closed by") ||
+                 m_dataReceived.contains("Connection timed out") ||
+                 m_dataReceived.contains("remote host not responding") ||
+                 m_dataReceived.contains("Connection refused") ||
+                 m_dataReceived.contains("Invalid key length") ||
+                 m_dataReceived.contains("Connection reset by peer") ||
+                 m_dataReceived.contains("Disconnected from") ||
+                 m_dataReceived.contains("no matching host key type found") )
+            {
+                qCDebug(qremoteshell) << m_ip << "Connection refused, a probar con el siguiente protocolo";
+                m_nextTry();
+                return;
+            }
+        }
 
         //verificamos si ya miramos el promt del equipo para saber que ya nos conectamos
         exp.setPattern("^.+#\\s*$");
         if ( line.contains(exp) )
         {
-            saveLog( "\nEncontro el prompt\n" );
+            qCDebug(qremoteshell) << m_ip << "Encontro el prompt";
 
             if ( !m_termle )
             {
-                saveLog( "\nse envia terminal length 0\n" );
+                qCDebug(qremoteshell) << m_ip << "se envia terminal length 0";
 
                 //enviando terminal length 0
                 sendCommand( "terminal length 0" );
@@ -262,7 +278,7 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
             }
             else
             {
-                saveLog( "\nconectado .......\n" );
+                qCDebug(qremoteshell) << m_ip << "conectado .......";
                 m_host = exp.cap(0).replace("#","").simplified();
 
                 //se han encontrado casos de caracteres no imprimibles al principio del nombre del equipo
@@ -336,13 +352,15 @@ void QRemoteShell::finalizado()
     {
         if ( !m_gwConnected )
         {
-            //conectado al GW, a conectarse al equipo fin
+            //conectado al GW, a conectarse al equipo final
 
             qCDebug(qremoteshell) << m_ip << "QRemoteShell::finalizado() conectado al gw, a empezar conexion con el equipo";
 
             m_gwConnected=true;
             m_pwdsent=false;
             m_termle=false;
+            m_user1sent=false;
+            m_pwd1sent=false;
             m_lstConnectionProtocol = m_lstConnectionProtocolgw;
             host_connect();
         }

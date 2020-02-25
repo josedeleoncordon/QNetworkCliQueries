@@ -32,7 +32,7 @@ class QNETWORKCLIQUERIES_EXPORT Queries : public QObject
 
 public:
     explicit Queries(QString IP, QObject *parent = nullptr);
-    explicit Queries(QString IP, QString user, QString pwd, QString linuxprompt, QObject *parent = 0);
+    explicit Queries(QString IP, QString user, QString pwd, QString linuxprompt, QObject *parent = nullptr);
     explicit Queries();
     Queries(const Queries &other);
     ~Queries();
@@ -142,7 +142,8 @@ public:
     void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; }
     void createEmptyQueries();
     void clear();
-
+    void setUser2(QString user) { m_user2=user; }
+    void setPassword2(QString pwd) { m_pwd2=pwd; }
     void startSync();
 
     static QMap<QString,QString> queriesArgumentosAceptados();
@@ -200,9 +201,11 @@ protected:
     QString m_ip;
 
     QTimer *m_keepAliveTimer;
-    QString m_user;
     QString m_gw;
-    QString m_pwd;       
+    QString m_user;
+    QString m_user2;
+    QString m_pwd;
+    QString m_pwd2;
     QString m_linuxprompt;
     bool m_conectionSecondTriedOtherUserPassword;
 
@@ -223,6 +226,10 @@ protected:
 class QNETWORKCLIQUERIES_EXPORT LstQueries
 {
 public:
+    LstQueries() {}
+    LstQueries(LstQueries* lstOrigen);
+    ~LstQueries();
+
     QString grupo;
     int opcionesConsulta;
     QString gw;

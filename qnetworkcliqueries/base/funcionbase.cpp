@@ -28,8 +28,8 @@ QStringList QueriesConfiguration::mapQueriesToList(QString value)
     return m_instance->mapQueries.value(value).split(",",QString::SkipEmptyParts);
 }
 
-FuncionBase::FuncionBase(QRemoteShell *terminal,QObject *parent):
-    QObject(parent)
+FuncionBase::FuncionBase(QRemoteShell *terminal,QObject *parent)/*:
+    QObject(parent) */
 {
     term=terminal;
     lastCommandFailed=false;

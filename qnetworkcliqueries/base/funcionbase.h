@@ -73,7 +73,7 @@ protected:
     bool lastCommandFailed;
 
 public:
-    FuncionBase(QRemoteShell *terminal,QObject *parent = 0);
+    FuncionBase(QRemoteShell *terminal, QObject *parent = nullptr);
     ~FuncionBase();
 
     void setBrand(QString brand) { m_brand = brand; }

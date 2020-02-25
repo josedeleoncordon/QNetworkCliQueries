@@ -4,6 +4,7 @@
 #include <QDir>
 #include "queries.h"
 #include "funciones.h"
+#include "properties.h"
 
 ConsultaEquipos::ConsultaEquipos(QObject *parent) : QObject(parent)
 {    
@@ -19,22 +20,34 @@ ConsultaEquipos::ConsultaEquipos(QObject *parent) : QObject(parent)
     m_interval=1000;
     m_simultaneos=3;
     m_maxParalelos=40;
+    m_user = Properties::Instance()->user;
+    m_pwd = Properties::Instance()->password;
+    m_linuxprompt = Properties::Instance()->linuxpromt;
     connect( m_queriesThread,SIGNAL(newInformation()),SIGNAL(queriesThread_newInformation()) );
     connect( m_queriesThread,SIGNAL(finished(bool)),SLOT(on_queriesThread_finished(bool)));
 }
 
 ConsultaEquipos::~ConsultaEquipos()
 {
-    qDeleteAll(_lstQN->lstQueries); //solo se borrar lstQueries de uno (lstQN) ya que lstQ tambien lo comparte
-    delete _lstQ;
-    delete _lstQN;
+    qDebug() << "ConsultaEquipos::~ConsultaEquipos()" << 11;
+    if ( _lstQN )
+    {
+        qDebug() << "ConsultaEquipos::~ConsultaEquipos()" << 22 << _lstQN;
+        qDeleteAll(_lstQN->lstQueries); //solo borrar lstQueries de uno (lstQN) ya que lstQ tambien lo comparte
+        delete _lstQN;
+    }
+    if ( _lstQ )
+    {
+        qDebug() << "ConsultaEquipos::~ConsultaEquipos()" << 33;
+        delete _lstQ;
+    }
 }
 
 void ConsultaEquipos::setLstQ(LstQueries *lQ)
 {
-    if ( _lstQ )
+    if ( lQ )
     {
-        _lstQ = lQ;
+        _lstQ = new LstQueries(lQ);
         queriesParametrosMap = _lstQ->queriesParametrosMap;
         lstQueries = _lstQ->lstQueries;
         errorMap = _lstQ->errorMap;
@@ -95,8 +108,6 @@ void ConsultaEquipos::consultarEquipos()
 {
     if ( !m_lstQpath.isEmpty() )
         m_lstQfilepath = buscarArchivoConsultasActual(m_lstQpath,m_lstLabel,m_grupo);
-
-    qDebug() << "m_lstQfilepath" << m_lstQfilepath;
 
     //consulta anterior
     QStringList lstAnteriores;
@@ -162,16 +173,25 @@ void ConsultaEquipos::consultarEquipos()
                 lstIP.append( i.key() );
         }
     }
+
     if ( lstIP.isEmpty() )
     {
+        qDebug() << "Sin listado de equipos a consultar";
         _error = "Sin listado de equipos a consultar";
         emit error();
         return;
     }
 
+    qDebug() << "consultaequipos: IPs a consultar" << lstIP;
+
     m_queriesThread->setGrupo(m_grupo);
     m_queriesThread->setLstIP( lstIP );
     m_queriesThread->setGW( m_gw );
+    m_queriesThread->setUser( m_user );
+    m_queriesThread->setPassword( m_pwd );
+    m_queriesThread->setUser2( m_user2 );
+    m_queriesThread->setPassword2( m_pwd2 );
+    m_queriesThread->setLinuxPrompt( m_linuxprompt );
     m_queriesThread->setOpciones( opciones );
     m_queriesThread->setEquipmentNeighborsConsultarVecinos( m_consultaAgregarVecinos );
     m_queriesThread->setEquipmentNeighborsOSPFMismoDominio( m_consultaOSPFMismoDominio );

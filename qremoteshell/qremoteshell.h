@@ -25,13 +25,15 @@ public:
         SSHTelnet
     };
 
-    QRemoteShell( QString ip, QString user, QString pwd, QString platform, QString linuxprompt,QObject *parent=0 );
+    QRemoteShell( QString ip, QString user, QString pwd, QString platform, QString linuxprompt,QObject *parent=nullptr );
     ~QRemoteShell();
 
     void setConnectionProtocol( ConnectionProtocol cp );
     void setGW(QString GW) { m_gw = GW; }
     void host_connect();
     void host_disconnect();
+    void setUser2(QString user) { m_user2=user; }
+    void setPassword2(QString pwd) { m_pwd2=pwd; }
     void sendData(const QByteArray &data);
     void sendCommand(QString cmd);
     void disconnectReceiveTextSignalConnections();
@@ -39,7 +41,6 @@ public:
     QString hostName();
     QString brandName();
     QString platform();
-    void setLogPath(QString path);
     QString& dataReceived() { return m_dataReceived; }
 
 private:
@@ -48,7 +49,9 @@ private:
     QList<ConnectionProtocol> m_lstConnectionProtocolgw;
     QString m_ip;
     QString m_user;
+    QString m_user2;
     QString m_pwd;
+    QString m_pwd2;
     QString m_platform;
     QString m_gw;
     QString m_vendor;
@@ -58,6 +61,8 @@ private:
     bool m_termle;
     bool m_pwdsent;
     bool m_gwConnected;
+    bool m_user1sent;
+    bool m_pwd1sent;
     QString m_dataReceived;
     QRegExp m_localprompt;
     QTimer *m_timerNoResponse;
@@ -65,12 +70,6 @@ private:
 
     Terminal *m_terminal;
 
-    //debug
-    QString m_logPath;
-    QFile m_logFile;
-    QTextStream m_out;
-
-    void saveLog(QString);
     void m_nextTry();
 
     void finalizado();

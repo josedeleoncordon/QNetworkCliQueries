@@ -1,5 +1,6 @@
 #include "interfaceinfo.h"
 #include "funciones.h"
+#include "queries.h"
 
 SInterfaceInfo::SInterfaceInfo(const SInterfaceInfo &other)
 {
@@ -21,6 +22,7 @@ SInterfaceInfo::SInterfaceInfo(const SInterfaceInfo &other)
     speed = other.speed;
     opticalRx = other.opticalRx;
     mediaType = other.mediaType;
+    description = other.description;
 }
 
 QDataStream& operator<<(QDataStream& out, const SInterfaceInfo* data)
@@ -422,12 +424,16 @@ void InterfaceInfo::on_term_receiveText_Info()
     {
         line = line.simplified();
 
+//        qDebug() << m_queriesParent->ip() << "line II line" << line;
+
         if ( m_brand == "Cisco" )
         {
             expInterface.setPattern("^(.+) is (.+), line protocol is (\\w+)");
             if ( line.contains(expInterface) )
             {
                 QString interface = estandarizarInterfaz(expInterface.cap(1));
+
+//                qDebug() << m_queriesParent->ip() << "interfaz encontrada" << interface;
 
                 id = new SInterfaceInfo;
                 id->queryParent = m_queriesParent;

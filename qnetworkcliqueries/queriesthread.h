@@ -19,14 +19,15 @@ public:
     void setUser(QString user) { m_user = user; }
     void setGW(QString gw) { m_gw = gw; }
     void setPassword(QString password) { m_password=password; }
-    void setUserOtro(QString user) { m_userother=user; }
-    void setPasswordOtro(QString pwd) { m_pwdother=pwd; }
+    void setUser2(QString user) { m_user2=user; }
+    void setPassword2(QString pwd) { m_pwd2=pwd; }
     void setPrincipalUserFirst(bool principalfirst) { m_principaluserfirst=principalfirst; }
     void setLinuxPrompt(QString prompt) { m_linuxprompt = prompt; }
     void setConnectionProtocol( QRemoteShell::ConnectionProtocol cp ) { m_connectionprotocol = cp; }
     void setLstIP(QStringList lst) { m_lstIP = lst; }
     void setLstIPsConsultaAnterior(QStringList lst) { lstIPsConsultaAnterior=lst; }
     void setConsultaSoloEquiposNuevos(bool enable) { m_soloequiposnuevos = enable; }
+    void setConsultaLinksEnSegmentos(QStringList lstSegmentos) { m_lstLinksEnSegmentos=lstSegmentos; }
     void setInterval(int interval) { m_interval = interval; }
     void setSimultaneos(int simultaneos) { m_simultaneos = simultaneos; }
     void setMaxParalelos(int max) { m_maxparalelos = max; }
@@ -65,8 +66,8 @@ private:
    QString m_user;
    QString m_gw;
    QString m_password;
-   QString m_userother;
-   QString m_pwdother;
+   QString m_user2;
+   QString m_pwd2;
    QString m_linuxprompt;
    QString m_consultaOSPFArea;
    QStringList m_lstIP;
@@ -78,6 +79,7 @@ private:
    int m_opciones;
    int m_simultaneos; //cantidad de equipos se suman al mismo tiempo al grupo,
    QStringList m_equiposenconsulta;
+   QStringList m_lstLinksEnSegmentos;
    QList<Queries*> m_queriesenconsulta;
    int m_maxparalelos; //cantidad de equipos que se estan trabajando
    int m_equiposExitosos;

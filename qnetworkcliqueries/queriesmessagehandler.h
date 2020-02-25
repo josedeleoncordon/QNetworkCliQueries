@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMutex>
+#include <QLoggingCategory>
 
 class QueriesMessageHandler
 {
@@ -12,6 +13,8 @@ public:
     static void initHandler(QString path);
     static QueriesMessageHandler* instance();
     void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    void close(); //para cerrar todos los archivos al finalizar
+    void init(); //para limpiar todos los archivos de una sesion anterior
 
 private:
     QueriesMessageHandler(QString path);

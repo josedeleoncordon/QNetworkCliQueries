@@ -478,30 +478,39 @@ QStringList interfacePortChannelToInterfaces(QList<SPortChannel *> lst,QString p
 
 bool sonIPsParejaMascara30_31( QString ip1, QString ip2 )
 {
-    QStringList lstUno = ip1.split(".");
-    QStringList lstDos = ip2.split(".");
-
-    QString ipuno;
-    QString ipdos;
-
-    foreach (QString oct, lstUno)
-    {
-        int dec = oct.toInt();
-        QString salida="00000000";
-        salida.append(QString::number(dec,2));
-        ipuno.append( salida.right(8) );
-    }
-
-    foreach (QString oct, lstDos)
-    {
-        int dec = oct.toInt();
-        QString salida="00000000";
-        salida.append(QString::number(dec,2));
-        ipdos.append( salida.right(8) );
-    }
+    QString ipuno = IP2Binario(ip1);
+    QString ipdos = IP2Binario(ip2);
 
     if ( ipuno.left(30) == ipdos.left(30) ||
          ipuno.left(31) == ipdos.left(31) )
+        return true;
+
+    return false;
+}
+
+QString IP2Binario(QString ip)
+{
+    QStringList lst = ip.split(".");
+    QString salida;
+    foreach (QString oct, lst)
+    {
+        QString s="00000000";
+        s.append(QString::number(oct.toInt(),2));
+        salida.append( s.right(8) );
+    }
+    return salida;
+}
+
+bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos)
+{
+    QRegExp exp("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2})");
+    if ( !exp.exactMatch( segmentoIP_mascara2digitos ) )
+        return false;
+
+    QString segmento = exp.cap( 1 );
+    short int mascara = exp.cap( 2 ).toShort();
+
+    if ( IP2Binario(IP).left(mascara) == IP2Binario(segmento).left(mascara) )
         return true;
 
     return false;

@@ -136,6 +136,8 @@ void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
         query->setIpOInterfazMismoDominioOSPFDondeSeViene( m_mapOSPFVecinosInterfazDondeVienen.value( ip ) );
     query->setOptions( m_opciones );
     query->setConnectionProtocol( m_connectionprotocol );
+    query->setUser2( m_user2 );
+    query->setPassword2( m_pwd2 );
 
     QThread *thr = new QThread(this);
     query->moveToThread( thr );    
@@ -298,7 +300,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
 
             qCDebug(queriesthread) << "probando empezar uno por GW" << m_lstIPsAintentarPorGW << m_equiposPorGWenConsulta;
 
-            if ( !m_lstIPsAintentarPorGW.isEmpty() && m_equiposPorGWenConsulta < 10 )
+            if ( !m_lstIPsAintentarPorGW.isEmpty() && m_equiposPorGWenConsulta < 8 )
             {
                 QString IP = m_lstIPsAintentarPorGW.takeFirst();
                 qCDebug(queriesthread) << IP << "se intenta la conexion por GW";
@@ -331,11 +333,25 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                                                    QString interfazEsteEquipoSalida,
                                                    QString interfazSiguienteEquipoEntrada)
 {
-    //no esta en el listado actual a consultar
+    //que no este en el listado actual a consultar
     //no pasa si solo equipos nuevos y ya esta en el listado de anteriores
     if ( !m_lstIP.contains(ip) &&
          !( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( ip ) ) )
     {
+        //que este en el listado de segmentos
+        for ( QString segmento : m_lstLinksEnSegmentos )
+        {
+            bool encontrado=false;
+            if ( validarIPperteneceAsegmento( qry->interfacesIpAddressesQuery->ipFromInterfaz( interfazEsteEquipoSalida ),
+                                              segmento) )
+            {
+                encontrado=true;
+                break;
+            }
+            if ( !encontrado )
+                return;
+        }
+
         //ospf area
         if ( !m_consultaOSPFArea.isEmpty() )
         {

@@ -31,12 +31,16 @@ private:
     QMap<QString,QString> queriesParametrosMap;
     QStringList lstIPAnteriores;
     QStringList lstIP;
+    QStringList m_lstLinksEnSegmentos; //agregar los vecinos cuyo link pertenezca a los segmentos establecidos
     QString m_ip;
     QString m_lstIPsPath;
     QString m_gw;
     QString m_user;
     QString m_pwd;
+    QString m_user2;
+    QString m_pwd2;
     QString m_consultaOSPFArea;
+    QString m_linuxprompt;
     int m_interval,m_simultaneos,m_maxParalelos;
     QRemoteShell::ConnectionProtocol m_connectionprotocol;
     QString _error;
@@ -62,11 +66,14 @@ public:
     void setConsultaSoloEquiposNuevos(bool enable) { m_consultaSoloEquiposNuevos=enable; }
     void setConsultaOSPFMismoDominio(bool enable) { m_consultaOSPFMismoDominio=enable; }
     void setConsultaOSPFArea(QString area) { m_consultaOSPFArea = area; }
+    void setConsultaLinksEnSegmentos(QStringList lstSegmentos) { m_lstLinksEnSegmentos=lstSegmentos; }
     void setGW(QString gw) { m_gw=gw; }
     void setConsultaInterval(int interval) { m_interval=interval; }
     void setConsultaSimultaneos(int simultaneos) { m_simultaneos=simultaneos; }
     void setConsultaMaxParalelos(int maxParalelos) { m_maxParalelos=maxParalelos; }
     void setConnectionProtocol( QRemoteShell::ConnectionProtocol cp ) { m_connectionprotocol = cp; }
+    void setUser2(QString user) { m_user2=user; }
+    void setPassword2(QString pwd) { m_pwd2=pwd; }
 
     void addOpcionesConsulta(QList<Queries::Opcion> lst);
     void addParametrosConsulta(QString parametro,QString valor);

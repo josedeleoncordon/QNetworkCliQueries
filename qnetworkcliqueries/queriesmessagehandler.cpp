@@ -1,6 +1,7 @@
 #include "queriesmessagehandler.h"
 #include <QMutex>
 #include <QDebug>
+#include <QDir>
 
 QueriesMessageHandler *QueriesMessageHandler::m_instance = nullptr;
 
@@ -22,13 +23,7 @@ QueriesMessageHandler::QueriesMessageHandler(QString path)
     _path = path;
     _expIP.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
 
-    _dbgFie.setFileName( path+"/ConsultaEquipos_debug.txt" );
-    _dbgFie.open(QIODevice::WriteOnly | QIODevice::Append);
-    _dbgS.setDevice( &_dbgFie );
-
-    _otherFie.setFileName( path+"/ConsultaEquipos_other.txt" );
-    _otherFie.open(QIODevice::WriteOnly | QIODevice::Append);
-    _otherS.setDevice( &_otherFie );
+    init();
 
     _c=0;
 }
@@ -43,6 +38,27 @@ QueriesMessageHandler::~QueriesMessageHandler()
     qDeleteAll( _lstLogs );
 }
 
+void QueriesMessageHandler::init()
+{
+    QDir dir(_path);
+    dir.setNameFilters(QStringList() << "*.log");
+    dir.setFilter(QDir::Files);
+    for (QString dirFile : dir.entryList())
+        dir.remove(dirFile);
+
+    close();
+
+    _dbgFie.setFileName( _path+"/ConsultaEquipos_debug.log" );
+    _dbgFie.open(QIODevice::WriteOnly | QIODevice::Append);
+    _dbgS.setDevice( &_dbgFie );
+
+    _otherFie.setFileName( _path+"/ConsultaEquipos_other.log" );
+    _otherFie.open(QIODevice::WriteOnly | QIODevice::Append);
+    _otherS.setDevice( &_otherFie );
+
+    _c=0;
+}
+
 void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     Q_UNUSED(context)
@@ -52,7 +68,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
     switch (type) {
     case QtInfoMsg:
     {
-        printf( qPrintable( QString(context.category)+": "+msg+"\n"));
+        printf( qPrintable( QString(context.category)+": "+msg+"\n") );
         break;
     }
     case QtWarningMsg:
@@ -101,7 +117,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
 
                     log* ll = new log;
                     ll->ip = ip;
-                    QFile *f = new QFile( _path+"/"+numero+"_"+ip+".txt" );
+                    QFile *f = new QFile( _path+"/"+numero+"_"+ip+".log" );
                     f->open(QIODevice::WriteOnly | QIODevice::Append);
                     QTextStream *s = new QTextStream( f );
                     ll->file = f;
@@ -136,6 +152,22 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
     }
 
     _mutex.unlock();
+}
+
+void QueriesMessageHandler::close()
+{
+    for ( log* ll : _lstLogs )
+    {
+        ll->file->close();
+        ll->file->deleteLater();
+    }
+    _lstLogs.clear();
+
+    if ( _otherFie.isOpen() )
+    {
+        _otherFie.close();
+        _dbgFie.close();
+    }
 }
 
 void queriesMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)

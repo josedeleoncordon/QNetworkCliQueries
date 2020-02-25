@@ -94,6 +94,12 @@ QStringList interfacePortChannelToInterfaces(QList<SPortChannel *> lst,QString p
 //verifica si las dos ips pertenecen al mismo segmento /30 /31
 bool sonIPsParejaMascara30_31( QString ip1, QString ip2 );
 
+//convierte una IP (192.168.1.1) a su forma binaria
+QString IP2Binario(QString ip);
+
+//verifica si una IP pertenece a un segmento
+bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos);  //segmentoIP_mascara2digitos ej: 192.168.1.0/24
+
 //buscar la pareja de la interfaz que pertenezca al mismo segmento /30
 Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries *> lst,
                                                     QString ipBuscar,
