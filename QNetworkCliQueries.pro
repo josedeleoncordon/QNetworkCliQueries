@@ -3,6 +3,6 @@ CONFIG   += ordered
 
 SUBDIRS =   qremoteshell \
             qnetworkcliqueries \
-            testapps \
+#            testapps \
             apps
 

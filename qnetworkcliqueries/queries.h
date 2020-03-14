@@ -37,6 +37,7 @@ public:
     Queries(const Queries &other);
     ~Queries();
 
+    //
     enum Opcion {
         Null = 0,
         Connect = 4,
@@ -63,8 +64,6 @@ public:
         Configuration = 8388608,
         Exit = 16777216
     };
-
-    QString mac; //mie para debug de graficar l2 por mac
 
     PlatformInfo *pi;
     EquipmentNeighborsInfo *equipmentNeighborsInfoQuery;
@@ -99,55 +98,54 @@ public:
     QString location() { return m_location; }
     QString brand() { return m_brand; }
     QString gw() { return m_gw; }
-    void setConnectionProtocol(QRemoteShell::ConnectionProtocol cp) { m_connectionprotol = cp; }    
+    void setConnectionProtocol(QRemoteShell::ConnectionProtocol cp) { m_connectionprotol = cp; }   //
     QDateTime dateTime() { return m_datetime; }
     bool operativo() { return m_operativo; }
     QString ip() { return m_ip; }
-    QString ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; }
+    QString ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; } //
 
     QList<SEquipmentNeighborsInfo*>& equipmentNeighborsInfo() { return equipmentNeighborsInfoQuery->equipmentNeighborsInfo(); }
     QList<SInterfaceInfo*>& interfacesInfo() { return interfacesInfoQuery->interfacesInfo(); }
     QList<SInterfaceVlans*>& interfacesPermitedVlansInfo() { return interfacesPermitedVlansQuery->interfacesPermitedVlansInfo(); }
     QList<SInterfaceInfo*>& interfacesDescriptionsInfo() { return interfacesDescriptionsQuery->interfacesInfo(); }
     QList<SIpInfo*>& interfacesIpAddressesInfo() { return interfacesIpAddressesQuery->interfacesIpAddressesInfo(); }
-    QList<SOSPFInfo*>& ospfInfo() { return ospfQuery->ospfInfo(); } //
-    QString& mplsLdpLocalIDInfo() { return mplsLdpDiscoveryQuery->ldpLocalIDInfo(); } //
-    QList<SMplsTETunnelInfo*>& mplsTETunnelsInfo() { return mplsTEtunnelsQuery->mplsTEtunnelsInfo(); } //
-    QList<SMplsLdpInfo*>& mplsLdpDiscoveryInfo() { return mplsLdpDiscoveryQuery->mplsLdpDiscoveryInfo(); } //
+    QList<SOSPFInfo*>& ospfInfo() { return ospfQuery->ospfInfo(); }
+    QString& mplsLdpLocalIDInfo() { return mplsLdpDiscoveryQuery->ldpLocalIDInfo(); }
+    QList<SMplsTETunnelInfo*>& mplsTETunnelsInfo() { return mplsTEtunnelsQuery->mplsTEtunnelsInfo(); }
+    QList<SMplsLdpInfo*>& mplsLdpDiscoveryInfo() { return mplsLdpDiscoveryQuery->mplsLdpDiscoveryInfo(); }
     QList<SMplsLdpInfo*>& mplsLdpNeighborsInfo() { return mplsLdpNeighborsQuery->mplsLdpNeighborsInfo(); }
     QList<SMplsLdpInfo*>& mplsLdpInterfacesInfo() { return mplsLdpInterfacesQuery->mplsLdpInterfacesInfo(); }
 //    QList<SPIMInfo*>& pimNeighbors() { return pimNeighborsQuery->pimNeighbors(); }
     QList<SPIMInfo*>& pimInterfacesInfo() { return pimInteracesQuery->pimIntefacesInfo(); }
     QList<SMacInfo*>& macInfo() { return macsQuery->macInfo(); }
-    QList<SPortChannel*>& portChannelInfo() { return portChannelInfoQuery->portChannelInfo(); } //
+    QList<SPortChannel*>& portChannelInfo() { return portChannelInfoQuery->portChannelInfo(); }
     QStringList& vrfsFromVlansInfo() { return vrfsFromVlansQuery->vrfsFromVlansInfo(); }
     QString& vrfFromRTInfo() { return vrfFromRTQuery->vrfFromRTInfo(); }
     QList<SVrfInfo*>& vrfsInfo() { return vrfsQuery->vrfsInfo(); } //
     QList<SIpInfo*>& arpsInfo() { return arpsQuery->arpInfo(); } //
-    QStringList& bgpNeighborsInfo() { return bgpNeighborsQuery->bgpNeighborInfo(); } //
+    QStringList& bgpNeighborsInfo() { return bgpNeighborsQuery->bgpNeighborInfo(); }
     QList<SIpRouteInfo*>& ipRoutesInfo() { return ipRoutesQuery->ipRouteInfo(); }
 
     void setId(QString id) { m_id = id; }
-    void setGW(QString GW);
+    void setGW(QString GW); //
     void updateDate() { m_datetime = QDateTime::currentDateTime(); }
-    void setKeepAlive(bool enable);
-    void setRemoteShell(QRemoteShell *remoteShell) { term = remoteShell; }
-    void setOptions(unsigned int);
-//    void addAndCreateOptions(unsigned int);
+    void setKeepAlive(bool enable); //
+    void setRemoteShell(QRemoteShell *remoteShell) { term = remoteShell; } //
+    void setOptions(unsigned int); //
     void setOperativo(bool OPERATIVO) { m_operativo = OPERATIVO; }
     void setCountry(QString COUNTRY) { m_country = COUNTRY; }
     void setIP(QString IP) { m_ip = IP; }
     void setHostName(QString NAME) { m_name = NAME; }
     void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }    
-    void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; }
-    void createEmptyQueries();
-    void clear();
-    void setUser2(QString user) { m_user2=user; }
-    void setPassword2(QString pwd) { m_pwd2=pwd; }
-    void startSync();
+    void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; } //
+    void createEmptyQueries(); //
+    void clear(); //
+    void setUser2(QString user) { m_user2=user; } //
+    void setPassword2(QString pwd) { m_pwd2=pwd; } //
+    void startSync(); //
 
-    static QMap<QString,QString> queriesArgumentosAceptados();
-    static void updateInfoQueries( QList<Queries*> &lstDest, QList<Queries*> &lstOrigin, QStringList lstIPsConsulta );
+    static QMap<QString,QString> queriesArgumentosAceptados(); //
+    static void updateInfoQueries( QList<Queries*> &lstDest, QList<Queries*> &lstOrigin, QStringList lstIPsConsulta ); //
 
     friend QDataStream& operator<<(QDataStream& out, const Queries* query);
     friend QDataStream& operator>>(QDataStream& in, Queries*& query);
@@ -157,31 +155,31 @@ public slots:
     virtual void start();    
 
 protected slots:
-    void processConnectToHostReachable();
-    void processConnectToHostConnected();
-    void processConnectToHostDisconnected();
-    void processPlatform();
-    void processConfigFinished();
-    void processFinished();
-    void processKeepWorking();
-    void on_m_keepAliveTimer_timeout();
-    void on_query_lastCommand(QString);
-    void on_queryTimer_timeout();
+    void processConnectToHostReachable(); //
+    void processConnectToHostConnected(); //
+    void processConnectToHostDisconnected(); //
+    void processPlatform(); //
+    void processConfigFinished(); //
+    void processFinished(); //
+    void processKeepWorking(); //
+    void on_m_keepAliveTimer_timeout(); //
+    void on_query_lastCommand(QString); //
+    void on_queryTimer_timeout(); //
 
 signals:
-    void lastCommand(Queries*,QString);
-    void finished(Queries*);
+    void lastCommand(Queries*,QString); //
+    void finished(Queries*); //
 
 protected:
-    QRemoteShell *term;
-    unsigned int flags;    
-    unsigned int opcionActual;
-    QTimer *queryTimer;
+    QRemoteShell *term; //
+    unsigned int flags;     //
+    unsigned int opcionActual; //
+    QTimer *queryTimer; //
     bool m_connected;
     bool m_error;
     bool m_ipreachable;
-    bool m_queriescreated;
-    bool m_contieneconsultas;
+    bool m_queriescreated; //
+    bool m_contieneconsultas; //
 
     short int m_consultaIntentos;
     bool m_reintentandoConsulta;
@@ -196,20 +194,20 @@ protected:
     QDateTime m_datetime;
     QString m_xr_location;
     QString m_location;
-    QRemoteShell::ConnectionProtocol m_connectionprotol;    
+    QRemoteShell::ConnectionProtocol m_connectionprotol;   //
     bool m_operativo;
     QString m_ip;
 
-    QTimer *m_keepAliveTimer;
-    QString m_gw;
-    QString m_user;
-    QString m_user2;
-    QString m_pwd;
-    QString m_pwd2;
-    QString m_linuxprompt;
-    bool m_conectionSecondTriedOtherUserPassword;
+    QTimer *m_keepAliveTimer; //
+    QString m_gw; //
+    QString m_user; //
+    QString m_user2; //
+    QString m_pwd; //
+    QString m_pwd2; //
+    QString m_linuxprompt; //
+    bool m_conectionSecondTriedOtherUserPassword; //
 
-    QString m_ipOinterfazMismoDominioOSPFdondeSeViene;
+    QString m_ipOinterfazMismoDominioOSPFdondeSeViene; //
 
     void iniciar();
     void createQueries(Queries::Opcion option = Queries::Null);    

@@ -33,6 +33,7 @@ HEADERS += \
     properties.h \
     qnetworkquerieslogging.h \
     queries.h \
+#    queriesdao.h \
     queriesmessagehandler.h \
     queriesthread.h \
     base/platforminfo.h \
@@ -68,6 +69,7 @@ SOURCES += \
     properties.cpp \
     qnetworkquerieslogging.cpp \
     queries.cpp \
+#    queriesdao.cpp \
     queriesmessagehandler.cpp \
     queriesthread.cpp \
     base/platforminfo.cpp \
