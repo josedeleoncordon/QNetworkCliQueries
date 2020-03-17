@@ -6,6 +6,7 @@
 #include "ospfinfo.h"
 #include "mplsldpinfo.h"
 #include "mplstetunnelsinfo.h"
+#include "mplsl2transport.h"
 #include "piminfo.h"
 #include "macinfo.h"
 #include "platforminfo.h"
@@ -62,7 +63,8 @@ public:
         BGPNeig = 2097152,
         IpRoutes = 4194304,
         Configuration = 8388608,
-        Exit = 16777216
+        Mplsl2Transport = 16777216,
+        Exit = 33554432
     };
 
     PlatformInfo *pi;
@@ -73,6 +75,7 @@ public:
     InterfaceInfo *interfacesIpAddressesQuery;
     OSPFInfo* ospfQuery;
     MplsTEtunnelsInfo *mplsTEtunnelsQuery;
+    MplsL2TransportInfo *mplsL2TransportQuery;
     MplsLdpInfo* mplsLdpDiscoveryQuery;
     MplsLdpInfo* mplsLdpNeighborsQuery;
     MplsLdpInfo* mplsLdpInterfacesQuery;
@@ -112,6 +115,8 @@ public:
     QList<SOSPFInfo*>& ospfInfo() { return ospfQuery->ospfInfo(); }
     QString& mplsLdpLocalIDInfo() { return mplsLdpDiscoveryQuery->ldpLocalIDInfo(); }
     QList<SMplsTETunnelInfo*>& mplsTETunnelsInfo() { return mplsTEtunnelsQuery->mplsTEtunnelsInfo(); }
+    QList<SMplsL2XconnectInfo*>& mplsL2TransportXconnectsInfo() { return mplsL2TransportQuery->mplsL2XconnectsInfo(); }
+    QList<SMplsL2VFIInfo*>& mplsL2TransportVFIsInfo() { return mplsL2TransportQuery->mplsL2VFIsInfo(); }
     QList<SMplsLdpInfo*>& mplsLdpDiscoveryInfo() { return mplsLdpDiscoveryQuery->mplsLdpDiscoveryInfo(); }
     QList<SMplsLdpInfo*>& mplsLdpNeighborsInfo() { return mplsLdpNeighborsQuery->mplsLdpNeighborsInfo(); }
     QList<SMplsLdpInfo*>& mplsLdpInterfacesInfo() { return mplsLdpInterfacesQuery->mplsLdpInterfacesInfo(); }

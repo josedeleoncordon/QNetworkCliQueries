@@ -345,13 +345,13 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             exp.setPattern("Explicit Route: (.+)$");
             if ( line.contains(exp) )
             {
-                QString route = exp.cap(1);
+                QString ro = exp.cap(1);
 
-                if ( !route.contains("NONE") )
+                if ( !ro.contains("NONE") )
                 {
                     tunel->route.append(exp.cap(1).replace("*",""));
                     if ( tunel->role.isEmpty() ) tunel->role = "Mid";
-                    route=true;
+                    ro=true;
                 }
                 else
                     tunel->role = "Tail";

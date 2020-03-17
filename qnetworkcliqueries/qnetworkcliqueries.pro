@@ -13,8 +13,8 @@ CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
 HEADERS += \
     base/exitinfo.h \
+    base/mplsl2transport.h \
     base/mplstetunnelsinfo.h \
-    base/mplsvpnl2info.h \
     base/portchannelsinfo.h \
     base/vrfinfo.h \
     base/arpinfo.h \
@@ -49,8 +49,8 @@ HEADERS += \
 
 SOURCES += \
     base/exitinfo.cpp \
+    base/mplsl2transport.cpp \
     base/mplstetunnelsinfo.cpp \
-    base/mplsvpnl2info.cpp \
     base/portchannelsinfo.cpp \
     base/vrfinfo.cpp \
     base/arpinfo.cpp \
@@ -81,3 +81,8 @@ SOURCES += \
     base/config.cpp \    
     Cisco/arpinfocisco.cpp \
     Huawei/arpinfohuawei.cpp
+
+unix {
+    target.path = /usr/lib64
+    INSTALLS += target
+}

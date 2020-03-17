@@ -62,6 +62,13 @@ MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, 
     return new MplsTEtunnelsInfo(term,parent);
 }
 
+MplsL2TransportInfo *factoryNewMplsL2TransportInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+{
+    Q_UNUSED( type )
+
+    return new MplsL2TransportInfo(term,parent);
+}
+
 MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
 {
     return new MplsLdpInfo(term,parent);

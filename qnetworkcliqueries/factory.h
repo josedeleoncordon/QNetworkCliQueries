@@ -8,6 +8,7 @@
 #include "iprouteinfo.h"
 #include "macinfo.h"
 #include "mplstetunnelsinfo.h"
+#include "mplsl2transport.h"
 #include "mplsldpinfo.h"
 #include "ospfinfo.h"
 #include "piminfo.h"
@@ -23,6 +24,7 @@ InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteS
 IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
+MplsL2TransportInfo *factoryNewMplsL2TransportInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);

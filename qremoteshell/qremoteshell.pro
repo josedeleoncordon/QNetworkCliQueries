@@ -51,3 +51,8 @@ HEADERS += \
     qremoteshell.h\
     qremoteshell_global.h
 
+unix {
+    target.path = /usr/lib64
+    INSTALLS += target
+}
+
