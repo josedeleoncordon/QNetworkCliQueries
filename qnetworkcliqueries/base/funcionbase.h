@@ -68,6 +68,7 @@ protected:
     QString m_lastCommand;
 
     void termSendText(QString str);
+    void termSendTextSync(QString str);
     void finished();
     bool allTextReceived();
     bool lastCommandFailed;
@@ -82,10 +83,15 @@ public:
     void setHostName(QString name) { m_name=name; }
     void setIp(QString ip) { m_ip = ip; }
 
+private slots:
+    void m_on_term_receiveText();
+
 signals:
     void lastCommand(QString);
     void processFinished();
     void working();
+
+    void m_termReceivedFinished();
 };
 
 Q_DECLARE_METATYPE(FuncionBase*);

@@ -1766,6 +1766,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries*& que
         foreach (SMplsTETunnelInfo *i, query->mplsTETunnelsInfo() )
             i->queryParent = query;
     }
+    in >> a;
     if ( a )
     {
         in >> query->mplsL2TransportQuery;

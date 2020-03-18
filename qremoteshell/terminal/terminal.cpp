@@ -58,8 +58,10 @@ Terminal::~Terminal()
 }
 
 void Terminal::onReceiveBlock( const char * buf, int len )
-{    
+{
     QString received = QString::fromLatin1( buf, len ).toLatin1();
+
+    qCDebug(terminal) << _debugIP << "onReceiveBlock" << received;
 
     if ( !_ready )
     {
@@ -82,6 +84,7 @@ void Terminal::on_timerout()
 
 void Terminal::sendCommand(QString txt)
 {
+    qCDebug(terminal) << _debugIP << "sendCommand " << txt;
     txt.append("\n");
     sendData( txt.toLocal8Bit() );
 }

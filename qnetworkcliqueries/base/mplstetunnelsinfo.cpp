@@ -11,6 +11,7 @@ SMplsTETunnelInfo::SMplsTETunnelInfo(const SMplsTETunnelInfo &other)
     InterfaceIn = other.InterfaceIn;
     InterfaceOut = other.InterfaceOut;
     status = other.status;
+    autoRouteDestinationsCount = other.autoRouteDestinationsCount;
 }
 
 QDataStream& operator<<(QDataStream& out, const SMplsTETunnelInfo* data)
@@ -24,6 +25,7 @@ QDataStream& operator<<(QDataStream& out, const SMplsTETunnelInfo* data)
     out << data->InterfaceIn;
     out << data->InterfaceOut;
     out << data->status;
+    out << data->autoRouteDestinationsCount;
     //infobase
     out << data->datetime;
     out << data->operativo;
@@ -42,6 +44,7 @@ QDataStream& operator>>(QDataStream& in, SMplsTETunnelInfo*& data)
     in >> data->InterfaceIn;
     in >> data->InterfaceOut;
     in >> data->status;
+    in >> data->autoRouteDestinationsCount;
     //infobase
     in >> data->datetime;
     in >> data->operativo;
@@ -87,6 +90,7 @@ void updateInfoList(QList<SMplsTETunnelInfo*> &lstDest, QList<SMplsTETunnelInfo*
                 dest->InterfaceIn = origin->InterfaceIn;
                 dest->InterfaceOut = origin->InterfaceOut;
                 dest->status = origin->status;
+                dest->autoRouteDestinationsCount = origin->autoRouteDestinationsCount;
                 encontrado=true;
                 break;
             }
@@ -200,6 +204,14 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             if ( line.contains(exp) )
             {
                 tunel->status = exp.cap(2).simplified();
+                continue;
+            }
+
+            //Autoroute Destinations
+            exp.setPattern("Autoroute Destinations: (\\d+)$");
+            if ( line.contains(exp) )
+            {
+                tunel->autoRouteDestinationsCount = exp.cap(1).toShort();
                 continue;
             }
 
@@ -351,7 +363,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 {
                     tunel->route.append(exp.cap(1).replace("*",""));
                     if ( tunel->role.isEmpty() ) tunel->role = "Mid";
-                    ro=true;
+                    route=true;
                 }
                 else
                     tunel->role = "Tail";
@@ -407,8 +419,9 @@ QDebug operator<<(QDebug dbg, const MplsTEtunnelsInfo &info)
     dbg.nospace() << "MplsTEtunnels:\n";
 
     foreach (SMplsTETunnelInfo *i, info.m_lstMplsTEtunnels)
-        dbg.space() << i->name << i->status << i->origen << i->destino <<
-                       i->TuID << i->role << i->InterfaceIn << i->InterfaceOut << i->route << "\n";
+        dbg.space() << i->name << i->status << i->origen << i->destino
+                    << i->TuID << i->role << i->InterfaceIn << i->InterfaceOut
+                    << i->route << i->autoRouteDestinationsCount << "\n";
 
     dbg.nospace() << "\n";
 

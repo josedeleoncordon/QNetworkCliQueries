@@ -1,6 +1,8 @@
 #include "funcionbase.h"
 #include "queries.h"
 
+#include <QEventLoop>
+
 InfoBase::InfoBase(const InfoBase &other)
 {
     datetime = other.datetime;
@@ -49,13 +51,35 @@ void FuncionBase::setPlatform(QString platform)
     m_os=equipmentOSFromPlatform(m_platform);
 }
 
-void FuncionBase::termSendText(QString str)
+void FuncionBase::termSendText(QString str) //Async
 {
     txt.clear();
     lastCommandFailed=false;
     m_lastCommand = str;
     term->sendCommand( str );
     emit lastCommand(m_lastCommand);
+}
+
+void FuncionBase::termSendTextSync(QString str) //Sync
+{
+    disconnect();
+    QEventLoop loop;
+    connect(term, SIGNAL(readyRead()), SLOT(m_on_term_receiveText()));
+    connect(this, SIGNAL(m_termReceivedFinished()), &loop, SLOT(quit()));
+    termSendText(str);
+    loop.exec();
+}
+
+void FuncionBase::m_on_term_receiveText()
+{
+    qDebug() << "FuncionBase::m_on_term_receiveText() sync";
+
+    //cuando es sync
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    emit m_termReceivedFinished();
 }
 
 bool FuncionBase::allTextReceived()
