@@ -18,17 +18,7 @@ Config::~Config() {}
 
 void Config::configApply()
 {
-    QMapIterator<QString, QString> imap( QueriesConfiguration::instance()->mapConfigurations );
-    while (imap.hasNext())
-    {
-        imap.next();
-        if ( m_platform.contains(imap.key()) ||
-             m_os == imap.key() )
-        {
-            m_config = imap.value();
-            break;
-        }
-    }
+    m_config = QueriesConfiguration::instance()->configuration( m_platform,m_os,m_ip );
 
     if ( m_config.isEmpty() )
     {

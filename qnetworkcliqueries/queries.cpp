@@ -71,8 +71,10 @@ Queries::Queries(const Queries &other) : QObject(other.parent())
     if ( other.vrfFromRTQuery ) vrfFromRTQuery = new VrfInfo( *other.vrfFromRTQuery );
     if ( other.vrfsQuery ) vrfsQuery = new VrfInfo( *other.vrfsQuery );
     if ( other.arpsQuery ) arpsQuery = new ArpInfo( *other.arpsQuery );
-    if ( other.bgpNeighborsQuery ) bgpNeighborsQuery = new BGPNeighborInfo( *other.bgpNeighborsQuery );
+    if ( other.bgpNeighborsQuery ) bgpNeighborsQuery = new BGPInfo( *other.bgpNeighborsQuery );
+    if ( other.bgpNetworksQuery ) bgpNetworksQuery = new BGPInfo( *other.bgpNetworksQuery );
     if ( other.ipRoutesQuery ) ipRoutesQuery = new IPRouteInfo( *other.ipRoutesQuery );
+    if ( other.funcionQuery ) funcionQuery = new FuncionInfo( *other.funcionQuery );
 }
 
 Queries::~Queries()
@@ -106,9 +108,11 @@ void Queries::iniciar()
     vrfsQuery = nullptr;
     arpsQuery = nullptr;
     bgpNeighborsQuery = nullptr;
+    bgpNetworksQuery = nullptr;
     ipRoutesQuery = nullptr;
     configQuery = nullptr;
     exitQuery = nullptr;
+    funcionQuery = nullptr;
     m_connectionprotol = QRemoteShell::SSHTelnet;
 
     m_connected=false;
@@ -234,6 +238,11 @@ void Queries::limpiarConsultas()
         delete bgpNeighborsQuery;
         bgpNeighborsQuery=nullptr;
     }
+    if (bgpNetworksQuery)
+    {
+        delete bgpNetworksQuery;
+        bgpNetworksQuery=nullptr;
+    }
     if (ipRoutesQuery)
     {
         delete ipRoutesQuery;
@@ -243,6 +252,11 @@ void Queries::limpiarConsultas()
     {
         delete configQuery;
         configQuery=nullptr;
+    }
+    if (funcionQuery)
+    {
+        delete funcionQuery;
+        funcionQuery=nullptr;
     }
     if (exitQuery)
     {
@@ -456,6 +470,13 @@ void Queries::createQueries(Queries::Opcion option)
 
             bgpNeighborsQuery = factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term);
         }
+        else if ( flags & BGPNetworks & oActual )
+        {
+            if (bgpNetworksQuery)
+                delete bgpNetworksQuery;
+
+            bgpNetworksQuery = factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term);
+        }
         else if ( flags & IpRoutes & oActual )
         {
             if (ipRoutesQuery)
@@ -469,6 +490,13 @@ void Queries::createQueries(Queries::Opcion option)
                 delete configQuery;
 
             configQuery = factoryNewConfig(m_brand,m_equipmenttype,term);
+        }
+        else if ( flags & Funcion & oActual )
+        {
+            if (funcionQuery)
+                delete funcionQuery;
+
+            funcionQuery = factoryNewFuncionInfo(m_brand,m_equipmenttype,term);
         }
         else if ( flags & Exit & oActual )
         {
@@ -1004,6 +1032,25 @@ void Queries::nextProcess()
         bgpNeighborsQuery->getBGPNeighbors();
         return;
     }
+    else if ( opcionActual & flags & BGPNetworks )
+    {
+        if ( m_reintentandoConsulta )
+        {
+            m_reintentandoConsulta=false;
+            createQueries( BGPNetworks );
+        }
+
+        bgpNetworksQuery->setPlatform( m_platform );
+        bgpNetworksQuery->setXRLocation(m_xr_location);
+        bgpNetworksQuery->setBrand(m_brand);
+        bgpNetworksQuery->setHostName(m_fullName);
+        bgpNetworksQuery->setIp(m_ip);
+        connect(bgpNetworksQuery,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(bgpNetworksQuery,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(bgpNetworksQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        bgpNetworksQuery->getNetworks();
+        return;
+    }
     else if ( opcionActual & flags & IpRoutes )
     {
         if ( m_reintentandoConsulta )
@@ -1040,6 +1087,25 @@ void Queries::nextProcess()
         connect(configQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(configQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
         configQuery->configApply();
+        return;
+    }
+    else if ( opcionActual & flags & Funcion )
+    {
+        if ( m_reintentandoConsulta )
+        {
+            m_reintentandoConsulta=false;
+            createQueries( Funcion );
+        }
+
+        funcionQuery->setPlatform(m_platform);
+        funcionQuery->setXRLocation(m_xr_location);
+        funcionQuery->setBrand(m_brand);
+        funcionQuery->setHostName(m_fullName);
+        funcionQuery->setIp(m_ip);
+        connect(funcionQuery,SIGNAL(processFinished()),SLOT(processConfigFinished()));
+        connect(funcionQuery,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(funcionQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        funcionQuery->getTXT();
         return;
     }
     else if ( opcionActual & flags & Exit )
@@ -1301,10 +1367,14 @@ void Queries::crearFuncionesFaltantes()
         arpsQuery = factoryNewArpInfo(m_brand,m_equipmenttype,term);
     if (!bgpNeighborsQuery)
         bgpNeighborsQuery = factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term);
+    if (!bgpNetworksQuery)
+        bgpNetworksQuery = factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term);
     if (!ipRoutesQuery)
         ipRoutesQuery = factoryNewIPRouteInfo(m_brand,m_equipmenttype,term);
     if (!configQuery)
         configQuery = factoryNewConfig(m_brand,m_equipmenttype,term);
+    if (!funcionQuery)
+        funcionQuery = factoryNewFuncionInfo(m_brand,m_equipmenttype,term);
     if (!exitQuery)
         exitQuery = factoryNewExit(m_brand,m_equipmenttype,term);
 }
@@ -1317,14 +1387,19 @@ void Queries::createEmptyQueries()
 QMap<QString,QString> Queries::queriesArgumentosAceptados()
 {
     QMap<QString,QString> map;
-    map.insert("ARP_MacIP","Indicar aqui la MAC o IP en una consulta de ARP: 192.168.1.1 o 044e.0676.12bc");
-    map.insert("Arp_VRFs","Indicar aqui las VRFs en una consulta de ARP, VRFs separadas por comas: VRF1,VRF2,VRF3");
-    map.insert("BGPNeig_Type","Indicar aqui la familia: VPNV4");
-    map.insert("IPRoutes_protocol","Indicar aqui el protocolo para una consulta de tabla de enrutamiento: ospf static bgp");
-    map.insert("IPRoutes_VRFs","Indicar aqui las VRFs en una consulta de tablas de enrutamiento: VRF1,VRF2,VRF3");
-    map.insert("MAC_MAC","Indicar aqui la MAC en una consulta de tabla de MAC: 044e.0676.12bc");
+    map.insert("ARP_MacIP","Indicar la MAC o IP en una consulta de ARP: 192.168.1.1 o 044e.0676.12bc");
+    map.insert("Arp_VRFs","Indicar las VRFs en una consulta de ARP, VRFs separadas por comas: VRF1,VRF2,VRF3");
+    map.insert("BGPNeig_Type","Indicar la familia: VPNV4");
+    map.insert("BGPNetworks_Community","Indicar la comunidad de las redes a consultar");
+    map.insert("BGPNetworks_NeighborIP","Indicar la IP del vecino BGP. No utilizar BGPNetworks_Community");
+    map.insert("BGPNetworks_VRF","Indicar la VRF en la consulta de redes en un vecino BGP. No utilizar BGPNetworks_Community");
+    map.insert("BGPNetworks_NeighborIn_Out","Indicar si se consulta las redes entrantes o salientes del vecino.");
+    map.insert("IPRoutes_protocol","Indicar el protocolo para una consulta de tabla de enrutamiento: ospf static bgp");
+    map.insert("IPRoutes_VRFs","Indicar las VRFs en una consulta de tablas de enrutamiento: VRF1,VRF2,VRF3");
+    map.insert("MAC_MAC","Indicar la MAC en una consulta de tabla de MAC: 044e.0676.12bc");
     map.insert("VRFfRT_RT","Indicar la RT para una consulta donde se quiere saber la VRF desde la RT: 6458:17350");
     map.insert("VRFfVlans_Vlans","Indicar las Vlans para una consulta donde se quiere saber las VRFs a las que pertenecen: 136,3019,456,122");
+    map.insert("Funcion_txt","Indicar el comando a ejecutar. Se devuelve el texto obtenido del equipo");
     return map;
 }
 
@@ -1516,12 +1591,26 @@ void Queries::updateInfoQueries(QList<Queries*> &lstDest, QList<Queries *> &lstO
                     else
                         dest->bgpNeighborsQuery = origin->bgpNeighborsQuery;
                 }
+                if ( origin->bgpNetworksQuery )
+                {
+                    if ( dest->bgpNetworksQuery )
+                        dest->bgpNetworksInfo() = origin->bgpNetworksInfo();
+                    else
+                        dest->bgpNetworksQuery = origin->bgpNetworksQuery;
+                }
                 if ( origin->ipRoutesQuery )
                 {
                     if ( dest->ipRoutesQuery )                        
                         dest->ipRoutesInfo() = origin->ipRoutesInfo();
                     else
                         dest->ipRoutesQuery = origin->ipRoutesQuery;
+                }
+                if ( origin->funcionQuery )
+                {
+                    if ( dest->funcionQuery )
+                        dest->funcionTxtInfo() = origin->funcionTxtInfo();
+                    else
+                        dest->funcionQuery = origin->funcionQuery;
                 }
 
                 encontrado=true;
@@ -1688,6 +1777,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     }
     else
         out << false;
+    if ( query->bgpNetworksQuery )
+    {
+        out << true;
+        out << query->bgpNetworksQuery;
+    }
+    else
+        out << false;
     if ( query->ipRoutesQuery )
     {
         out << true;
@@ -1695,6 +1791,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     }
     else
         out << false;
+//    if ( query->funcionQuery )
+//    {
+//        out << true;
+//        out << query->funcionQuery;
+//    }
+//    else
+//        out << false;
 
     return out;
 }
@@ -1857,10 +1960,22 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries*& que
     in >> a;
     if ( a )
     {
+        in >> query->bgpNetworksQuery;
+        foreach (SBGPNetwork *i, query->bgpNetworksInfo() )
+            i->queryParent = query;
+    }
+    in >> a;
+    if ( a )
+    {
         in >> query->ipRoutesQuery;
         foreach (SIpRouteInfo *i, query->ipRoutesInfo() )
             i->queryParent = query;
     }
+//    if ( a )
+//    {
+//        in >> query->funcionQuery;
+//        //no se puede establecer el queryParent, no es una estructura
+//    }
 
     return in;
 }
@@ -1933,11 +2048,17 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
     if ( info.bgpNeighborsQuery )
         dbg.space() << "bgpNeighborsQuery" << *info.bgpNeighborsQuery;
 
+    if ( info.bgpNetworksQuery )
+        dbg.space() << "bgpNetworksQuery" << *info.bgpNetworksQuery;
+
     if ( info.ipRoutesQuery )
         dbg.space() << "ipRoutesQuery" << *info.ipRoutesQuery;
 
     if ( info.configQuery )
         dbg.space() << "Configuration" << *info.configQuery;
+
+    if ( info.configQuery )
+        dbg.space() << "Funcion" << *info.configQuery;
 
     dbg.nospace() << "--\n\n";
 
@@ -1954,7 +2075,7 @@ LstQueries::LstQueries(LstQueries* lstOrigen)
     lstIPsAconsultadas = lstOrigen->lstIPsAconsultadas;
     lstIPsConectadasPorGW = lstOrigen->lstIPsConectadasPorGW;
     errorMap = lstOrigen->errorMap;
-    queriesParametrosMap = lstOrigen->queriesParametrosMap;
+    lstQueriesParameters = lstOrigen->lstQueriesParameters;
     dateTime = lstOrigen->dateTime;
     label = lstOrigen->label;
     tipoconsulta = lstOrigen->tipoconsulta;
@@ -1973,7 +2094,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const LstQue
     out << lstquery->dateTime;
     out << lstquery->label;
     out << lstquery->tipoconsulta;
-    out << lstquery->queriesParametrosMap;
+    out << lstquery->lstQueriesParameters;
     out << lstquery->lstIPsAconsultadas;
     out << lstquery->gw;
     return out;
@@ -1990,7 +2111,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, LstQueries*& 
     in >> lstquery->dateTime;
     in >> lstquery->label;
     in >> lstquery->tipoconsulta;
-    in >> lstquery->queriesParametrosMap;
+    in >> lstquery->lstQueriesParameters;
     in >> lstquery->lstIPsAconsultadas;
     in >> lstquery->gw;
     return in;
@@ -2022,12 +2143,10 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const LstQueries &info)
     dbg.space() << "OpcionesConsulta" << info.opcionesConsulta << "\n";
     dbg.space() << "GW" << info.gw << "\n\n";
     dbg.space() << "ParametrosMap:\n";
-    QMapIterator<QString, QString> ipar(info.queriesParametrosMap);
-    while (ipar.hasNext())
-    {
-        ipar.next();
-        dbg.space() << ipar.key() << ipar.value() << "\n";
-    }
+
+    for ( QueriesConfigurationValue qcv : info.lstQueriesParameters )
+        dbg.space() << qcv;
+
     dbg.space() << "\n";
     dbg.space() << "errorMap:\n";
     dbg.space() << "No Conexion:\n";

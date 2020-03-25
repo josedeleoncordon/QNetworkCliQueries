@@ -33,20 +33,47 @@ struct InfoBase
     InfoBase(const InfoBase &other);
 };
 
+class QNETWORKCLIQUERIES_EXPORT QueriesConfigurationValue
+{
+
+public:
+
+    QString _key;
+    QVariant _value;
+    QString _IP;
+
+    QueriesConfigurationValue(QString key, QVariant value, QString IP="*");
+    QueriesConfigurationValue(const QueriesConfigurationValue &other);
+    QueriesConfigurationValue() {}
+
+    friend QDataStream& operator<<(QDataStream& out, const QueriesConfigurationValue& qcv);
+    friend QDataStream& operator>>(QDataStream& in, QueriesConfigurationValue& qcv);
+    friend QDebug operator<<(QDebug dbg, const QueriesConfigurationValue &info);
+};
+
 class QNETWORKCLIQUERIES_EXPORT QueriesConfiguration
 {
 private:
     static QueriesConfiguration* m_instance;
+    QList<QueriesConfigurationValue> m_lstQueryParameters;
+    QList<QueriesConfigurationValue> m_lstConfiguration;
+
+    QVariant m_find(QString parameter, QString IP);
+
 public:
     QueriesConfiguration();
     static QueriesConfiguration *instance();
 
-    QMap<QString,QString> mapQueries;
-    QStringList mapQueriesToList(QString value);
+    void addQueryParameter(const QList<QueriesConfigurationValue>&);
+    void addConfiguration(const QList<QueriesConfigurationValue>&);
 
-    QMap<QString,QString> mapConfigurations;
+    bool state(QString paramete, QString IP);
+    QString value(QString parameter, QString IP);
+    QStringList values(QString parameter, QString IP);
 
-    int opciones;
+    QString configuration(QString platform, QString os, QString IP);
+
+    QList<QueriesConfigurationValue> lstQueryParameters() { return m_lstQueryParameters; }
 };
 
 class QNETWORKCLIQUERIES_EXPORT FuncionBase : public QObject

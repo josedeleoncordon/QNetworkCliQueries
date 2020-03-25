@@ -258,6 +258,7 @@ InterfaceInfo::InterfaceInfo(QRemoteShell *terminal, QObject *parent):
     m_InterfacesInfo_onlyPhysicalInterfaces=true;
     m_continueShowVlan=false;
     m_continueShowVlanBridge=false;
+    m_onlyphysicalinterfaces=false;
 }
 
 InterfaceInfo::InterfaceInfo(const InterfaceInfo &other):
@@ -300,11 +301,13 @@ InterfaceInfo::~InterfaceInfo()
 void InterfaceInfo::getInterfacesInfo()
 {
     m_interfacesPos=-1;
-    m_interfaces = QueriesConfiguration::instance()->mapQueriesToList("InterfaceInfo_Interfaces");
-    getInterfacesInfoNextInteface();
+    m_interfaces = QueriesConfiguration::instance()->values("InterfaceInfo_Interfaces",m_ip);
+    m_onlyphysicalinterfaces = QueriesConfiguration::instance()->state("InterfaceInfo_XRonlyPhisical",m_ip);
+
+    _getInterfacesInfoNextInteface();
 }
 
-void InterfaceInfo::getInterfacesInfoNextInteface()
+void InterfaceInfo::_getInterfacesInfoNextInteface()
 {
     term->disconnectReceiveTextSignalConnections();
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Info()));
@@ -314,6 +317,7 @@ void InterfaceInfo::getInterfacesInfoNextInteface()
         //se consultan todas las interfaces
         if ( m_brand == "Cisco" )
             termSendText("show interface");
+//            termSendText("show interface | i \"rate|line|Desc|MTU|duplex|address|drops\"");
         else if ( m_brand == "Huawei" )
             termSendText("display interface");
         else
@@ -386,10 +390,10 @@ void InterfaceInfo::getInterfacesDescriptions()
 {
     term->disconnectReceiveTextSignalConnections();   
 
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Descriptions()));        
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Descriptions()));
 
     if ( m_brand == "Cisco" )
-        termSendText("show interface description");
+        termSendText("show interface description " );
     else if ( m_brand == "Huawei" )
         termSendText("display interface description");
     else
@@ -424,7 +428,7 @@ void InterfaceInfo::on_term_receiveText_Info()
     {
         line = line.simplified();
 
-//        qDebug() << m_queriesParent->ip() << "line II line" << line;
+        qDebug() << m_queriesParent->ip() << "line II line" << line;
 
         if ( m_brand == "Cisco" )
         {
@@ -649,7 +653,7 @@ void InterfaceInfo::on_term_receiveText_Info()
         }
         if ( m_brand == "Huawei")
             //Huawei de una vez muestra la potencia en la informacion de interfaz, continuamos con la siguiente.
-            getInterfacesInfoNextInteface();
+            _getInterfacesInfoNextInteface();
     }
 }
 
@@ -696,7 +700,7 @@ void InterfaceInfo::on_term_receiveText_InfoTransceiver()
         }
     }
 
-    getInterfacesInfoNextInteface();
+    _getInterfacesInfoNextInteface();
 }
 
 void InterfaceInfo::on_term_receiveText_IpAddresses()
@@ -1047,6 +1051,7 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
             m_lstInterfacesInfo.append(id);
         }        
     }    
+
     finished();
 }
 

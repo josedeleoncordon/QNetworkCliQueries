@@ -8,6 +8,7 @@ SIpInfo::SIpInfo(const SIpInfo &other)
     vlan = other.vlan;
     interfaz = other.interfaz;
     age = other.age;
+    //infobase
     datetime = other.datetime;
     operativo = other.operativo;
 }

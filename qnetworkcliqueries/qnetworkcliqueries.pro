@@ -18,7 +18,7 @@ HEADERS += \
     base/portchannelsinfo.h \
     base/vrfinfo.h \
     base/arpinfo.h \
-    base/bgpneighborinfo.h \
+    base/bgpinfo.h \
     base/equipmentneighbors.h \
     base/funcionbase.h \
     base/interfaceinfo.h \
@@ -29,6 +29,7 @@ HEADERS += \
     base/piminfo.h \
     consultaequipos.h \
     factory.h \
+    base/funcioninfo.h \
     funciones.h \
     properties.h \
     qnetworkquerieslogging.h \
@@ -54,7 +55,7 @@ SOURCES += \
     base/portchannelsinfo.cpp \
     base/vrfinfo.cpp \
     base/arpinfo.cpp \
-    base/bgpneighborinfo.cpp \
+    base/bgpinfo.cpp \
     base/equipmentneighbors.cpp \
     base/funcionbase.cpp \
     base/interfaceinfo.cpp \
@@ -65,6 +66,7 @@ SOURCES += \
     base/piminfo.cpp \
     consultaequipos.cpp \
     factory.cpp \
+    base/funcioninfo.cpp \
     funciones.cpp \
     properties.cpp \
     qnetworkquerieslogging.cpp \

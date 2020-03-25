@@ -116,8 +116,8 @@ void IPRouteInfo::getIPRouteInfo()
         return;
     }
 
-    m_vrfs = QueriesConfiguration::instance()->mapQueriesToList("IPRoutes_VRFs");
-    m_protocol = QueriesConfiguration::instance()->mapQueries.value("IPRoutes_protocol");
+    m_vrfs = QueriesConfiguration::instance()->values("IPRoutes_VRFs",m_ip);
+    m_protocol = QueriesConfiguration::instance()->value("IPRoutes_protocol",m_ip);
 
     if ( m_vrfs.isEmpty() )
         m_vrfs.append(""); //para la global

@@ -1,4 +1,5 @@
 #include "mplstetunnelsinfo.h"
+#include "qnetworkquerieslogging.h"
 
 SMplsTETunnelInfo::SMplsTETunnelInfo(const SMplsTETunnelInfo &other)
 {
@@ -53,52 +54,12 @@ QDataStream& operator>>(QDataStream& in, SMplsTETunnelInfo*& data)
 
 void updateInfoList(QList<SMplsTETunnelInfo*> &lstDest, QList<SMplsTETunnelInfo*> &lstOrigin )
 {
-    //actualiza la lista anterior con la información de la nueva
-    //origen = nuevo
-    //destino = anterior
+    //Los tuneles TEs no es necesario fusionar, simplemente reemplazar los viejos por los nuevos
 
-    //borramos los datos anteriores que tengan mas de 30 dias
-    for ( int c=0; c<lstDest.size(); )
-    {
-        SMplsTETunnelInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
-             lstDest.removeAt( c );
-        else
-        {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
-            c++;
-        }
-    }
+    qDeleteAll(lstDest);
+    lstDest.clear();
 
-    //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SMplsTETunnelInfo *origin, lstOrigin )
-    {
-        bool encontrado=false;
-        foreach ( SMplsTETunnelInfo *dest, lstDest )
-        {
-            if ( origin->name == dest->name )
-            {
-                //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->name = origin->name;
-                dest->origen = origin->origen;
-                dest->destino = origin->destino;
-                dest->TuID = origin->TuID;
-                dest->route = origin->route;
-                dest->role = origin->role;
-                dest->InterfaceIn = origin->InterfaceIn;
-                dest->InterfaceOut = origin->InterfaceOut;
-                dest->status = origin->status;
-                dest->autoRouteDestinationsCount = origin->autoRouteDestinationsCount;
-                encontrado=true;
-                break;
-            }
-        }
-        if ( !encontrado )
-            //no se encontro, se agrega
-            lstDest.append( origin );
-    }
+    lstDest = lstOrigin;
 }
 
 MplsTEtunnelsInfo::MplsTEtunnelsInfo(QRemoteShell *terminal, QObject *parent):
@@ -151,6 +112,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
     foreach (QString line, lines)
     {
         line = line.simplified();
+        qCDebug(mplstetunnels) << "line" << line;
 
         if ( m_os == "IOS XR" )
         {
@@ -304,6 +266,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 tunel->name = exp.cap(1).simplified();
                 tunel->role = "Head";
                 m_lstMplsTEtunnels.append( tunel );
+                qCDebug(mplstetunnels) << "Nuevo tunnel" << tunel->name << tunel->role;
                 continue;
             }
             //LSP Tunnel FROM-CMY3-TO-WBP is signalled, connection is up
@@ -317,6 +280,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 tunel->name = exp2.cap(1).simplified();
                 tunel->status = exp2.cap(2).simplified();
                 m_lstMplsTEtunnels.append( tunel );
+                qCDebug(mplstetunnels) << "Nuevo tunnel" << tunel->name << tunel->role;
                 continue;
             }
 
@@ -349,6 +313,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 tunel->origen = exp.cap(1).simplified();
                 tunel->destino = exp.cap(2).simplified();
                 tunel->TuID = (tunel->role=="Head"?"Tunnel":"")+exp.cap(3).simplified();
+                qCDebug(mplstetunnels) << "origen destino" << tunel->origen << tunel->destino;
                 continue;
             }
 
@@ -372,18 +337,20 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             }
 
             //InLabel  : TenGigabitEthernet0/0/4, implicit-null
-            exp.setPattern("InLabel : (.+), .+");
+            exp.setPattern("^InLabel : (.+), .+");
             if ( line.contains(exp) )
             {
                 tunel->InterfaceIn=estandarizarInterfaz(exp.cap(1).simplified());
+                qCDebug(mplstetunnels) << "interfaz in" << tunel->InterfaceIn;
                 continue;
             }
 
             //OutLabel : TenGigabitEthernet0/0/4, 1211
-            exp.setPattern("OutLabel : (.+), .+");
+            exp.setPattern("^OutLabel : (.+), .+");
             if ( line.contains(exp) )
             {
                 tunel->InterfaceOut=estandarizarInterfaz(exp.cap(1).simplified());
+                qCDebug(mplstetunnels) << "interfaz out" << tunel->InterfaceOut;
                 continue;
             }
         }
@@ -419,8 +386,8 @@ QDebug operator<<(QDebug dbg, const MplsTEtunnelsInfo &info)
     dbg.nospace() << "MplsTEtunnels:\n";
 
     foreach (SMplsTETunnelInfo *i, info.m_lstMplsTEtunnels)
-        dbg.space() << i->name << i->status << i->origen << i->destino
-                    << i->TuID << i->role << i->InterfaceIn << i->InterfaceOut
+        dbg.space() << i->TuID << i->name << i->status << i->origen << i->destino
+                    << i->role << i->InterfaceIn << i->InterfaceOut
                     << i->route << i->autoRouteDestinationsCount << "\n";
 
     dbg.nospace() << "\n";

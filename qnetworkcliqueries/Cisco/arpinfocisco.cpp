@@ -13,8 +13,8 @@ ArpInfoCisco::~ArpInfoCisco()
 
 void ArpInfoCisco::getArpInfo()
 {
-    m_vrfs = QueriesConfiguration::instance()->mapQueriesToList("Arp_VRFs");
-    m_macip = QueriesConfiguration::instance()->mapQueries.value("ARP_MacIP");    
+    m_vrfs = QueriesConfiguration::instance()->values("Arp_VRFs",m_ip);
+    m_macip = QueriesConfiguration::instance()->value("ARP_MacIP",m_ip);
 
     if ( m_vrfs.isEmpty() )
         m_vrfs.append(""); //para la global

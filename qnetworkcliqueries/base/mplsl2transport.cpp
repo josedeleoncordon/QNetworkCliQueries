@@ -203,7 +203,7 @@ void updateInfoList(QList<SMplsL2VFIInfo*> &lstDest, QList<SMplsL2VFIInfo*> &lst
         bool encontrado=false;
         foreach ( SMplsL2VFIInfo *dest, lstDest )
         {
-            if ( origin->vfi == dest->vfi )
+            if ( origin->vfi == dest->vfi && origin )
             {
                 //Si se encontro, actualizamos los datos
                 dest->datetime = origin->datetime;

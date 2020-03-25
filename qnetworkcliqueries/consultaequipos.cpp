@@ -48,7 +48,7 @@ void ConsultaEquipos::setLstQ(LstQueries *lQ)
     if ( lQ )
     {
         _lstQ = new LstQueries(lQ);
-        queriesParametrosMap = _lstQ->queriesParametrosMap;
+        lstQueriesParameters = _lstQ->lstQueriesParameters;
         lstQueries = _lstQ->lstQueries;
         errorMap = _lstQ->errorMap;
         m_lstLabel = _lstQ->label;
@@ -89,9 +89,9 @@ void ConsultaEquipos::addOpcionesConsulta(QList<Queries::Opcion> lst)
     }
 }
 
-void ConsultaEquipos::addParametrosConsulta(QString parametro,QString valor)
+void ConsultaEquipos::addParametrosConsulta(const QList<QueriesConfigurationValue> &c)
 {
-    queriesParametrosMap.insert( parametro,valor );
+    QueriesConfiguration::instance()->addQueryParameter(c);
 }
 
 void ConsultaEquipos::consultarEquiposSync()
@@ -117,7 +117,7 @@ void ConsultaEquipos::consultarEquipos()
         m_lstLabel = _lstQ->label;
         m_lstTipo = _lstQ->tipoconsulta;
         m_grupo = _lstQ->grupo;
-        queriesParametrosMap = _lstQ->queriesParametrosMap;
+        lstQueriesParameters = _lstQ->lstQueriesParameters;
         lstQueries = _lstQ->lstQueries;
         errorMap = _lstQ->errorMap;
         for ( Queries *q : lstQueries )
@@ -201,12 +201,7 @@ void ConsultaEquipos::consultarEquipos()
     m_queriesThread->setMaxParalelos( m_maxParalelos );
 
     //paramentros de consulta
-    QMapIterator<QString, QString> iqpm(queriesParametrosMap);
-    while (iqpm.hasNext())
-    {
-        iqpm.next();
-        QueriesConfiguration::instance()->mapQueries.insert(iqpm.key(),iqpm.value());
-    }
+    QueriesConfiguration::instance()->addQueryParameter(lstQueriesParameters);
 
     //iniciando consulta
     m_queriesThread->iniciar();
@@ -257,7 +252,7 @@ void ConsultaEquipos::on_queriesThread_finished(bool ok)
     _lstQN->opcionesConsulta = opciones;
     _lstQN->lstQueries = lstQueries;
     _lstQN->errorMap = errormapaintegrado;
-    _lstQN->queriesParametrosMap = queriesParametrosMap;
+    _lstQN->lstQueriesParameters = QueriesConfiguration::instance()->lstQueryParameters();
     _lstQN->tipoconsulta = m_lstTipo;
     _lstQN->lstIPsAconsultadas = lstIP;
     _lstQN->dateTime = QDateTime::currentDateTime();

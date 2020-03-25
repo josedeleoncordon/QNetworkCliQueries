@@ -10,12 +10,48 @@ InfoBase::InfoBase(const InfoBase &other)
     queryParent = other.queryParent;
 }
 
+QueriesConfigurationValue::QueriesConfigurationValue(QString key, QVariant value, QString IP)
+{
+    _key = key;
+    _value = value;
+    _IP = IP;
+}
+
+QueriesConfigurationValue::QueriesConfigurationValue(const QueriesConfigurationValue &other)
+{
+    _key = other._key;
+    _value = other._value;
+    _IP = other._IP;
+}
+
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const QueriesConfigurationValue& qcv)
+{
+    //guardar
+    out << qcv._IP;
+    out << qcv._key;
+    out << qcv._value;
+    return out;
+}
+
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, QueriesConfigurationValue& qcv)
+{
+    //abrir
+    in >> qcv._IP;
+    in >> qcv._key;
+    in >> qcv._value;
+    return in;
+}
+
+QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const QueriesConfigurationValue &info)
+{
+     dbg.space() << info._key << info._value << info._IP;
+     return dbg;
+}
+
 QueriesConfiguration* QueriesConfiguration::m_instance = nullptr;
 
 QueriesConfiguration::QueriesConfiguration()
-{
-    opciones=0;
-}
+{}
 
 QueriesConfiguration *QueriesConfiguration::instance()
 {
@@ -25,9 +61,67 @@ QueriesConfiguration *QueriesConfiguration::instance()
     return m_instance;
 }
 
-QStringList QueriesConfiguration::mapQueriesToList(QString value)
+void QueriesConfiguration::addQueryParameter(const QList<QueriesConfigurationValue>& c)
 {
-    return m_instance->mapQueries.value(value).split(",",QString::SkipEmptyParts);
+    m_lstQueryParameters.append(c);
+}
+
+void QueriesConfiguration::addConfiguration(const QList<QueriesConfigurationValue>& c)
+{
+    m_lstConfiguration.append(c);
+}
+
+QVariant QueriesConfiguration::m_find(QString parameter, QString IP)
+{
+    //por IP especifica
+    for ( QueriesConfigurationValue v : m_lstQueryParameters )
+    {
+        if ( v._key == parameter && v._IP == IP  )
+            return v._value;
+    }
+
+    //no hay para un equipo especifico, regresamos el general
+    for ( QueriesConfigurationValue v : m_lstQueryParameters )
+    {
+        if ( v._key == parameter && v._IP == QString("*") )
+            return v._value;
+    }
+
+    return QVariant();
+}
+
+bool QueriesConfiguration::state(QString parameter, QString IP)
+{
+    return m_find(parameter,IP).toBool();
+}
+
+QString QueriesConfiguration::value(QString parameter, QString IP)
+{
+    return m_find(parameter,IP).toString();
+}
+
+QStringList QueriesConfiguration::values(QString parameter, QString IP)
+{
+    return value(parameter,IP).split(",",QString::SkipEmptyParts);
+}
+
+QString QueriesConfiguration::configuration(QString platform, QString os, QString IP)
+{
+    //por IP especifica
+    for ( QueriesConfigurationValue v : m_lstConfiguration )
+    {
+        if ( (v._key == platform || v._key == os ) && v._IP == IP  )
+            return v._value.toString();
+    }
+
+    //no hay para un equipo especifico, regresamos el general
+    for ( QueriesConfigurationValue v : m_lstConfiguration )
+    {
+        if ( (v._key == platform || v._key == os ) && v._IP == QString("*") )
+            return v._value.toString();
+    }
+
+    return "";
 }
 
 FuncionBase::FuncionBase(QRemoteShell *terminal,QObject *parent)/*:
@@ -106,9 +200,9 @@ bool FuncionBase::allTextReceived()
     //hasta que miremos el prompt del equipo sabremos que se finalizo de recibir texto
 
     QStringList data = txt.split("\n");
-    exp.setPattern("^.+#\\s*$");
-    exp2.setPattern("^<.+>");
-    if ( !data.last().contains(exp) && !data.last().contains(exp2) )
+    exp.setPattern("^\\S+#\\s*$");
+    exp2.setPattern("^<\\S+>");
+    if ( (!data.last().contains(exp) && !data.last().contains(exp2)) || data.contains("Description: ") )
         return false;
 
     txt.replace("---- More ----","");

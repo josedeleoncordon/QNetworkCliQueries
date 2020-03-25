@@ -13,10 +13,11 @@
 #include "portchannelsinfo.h"
 #include "arpinfo.h"
 #include "vrfinfo.h"
-#include "bgpneighborinfo.h"
+#include "bgpinfo.h"
 #include "iprouteinfo.h"
 #include "config.h"
 #include "exitinfo.h"
+#include "funcioninfo.h"
 
 #include <QFile>
 
@@ -64,7 +65,9 @@ public:
         IpRoutes = 4194304,
         Configuration = 8388608,
         Mplsl2Transport = 16777216,
-        Exit = 33554432
+        Funcion = 33554432,
+        BGPNetworks = 67108864,
+        Exit = 134217728
     };
 
     PlatformInfo *pi;
@@ -86,9 +89,11 @@ public:
     VrfInfo *vrfFromRTQuery;
     VrfInfo *vrfsQuery;
     ArpInfo *arpsQuery;
-    BGPNeighborInfo *bgpNeighborsQuery;
+    BGPInfo *bgpNeighborsQuery;
+    BGPInfo *bgpNetworksQuery;
     IPRouteInfo *ipRoutesQuery;
     Config *configQuery;
+    FuncionInfo *funcionQuery;
     ExitInfo *exitQuery;
 
     bool isConnected() { return m_connected; }
@@ -129,7 +134,9 @@ public:
     QList<SVrfInfo*>& vrfsInfo() { return vrfsQuery->vrfsInfo(); } //
     QList<SIpInfo*>& arpsInfo() { return arpsQuery->arpInfo(); } //
     QStringList& bgpNeighborsInfo() { return bgpNeighborsQuery->bgpNeighborInfo(); }
+    QList<SBGPNetwork*>& bgpNetworksInfo() { return bgpNetworksQuery->bgpNetworksInfo(); }
     QList<SIpRouteInfo*>& ipRoutesInfo() { return ipRoutesQuery->ipRouteInfo(); }
+    QString& funcionTxtInfo() { return funcionQuery->txtReceived(); }
 
     void setId(QString id) { m_id = id; }
     void setGW(QString GW); //
@@ -240,7 +247,8 @@ public:
     QStringList lstIPsAconsultadas;
     QStringList lstIPsConectadasPorGW;
     QMap<QString, QString> errorMap;
-    QMap<QString, QString> queriesParametrosMap;
+    QList<QueriesConfigurationValue> lstQueriesParameters;
+
     QDateTime dateTime;
     QString label;
     QString tipoconsulta;

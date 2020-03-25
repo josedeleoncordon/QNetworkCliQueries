@@ -75,12 +75,13 @@ protected:
     QList<SInterfaceIOSServiceInstanceInfo*> m_lstInterfaceServiceInstance;
     bool m_continueShowVlan;
     bool m_continueShowVlanBridge;
+    bool m_onlyphysicalinterfaces;
 
     QStringList m_interfaces; //interfaces a consultar, TODO completar el filtro para el resto de consultas
     QString m_interfaceCurrent;
     int m_interfacesPos;
 
-    void getInterfacesInfoNextInteface();
+    void _getInterfacesInfoNextInteface();
 
 public:
     InterfaceInfo(QRemoteShell *terminal, QObject *parent=0);

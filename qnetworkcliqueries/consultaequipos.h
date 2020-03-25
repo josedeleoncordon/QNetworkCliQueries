@@ -4,6 +4,8 @@
 #include <QObject>
 #include "queriesthread.h"
 
+class QueriesConfigurationValue;
+
 class ConsultaEquipos : public QObject
 {
     Q_OBJECT        
@@ -28,7 +30,7 @@ private:
     QList<Queries*> lstQueries;    
     QList<Queries*> lstQueriesConsultados;
     QMap<QString,QString> errorMap;
-    QMap<QString,QString> queriesParametrosMap;
+    QList<QueriesConfigurationValue> lstQueriesParameters;
     QStringList lstIPAnteriores;
     QStringList lstIP;
     QStringList m_lstLinksEnSegmentos; //agregar los vecinos cuyo link pertenezca a los segmentos establecidos
@@ -76,7 +78,7 @@ public:
     void setPassword2(QString pwd) { m_pwd2=pwd; }
 
     void addOpcionesConsulta(QList<Queries::Opcion> lst);
-    void addParametrosConsulta(QString parametro,QString valor);
+    void addParametrosConsulta(const QList<QueriesConfigurationValue>&);
 
     void consultarEquiposSync();
     LstQueries *lstQ() { return _lstQN; }

@@ -21,9 +21,14 @@ ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, 
         return new ArpInfo(term,parent);
 }
 
-BGPNeighborInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
 {
-    return new BGPNeighborInfo(term,parent);
+    return new BGPInfo(term,parent);
+}
+
+BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+{
+    return new BGPInfo(term,parent);
 }
 
 EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
@@ -104,6 +109,11 @@ VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, 
 Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, QObject *parent)
 {
     return new Config(term,parent);
+}
+
+FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+{
+    return new FuncionInfo(term,parent);
 }
 
 ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, QObject *parent)

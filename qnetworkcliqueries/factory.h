@@ -2,7 +2,7 @@
 #define MACINFOFACTORY_H
 
 #include "arpinfo.h"
-#include "bgpneighborinfo.h"
+#include "bgpinfo.h"
 #include "equipmentneighbors.h"
 #include "interfaceinfo.h"
 #include "iprouteinfo.h"
@@ -15,10 +15,12 @@
 #include "portchannelsinfo.h"
 #include "vrfinfo.h"
 #include "config.h"
+#include "funcioninfo.h"
 #include "exitinfo.h"
 
 ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-BGPNeighborInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
+BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
+BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
@@ -31,6 +33,7 @@ PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, 
 PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
+FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
 
 #endif // MACINFOFACTORY_H
