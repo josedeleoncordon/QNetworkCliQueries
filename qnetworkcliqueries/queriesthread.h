@@ -37,6 +37,7 @@ public:
     void setEquipmentNeighborsOSPFArea(QString area) { m_consultaOSPFArea=area; }
 
     void iniciar();
+    void iniciarSync();
     void detener(); //no se consultan nuevos equipos y espera a que se terminen las consultas ya en ejeucución.
     void cancelar(); //elimina las consultas en ejecución y se finaliza.
 

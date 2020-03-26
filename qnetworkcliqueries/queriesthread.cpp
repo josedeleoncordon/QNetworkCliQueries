@@ -3,6 +3,8 @@
 #include "properties.h"
 #include "qnetworkquerieslogging.h"
 
+#include <QEventLoop>
+
 QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
 {
     m_interval=0;
@@ -63,6 +65,15 @@ void QueriesThread::iniciar()
     on_timer_timeOut();
     m_timer->start();
     m_timerActivity->start();
+}
+
+void QueriesThread::iniciarSync()
+{
+    disconnect(); //desconectamos todas las señales antes configuradas
+    QEventLoop loop;
+    connect(this, SIGNAL(finished(bool)), &loop, SLOT(quit()));
+    iniciar();
+    loop.exec();
 }
 
 void QueriesThread::detener()
