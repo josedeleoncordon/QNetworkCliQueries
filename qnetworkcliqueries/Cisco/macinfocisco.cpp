@@ -60,10 +60,9 @@ void MacInfoCisco::on_term_receiveText()
              line.contains("drop",Qt::CaseInsensitive) )
             continue;
 
-        SMacInfo *mac = new SMacInfo;
-        mac->queryParent = m_queriesParent;
-        mac->datetime = QDateTime::currentDateTime();
-        mac->operativo = true;
+        SMacInfo mac;
+        mac.datetime = QDateTime::currentDateTime();
+        mac.operativo = true;
 
         line.replace("* ","");
 
@@ -74,16 +73,16 @@ void MacInfoCisco::on_term_receiveText()
             //TODO como el concepto del XR es bridge-domains se supone que el numero de las subinterfaces y los pw-id
             //de los PW coinciden con la vlan dot1q.
 
-            mac->mac = data.at(0).simplified();
+            mac.mac = data.at(0).simplified();
 
             QRegExp expip("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
             if ( data.at(2).contains(expip) ) //PW
             {
                 //000e.50ef.4340 dynamic (10.192.65.146, 322261)     0/0/CPU0   0d 0h 0m 18s       N/A
                 //XR no es necesario consultar los PW, en la misma tabla de mac se muestra hacia donde va
-                mac->interfaz = data.at(2)+" "+data.at(3);
-                mac->vlan = data.at(3);
-                mac->vlan.replace(")","");
+                mac.interfaz = data.at(2)+" "+data.at(3);
+                mac.vlan = data.at(3);
+                mac.vlan.replace(")","");
             }
             else
             {
@@ -91,17 +90,17 @@ void MacInfoCisco::on_term_receiveText()
                 interfaz = data.at(2).simplified();
 
                 QStringList inter = interfaz.split(".",QString::SkipEmptyParts);
-                mac->interfaz = estandarizarInterfaz( inter.at(0) );
+                mac.interfaz = estandarizarInterfaz( inter.at(0) );
                 if ( inter.size() > 1 )
-                    mac->vlan = inter.at(1);
+                    mac.vlan = inter.at(1);
                 else
-                    mac->vlan = "1";
+                    mac.vlan = "1";
             }
         }
         else
         {
-            mac->mac = data.at(1).simplified();
-            mac->vlan = data.at(0).simplified();
+            mac.mac = data.at(1).simplified();
+            mac.vlan = data.at(0).simplified();
 
             QString interface;            
             if ( line.contains("efp_id") )
@@ -137,11 +136,10 @@ void MacInfoCisco::on_term_receiveText()
                  interface.contains("unicast") ||
                  interface.contains("flood") )
             {
-                delete mac;
                 continue;
             }
 
-            mac->interfaz = interface;
+            mac.interfaz = interface;
         }
 
         //verificando si la mac esta en la vlans permitidas, si se configuro
@@ -150,10 +148,8 @@ void MacInfoCisco::on_term_receiveText()
             m_lstMacs.append(mac);
         else
         {
-            if ( vlanfilter.contains( mac->vlan ) )
+            if ( vlanfilter.contains( mac.vlan ) )
                 m_lstMacs.append(mac);
-            else
-                delete mac;
         }
     }
 
@@ -189,12 +185,12 @@ void MacInfoCisco::on_term_receiveText_iosXconnect()
         QString ip = exp.cap(2);
         QString id = exp.cap(3);
 
-        foreach (SMacInfo *mi, m_lstMacs)
+        for (SMacInfo &mi : m_lstMacs)
         {
-            if ( mi->interfaz.contains("PW_"+vlan) )
+            if ( mi.interfaz.contains("PW_"+vlan) )
                 //reemplazamos la interfaz creada a la hora de consultar la tabla de MAC y ponemos la IP hacia
                 //donde va el PW
-                mi->interfaz = "("+ip+","+id+")";
+                mi.interfaz = "("+ip+","+id+")";
         }
     }
 

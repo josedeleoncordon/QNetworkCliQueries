@@ -12,10 +12,10 @@ struct SVrfInfo : InfoBase
     SVrfInfo(const SVrfInfo &other);
 };
 
-QDataStream& operator<<(QDataStream& out, const SVrfInfo* data);
-QDataStream& operator>>(QDataStream& in, SVrfInfo*& data);
+QDataStream& operator<<(QDataStream& out, const SVrfInfo& data);
+QDataStream& operator>>(QDataStream& in, SVrfInfo& data);
 
-void updateInfoList(QList<SVrfInfo*> &lstDest, QList<SVrfInfo*> &lstOrigin );
+void updateInfoList(QList<SVrfInfo> &lstDest, QList<SVrfInfo> &lstOrigin );
 
 class QNETWORKCLIQUERIES_EXPORT VrfInfo : public FuncionBase
 {
@@ -23,13 +23,14 @@ class QNETWORKCLIQUERIES_EXPORT VrfInfo : public FuncionBase
 protected:
     QStringList m_vlans;
     QStringList m_lstVrf;
-    QList<SVrfInfo*> m_lstVrfInfo;
+    QList<SVrfInfo> m_lstVrfInfo;
 
     QString m_vrf;
     QString m_rt;
 
 public:
-    VrfInfo(QRemoteShell *terminal, QObject *parent=0);
+    VrfInfo() {}
+    VrfInfo(QRemoteShell *terminal, QObject *parent=nullptr);
     VrfInfo(const VrfInfo &other);
     ~VrfInfo();
     virtual void getVRFsFromVLans();
@@ -39,12 +40,14 @@ public:
     //
     QStringList& vrfsFromVlansInfo() { return m_lstVrf; }
     QString& vrfFromRTInfo() { return m_vrf; }
-    QList<SVrfInfo*>& vrfsInfo() { return m_lstVrfInfo; }
+    QList<SVrfInfo>& vrfsInfo() { return m_lstVrfInfo; }
 
     //
     QString vrfFromInterface(QString);
 
     //
+    friend QDataStream& operator<<(QDataStream& out, const VrfInfo& info);
+    friend QDataStream& operator>>(QDataStream& in, VrfInfo& info);
     friend QDataStream& operator<<(QDataStream& out, const VrfInfo* info);
     friend QDataStream& operator>>(QDataStream& in, VrfInfo*& info);
     friend QDebug operator<<(QDebug dbg, const VrfInfo &info);
@@ -54,5 +57,7 @@ private slots:
     void on_term_receiveTextFromRT();
     void on_term_receiveTextVRFs();
 };
+
+Q_DECLARE_METATYPE(SVrfInfo)
 
 #endif // VRFINFO_H

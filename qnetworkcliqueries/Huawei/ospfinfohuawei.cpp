@@ -45,26 +45,25 @@ void OSPFInfoHuawei::on_term_receiveTextNeighbors()
         if ( !line.contains(exp2) )
             continue;
 
-        SOSPFInfo *oii = new SOSPFInfo;
-        oii->queryParent = m_queriesParent;
-        oii->datetime = QDateTime::currentDateTime();
-        oii->operativo = true;
+        SOSPFInfo oii;
+        oii.datetime = QDateTime::currentDateTime();
+        oii.operativo = true;
         QStringList lstColumns = line.split(" ",QString::SkipEmptyParts);
 
-        oii->id = lstColumns.at(2).simplified();
-        oii->state = lstColumns.at(3).simplified();
-        oii->area = lstColumns.at(0).simplified();
-        oii->interfaz = estandarizarInterfaz( lstColumns.at(1).simplified() );
-        oii->process = proceso;
+        oii.id = lstColumns.at(2).simplified();
+        oii.state = lstColumns.at(3).simplified();
+        oii.area = lstColumns.at(0).simplified();
+        oii.interfaz = estandarizarInterfaz( lstColumns.at(1).simplified() );
+        oii.process = proceso;
 
         if ( lastArea.isEmpty() )
-            lastArea = oii->area;
-        else if ( lastArea != oii->area )
+            lastArea = oii.area;
+        else if ( lastArea != oii.area )
             m_abr=true;
 
         if ( lastPID.isEmpty() )
-            lastPID = oii->process;
-        else if ( lastPID != oii->process )
+            lastPID = oii.process;
+        else if ( lastPID != oii.process )
             m_asbr=true;
 
         m_lstOSPFInfo.append(oii);
@@ -91,12 +90,12 @@ void OSPFInfoHuawei::on_term_receiveTextInterfaces()
 
         QStringList lstColumns = line.split(" ",QString::SkipEmptyParts);
 
-        for ( SOSPFInfo *oii : m_lstOSPFInfo )
+        for ( SOSPFInfo &oii : m_lstOSPFInfo )
         {
-            if ( oii->interfaz == estandarizarInterfaz( lstColumns.at(0).simplified() ) )
+            if ( oii.interfaz == estandarizarInterfaz( lstColumns.at(0).simplified() ) )
             {
-                oii->cost = lstColumns.at(4).simplified();
-                oii->address = lstColumns.at(1).simplified();
+                oii.cost = lstColumns.at(4).simplified();
+                oii.address = lstColumns.at(1).simplified();
             }
         }
     }

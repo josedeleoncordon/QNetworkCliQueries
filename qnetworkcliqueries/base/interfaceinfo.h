@@ -51,28 +51,28 @@ struct SInterfaceIOSServiceInstanceInfo : InfoBase
     SInterfaceIOSServiceInstanceInfo(const SInterfaceIOSServiceInstanceInfo &other);
 };
 
-QDataStream& operator<<(QDataStream& out, const SInterfaceInfo* data);
-QDataStream& operator>>(QDataStream& in, SInterfaceInfo*& data);
+QDataStream& operator<<(QDataStream& out, const SInterfaceInfo& data);
+QDataStream& operator>>(QDataStream& in, SInterfaceInfo& data);
 
-QDataStream& operator<<(QDataStream& out, const SInterfaceVlans* data);
-QDataStream& operator>>(QDataStream& in, SInterfaceVlans*& data);
+QDataStream& operator<<(QDataStream& out, const SInterfaceVlans& data);
+QDataStream& operator>>(QDataStream& in, SInterfaceVlans& data);
 
-QDataStream& operator<<(QDataStream& out, const SInterfaceIOSServiceInstanceInfo* data);
-QDataStream& operator>>(QDataStream& in, SInterfaceIOSServiceInstanceInfo*& data);
+QDataStream& operator<<(QDataStream& out, const SInterfaceIOSServiceInstanceInfo& data);
+QDataStream& operator>>(QDataStream& in, SInterfaceIOSServiceInstanceInfo& data);
 
-void updateInfoList(QList<SInterfaceInfo*> &lstDest, QList<SInterfaceInfo*> &lstOrigin );
-void updateInfoList(QList<SInterfaceVlans*> &lstDest, QList<SInterfaceVlans*> &lstOrigin );
-void updateInfoList(QList<SInterfaceIOSServiceInstanceInfo*> &lstDest, QList<SInterfaceIOSServiceInstanceInfo*> &lstOrigin );
+void updateInfoList(QList<SInterfaceInfo> &lstDest, QList<SInterfaceInfo> &lstOrigin );
+void updateInfoList(QList<SInterfaceVlans> &lstDest, QList<SInterfaceVlans> &lstOrigin );
+void updateInfoList(QList<SInterfaceIOSServiceInstanceInfo> &lstDest, QList<SInterfaceIOSServiceInstanceInfo> &lstOrigin );
 
 class QNETWORKCLIQUERIES_EXPORT InterfaceInfo : public FuncionBase
 {
     Q_OBJECT
 protected:
     bool m_InterfacesInfo_onlyPhysicalInterfaces;
-    QList<SIpInfo*> m_lstInterfacesIPAddresses;
-    QList<SInterfaceInfo*> m_lstInterfacesInfo;
-    QList<SInterfaceVlans*> m_lstInterfacesPermitedVlans;
-    QList<SInterfaceIOSServiceInstanceInfo*> m_lstInterfaceServiceInstance;
+    QList<SIpInfo> m_lstInterfacesIPAddresses;
+    QList<SInterfaceInfo> m_lstInterfacesInfo;
+    QList<SInterfaceVlans> m_lstInterfacesPermitedVlans;
+    QList<SInterfaceIOSServiceInstanceInfo> m_lstInterfaceServiceInstance;
     bool m_continueShowVlan;
     bool m_continueShowVlanBridge;
     bool m_onlyphysicalinterfaces;
@@ -84,6 +84,7 @@ protected:
     void _getInterfacesInfoNextInteface();
 
 public:
+    InterfaceInfo() {}
     InterfaceInfo(QRemoteShell *terminal, QObject *parent=0);
     InterfaceInfo(const InterfaceInfo &other);
     ~InterfaceInfo();
@@ -95,9 +96,9 @@ public:
     virtual void getInterfacesServiceInstancesInfo();
 
     //
-    QList<SInterfaceInfo*>& interfacesInfo() { return m_lstInterfacesInfo; }
-    QList<SIpInfo*>& interfacesIpAddressesInfo() { return m_lstInterfacesIPAddresses; }
-    QList<SInterfaceVlans*>& interfacesPermitedVlansInfo() { return m_lstInterfacesPermitedVlans; }
+    QList<SInterfaceInfo>& interfacesInfo() { return m_lstInterfacesInfo; }
+    QList<SIpInfo>& interfacesIpAddressesInfo() { return m_lstInterfacesIPAddresses; }
+    QList<SInterfaceVlans>& interfacesPermitedVlansInfo() { return m_lstInterfacesPermitedVlans; }
 
     //
     QStringList interfacePermitedVlans(QString);
@@ -105,6 +106,8 @@ public:
     QString ipFromInterfaz(QString interfaz);
 
     //
+    friend QDataStream& operator<<(QDataStream& out, const InterfaceInfo& ii);
+    friend QDataStream& operator>>(QDataStream& in, InterfaceInfo& ii);
     friend QDataStream& operator<<(QDataStream& out, const InterfaceInfo* ii);
     friend QDataStream& operator>>(QDataStream& in, InterfaceInfo*& ii);
     friend QDebug operator<<(QDebug dbg, const InterfaceInfo &info);
@@ -120,5 +123,9 @@ private slots:
     void on_term_receiveText_Descriptions();
     void on_term_receiveText_ServiceInstances();
 };
+
+Q_DECLARE_METATYPE(SInterfaceInfo)
+Q_DECLARE_METATYPE(SInterfaceVlans)
+Q_DECLARE_METATYPE(SInterfaceIOSServiceInstanceInfo)
 
 #endif // INTERFACEINFO_H

@@ -23,17 +23,18 @@ private:
     bool m_consultaSoloEquiposNuevos;
     bool m_consultaOSPFMismoDominio;
 
-    LstQueries *_lstQ; //origen
-    LstQueries *_lstQN; //resultado final
+    LstQueries _lstQ; //origen
+    LstQueries _lstQN; //destino
     int opciones;
     QString m_lstQfilepath;
-    QList<Queries*> lstQueries;    
-    QList<Queries*> lstQueriesConsultados;
+    QList<Queries> lstQueries;
+    QList<Queries> lstQueriesConsultados;
     QMap<QString,QString> errorMap;
     QList<QueriesConfigurationValue> lstQueriesParameters;
     QStringList lstIPAnteriores;
     QStringList lstIP;
     QStringList m_lstLinksEnSegmentos; //agregar los vecinos cuyo link pertenezca a los segmentos establecidos
+    QStringList m_lstLoopbacksEnSegmentos; //agregar los vecinos cuya loopback este en el los segmentos establecidos
     QString m_ip;
     QString m_lstIPsPath;
     QString m_gw;
@@ -59,7 +60,7 @@ public:
     void setLstQPath(QString path) { m_lstQpath = path; }
     void setLstQlabel(QString label) { m_lstLabel = label; }
     void setLstIPsPath(QString path) { m_lstIPsPath = path; }
-    void setLstQ(LstQueries *lQ);
+    void setLstQ(LstQueries &lQ);
     void setIP(QString ip) { m_ip=ip; }
     void setLstIPs(QStringList lstIps) { lstIP = lstIps; }
     void setConsultaAnteriorBorrar(bool enable) { m_consultaAnteriorBorrar=enable; }
@@ -69,6 +70,7 @@ public:
     void setConsultaOSPFMismoDominio(bool enable) { m_consultaOSPFMismoDominio=enable; }
     void setConsultaOSPFArea(QString area) { m_consultaOSPFArea = area; }
     void setConsultaLinksEnSegmentos(QStringList lstSegmentos) { m_lstLinksEnSegmentos=lstSegmentos; }
+    void setConsultaLoopbacksEnSegmentos(QStringList lstSegmentos) { m_lstLoopbacksEnSegmentos=lstSegmentos; }
     void setGW(QString gw) { m_gw=gw; }
     void setConsultaInterval(int interval) { m_interval=interval; }
     void setConsultaSimultaneos(int simultaneos) { m_simultaneos=simultaneos; }
@@ -81,7 +83,7 @@ public:
     void addParametrosConsulta(const QList<QueriesConfigurationValue>&);
 
     void consultarEquiposSync();
-    LstQueries *lstQ() { return _lstQN; }
+    LstQueries& lstQ() { return _lstQN; }
     QString errorTxt() { return _error; }
 
 signals:

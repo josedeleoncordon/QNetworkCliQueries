@@ -90,16 +90,15 @@ void ArpInfoHuawei::on_term_receiveText()
             _vlan = vlan;
         }        
 
-        SIpInfo *mac = new SIpInfo;
-        mac->ip = _ip;
-        mac->vlan = _vlan;
-        mac->interfaz = _interfaz;
-        mac->age = _age;
-        mac->mac = _mac;
-        mac->queryParent = m_queriesParent;
-        mac->operativo = true;
-        mac->datetime = QDateTime::currentDateTime();
-        mac->vrf = m_vrf;
+        SIpInfo mac;
+        mac.ip = _ip;
+        mac.vlan = _vlan;
+        mac.interfaz = _interfaz;
+        mac.age = _age;
+        mac.mac = _mac;
+        mac.operativo = true;
+        mac.datetime = QDateTime::currentDateTime();
+        mac.vrf = m_vrf;
         m_lstArp.append(mac);
     }
     m_siguienteVRF();

@@ -14,12 +14,12 @@ struct SMacInfo : InfoBase
     SMacInfo(const SMacInfo &other);
 };
 
-QDataStream& operator<<(QDataStream& out, const SMacInfo* data);
-QDataStream& operator>>(QDataStream& in, SMacInfo*& data);
+QDataStream& operator<<(QDataStream& out, const SMacInfo& data);
+QDataStream& operator>>(QDataStream& in, SMacInfo& data);
 
-bool existMacAddress(QList<SMacInfo*>,SMacInfo*);
+bool existMacAddress(QList<SMacInfo>,SMacInfo);
 
-void updateInfoList( QList<SMacInfo*> &lstDest, QList<SMacInfo*> &lstOrigin );
+void updateInfoList( QList<SMacInfo> &lstDest, QList<SMacInfo> &lstOrigin );
 
 class QNETWORKCLIQUERIES_EXPORT MacInfo : public FuncionBase
 {
@@ -27,8 +27,9 @@ class QNETWORKCLIQUERIES_EXPORT MacInfo : public FuncionBase
 protected:
     QString m_mac;
     QString m_vlan;
-    QList<SMacInfo*> m_lstMacs;
+    QList<SMacInfo> m_lstMacs;
 public:
+    MacInfo() {}
     MacInfo(QRemoteShell *terminal, QObject *parent=0);
     MacInfo(const MacInfo &other);
     ~MacInfo();
@@ -37,15 +38,19 @@ public:
     virtual void getMacInfo();
 
     //
-    QList<SMacInfo*>& macInfo() { return m_lstMacs; }
+    QList<SMacInfo>& macInfo() { return m_lstMacs; }
 
     //
     QString macInterfaceLearnedFrom(QString mac);
 
     //
+    friend QDataStream& operator<<(QDataStream& out, const MacInfo& info);
+    friend QDataStream& operator>>(QDataStream& in, MacInfo& info);
     friend QDataStream& operator<<(QDataStream& out, const MacInfo* info);
     friend QDataStream& operator>>(QDataStream& in, MacInfo*& info);
     friend QDebug operator<<(QDebug dbg, const MacInfo &info);
 };
+
+Q_DECLARE_METATYPE(SMacInfo)
 
 #endif // MACINFO_H

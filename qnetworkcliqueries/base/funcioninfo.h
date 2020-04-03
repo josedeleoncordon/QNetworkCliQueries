@@ -11,6 +11,7 @@ protected:
     QString _txt;
 
 public:
+    FuncionInfo() {}
     FuncionInfo(QRemoteShell *terminal, QObject *parent);
     FuncionInfo(const FuncionInfo &other);
     ~FuncionInfo();

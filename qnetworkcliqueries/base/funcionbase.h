@@ -25,12 +25,8 @@ struct InfoBase
 {
     QDateTime datetime;
     bool operativo;
-    Queries* queryParent;
 
     QString id;
-
-    InfoBase() { operativo=true; queryParent=nullptr; }
-    InfoBase(const InfoBase &other);
 };
 
 class QNETWORKCLIQUERIES_EXPORT QueriesConfigurationValue
@@ -79,6 +75,9 @@ public:
 class QNETWORKCLIQUERIES_EXPORT FuncionBase : public QObject
 {
     Q_OBJECT
+private:
+    void init();
+
 protected:
     QRemoteShell *term;
     QString txt;
@@ -90,7 +89,7 @@ protected:
     QString m_location;
     QString m_name;
     QString m_ip;
-    Queries* m_queriesParent;
+    Queries* m_parentQuery;
 
     QString m_lastCommand;
 
@@ -101,6 +100,7 @@ protected:
     bool lastCommandFailed;
 
 public:
+    FuncionBase();
     FuncionBase(QRemoteShell *terminal, QObject *parent = nullptr);
     ~FuncionBase();
 
@@ -109,6 +109,7 @@ public:
     void setXRLocation(QString location) { m_xr_location=location; }
     void setHostName(QString name) { m_name=name; }
     void setIp(QString ip) { m_ip = ip; }
+    void setParentQuery(Queries *qry) { m_parentQuery = qry; }
 
 private slots:
     void m_on_term_receiveText();
@@ -120,7 +121,5 @@ signals:
 
     void m_termReceivedFinished();
 };
-
-Q_DECLARE_METATYPE(FuncionBase*);
 
 #endif

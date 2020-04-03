@@ -7,6 +7,7 @@ Config::Config(QRemoteShell *terminal, QObject *parent):
     m_error=false;
     m_guardado=false;
     m_lstComandosPos=-1;
+    m_parentQuery=nullptr;
     timerSiguienteComando = new QTimer;
     timerSiguienteComando->setInterval(500);
     timerSiguienteComando->setSingleShot(true);
@@ -19,6 +20,20 @@ Config::~Config() {}
 void Config::configApply()
 {
     m_config = QueriesConfiguration::instance()->configuration( m_platform,m_os,m_ip );
+
+    m_lstComandos = m_config.split("\n",QString::SkipEmptyParts);
+
+    if ( !m_parentQuery )
+    {
+        for ( QString comando : m_lstComandos )
+            if ( comando.contains("@")  )
+            {
+                m_lstComandosConErrores.append("Comandos con @ propiedades de padre, padre no fue establecido");
+                m_error=true;
+                finished();
+                return;
+            }
+    }
 
     if ( m_config.isEmpty() )
     {
@@ -52,7 +67,6 @@ void Config::on_term_receiveText_configMode()
         term->disconnectReceiveTextSignalConnections();
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_finished()));
 
-        m_lstComandos = m_config.split("\n",QString::SkipEmptyParts);
         siguienteComando();
     }
     else if ( allTextReceived() )
@@ -82,10 +96,13 @@ void Config::siguienteComando()
             if (word.contains("@"))
             {
                 word.replace("@","");
-                comando.append( m_queriesParent->property(word.toLocal8Bit()).toString() );
+                comando.append( m_parentQuery->property(word.toLocal8Bit()).toString() );
             }
             else
                 comando.append(word);
+
+            m_error=true;
+            m_lstComandosConErrores.append( m_lastCommand );
         }
         QString txt = comando.join(" ");
         termSendText( txt );

@@ -8,82 +8,77 @@ SEquipmentNeighborsInfo::SEquipmentNeighborsInfo(const SEquipmentNeighborsInfo &
     interfazestesalida = other.interfazestesalida;
     interfazotroentrada = other.interfazotroentrada;
     plataforma = other.plataforma;
-
-    for ( SEquipmentNeighborsInfo *i : other.lstEquipos )
-    {
-        SEquipmentNeighborsInfo *n = new SEquipmentNeighborsInfo(*i);
-        lstEquipos.append( n );
-    }
+    lstEquipos = other.lstEquipos;
 }
 
-QDataStream& operator<<(QDataStream& out, const SEquipmentNeighborsInfo* data)
+QDataStream& operator<<(QDataStream& out, const SEquipmentNeighborsInfo& data)
 {
-    out << data->nombreequipo;
-    out << data->ip;
-    out << data->interfazestesalida;
-    out << data->interfazotroentrada;
-    out << data->plataforma;
-    out << data->lstEquipos;
+    out << data.nombreequipo;
+    out << data.ip;
+    out << data.interfazestesalida;
+    out << data.interfazotroentrada;
+    out << data.plataforma;
+    out << data.lstEquipos;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SEquipmentNeighborsInfo*& data)
+QDataStream& operator>>(QDataStream& in, SEquipmentNeighborsInfo& data)
 {
-    data = new SEquipmentNeighborsInfo;
-    in >> data->nombreequipo;
-    in >> data->ip;
-    in >> data->interfazestesalida;
-    in >> data->interfazotroentrada;
-    in >> data->plataforma;
-    in >> data->lstEquipos;
+    in >> data.nombreequipo;
+    in >> data.ip;
+    in >> data.interfazestesalida;
+    in >> data.interfazotroentrada;
+    in >> data.plataforma;
+    in >> data.lstEquipos;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SEquipmentNeighborsInfo *> &lstDest, QList<SEquipmentNeighborsInfo *> &lstOrigin )
+void updateInfoList(QList<SEquipmentNeighborsInfo> &lstDest, QList<SEquipmentNeighborsInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
     //destino = anterior
 
     //borramos los datos anteriores que tengan mas de 30 dias
+
     for ( int c=0; c<lstDest.size(); )
     {
-        SEquipmentNeighborsInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo)
+        SEquipmentNeighborsInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo)
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SEquipmentNeighborsInfo *origin, lstOrigin )
+    for ( SEquipmentNeighborsInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SEquipmentNeighborsInfo *dest, lstDest )
+        for ( SEquipmentNeighborsInfo &dest : lstDest )
         {
             //si ya esta operativo es por que en un ciclo anterior se actualizo
-            if ( dest->operativo )
+            if ( dest.operativo )
                 continue;
 
-            if ( origin->interfazestesalida == dest->interfazestesalida )
+            if ( origin.interfazestesalida == dest.interfazestesalida )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->interfazestesalida = origin->interfazestesalida;
-                dest->interfazotroentrada = origin->interfazotroentrada;
-                dest->ip = origin->ip;
-                dest->nombreequipo = origin->nombreequipo;
-                dest->plataforma = origin->plataforma;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.interfazestesalida = origin.interfazestesalida;
+                dest.interfazotroentrada = origin.interfazotroentrada;
+                dest.ip = origin.ip;
+                dest.nombreequipo = origin.nombreequipo;
+                dest.plataforma = origin.plataforma;
                 encontrado=true;
                 break;
             }
@@ -105,17 +100,11 @@ EquipmentNeighborsInfo::EquipmentNeighborsInfo(const EquipmentNeighborsInfo &oth
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    foreach (SEquipmentNeighborsInfo *ii, other.m_lstEquipos)
-    {
-        SEquipmentNeighborsInfo *ii2 = new SEquipmentNeighborsInfo(*ii);
-        m_lstEquipos.append(ii2);
-    }
+    m_lstEquipos = other.m_lstEquipos;
 }
 
 EquipmentNeighborsInfo::~EquipmentNeighborsInfo()
-{
-    qDeleteAll(m_lstEquipos);
-}
+{}
 
 void EquipmentNeighborsInfo::getEquipmentNeighborsInfo()
 {
@@ -160,7 +149,6 @@ void EquipmentNeighborsInfo::on_term_receiveText_CDP()
                 QString nombre = lst.at(1);
 
                 nuevo = new SEquipmentNeighborsInfo;
-                nuevo->queryParent = m_queriesParent;
                 nuevo->nombreequipo = nombre.simplified();
                 nuevo->datetime = QDateTime::currentDateTime();
                 nuevo->operativo = true;
@@ -221,7 +209,10 @@ void EquipmentNeighborsInfo::on_term_receiveText_CDP()
             }
         }
         if ( nuevo )
-            m_lstEquipos.append(nuevo);
+        {
+            m_lstEquipos.append(*nuevo);
+            delete nuevo;
+        }
     }
 
     //se consulta ahora lldp, algunas versiones de ios no muestra la interfaz local por lo que hay que hacer dos consultas
@@ -320,7 +311,6 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Cisco_detail()
                 QStringList lst = line.split(":");
 
                 nuevo = new SEquipmentNeighborsInfo;
-                nuevo->queryParent = m_queriesParent;
                 nuevo->nombreequipo = lst.at(1).simplified();
                 nuevo->interfazotroentrada = otroint;
 
@@ -368,17 +358,17 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Cisco_detail()
             if ( !nuevo->interfazestesalida.isEmpty() )
             {
                 bool encontrado = false;
-                foreach (SEquipmentNeighborsInfo *vecino, m_lstEquipos)
+                for (SEquipmentNeighborsInfo &vecino : m_lstEquipos)
                 {
-                    if ( vecino->nombreequipo == nuevo->nombreequipo &&
-                         vecino->interfazestesalida == nuevo->interfazestesalida )
+                    if ( vecino.nombreequipo == nuevo->nombreequipo &&
+                         vecino.interfazestesalida == nuevo->interfazestesalida )
                     {
                         encontrado=true;
                         break;
                     }
                 }
                 if ( !encontrado )
-                    m_lstEquipos.append(nuevo);
+                    m_lstEquipos.append(*nuevo);
                 else
                     delete nuevo;
             }
@@ -414,12 +404,12 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Huawei()
         if ( line.contains(QRegExp("Neighbor \\d+:")) ||
              line.contains(QRegExp("Neighbor index *:\\d+")))
         {            
-            nuevo = new SEquipmentNeighborsInfo;
-            nuevo->queryParent = m_queriesParent;
-            nuevo->interfazestesalida = estandarizarInterfaz(localint);
-            nuevo->datetime = QDateTime::currentDateTime();
-            nuevo->operativo = true;
-            m_lstEquipos.append(nuevo);
+            SEquipmentNeighborsInfo e;
+            e.interfazestesalida = estandarizarInterfaz(localint);
+            e.datetime = QDateTime::currentDateTime();
+            e.operativo = true;
+            m_lstEquipos.append(e);
+            nuevo = &e;
             continue;
         }
 
@@ -469,18 +459,31 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Huawei()
             continue;        
         }
     }
+
     finished();
 }
 
-QList<SEquipmentNeighborsInfo *> EquipmentNeighborsInfo::equipmentNeighborsInfoFromInterface(QString interfaz)
+QList<SEquipmentNeighborsInfo*> EquipmentNeighborsInfo::equipmentNeighborsInfoFromInterface(QString interfaz)
 {
-    QList<SEquipmentNeighborsInfo *> lst;
-    foreach (SEquipmentNeighborsInfo *cdp, m_lstEquipos)
+    QList<SEquipmentNeighborsInfo*> lst;
+    for (SEquipmentNeighborsInfo &cdp : m_lstEquipos)
     {
-        if ( cdp->interfazestesalida == interfaz )       
-            lst.append(cdp);
+        if ( cdp.interfazestesalida == interfaz )
+            lst.append(&cdp);
     }
     return lst;
+}
+
+QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo& info)
+{
+    out << info.m_lstEquipos;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo& info)
+{
+    in >> info.m_lstEquipos;
+    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo* info)
@@ -491,7 +494,7 @@ QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo* info)
 
 QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo*& info)
 {
-    info =new EquipmentNeighborsInfo(nullptr,nullptr);
+    info = new EquipmentNeighborsInfo;
     in >> info->m_lstEquipos;
     return in;
 }
@@ -499,9 +502,9 @@ QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo*& info)
 QDebug operator<<(QDebug dbg, const EquipmentNeighborsInfo &info)
 {
     dbg.nospace() << "EquipmentNeighborsInfo:\n";
-    foreach (SEquipmentNeighborsInfo *i, info.m_lstEquipos)
-        dbg.space() << i->nombreequipo << i->ip << i->plataforma << i->interfazestesalida
-                    << i->interfazotroentrada << i->operativo << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+    for (SEquipmentNeighborsInfo i : info.m_lstEquipos)
+        dbg.space() << i.nombreequipo << i.ip << i.plataforma << i.interfazestesalida
+                    << i.interfazotroentrada << i.operativo << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     dbg.nospace() << "\n";
 

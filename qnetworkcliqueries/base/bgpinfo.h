@@ -1,6 +1,7 @@
 #ifndef BGPINFO_H
 #define BGPINFO_H
 
+#include <QtDBus/QDBusArgument>
 #include "funcionbase.h"
 #include "macinfo.h"
 
@@ -17,8 +18,11 @@ struct SBGPNetwork : InfoBase
     SBGPNetwork(const SBGPNetwork &other);
 };
 
-QDataStream& operator<<(QDataStream& out, const SBGPNetwork* data);
-QDataStream& operator>>(QDataStream& in, SBGPNetwork*& data);
+QDataStream& operator<<(QDataStream& out, const SBGPNetwork &data);
+QDataStream& operator>>(QDataStream& in, SBGPNetwork& data);
+
+QDBusArgument& operator<<(QDBusArgument &argument, const SBGPNetwork &data);
+const QDBusArgument& operator>>(const QDBusArgument& argument, SBGPNetwork &data);
 
 class QNETWORKCLIQUERIES_EXPORT BGPInfo : public FuncionBase
 {
@@ -30,7 +34,7 @@ protected:
     QString m_neighbor_int_out;
     QString m_community;
     QStringList m_lstIPs;
-    QList<SBGPNetwork*> m_lstNetworks;
+    QList<SBGPNetwork> m_lstNetworks;
 
     int m_neighborsPos;
     QString m_currentNeighbor;
@@ -38,7 +42,8 @@ protected:
     void networksNextNeighbor();
 
 public:
-    BGPInfo(QRemoteShell *terminal, QObject *parent=0);
+    BGPInfo() {}
+    BGPInfo(QRemoteShell *terminal, QObject *parent=nullptr);
     BGPInfo(const BGPInfo &other);
 
     enum Type
@@ -51,11 +56,13 @@ public:
 
     //
     QStringList& bgpNeighborInfo() { return m_lstIPs; }
-    QList<SBGPNetwork*>& bgpNetworksInfo() { return m_lstNetworks; }
+    QList<SBGPNetwork>& bgpNetworksInfo() { return m_lstNetworks; }
 
     //
 
     //
+    friend QDataStream& operator<<(QDataStream& out, const BGPInfo& info);
+    friend QDataStream& operator>>(QDataStream& in, BGPInfo& info);
     friend QDataStream& operator<<(QDataStream& out, const BGPInfo* info);
     friend QDataStream& operator>>(QDataStream& in, BGPInfo*& info);
     friend QDebug operator<<(QDebug dbg, const BGPInfo &info);
@@ -64,5 +71,7 @@ private slots:
     void on_term_receiveText_BGPNeighbors();
     void on_term_receiveText_networks();
 };
+
+Q_DECLARE_METATYPE(SBGPNetwork)
 
 #endif

@@ -64,7 +64,7 @@ QString openFile(QString path)
     return txt;
 }
 
-void saveFile(QString txt, QString path,QIODevice::OpenModeFlag openmode)
+void saveFile(QString txt, QString path, QIODevice::OpenModeFlag openmode)
 {
     QFile file(path);
     if (!file.open( openmode | QIODevice::Text ))
@@ -75,18 +75,19 @@ void saveFile(QString txt, QString path,QIODevice::OpenModeFlag openmode)
     file.close();
 }
 
-LstQueries *openLstQueries(QString path)
+LstQueries openLstQueries(QString path)
 {
-    LstQueries *lst;
+    LstQueries lst;
     QFile file( path );
     file.open(QIODevice::ReadOnly);
     QDataStream storeStream(&file);
     storeStream >> lst;
     file.close();
+
     return lst;
 }
 
-void saveLstQueries(LstQueries* lst, QString path)
+void saveLstQueries(LstQueries &lst, QString path)
 {
     QFile qryfile( path );
     if (!qryfile.open(QIODevice::WriteOnly))
@@ -136,16 +137,16 @@ QStringList numberRangeToLST(QString str)
     return salida;
 }
 
-Queries *buscarEquipoPorIPnombre(QList<Queries*> lst, QString ip,QString nombre)
+Queries *buscarEquipoPorIPnombre(QList<Queries> &lst, QString ip, QString nombre)
 {
     bool nom=false;
-    foreach (Queries *qry, lst)
+    for (Queries &qry : lst)
     {
         //si no habia informacion de cdp/lldp y fue agregado por ospf
         if ( nombre == "**porOSPF**" )
         {
             if ( validateIpQuery( qry,ip ) )
-                return qry;
+                return &qry;
             continue;
         }
 
@@ -153,12 +154,12 @@ Queries *buscarEquipoPorIPnombre(QList<Queries*> lst, QString ip,QString nombre)
         //ya que puede ser que la IP que reporto EquipmentNeighbors sea diferente a la ip con la que se hace el backup
         //caso como equipos L3
 
-        if ( qry->hostName() == nombre )
+        if ( qry.hostName() == nombre )
         {
             nom=true;
 
             if ( validateIpQuery( qry,ip ) )
-                return qry;
+                return &qry;
         }
     }
 
@@ -169,37 +170,37 @@ Queries *buscarEquipoPorIPnombre(QList<Queries*> lst, QString ip,QString nombre)
     return nullptr;
 }
 
-Queries *buscarEquipoPorIP(QList<Queries*> lst, QString ip)
+Queries* buscarEquipoPorIP(QList<Queries> &lst, QString ip)
 {
-    foreach (Queries *qry, lst)
+    for (Queries &qry : lst)
     {
         if ( validateIpQuery( qry,ip ) )
-            return qry;
+            return &qry;
     }
     return nullptr;
 }
 
-Queries *buscarEquipoPorNombre(QList<Queries*> lst, QString nombre)
+Queries *buscarEquipoPorNombre(QList<Queries> &lst, QString nombre)
 {
-    foreach (Queries *qry, lst)
+    for (Queries &qry : lst)
     {
-        if ( qry->hostName() == nombre )
-            return qry;
+        if ( qry.hostName() == nombre )
+            return &qry;
     }
     return nullptr;
 }
 
-bool validateIpQuery(Queries *qry, QString ip)
+bool validateIpQuery(Queries &qry, QString ip)
 {
     //validamos primero la ip, si la enviada concide exactamente se devuleve
-    if ( qry->ip() == ip )
+    if ( qry.ip() == ip )
         return true;
-    else if ( qry->interfacesIpAddressesQuery )
+    else if ( qry.interfacesIpAddressesQuery )
     {
         //el query tiene informacion de las ips del equipo. Validamos la IP
-        foreach (SIpInfo *i, qry->interfacesIpAddressesInfo())
+        for (SIpInfo &i : qry.interfacesIpAddressesInfo())
         {
-            if ( i->ip == ip )
+            if ( i.ip == ip )
                 return true;
         }
 
@@ -235,7 +236,7 @@ bool platformValidate(QString platform)
     return false;
 }
 
-bool equipmentNeighborsVecinoValidarEquipo(SEquipmentNeighborsInfo *e)
+bool equipmentNeighborsVecinoValidarEquipo(SEquipmentNeighborsInfo &e)
 {
 //    //Si exite un query del equipo entonces pertenece a la red
 //    if ( consultarQueries )
@@ -249,27 +250,27 @@ bool equipmentNeighborsVecinoValidarEquipo(SEquipmentNeighborsInfo *e)
     exp.setPattern("\\w+\\.(telgua|enitel|claro|sercom|telecom)+");
     exp2.setPattern("\\w{13}(XM|GM|RM)+\\d+");
 
-    if ( !e->nombreequipo.contains(exp) &&
-         !e->nombreequipo.contains(exp2) )
+    if ( !e.nombreequipo.contains(exp) &&
+         !e.nombreequipo.contains(exp2) )
     {
-        if ( !platformValidate(e->plataforma) )
+        if ( !platformValidate(e.plataforma) )
             return false;
     }
 
     return true;
 }
 
-QString interfaceDescription(QList<SInterfaceInfo*> lstInterfaceDescriptions,QString interfaz)
+QString interfaceDescription(QList<SInterfaceInfo> &lstInterfaceDescriptions, QString interfaz)
 {
-    foreach ( SInterfaceInfo* id, lstInterfaceDescriptions )
+    for ( SInterfaceInfo  &id : lstInterfaceDescriptions )
     {
-        if ( id->interfaz == interfaz )
-            return id->description;
+        if ( id.interfaz == interfaz )
+            return id.description;
     }
     return "";
 }
 
-QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipmentNeighborsInfo *> lstEquipmentNeighborsInfo, QList<SPortChannel *> lstPCInfo, QString i)
+QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipmentNeighborsInfo> &lstEquipmentNeighborsInfo, QList<SPortChannel> &lstPCInfo, QString i)
 {
     QStringList lstVecinos;
     QList<SEquipmentNeighborsInfo*> lstSalida;
@@ -280,22 +281,22 @@ QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipm
     if ( i.contains(exp) )
     {
         QString group = exp.cap(2);
-        foreach (SPortChannel *pc, lstPCInfo)
+        for (SPortChannel &pc : lstPCInfo)
         {
-            if ( group == pc->group )
+            if ( group == pc.group )
             {
-                i = pc->interfaz;
+                i = pc.interfaz;
                 break;
             }
         }
     }
 
-    foreach (SEquipmentNeighborsInfo *equipo, lstEquipmentNeighborsInfo)
+    for (SEquipmentNeighborsInfo &equipo : lstEquipmentNeighborsInfo)
     {
-        if ( equipo->interfazestesalida != i || !equipo->operativo  )
+        if ( equipo.interfazestesalida != i || !equipo.operativo  )
             continue;
 
-        QString vecinonombre = simplicateName(equipo->nombreequipo);
+        QString vecinonombre = simplicateName(equipo.nombreequipo);
 
         //verificamos si ya se habia agregado un equipo con el mismo nombre. Caso de que se aprenda dos veces el mismo equipo
         //por la misma interfaz
@@ -305,25 +306,25 @@ QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipm
             lstVecinos.append( vecinonombre );
 
         if ( equipmentNeighborsVecinoValidarEquipo(equipo) )
-            lstSalida.append(equipo);
+            lstSalida.append(&equipo);
     }
     return lstSalida;
 }
 
-bool interfaceIsL2(Queries* q, QString interfaz)
+bool interfaceIsL2(Queries &q, QString interfaz)
 {
     //Si la interfaz pertenece a un Po se busca el mismo para poder averiguar si es L2 o L3
     //Se usa "interfaz" para averiguar la informacion de vlans u ospf ya sea el Po o la interfaz original
     //Al final se gráfica la interfaz
-    QString interfazPO = interfaceToPortChannelInterface( q->portChannelInfo(),
+    QString interfazPO = interfaceToPortChannelInterface( q.portChannelInfo(),
                                                         interfaz,
-                                                        q->platform() );
+                                                        q.platform() );
 
-    foreach (SInterfaceVlans *ipv, q->interfacesPermitedVlansInfo())
+    for (SInterfaceVlans &ipv : q.interfacesPermitedVlansInfo() )
     {
-        if ( ipv->interfaz == interfazPO )
+        if ( ipv.interfaz == interfazPO )
         {
-            int vlans = ipv->vlans.size();
+            int vlans = ipv.vlans.size();
 
             if ( vlans > 0 )
                 return true;
@@ -334,31 +335,31 @@ bool interfaceIsL2(Queries* q, QString interfaz)
     return false;
 }
 
-bool interfacesAreL2OneVlanMatches(Queries *q1, QString interfaz1, Queries *q2, QString interfaz2)
+bool interfacesAreL2OneVlanMatches(Queries &q1, QString interfaz1, Queries &q2, QString interfaz2)
 {
     //Si la interfaz pertenece a un Po se busca el mismo para poder averiguar si es L2 o L3
     //Se usa "interfaz" para averiguar la informacion de vlans u ospf ya sea el Po o la interfaz original
     //Al final se gráfica la interfaz
-    QString interfazPO1 = interfaceToPortChannelInterface( q1->portChannelInfo(),
+    QString interfazPO1 = interfaceToPortChannelInterface( q1.portChannelInfo(),
                                                         interfaz1,
-                                                        q1->platform() );
+                                                        q1.platform() );
 
-    QString interfazPO2 = interfaceToPortChannelInterface( q2->portChannelInfo(),
+    QString interfazPO2 = interfaceToPortChannelInterface( q2.portChannelInfo(),
                                                         interfaz2,
-                                                        q2->platform() );
+                                                        q2.platform() );
 
     //por lo menos una vlan tiene que se ser comun en ambos
-    foreach (SInterfaceVlans *ipv1, q1->interfacesPermitedVlansInfo())
+    for (SInterfaceVlans &ipv1 : q1.interfacesPermitedVlansInfo())
     {
-        if ( ipv1->interfaz == interfazPO1 )
+        if ( ipv1.interfaz == interfazPO1 )
         {
-            foreach (SInterfaceVlans *ipv2, q2->interfacesPermitedVlansInfo())
+            for (SInterfaceVlans &ipv2 : q2.interfacesPermitedVlansInfo())
             {
-                if ( ipv2->interfaz == interfazPO2 )
+                if ( ipv2.interfaz == interfazPO2 )
                 {
-                    foreach (QString vlan, ipv1->vlans)
+                    for (QString vlan : ipv1.vlans)
                     {
-                        if ( ipv2->vlans.contains( vlan ) )
+                        if ( ipv2.vlans.contains( vlan ) )
                             return true;
                     }
                     break;
@@ -370,86 +371,86 @@ bool interfacesAreL2OneVlanMatches(Queries *q1, QString interfaz1, Queries *q2, 
     return false;
 }
 
-bool interfaceIsL3(Queries *q, QString interfaz)
+bool interfaceIsL3(Queries &q, QString interfaz)
 {
     //Si la interfaz pertenece a un Po se busca el mismo para poder averiguar si es L2 o L3
     //Se usa "interfaz" para averiguar la informacion de vlans u ospf ya sea el Po o la interfaz original
     //Al final se gráfica la interfaz
-    QString interfazPO1 = interfaceToPortChannelInterface( q->portChannelInfo(),
+    QString interfazPO1 = interfaceToPortChannelInterface( q.portChannelInfo(),
                                                         interfaz,
-                                                        q->platform() );
+                                                        q.platform() );
 
     QRegExp exp( interfazPO1+"\\.\\d+" ); //para verificar si existe una sesion ospf en un subinterfa, si si, regresamos true
-    foreach (SOSPFInfo *oi1, q->ospfInfo())
+    for (SOSPFInfo &oi1 : q.ospfInfo())
     {
-        if ( oi1->interfaz == interfazPO1 ||
-             oi1->interfaz.contains( exp ) )
+        if ( oi1.interfaz == interfazPO1 ||
+             oi1.interfaz.contains( exp ) )
             return true;
     }
     return false;
 }
 
-bool interfaceIsInVRF(Queries *q, QString interfaz)
+bool interfaceIsInVRF(Queries &q, QString interfaz)
 {
-    QString interfazPO1 = interfaceToPortChannelInterface( q->portChannelInfo(),
+    QString interfazPO1 = interfaceToPortChannelInterface( q.portChannelInfo(),
                                                         interfaz,
-                                                        q->platform() );
+                                                        q.platform() );
 
-    foreach (SVrfInfo *vi, q->vrfsInfo())
+    for (SVrfInfo &vi : q.vrfsInfo())
     {
-        if ( vi->interfaz == interfazPO1 &&
-             !vi->vrf.isEmpty() )
+        if ( vi.interfaz == interfazPO1 &&
+             !vi.vrf.isEmpty() )
             return true;
     }
     return false;
 }
 
-QString interfaceOspfArea(Queries *q, QString interfaz)
+QString interfaceOspfArea(Queries &q, QString interfaz)
 {
-    QString interfazPO1 = interfaceToPortChannelInterface( q->portChannelInfo(),
+    QString interfazPO1 = interfaceToPortChannelInterface( q.portChannelInfo(),
                                                         interfaz,
-                                                        q->platform() );
+                                                        q.platform() );
 
-    foreach (SOSPFInfo *io, q->ospfInfo())
+    for (SOSPFInfo &io : q.ospfInfo())
     {
-        if ( io->interfaz == interfazPO1 )
-            return io->area;
+        if ( io.interfaz == interfazPO1 )
+            return io.area;
     }
     return "";
 }
 
-QString interfaceOspfProceso(Queries *q, QString interfaz)
+QString interfaceOspfProceso(Queries &q, QString interfaz)
 {
-    QString interfazPO1 = interfaceToPortChannelInterface( q->portChannelInfo(),
-                                                        interfaz,
-                                                        q->platform() );
+    QString interfazPO1 = interfaceToPortChannelInterface( q.portChannelInfo(),
+                                                           interfaz,
+                                                           q.platform() );
 
-    foreach (SOSPFInfo *io, q->ospfInfo())
+    for (SOSPFInfo &io : q.ospfInfo())
     {
-        if ( io->interfaz == interfazPO1 )
-            return io->process;
+        if ( io.interfaz == interfazPO1 )
+            return io.process;
     }
     return "";
 }
 
-QString interfaceToPortChannelInterface(QList<SPortChannel *> lst, QString interface, QString plataforma)
+QString interfaceToPortChannelInterface(QList<SPortChannel> &lst, QString interface, QString plataforma)
 {
     //regresa la Po interfaz a la que pertenece la interfaz.
     //Si no pertenece a alguno PO se regresa la misma interfaz enviada.
-    foreach (SPortChannel *pc, lst)
+    for (SPortChannel pc : lst)
     {
-        if ( pc->interfaz == interface )
+        if ( pc.interfaz == interface )
         {
             if ( equipmentOSFromPlatform(plataforma) == "IOS XR" )
-                return "BE"+pc->group;
+                return "BE"+pc.group;
             else
-                return "Po"+pc->group;
+                return "Po"+pc.group;
         }
     }
     return interface;
 }
 
-QStringList interfacePortChannelToInterfaces(QList<SPortChannel *> lst,QString pcInterface)
+QStringList interfacePortChannelToInterfaces(QList<SPortChannel> &lst, QString pcInterface)
 {
     QString group;
     QRegExp exp;
@@ -468,15 +469,15 @@ QStringList interfacePortChannelToInterfaces(QList<SPortChannel *> lst,QString p
         return QStringList() << pcInterface; //Interfaz proporcionada no esta en portchannel, se regresa la misma
 
     QStringList salida;
-    foreach (SPortChannel *pc, lst)
+    for (SPortChannel pc : lst)
     {
-        if ( group == pc->group )
-            salida.append( pc->interfaz );
+        if ( group == pc.group )
+            salida.append( pc.interfaz );
     }
     return salida;
 }
 
-bool sonIPsParejaMascara30_31( QString ip1, QString ip2 )
+bool sonIPsParejaMascara30_31(QString ip1, QString ip2 )
 {
     QString ipuno = IP2Binario(ip1);
     QString ipdos = IP2Binario(ip2);
@@ -516,7 +517,7 @@ bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos)
     return false;
 }
 
-Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries *> lst,
+Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries> &lst,
                                                     QString ipBuscar,
                                                     QString &interfaz,
                                                     QString ospfarea)
@@ -524,32 +525,32 @@ Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries *> lst,
     if ( ipBuscar.isEmpty() )
         return nullptr;
 
-    foreach (Queries *q, lst)
+    for (Queries &q : lst)
     {
-        if ( !q->interfacesIpAddressesQuery )
+        if ( !q.interfacesIpAddressesQuery )
             continue;
 
-        foreach (SIpInfo *ii, q->interfacesIpAddressesInfo())
+        for (SIpInfo &ii : q.interfacesIpAddressesInfo())
         {
             //verificamos que no se svi
-            if ( ii->interfaz.contains("Vlan") ||
-                 ii->interfaz.contains("BVI") ||
-                 ii->interfaz.contains("BDI"))
+            if ( ii.interfaz.contains("Vlan") ||
+                 ii.interfaz.contains("BVI") ||
+                 ii.interfaz.contains("BDI"))
                 continue;
 
             //Que la ip no sea la misma
-            if ( ipBuscar == ii->ip )
+            if ( ipBuscar == ii.ip )
                 continue;
 
             //que la ip no se este vacia
-            if ( ii->ip.isEmpty() )
+            if ( ii.ip.isEmpty() )
                 continue;
 
             //verificamos que la interfaz tenga ospf
             bool encontrado=false;
-            foreach (SOSPFInfo *oi, q->ospfInfo())
+            for (SOSPFInfo &oi : q.ospfInfo())
             {
-                if ( oi->interfaz == ii->interfaz && oi->area == ospfarea )
+                if ( oi.interfaz == ii.interfaz && oi.area == ospfarea )
                 {
                     encontrado=true;
                     break;
@@ -559,17 +560,17 @@ Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries *> lst,
                 continue;
 
             //verificando si en este equipo hay una IP que pertenezca al mismo segmento
-            if ( !sonIPsParejaMascara30_31( ipBuscar, ii->ip ) )
+            if ( !sonIPsParejaMascara30_31( ipBuscar, ii.ip ) )
                 continue;
 
             //IP pertenece al mismo segmento /30
 
             //verificando que la interfaz de este equipo no esta en una vrf
             encontrado = false;
-            foreach (SVrfInfo *vrf, q->vrfsInfo())
+            for (SVrfInfo &vrf : q.vrfsInfo())
             {
-                if ( vrf->interfaz == ii->interfaz &&
-                     !vrf->vrf.isEmpty() )
+                if ( vrf.interfaz == ii.interfaz &&
+                     !vrf.vrf.isEmpty() )
                 {
                     encontrado=true;
                     break;
@@ -578,29 +579,29 @@ Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries *> lst,
             if ( encontrado )
                 continue;
 
-            if ( !q->ospfQuery )
-                continue;           
+            if ( !q.ospfQuery )
+                continue;
 
             //interfaz no esta en una vrf
             //interfaz tiene ospf
             //Las IPs pertenecen al mismo segmento /30
-            interfaz=ii->interfaz;
+            interfaz=ii.interfaz;
 
-            return q;
+            return &q;
         }
     }
 
     return nullptr;
 }
 
-bool existeEquipmentNeighborsOperativoHaciaEquipo(QList<SEquipmentNeighborsInfo *> lst, QString hostname )
+bool existeEquipmentNeighborsOperativoHaciaEquipo(QList<SEquipmentNeighborsInfo> &lst, QString hostname )
 {
-    foreach (SEquipmentNeighborsInfo *vecino, lst)
+    for (SEquipmentNeighborsInfo &vecino : lst)
     {
-        if ( !vecino->operativo )
+        if ( !vecino.operativo )
             continue;
 
-        if ( vecino->nombreequipo == hostname )
+        if ( vecino.nombreequipo == hostname )
             return true;
     }
     return false;
@@ -628,32 +629,32 @@ QString eliminarCaractaresNoImprimibles(QString txt)
     return txt;
 }
 
-SIpInfo* buscarARP(QList<Queries *> lstQueries, QString IPoMAc)
-{
-    foreach (Queries *q, lstQueries)
-    {
-        if ( !q->arpsQuery )
-            return nullptr; //si al primer queries no tiene info de arp se regresa null ya que los demas tampoco tendran
+//SIpInfo* buscarARP(QList<Queries *> lstQueries, QString IPoMAc)
+//{
+//    foreach (Queries *q, lstQueries)
+//    {
+//        if ( !q->arpsQuery )
+//            return nullptr; //si al primer queries no tiene info de arp se regresa null ya que los demas tampoco tendran
 
-        foreach (SIpInfo *arp, q->arpsInfo())
-        {
-            if ( arp->ip == IPoMAc )
-                return arp;
-            if ( arp->mac == IPoMAc )
-                return arp;
-        }
-    }
-    return nullptr;
-}
+//        foreach (SIpInfo *arp, q->arpsInfo())
+//        {
+//            if ( arp->ip == IPoMAc )
+//                return arp;
+//            if ( arp->mac == IPoMAc )
+//                return arp;
+//        }
+//    }
+//    return nullptr;
+//}
 
 bool mplsInterfaceStatus(QString interface,
-                         QString& txtStatusOut,
-                         QList<SMplsLdpInfo*> lstDiscovery,
-                         QList<SMplsLdpInfo*> lstInterfaces)
+                         QString &txtStatusOut,
+                         QList<SMplsLdpInfo> &lstDiscovery,
+                         QList<SMplsLdpInfo> &lstInterfaces)
 {
-    foreach (SMplsLdpInfo *discoveryInfo, lstDiscovery)
+    for (SMplsLdpInfo &discoveryInfo : lstDiscovery)
     {
-        if ( discoveryInfo->interfaz == interface )
+        if ( discoveryInfo.interfaz == interface )
         {
             //si se encuentra en discovery esta arriba y obviamente configurado
             txtStatusOut = "up";
@@ -662,9 +663,9 @@ bool mplsInterfaceStatus(QString interface,
     }
 
     //No estaba arriba, vemos en las interfaces si esta configurado
-    foreach (SMplsLdpInfo *interfaceInfo, lstInterfaces)
+    for (SMplsLdpInfo &interfaceInfo : lstInterfaces)
     {
-        if ( interfaceInfo->interfaz == interface )
+        if ( interfaceInfo.interfaz == interface )
         {
             //Si se encuentra
             txtStatusOut = "down";
@@ -679,13 +680,13 @@ bool mplsInterfaceStatus(QString interface,
 
 bool ospfInterfaceStatus(QString interface,
                          QString& txtStatusOut,
-                         QList<SOSPFInfo*> lstOspfInfo )
+                         QList<SOSPFInfo> &lstOspfInfo )
 {
-    foreach (SOSPFInfo* info, lstOspfInfo)
+    for (SOSPFInfo &info : lstOspfInfo)
     {
-        if ( info->interfaz == interface )
+        if ( info.interfaz == interface )
         {
-            if ( info->state.contains("FULL") )
+            if ( info.state.contains("FULL") )
             {
                 txtStatusOut = "up";
                 return true;
@@ -703,7 +704,7 @@ bool ospfInterfaceStatus(QString interface,
     return true;
 }
 
-QString buscarArchivoConsultasActual(QString path, QString filelabel,QString grupo)
+QString buscarArchivoConsultasActual(QString path, QString filelabel, QString grupo)
 {
     //buscando el archivo de consultas mas actual a actualizar
     QString file;
@@ -728,12 +729,12 @@ QString buscarArchivoConsultasActual(QString path, QString filelabel,QString gru
     return file;
 }
 
-QString nombreArchivoLstQueries(LstQueries* lstQ)
+QString nombreArchivoLstQueries(LstQueries &lstQ)
 {
-    return lstQ->grupo +
-            (lstQ->label.isEmpty()?"":"_"+lstQ->label)+
+    return lstQ.grupo +
+            (lstQ.label.isEmpty()?"":"_"+lstQ.label)+
             "_Queries"+
-            (lstQ->tipoconsulta.isEmpty()?"":"_"+lstQ->tipoconsulta)+
+            (lstQ.tipoconsulta.isEmpty()?"":"_"+lstQ.tipoconsulta)+
             "_"+QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss")+".dat";
 }
 
@@ -768,9 +769,9 @@ QString estandarizarProtocoloEnrutamiento(QString proto)
     return proto;
 }
 
-bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *q,
-                                                    QString interfazOipDondeViene,
-                                                    QString interfazSiguienteEquipo )
+bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
+                                                   QString interfazOipDondeViene,
+                                                   QString interfazSiguienteEquipo )
 {
     if ( interfazOipDondeViene.isEmpty() ) //primer equipo
         return true;
@@ -784,11 +785,11 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *q,
     else
     {
         //como se paso una ip de ospf hay que buscar la interfaz a la que pertenece
-        for ( SIpInfo *ii : q->interfacesIpAddressesInfo() )
+        for ( SIpInfo &ii : q.interfacesIpAddressesInfo() )
         {
-            if ( sonIPsParejaMascara30_31( ii->ip, interfazOipDondeViene ) )
+            if ( sonIPsParejaMascara30_31( ii.ip, interfazOipDondeViene ) )
             {
-                interfazDeDondeSeViene = ii->interfaz;
+                interfazDeDondeSeViene = ii.interfaz;
                 break;
             }
         }
@@ -798,14 +799,14 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *q,
     }
 
     //buscamos el proceso de la interfaz de donde se viene
-    interfazDeDondeSeViene = interfaceToPortChannelInterface(q->portChannelInfo(),
+    interfazDeDondeSeViene = interfaceToPortChannelInterface(q.portChannelInfo(),
                                                              interfazDeDondeSeViene,
-                                                             q->platform());
-    for ( SOSPFInfo *oi : q->ospfInfo() )
+                                                             q.platform());
+    for ( SOSPFInfo &oi : q.ospfInfo() )
     {
-        if ( oi->interfaz == interfazDeDondeSeViene )
+        if ( oi.interfaz == interfazDeDondeSeViene )
         {
-            ospfProceso = oi->process;
+            ospfProceso = oi.process;
             break;
         }
     }
@@ -813,14 +814,14 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF( Queries *q,
         return false;
 
     //verificamos si la interfaz siguiente pertenece al mismo proceso que la interfaz donde se viene
-    interfazSiguienteEquipo = interfaceToPortChannelInterface(q->portChannelInfo(),
+    interfazSiguienteEquipo = interfaceToPortChannelInterface(q.portChannelInfo(),
                                                               interfazSiguienteEquipo,
-                                                              q->platform());
-    for ( SOSPFInfo *oi : q->ospfInfo() )
+                                                              q.platform());
+    for ( SOSPFInfo &oi : q.ospfInfo() )
     {
-        if ( oi->interfaz == interfazSiguienteEquipo )
+        if ( oi.interfaz == interfazSiguienteEquipo )
         {
-            if ( ospfProceso == oi->process ) return true; else return false;
+            if ( ospfProceso == oi.process ) return true; else return false;
         }
     }
 

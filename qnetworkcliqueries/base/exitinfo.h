@@ -10,7 +10,8 @@ protected:
     bool m_gw;
 
 public:
-    ExitInfo(QRemoteShell *terminal, QObject *parent=0);
+    ExitInfo() {}
+    ExitInfo(QRemoteShell *terminal, QObject *parent=nullptr);
     void setConnectedByGW(bool enable) { m_gw = enable; }
     void exit();
 

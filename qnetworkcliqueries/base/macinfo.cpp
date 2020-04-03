@@ -11,28 +11,27 @@ SMacInfo::SMacInfo(const SMacInfo &other)
     age = other.age;
 }
 
-QDataStream& operator<<(QDataStream& out, const SMacInfo* data)
+QDataStream& operator<<(QDataStream& out, const SMacInfo& data)
 {
-    out << data->mac;
-    out << data->vlan;
-    out << data->interfaz;
-    out << data->age;
+    out << data.mac;
+    out << data.vlan;
+    out << data.interfaz;
+    out << data.age;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SMacInfo*& data)
+QDataStream& operator>>(QDataStream& in, SMacInfo& data)
 {
-    data = new SMacInfo;
-    in >> data->mac;
-    in >> data->vlan;
-    in >> data->interfaz;
-    in >> data->age;
+    in >> data.mac;
+    in >> data.vlan;
+    in >> data.interfaz;
+    in >> data.age;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
@@ -47,7 +46,7 @@ bool existMacAddress(QList<SMacInfo*> lst,SMacInfo* mac)
     return false;
 }
 
-void updateInfoList(QList<SMacInfo *> &lstDest, QList<SMacInfo *> &lstOrigin )
+void updateInfoList(QList<SMacInfo> &lstDest, QList<SMacInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -56,30 +55,30 @@ void updateInfoList(QList<SMacInfo *> &lstDest, QList<SMacInfo *> &lstOrigin )
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SMacInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SMacInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SMacInfo *origin, lstOrigin )
+    for ( SMacInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SMacInfo *dest, lstDest )
+        for ( SMacInfo &dest : lstDest )
         {
-            if ( origin->mac == dest->mac &&
-                 origin->vlan == dest->vlan )
+            if ( origin.mac == dest.mac &&
+                 origin.vlan == dest.vlan )
             {
                 //Si se encontró, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->interfaz = origin->interfaz;
-                dest->age = origin->age;
-                dest->operativo = true;
+                dest.datetime = origin.datetime;
+                dest.interfaz = origin.interfaz;
+                dest.age = origin.age;
+                dest.operativo = true;
                 encontrado=true;
                 break;
             }
@@ -103,17 +102,11 @@ MacInfo::MacInfo(const MacInfo &other):
     m_ip = other.m_ip;
     m_mac = other.m_mac;
     m_vlan = other.m_vlan;
-    foreach (SMacInfo *ii, other.m_lstMacs)
-    {
-        SMacInfo *ii2 = new SMacInfo(*ii);
-        m_lstMacs.append(ii2);
-    }
+    m_lstMacs = other.m_lstMacs;
 }
 
 MacInfo::~MacInfo()
-{
-    qDeleteAll(m_lstMacs);
-}
+{}
 
 void MacInfo::getMacInfo()
 {
@@ -122,12 +115,24 @@ void MacInfo::getMacInfo()
 
 QString MacInfo::macInterfaceLearnedFrom(QString mac)
 {
-    foreach ( SMacInfo *m , m_lstMacs )
+    for ( SMacInfo &m : m_lstMacs )
     {
-        if ( mac == m->mac )
-            return m->interfaz;
+        if ( mac == m.mac )
+            return m.interfaz;
     }
     return "";
+}
+
+QDataStream& operator<<(QDataStream& out, const MacInfo& info)
+{
+    out << info.m_lstMacs;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, MacInfo& info)
+{
+    in >> info.m_lstMacs;
+    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const MacInfo* info)
@@ -138,7 +143,7 @@ QDataStream& operator<<(QDataStream& out, const MacInfo* info)
 
 QDataStream& operator>>(QDataStream& in, MacInfo*& info)
 {
-    info =new MacInfo(nullptr,nullptr);
+    info = new MacInfo;
     in >> info->m_lstMacs;
     return in;
 }
@@ -146,8 +151,8 @@ QDataStream& operator>>(QDataStream& in, MacInfo*& info)
 QDebug operator<<(QDebug dbg, const MacInfo &info)
 {
     dbg.nospace() << "MacInfo: (" << info.m_lstMacs.size() << ")\n";
-    foreach (SMacInfo *i, info.m_lstMacs)
-        dbg.space() << i->interfaz << i->mac << i->vlan << i->age << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+    for (SMacInfo i : info.m_lstMacs)
+        dbg.space() << i.interfaz << i.mac << i.vlan << i.age << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     dbg.nospace() << "\n";
 

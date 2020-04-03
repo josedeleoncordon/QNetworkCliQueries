@@ -8,8 +8,6 @@
 
 ConsultaEquipos::ConsultaEquipos(QObject *parent) : QObject(parent)
 {    
-    _lstQN = nullptr;
-    _lstQ = nullptr;
     opciones=0;
     m_queriesThread = new QueriesThread(this);
     m_consultaConErrores=false;
@@ -29,34 +27,34 @@ ConsultaEquipos::ConsultaEquipos(QObject *parent) : QObject(parent)
 
 ConsultaEquipos::~ConsultaEquipos()
 {
-    qDebug() << "ConsultaEquipos::~ConsultaEquipos()" << 11;
-    if ( _lstQN )
-    {
-        qDebug() << "ConsultaEquipos::~ConsultaEquipos()" << 22 << _lstQN;
-        qDeleteAll(_lstQN->lstQueries); //solo borrar lstQueries de uno (lstQN) ya que lstQ tambien lo comparte
-        delete _lstQN;
-    }
-    if ( _lstQ )
-    {
-        qDebug() << "ConsultaEquipos::~ConsultaEquipos()" << 33;
-        delete _lstQ;
-    }
+//    qDebug() << "ConsultaEquipos::~ConsultaEquipos()" << 11;
+//    if ( _lstQN )
+//    {
+//        qDebug() << "ConsultaEquipos::~ConsultaEquipos()" << 22 << _lstQN;
+//        qDeleteAll(_lstQN->lstQueries); //solo borrar lstQueries de uno (lstQN) ya que lstQ tambien lo comparte
+//        delete _lstQN;
+//    }
+//    if ( _lstQ )
+//    {
+//        qDebug() << "ConsultaEquipos::~ConsultaEquipos()" << 33;
+//        delete _lstQ;
+//    }
 }
 
-void ConsultaEquipos::setLstQ(LstQueries *lQ)
+void ConsultaEquipos::setLstQ(LstQueries &lQ)
 {
-    if ( lQ )
-    {
-        _lstQ = new LstQueries(lQ);
-        lstQueriesParameters = _lstQ->lstQueriesParameters;
-        lstQueries = _lstQ->lstQueries;
-        errorMap = _lstQ->errorMap;
-        m_lstLabel = _lstQ->label;
-        m_lstTipo = _lstQ->tipoconsulta;
-        m_grupo = _lstQ->grupo;
-        for ( Queries *q : lstQueries )
-            lstIPAnteriores.append( q->ip() );
-    }
+    if ( lQ.isEmpty() )
+        return;
+
+    _lstQ = lQ;
+    lstQueriesParameters = _lstQ.lstQueriesParameters;
+    lstQueries = _lstQ.lstQueries;
+    errorMap = _lstQ.errorMap;
+    m_lstLabel = _lstQ.label;
+    m_lstTipo = _lstQ.tipoconsulta;
+    m_grupo = _lstQ.grupo;
+    for ( Queries &q : lstQueries )
+        lstIPAnteriores.append( q.ip() );
 }
 
 void ConsultaEquipos::addOpcionesConsulta(QList<Queries::Opcion> lst)
@@ -85,7 +83,10 @@ void ConsultaEquipos::addOpcionesConsulta(QList<Queries::Opcion> lst)
         if (op == Queries::BGPNeig ) opciones |= 2097152;
         if (op == Queries::IpRoutes ) opciones |= 4194304;
         if (op == Queries::Configuration ) opciones |= 8388608;
-        if (op == Queries::Exit ) opciones |= 16777216;
+        if (op == Queries::Mplsl2Transport ) opciones |= 16777216;
+        if (op == Queries::Funcion ) opciones |= 33554432;
+        if (op == Queries::BGPNetworks ) opciones |= 67108864;
+        if (op == Queries::Exit ) opciones |= 134217728;
     }
 }
 
@@ -114,19 +115,19 @@ void ConsultaEquipos::consultarEquipos()
     if (!m_lstQfilepath.isEmpty())
     {
         _lstQ = openLstQueries( m_lstQfilepath );
-        m_lstLabel = _lstQ->label;
-        m_lstTipo = _lstQ->tipoconsulta;
-        m_grupo = _lstQ->grupo;
-        lstQueriesParameters = _lstQ->lstQueriesParameters;
-        lstQueries = _lstQ->lstQueries;
-        errorMap = _lstQ->errorMap;
-        for ( Queries *q : lstQueries )
-            lstAnteriores.append( q->ip() );
+        m_lstLabel = _lstQ.label;
+        m_lstTipo = _lstQ.tipoconsulta;
+        m_grupo = _lstQ.grupo;
+        lstQueriesParameters = _lstQ.lstQueriesParameters;
+        lstQueries = _lstQ.lstQueries;
+        errorMap = _lstQ.errorMap;
+        for ( Queries &q : lstQueries )
+            lstAnteriores.append( q.ip() );
     }
 
     //opciones de consulta
-    if ( !opciones && _lstQ )
-        opciones = _lstQ->opcionesConsulta; //si no se configuro opciones se usa la de la consulta anterior
+    if ( !opciones )
+        opciones = _lstQ.opcionesConsulta; //si no se configuro opciones se usa la de la consulta anterior
     if ( !opciones )
     {
         _error = "Opciones de consulta no configuradas";
@@ -150,7 +151,7 @@ void ConsultaEquipos::consultarEquipos()
     {
         //consulta de equipos anteriores con errores
 
-        if ( !_lstQ )
+        if ( _lstQ.isEmpty() )
         {
             _error = "No se configuro archivo de consultas anteriores";
             emit error();
@@ -184,6 +185,7 @@ void ConsultaEquipos::consultarEquipos()
 
     qDebug() << "consultaequipos: IPs a consultar" << lstIP;
 
+    m_queriesThread->setConnectionProtocol( m_connectionprotocol );
     m_queriesThread->setGrupo(m_grupo);
     m_queriesThread->setLstIP( lstIP );
     m_queriesThread->setGW( m_gw );
@@ -196,6 +198,8 @@ void ConsultaEquipos::consultarEquipos()
     m_queriesThread->setEquipmentNeighborsConsultarVecinos( m_consultaAgregarVecinos );
     m_queriesThread->setEquipmentNeighborsOSPFMismoDominio( m_consultaOSPFMismoDominio );
     m_queriesThread->setEquipmentNeighborsOSPFArea( m_consultaOSPFArea );
+    m_queriesThread->setConsultaAgregarVecinosLinksEnSegmentos( m_lstLinksEnSegmentos );
+    m_queriesThread->setConsultaAgregarVecinosLoopbacksEnSegmentos( m_lstLoopbacksEnSegmentos );
     m_queriesThread->setInterval( m_interval );
     m_queriesThread->setSimultaneos( m_simultaneos );
     m_queriesThread->setMaxParalelos( m_maxParalelos );
@@ -230,7 +234,7 @@ void ConsultaEquipos::on_queriesThread_finished(bool ok)
     QMap<QString, QString> errormapaintegrado;
     QMap<QString, QString> errormap_nuevo = m_queriesThread->errorMap();
     lstQueriesConsultados = m_queriesThread->lstQueries();
-    if ( _lstQ )
+    if ( !_lstQ.isEmpty() )
     {
         //actualizando consultar anterior
         Queries::updateInfoQueries( lstQueries, lstQueriesConsultados, lstIP );
@@ -246,16 +250,15 @@ void ConsultaEquipos::on_queriesThread_finished(bool ok)
 
     qDebug() << "lstQueries size" << lstQueries.size() << m_grupo << m_lstLabel << m_lstQpath;
 
-    _lstQN = new LstQueries;
-    _lstQN->grupo = m_grupo;
-    _lstQN->label = m_lstLabel;
-    _lstQN->opcionesConsulta = opciones;
-    _lstQN->lstQueries = lstQueries;
-    _lstQN->errorMap = errormapaintegrado;
-    _lstQN->lstQueriesParameters = QueriesConfiguration::instance()->lstQueryParameters();
-    _lstQN->tipoconsulta = m_lstTipo;
-    _lstQN->lstIPsAconsultadas = lstIP;
-    _lstQN->dateTime = QDateTime::currentDateTime();
+    _lstQN.grupo = m_grupo;
+    _lstQN.label = m_lstLabel;
+    _lstQN.opcionesConsulta = opciones;
+    _lstQN.lstQueries = lstQueries;
+    _lstQN.errorMap = errormapaintegrado;
+    _lstQN.lstQueriesParameters = QueriesConfiguration::instance()->lstQueryParameters();
+    _lstQN.tipoconsulta = m_lstTipo;
+    _lstQN.lstIPsAconsultadas = lstIP;
+    _lstQN.dateTime = QDateTime::currentDateTime();
 
     //eliminando consulta anterior si fue configurado
     if ( m_consultaAnteriorBorrar )

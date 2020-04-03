@@ -9,34 +9,33 @@ SIpRouteInfo::SIpRouteInfo(const SIpRouteInfo &other)
     vrf = other.vrf;
 }
 
-QDataStream& operator<<(QDataStream& out, const SIpRouteInfo* data)
+QDataStream& operator<<(QDataStream& out, const SIpRouteInfo& data)
 {
-    out << data->mask;
-    out << data->network;
-    out << data->vrf;
-    out << data->protocol;
-    out << data->via;
+    out << data.mask;
+    out << data.network;
+    out << data.vrf;
+    out << data.protocol;
+    out << data.via;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SIpRouteInfo*& data)
+QDataStream& operator>>(QDataStream& in, SIpRouteInfo& data)
 {
-    data = new SIpRouteInfo;
-    in >> data->mask;
-    in >> data->network;
-    in >> data->vrf;
-    in >> data->protocol;
-    in >> data->via;
+    in >> data.mask;
+    in >> data.network;
+    in >> data.vrf;
+    in >> data.protocol;
+    in >> data.via;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SIpRouteInfo *> &lstDest, QList<SIpRouteInfo *> &lstOrigin )
+void updateInfoList(QList<SIpRouteInfo> &lstDest, QList<SIpRouteInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -45,31 +44,31 @@ void updateInfoList(QList<SIpRouteInfo *> &lstDest, QList<SIpRouteInfo *> &lstOr
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SIpRouteInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SIpRouteInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SIpRouteInfo *origin, lstOrigin )
+    for ( SIpRouteInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SIpRouteInfo *dest, lstDest )
+        for ( SIpRouteInfo &dest : lstDest )
         {
-            if ( origin->network == dest->network &&
-                 origin->mask == dest->mask /*&&
+            if ( origin.network == dest.network &&
+                 origin.mask == dest.mask /*&&
                  origin->vrf == dest->vrf*/ )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->protocol = origin->protocol;
-                dest->via = origin->via;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.protocol = origin.protocol;
+                dest.via = origin.via;
                 encontrado=true;
                 break;
             }
@@ -93,19 +92,13 @@ IPRouteInfo::IPRouteInfo(const IPRouteInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;    
-    foreach (SIpRouteInfo *ii, other.m_lstRoutes)
-    {
-        SIpRouteInfo *ii2 = new SIpRouteInfo(*ii);
-        m_lstRoutes.append(ii2);
-    }
+    m_lstRoutes = other.m_lstRoutes;
     m_protocol = other.m_protocol;
     m_vrfs = other.m_vrfs;
 }
 
 IPRouteInfo::~IPRouteInfo()
-{
-    qDeleteAll(m_lstRoutes);
-}
+{}
 
 void IPRouteInfo::getIPRouteInfo()
 {
@@ -177,16 +170,16 @@ void IPRouteInfo::on_term_receiveText()
             exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}).+ via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(,.+)*$");
             if ( line.contains(exp) )
             {
-                route = new SIpRouteInfo;
-                route->queryParent = m_queriesParent;
-                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
-                route->network = exp.cap(2);
-                route->mask = exp.cap(3);
-                route->vrf = m_vrf;
-                route->via.append( exp.cap(4) );
-                route->datetime = QDateTime::currentDateTime();
-                route->operativo = true;
-                m_lstRoutes.append(route);
+                SIpRouteInfo i;
+                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
+                i.network = exp.cap(2);
+                i.mask = exp.cap(3);
+                i.vrf = m_vrf;
+                i.via.append( exp.cap(4) );
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                m_lstRoutes.append(i);
+                route = &i;
                 continue;
             }
 
@@ -194,17 +187,17 @@ void IPRouteInfo::on_term_receiveText()
             exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).+ via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}),.+$");
             if ( line.contains(exp) )
             {
-                route = new SIpRouteInfo;
-                route->queryParent = m_queriesParent;
-                route->datetime = QDateTime::currentDateTime();
-                route->operativo = true;
+                SIpRouteInfo i;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
 
-                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
-                route->network = exp.cap(2);
-                route->mask = mask;
-                route->vrf = m_vrf;
-                route->via.append( exp.cap(3) );
-                m_lstRoutes.append(route);
+                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
+                i.network = exp.cap(2);
+                i.mask = mask;
+                i.vrf = m_vrf;
+                i.via.append( exp.cap(3) );
+                m_lstRoutes.append(i);
+                route = &i;
                 continue;
             }
 
@@ -224,15 +217,15 @@ void IPRouteInfo::on_term_receiveText()
 
             if ( line.contains(exp) )
             {
-                route = new SIpRouteInfo;
-                route->queryParent = m_queriesParent;
-                route->datetime = QDateTime::currentDateTime();
-                route->operativo = true;
-                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
-                route->network = exp.cap(2);
-                route->mask = exp.cap(3);
-                route->vrf = m_vrf;
-                m_lstRoutes.append(route);
+                SIpRouteInfo i;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
+                i.network = exp.cap(2);
+                i.mask = exp.cap(3);
+                i.vrf = m_vrf;
+                m_lstRoutes.append(i);
+                route = &i;
                 continue;
             }
 
@@ -241,15 +234,15 @@ void IPRouteInfo::on_term_receiveText()
 
             if ( line.contains(exp) )
             {
-                route = new SIpRouteInfo;
-                route->queryParent = m_queriesParent;
-                route->datetime = QDateTime::currentDateTime();
-                route->operativo = true;
-                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
-                route->network = exp.cap(2);
-                route->vrf = m_vrf;
-                route->mask = mask;
-                m_lstRoutes.append(route);
+                SIpRouteInfo i;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
+                i.network = exp.cap(2);
+                i.vrf = m_vrf;
+                i.mask = mask;
+                m_lstRoutes.append(i);
+                route = &i;
                 continue;
             }
         }
@@ -259,16 +252,16 @@ void IPRouteInfo::on_term_receiveText()
             exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}) (\\w+) .+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) ");
             if ( line.contains(exp) )
             {
-                route = new SIpRouteInfo;
-                route->queryParent = m_queriesParent;
-                route->protocol = estandarizarProtocoloEnrutamiento(exp.cap(3));
-                route->network = exp.cap(1);
-                route->mask = exp.cap(2);
-                route->via.append( exp.cap(4) );
-                route->vrf = m_vrf;
-                route->datetime = QDateTime::currentDateTime();
-                route->operativo = true;
-                m_lstRoutes.append(route);
+                SIpRouteInfo i;
+                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(3));
+                i.network = exp.cap(1);
+                i.mask = exp.cap(2);
+                i.via.append( exp.cap(4) );
+                i.vrf = m_vrf;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                m_lstRoutes.append(i);
+                route = &i;
                 continue;
             }
 
@@ -289,6 +282,18 @@ void IPRouteInfo::on_term_receiveText()
     m_siguienteVRF();
 }
 
+QDataStream& operator<<(QDataStream& out, const IPRouteInfo& info)
+{
+    out << info.m_lstRoutes;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, IPRouteInfo& info)
+{
+    in >> info.m_lstRoutes;
+    return in;
+}
+
 QDataStream& operator<<(QDataStream& out, const IPRouteInfo* info)
 {
     out << info->m_lstRoutes;
@@ -297,7 +302,7 @@ QDataStream& operator<<(QDataStream& out, const IPRouteInfo* info)
 
 QDataStream& operator>>(QDataStream& in, IPRouteInfo*& info)
 {
-    info =new IPRouteInfo(nullptr,nullptr);
+    info = new IPRouteInfo;
     in >> info->m_lstRoutes;
     return in;
 }
@@ -305,8 +310,8 @@ QDataStream& operator>>(QDataStream& in, IPRouteInfo*& info)
 QDebug operator<<(QDebug dbg, const IPRouteInfo &info)
 {
     dbg.nospace() << "IPRouteInfo:\n";
-    foreach (SIpRouteInfo *i, info.m_lstRoutes)    
-        dbg.space() << i->vrf << i->network << i->mask << i->via << i->protocol << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << i->operativo << "\n";
+    foreach (SIpRouteInfo i, info.m_lstRoutes)
+        dbg.space() << i.vrf << i.network << i.mask << i.via << i.protocol << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << i.operativo << "\n";
 
     dbg.nospace() << "\n";
 

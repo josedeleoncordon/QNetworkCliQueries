@@ -3,13 +3,6 @@
 
 #include <QEventLoop>
 
-InfoBase::InfoBase(const InfoBase &other)
-{
-    datetime = other.datetime;
-    operativo = other.operativo;
-    queryParent = other.queryParent;
-}
-
 QueriesConfigurationValue::QueriesConfigurationValue(QString key, QVariant value, QString IP)
 {
     _key = key;
@@ -124,20 +117,29 @@ QString QueriesConfiguration::configuration(QString platform, QString os, QStrin
     return "";
 }
 
+FuncionBase::FuncionBase()
+{
+    init();
+}
+
 FuncionBase::FuncionBase(QRemoteShell *terminal,QObject *parent)/*:
     QObject(parent) */
 {
+    init();
     term=terminal;
-    lastCommandFailed=false;
-    m_brand="Cisco";
-    exp.setMinimal(true);
-    exp2.setMinimal(true);
-
-    m_queriesParent=dynamic_cast<Queries*>( parent );
 }
 
 FuncionBase::~FuncionBase()
 {}
+
+void FuncionBase::init()
+{
+    term=nullptr;
+    lastCommandFailed=false;
+    m_brand="Cisco";
+    exp.setMinimal(true);
+    exp2.setMinimal(true);
+}
 
 void FuncionBase::setPlatform(QString platform)
 {

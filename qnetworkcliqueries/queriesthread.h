@@ -27,7 +27,8 @@ public:
     void setLstIP(QStringList lst) { m_lstIP = lst; }
     void setLstIPsConsultaAnterior(QStringList lst) { lstIPsConsultaAnterior=lst; }
     void setConsultaSoloEquiposNuevos(bool enable) { m_soloequiposnuevos = enable; }
-    void setConsultaLinksEnSegmentos(QStringList lstSegmentos) { m_lstLinksEnSegmentos=lstSegmentos; }
+    void setConsultaAgregarVecinosLinksEnSegmentos(QStringList lstSegmentos) { m_lstLinksEnSegmentos=lstSegmentos; }
+    void setConsultaAgregarVecinosLoopbacksEnSegmentos(QStringList lstSegmentos) { m_lstLoopbacksEnSegmentos=lstSegmentos; }
     void setInterval(int interval) { m_interval = interval; }
     void setSimultaneos(int simultaneos) { m_simultaneos = simultaneos; }
     void setMaxParalelos(int max) { m_maxparalelos = max; }
@@ -49,7 +50,7 @@ public:
     int equiposSinConexion() { return m_sinconexion; }
     int equiposConexionConErrores() { return m_conexionerrores; }
     QStringList equiposEnConsulta() { return m_equiposenconsulta; }
-    QList<Queries*> lstQueries() { return m_lstQueries; }
+    QList<Queries> lstQueries();
     QMap<QString, QString> errorMap() { return m_errorMap; }
     QStringList lstIPsConectadosPorGW() { return m_lstIPsConectadosPorGW; }
 
@@ -81,6 +82,7 @@ private:
    int m_simultaneos; //cantidad de equipos se suman al mismo tiempo al grupo,
    QStringList m_equiposenconsulta;
    QStringList m_lstLinksEnSegmentos;
+   QStringList m_lstLoopbacksEnSegmentos;
    QList<Queries*> m_queriesenconsulta;
    int m_maxparalelos; //cantidad de equipos que se estan trabajando
    int m_equiposExitosos;

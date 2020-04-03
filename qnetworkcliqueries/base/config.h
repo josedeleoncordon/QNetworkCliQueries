@@ -20,7 +20,8 @@ class QNETWORKCLIQUERIES_EXPORT Config : public FuncionBase
     void siguienteComando();
 
 public:
-    Config(QRemoteShell *terminal, QObject *parent=0);
+    Config() {}
+    Config(QRemoteShell *terminal, QObject *parent=nullptr);
     ~Config();
     void configApply();
 

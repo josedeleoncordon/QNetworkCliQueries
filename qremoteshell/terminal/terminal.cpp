@@ -11,6 +11,8 @@ using namespace Konsole;
 
 Terminal::Terminal(QString debugIP, QString linuxprompt, QObject *parent) : QObject(parent)
 {
+     qCDebug(terminal) << _debugIP << "Terminal::Terminal";
+
     _debugIP = debugIP;
 
     _ready=false;

@@ -25,36 +25,35 @@ SInterfaceInfo::SInterfaceInfo(const SInterfaceInfo &other)
     description = other.description;
 }
 
-QDataStream& operator<<(QDataStream& out, const SInterfaceInfo* data)
+QDataStream& operator<<(QDataStream& out, const SInterfaceInfo& data)
 {
-    out << data->interfaz;
-    out << data->status;
-    out << data->description;
-    out << data->mac;
-    out << data->bandwidth;
-    out << data->ratein;
-    out << data->rateout;
-    out << data->bandwidth;
+    out << data.interfaz;
+    out << data.status;
+    out << data.description;
+    out << data.mac;
+    out << data.bandwidth;
+    out << data.ratein;
+    out << data.rateout;
+    out << data.bandwidth;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SInterfaceInfo*& data)
+QDataStream& operator>>(QDataStream& in, SInterfaceInfo& data)
 {
-    data = new SInterfaceInfo;
-    in >> data->interfaz;
-    in >> data->status;
-    in >> data->description;
-    in >> data->mac;
-    in >> data->bandwidth;
-    in >> data->ratein;
-    in >> data->rateout;
-    in >> data->bandwidth;
+    in >> data.interfaz;
+    in >> data.status;
+    in >> data.description;
+    in >> data.mac;
+    in >> data.bandwidth;
+    in >> data.ratein;
+    in >> data.rateout;
+    in >> data.bandwidth;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
@@ -64,24 +63,23 @@ SInterfaceVlans::SInterfaceVlans(const SInterfaceVlans &other)
     vlans = other.vlans;
 }
 
-QDataStream& operator<<(QDataStream& out, const SInterfaceVlans* data)
+QDataStream& operator<<(QDataStream& out, const SInterfaceVlans& data)
 {
-    out << data->interfaz;
-    out << data->vlans;
+    out << data.interfaz;
+    out << data.vlans;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SInterfaceVlans*& data)
+QDataStream& operator>>(QDataStream& in, SInterfaceVlans& data)
 {
-    data = new SInterfaceVlans;
-    in >> data->interfaz;
-    in >> data->vlans;
+    in >> data.interfaz;
+    in >> data.vlans;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
@@ -94,34 +92,33 @@ SInterfaceIOSServiceInstanceInfo::SInterfaceIOSServiceInstanceInfo(const SInterf
    bridgedomain = other.bridgedomain;
 }
 
-QDataStream& operator<<(QDataStream& out, const SInterfaceIOSServiceInstanceInfo* data)
+QDataStream& operator<<(QDataStream& out, const SInterfaceIOSServiceInstanceInfo& data)
 {
-    out << data->interfaz;
-    out << data->serviceinstance;
-    out << data->description;
-    out << data->vlan;
-    out << data->bridgedomain;
+    out << data.interfaz;
+    out << data.serviceinstance;
+    out << data.description;
+    out << data.vlan;
+    out << data.bridgedomain;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SInterfaceIOSServiceInstanceInfo*& data)
+QDataStream& operator>>(QDataStream& in, SInterfaceIOSServiceInstanceInfo& data)
 {
-    data = new SInterfaceIOSServiceInstanceInfo;
-    in >> data->interfaz;
-    in >> data->serviceinstance;
-    in >> data->description;
-    in >> data->vlan;
-    in >> data->bridgedomain;
+    in >> data.interfaz;
+    in >> data.serviceinstance;
+    in >> data.description;
+    in >> data.vlan;
+    in >> data.bridgedomain;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SInterfaceInfo *> &lstDest, QList<SInterfaceInfo *> &lstOrigin )
+void updateInfoList(QList<SInterfaceInfo> &lstDest, QList<SInterfaceInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -130,33 +127,33 @@ void updateInfoList(QList<SInterfaceInfo *> &lstDest, QList<SInterfaceInfo *> &l
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SInterfaceInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SInterfaceInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SInterfaceInfo *origin, lstOrigin )
+    for ( SInterfaceInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SInterfaceInfo *dest, lstDest )
+        for ( SInterfaceInfo &dest : lstDest )
         {
-            if ( origin->interfaz == dest->interfaz )
+            if ( origin.interfaz == dest.interfaz )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->status = origin->status;
-                dest->description = origin->description;
-                dest->mac = origin->mac;
-                dest->ratein = origin->ratein;
-                dest->rateout = origin->rateout;
-                dest->bandwidth = origin->bandwidth;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.status = origin.status;
+                dest.description = origin.description;
+                dest.mac = origin.mac;
+                dest.ratein = origin.ratein;
+                dest.rateout = origin.rateout;
+                dest.bandwidth = origin.bandwidth;
                 encontrado=true;
                 break;
             }
@@ -167,7 +164,7 @@ void updateInfoList(QList<SInterfaceInfo *> &lstDest, QList<SInterfaceInfo *> &l
     }
 }
 
-void updateInfoList(QList<SInterfaceVlans *> &lstDest, QList<SInterfaceVlans *> &lstOrigin )
+void updateInfoList(QList<SInterfaceVlans> &lstDest, QList<SInterfaceVlans> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -176,28 +173,28 @@ void updateInfoList(QList<SInterfaceVlans *> &lstDest, QList<SInterfaceVlans *> 
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SInterfaceVlans *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SInterfaceVlans &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SInterfaceVlans *origin, lstOrigin )
+    for ( SInterfaceVlans &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SInterfaceVlans *dest, lstDest )
+        for ( SInterfaceVlans &dest : lstDest )
         {
-            if ( origin->interfaz == dest->interfaz )
+            if ( origin.interfaz == dest.interfaz )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->vlans = origin->vlans;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.vlans = origin.vlans;
                 encontrado=true;
                 break;
             }
@@ -208,7 +205,7 @@ void updateInfoList(QList<SInterfaceVlans *> &lstDest, QList<SInterfaceVlans *> 
     }
 }
 
-void updateInfoList(QList<SInterfaceIOSServiceInstanceInfo*> &lstDest, QList<SInterfaceIOSServiceInstanceInfo*> &lstOrigin )
+void updateInfoList(QList<SInterfaceIOSServiceInstanceInfo> &lstDest, QList<SInterfaceIOSServiceInstanceInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -217,31 +214,31 @@ void updateInfoList(QList<SInterfaceIOSServiceInstanceInfo*> &lstDest, QList<SIn
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SInterfaceIOSServiceInstanceInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SInterfaceIOSServiceInstanceInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SInterfaceIOSServiceInstanceInfo *origin, lstOrigin )
+    for ( SInterfaceIOSServiceInstanceInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SInterfaceIOSServiceInstanceInfo *dest, lstDest )
+        for ( SInterfaceIOSServiceInstanceInfo &dest : lstDest )
         {
-            if ( origin->interfaz == dest->interfaz &&
-                 origin->serviceinstance == dest->serviceinstance )
+            if ( origin.interfaz == dest.interfaz &&
+                 origin.serviceinstance == dest.serviceinstance )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->description = origin->description;
-                dest->vlan = origin->vlan;
-                dest->bridgedomain = origin->bridgedomain;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.description = origin.description;
+                dest.vlan = origin.vlan;
+                dest.bridgedomain = origin.bridgedomain;
                 encontrado=true;
                 break;
             }
@@ -269,21 +266,10 @@ InterfaceInfo::InterfaceInfo(const InterfaceInfo &other):
     m_name = other.m_name;
     m_ip = other.m_ip;
     m_InterfacesInfo_onlyPhysicalInterfaces = other.m_InterfacesInfo_onlyPhysicalInterfaces;
-    foreach (SIpInfo *ii, other.m_lstInterfacesIPAddresses)
-    {
-        SIpInfo *ii2 = new SIpInfo(*ii);
-        m_lstInterfacesIPAddresses.append(ii2);
-    }
-    foreach (SInterfaceInfo *ii, other.m_lstInterfacesInfo)
-    {
-        SInterfaceInfo *ii2 = new SInterfaceInfo(*ii);
-        m_lstInterfacesInfo.append(ii2);
-    }
-    foreach (SInterfaceVlans *ii, other.m_lstInterfacesPermitedVlans)
-    {
-        SInterfaceVlans *ii2 = new SInterfaceVlans(*ii);
-        m_lstInterfacesPermitedVlans.append(ii2);
-    }
+    m_lstInterfacesIPAddresses = other.m_lstInterfacesIPAddresses;
+    m_lstInterfacesInfo = other.m_lstInterfacesInfo;
+    m_lstInterfacesPermitedVlans = other.m_lstInterfacesPermitedVlans;
+    m_lstInterfaceServiceInstance = other.m_lstInterfaceServiceInstance;
     m_continueShowVlan = other.m_continueShowVlan;
     m_continueShowVlanBridge = other.m_continueShowVlanBridge;
     m_interfaces = other.m_interfaces;
@@ -292,11 +278,7 @@ InterfaceInfo::InterfaceInfo(const InterfaceInfo &other):
 }
 
 InterfaceInfo::~InterfaceInfo()
-{
-    qDeleteAll(m_lstInterfacesIPAddresses);
-    qDeleteAll(m_lstInterfacesInfo);
-    qDeleteAll(m_lstInterfacesPermitedVlans);
-}
+{}
 
 void InterfaceInfo::getInterfacesInfo()
 {
@@ -421,14 +403,12 @@ void InterfaceInfo::on_term_receiveText_Info()
         return;
 
     QStringList lines = txt.split("\n");
-    SInterfaceInfo *id=nullptr;
+    SInterfaceInfo *nuevo=nullptr;
     QString interline,interstatus;
     QRegExp expInterface;
-    foreach (QString line, lines)
+    for (QString line : lines)
     {
         line = line.simplified();
-
-        qDebug() << m_queriesParent->ip() << "line II line" << line;
 
         if ( m_brand == "Cisco" )
         {
@@ -439,24 +419,24 @@ void InterfaceInfo::on_term_receiveText_Info()
 
 //                qDebug() << m_queriesParent->ip() << "interfaz encontrada" << interface;
 
-                id = new SInterfaceInfo;
-                id->queryParent = m_queriesParent;
-                id->interfaz = interface;
-                id->datetime = QDateTime::currentDateTime();
-                id->operativo = true;
+                SInterfaceInfo id;
+                id.interfaz = interface;
+                id.datetime = QDateTime::currentDateTime();
+                id.operativo = true;
 
-                interstatus = id->status = expInterface.cap(2);
-                interline = id->status = expInterface.cap(3);
+                interstatus = id.status = expInterface.cap(2);
+                interline = id.status = expInterface.cap(3);
                 if ( interstatus == "administratively down" )
-                    id->status = interstatus;
+                    id.status = interstatus;
                 else
                 {
                     if ( interstatus == "up" && interline == "up" )
-                        id->status = "up";
+                        id.status = "up";
                     else
-                        id->status = "down";
+                        id.status = "down";
                 }
                 m_lstInterfacesInfo.append(id);
+                nuevo = &m_lstInterfacesInfo.last();
 
                 continue;
             }
@@ -465,26 +445,26 @@ void InterfaceInfo::on_term_receiveText_Info()
             {
                 QString interface = estandarizarInterfaz(expInterface.cap(1));
 
-                id = new SInterfaceInfo;
-                id->queryParent = m_queriesParent;
-                id->interfaz = interface;
-                id->status = expInterface.cap(2);
-                id->datetime = QDateTime::currentDateTime();
-                id->operativo = true;
+                SInterfaceInfo id;
+                id.interfaz = interface;
+                id.status = expInterface.cap(2);
+                id.datetime = QDateTime::currentDateTime();
+                id.operativo = true;
                 m_lstInterfacesInfo.append(id);
+                nuevo = &m_lstInterfacesInfo.last();
 
                 continue;
             }
 
-            if ( !id )
+            if ( !nuevo )
                 continue;
 
             //MTU, BW
             exp.setPattern("MTU (\\d+) bytes, BW (\\d+) Kbit");
             if ( line.contains(exp) )
             {
-                id->mtu = exp.cap(1);
-                id->bandwidth = exp.cap(2).append("000"); //kilo2bit
+                nuevo->mtu = exp.cap(1);
+                nuevo->bandwidth = exp.cap(2).append("000"); //kilo2bit
                 continue;
             }
 
@@ -492,11 +472,11 @@ void InterfaceInfo::on_term_receiveText_Info()
             exp.setPattern("(.+duplex), (\\S+),");
             if ( line.contains(exp) )
             {
-                id->duplex = exp.cap(1);
-                id->speed = exp.cap(2);
+                nuevo->duplex = exp.cap(1);
+                nuevo->speed = exp.cap(2);
                 exp.setPattern("media type is (.+)$");
                 if ( line.contains(exp) )
-                    id->mediaType = exp.cap(1);
+                    nuevo->mediaType = exp.cap(1);
                 continue;
             }
 
@@ -504,7 +484,7 @@ void InterfaceInfo::on_term_receiveText_Info()
             exp.setPattern("Hardware.+address is ((\\w|\\d|\\.)+)( |$)");
             if ( line.contains(exp) )
             {
-                id->mac = exp.cap(1);
+                nuevo->mac = exp.cap(1);
                 continue;
             }
 
@@ -512,7 +492,7 @@ void InterfaceInfo::on_term_receiveText_Info()
             exp.setPattern("Description: (.+)$");
             if ( line.contains(exp) )
             {
-                id->description = exp.cap(1).simplified().replace("\"","").replace("'","");
+                nuevo->description = exp.cap(1).simplified().replace("\"","").replace("'","");
                 continue;
             }
 
@@ -520,13 +500,13 @@ void InterfaceInfo::on_term_receiveText_Info()
             exp.setPattern("input rate (\\d+) bits");
             if ( line.contains(exp) )
             {
-                id->ratein=exp.cap(1);
+                nuevo->ratein=exp.cap(1);
                 continue;
             }
             exp.setPattern("output rate (\\d+) bits");
             if ( line.contains(exp) )
             {
-                id->rateout=exp.cap(1);
+                nuevo->rateout=exp.cap(1);
                 continue;
             }
 
@@ -534,19 +514,19 @@ void InterfaceInfo::on_term_receiveText_Info()
             expInterface.setPattern("Total output drops: (\\d+)");
             if ( line.contains(expInterface) )
             {
-                id->dropsout = expInterface.cap(1);
+                nuevo->dropsout = expInterface.cap(1);
                 continue;
             }
             expInterface.setPattern("(\\d+) total output drops");
             if ( line.contains(expInterface) )
             {
-                id->dropsout = expInterface.cap(1);
+                nuevo->dropsout = expInterface.cap(1);
                 continue;
             }
             expInterface.setPattern("(\\d+) total input drops");
             if ( line.contains(expInterface) )
             {
-                id->dropsin = expInterface.cap(1);
+                nuevo->dropsin = expInterface.cap(1);
                 continue;
             }
 
@@ -554,9 +534,9 @@ void InterfaceInfo::on_term_receiveText_Info()
             expInterface.setPattern("(\\d+) input errors,.+(\\d+) CRC,.+(\\d+) overrun");
             if ( line.contains(expInterface) )
             {
-                id->errorsin = expInterface.cap(1);
-                id->CRC = expInterface.cap(2);
-                id->overrun = expInterface.cap(3);
+                nuevo->errorsin = expInterface.cap(1);
+                nuevo->CRC = expInterface.cap(2);
+                nuevo->overrun = expInterface.cap(3);
                 continue;
             }
 
@@ -564,13 +544,13 @@ void InterfaceInfo::on_term_receiveText_Info()
             expInterface.setPattern("(\\d+) output errors");
             if ( line.contains(expInterface) )
             {
-                id->errorsout = expInterface.cap(1);
+                nuevo->errorsout = expInterface.cap(1);
                 expInterface.setPattern("(\\d)+ collisions");
                 if ( line.contains(expInterface) )
-                    id->collisions = expInterface.cap(1);
+                    nuevo->collisions = expInterface.cap(1);
 
                 //lo ultimo que se busca
-                id=nullptr;
+                nuevo=nullptr;
 
                 continue;
             }
@@ -585,36 +565,36 @@ void InterfaceInfo::on_term_receiveText_Info()
                 {
                     interline = expInterface.cap(1).simplified().toLower();
                     if ( interstatus == "administratively down" )
-                        id->status = interstatus;
+                        nuevo->status = interstatus;
                     else
                     {
                         if ( interstatus == "up" && interline == "up" )
-                            id->status = "up";
+                            nuevo->status = "up";
                         else
-                            id->status = "down";
+                            nuevo->status = "down";
                     }
                 }
                 else
                 {
-                    id = new SInterfaceInfo;
-                    id->queryParent = m_queriesParent;
-                    id->interfaz = interface;
-                    id->datetime = QDateTime::currentDateTime();
-                    id->operativo = true;
+                    SInterfaceInfo id;
+                    id.interfaz = interface;
+                    id.datetime = QDateTime::currentDateTime();
+                    id.operativo = true;
                     interstatus = expInterface.cap(2).toLower();
                     m_lstInterfacesInfo.append(id);
+                    nuevo = &id;
                 }
                 continue;
             }
 
-            if ( !id )
+            if ( !nuevo )
                 continue;
 
             //Descripcion
             exp.setPattern("^Description:(.+)$");
             if ( line.contains(exp) )
             {
-                id->description = exp.cap(1).simplified().replace("\"","").replace("'","");
+                nuevo->description = exp.cap(1).simplified().replace("\"","").replace("'","");
                 continue;
             }
         }
@@ -667,7 +647,7 @@ void InterfaceInfo::on_term_receiveText_InfoTransceiver()
 
     QStringList lines = txt.split("\n");
     QString rx;
-    foreach (QString line, lines)
+    for (QString line : lines)
     {
         line = line.simplified();        
 
@@ -691,11 +671,11 @@ void InterfaceInfo::on_term_receiveText_InfoTransceiver()
         }       
     }
 
-    foreach (SInterfaceInfo* ii, m_lstInterfacesInfo)
+    for (SInterfaceInfo& ii : m_lstInterfacesInfo)
     {
-        if ( ii->interfaz == m_interfaceCurrent )
+        if ( ii.interfaz == m_interfaceCurrent )
         {
-            ii->opticalRx = rx;
+            ii.opticalRx = rx;
             break;
         }
     }
@@ -713,19 +693,18 @@ void InterfaceInfo::on_term_receiveText_IpAddresses()
 
     exp.setPattern("^(.+) +(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|unassigned).+");
     exp.setMinimal(false);
-    foreach (QString line, lines)
+    for (QString line : lines)
     {
         line = line.simplified();
 
         if ( !line.contains(exp) )
             continue;
 
-        SIpInfo *m = new SIpInfo;
-        m->queryParent = m_queriesParent;
-        m->interfaz = estandarizarInterfaz( exp.cap( 1 ) );
-        m->ip = exp.cap(2);
-        m->datetime = QDateTime::currentDateTime();
-        m->operativo = true;
+        SIpInfo m;
+        m.interfaz = estandarizarInterfaz( exp.cap( 1 ) );
+        m.ip = exp.cap(2);
+        m.datetime = QDateTime::currentDateTime();
+        m.operativo = true;
         m_lstInterfacesIPAddresses.append(m);
     }
     finished();
@@ -740,10 +719,10 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
     QStringList lines = txt.split("\n");
 
     bool a = false;
-    SInterfaceVlans *iv = nullptr;
+    SInterfaceVlans *nuevo = nullptr;
     QString temp;
 
-    foreach (QString line, lines)
+    for (QString line : lines)
     {
         line = line.simplified();
 
@@ -767,17 +746,17 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
             QString inter = estandarizarInterfaz( a.at(0) );
             QString vlan = a.at(1);
 
-            if ( !iv || inter != temp )
+            if ( !nuevo || inter != temp )
             {
-                iv = new SInterfaceVlans;
-                iv->queryParent = m_queriesParent;
-                iv->interfaz = inter;
-                iv->datetime = QDateTime::currentDateTime();
-                iv->operativo = true;
+                SInterfaceVlans iv;
+                iv.interfaz = inter;
+                iv.datetime = QDateTime::currentDateTime();
+                iv.operativo = true;
                 m_lstInterfacesPermitedVlans.append( iv );
+                nuevo = &iv;
                 temp = inter;
             }
-            iv->vlans.append( vlan );
+            nuevo->vlans.append( vlan );
         }
         else
         {
@@ -799,10 +778,11 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
             {
                 if ( line.contains(" ") )
                 {
-                    if ( iv )
+                    if ( nuevo )
                     {
-                        iv->vlans = numberRangeToLST( temp );
-                        m_lstInterfacesPermitedVlans.append( iv );
+                        nuevo->vlans = numberRangeToLST( temp );
+                        m_lstInterfacesPermitedVlans.append( *nuevo );
+                        delete nuevo;
                     }
 
                     if ( line.contains("Vlans allowed and active") )
@@ -812,11 +792,10 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
                     }
 
                     QStringList a = line.split(" ",QString::SkipEmptyParts);
-                    iv = new SInterfaceVlans;
-                    iv->queryParent = m_queriesParent;
-                    iv->interfaz =  estandarizarInterfaz( a.at(0) );
-                    iv->datetime = QDateTime::currentDateTime();
-                    iv->operativo = true;
+                    nuevo = new SInterfaceVlans;
+                    nuevo->interfaz =  estandarizarInterfaz( a.at(0) );
+                    nuevo->datetime = QDateTime::currentDateTime();
+                    nuevo->operativo = true;
                     temp = a.at(1);
                     continue;
                 }
@@ -880,12 +859,11 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunkHuawei()
     }
     for ( QString interfaz : map.uniqueKeys() )
     {
-        SInterfaceVlans *iv = new SInterfaceVlans;
-        iv->queryParent = m_queriesParent;
-        iv->interfaz = interfaz;
-        iv->vlans = map.values( interfaz );
-        iv->datetime = QDateTime::currentDateTime();
-        iv->operativo=true;
+        SInterfaceVlans iv;
+        iv.interfaz = interfaz;
+        iv.vlans = map.values( interfaz );
+        iv.datetime = QDateTime::currentDateTime();
+        iv.operativo=true;
         m_lstInterfacesPermitedVlans.append( iv );
     }
 
@@ -912,12 +890,12 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansBridge()
             QString interfaz = estandarizarInterfaz( exp.cap(1) );
             if ( lastInterface != interfaz )
             {
-                iv = new SInterfaceVlans;
-                iv->queryParent = m_queriesParent;
-                iv->interfaz = interfaz;
-                iv->datetime = QDateTime::currentDateTime();
-                iv->operativo = true;
-                m_lstInterfacesPermitedVlans.append( iv );
+                SInterfaceVlans i;
+                i.interfaz = interfaz;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                m_lstInterfacesPermitedVlans.append( i );
+                iv = &i;
                 lastInterface = interfaz;
 
                 continue;
@@ -971,15 +949,14 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansAccess()
         {
             for ( int c=3; c<data.size(); c++ )
             {
-                SInterfaceVlans *iv = new SInterfaceVlans;
-                iv->queryParent = m_queriesParent;
+                SInterfaceVlans iv;
                 QString interfaz = data.at(c);
                 interfaz.replace(",","");
 
-                iv->interfaz = estandarizarInterfaz( interfaz );
-                iv->vlans = QStringList() << data.at(0);
-                iv->datetime = QDateTime::currentDateTime();
-                iv->operativo = true;
+                iv.interfaz = estandarizarInterfaz( interfaz );
+                iv.vlans = QStringList() << data.at(0);
+                iv.datetime = QDateTime::currentDateTime();
+                iv.operativo = true;
 
                 m_lstInterfacesPermitedVlans.append( iv );
             }
@@ -997,7 +974,7 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
 
     QStringList lines = txt.split("\n");    
 
-    foreach (QString line, lines)
+    for (QString line : lines)
     {
         if ( m_brand == "Cisco" )
         {
@@ -1006,29 +983,28 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
                     !line.contains(QRegExp(" (up|down|admin) +(up|down) ")))
                 continue;                                    
 
-            SInterfaceInfo *id = new SInterfaceInfo;
-            id->queryParent = m_queriesParent;
+            SInterfaceInfo id;
 
             QStringList data = line.split("  ",QString::SkipEmptyParts);
 
-            id->interfaz = estandarizarInterfaz( data.at(0).simplified() );
-            id->datetime = QDateTime::currentDateTime();
-            id->operativo = true;
+            id.interfaz = estandarizarInterfaz( data.at(0).simplified() );
+            id.datetime = QDateTime::currentDateTime();
+            id.operativo = true;
             QString status = data.at(1).simplified();
             QString protocol = data.at(2).simplified();
             if ( status == "up" && protocol == "up" )
-                id->status = "up";
+                id.status = "up";
             else if ( status.contains("admin") )
-                id->status = "admin down";
+                id.status = "admin down";
             else
-                id->status = "down";
+                id.status = "down";
             if ( data.size() >= 4 )
             {
                 QStringList desc;
                 for ( int c=3; c<data.size(); c++ )
                     desc.append(data.at(c).simplified());
 
-                id->description = desc.join(" ").replace("\"","").replace("'","");
+                id.description = desc.join(" ").replace("\"","").replace("'","");
             }
             m_lstInterfacesInfo.append(id);
         }
@@ -1042,12 +1018,11 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
             if ( data.size() < 2 )
                 continue;
 
-            SInterfaceInfo *id = new SInterfaceInfo;
-            id->queryParent = m_queriesParent;
-            id->interfaz = estandarizarInterfaz( data.at(0).simplified() );
-            id->datetime = QDateTime::currentDateTime();
-            id->operativo = true;
-            id->description = data.at(1).simplified().replace("\"","").replace("'","");
+            SInterfaceInfo id;
+            id.interfaz = estandarizarInterfaz( data.at(0).simplified() );
+            id.datetime = QDateTime::currentDateTime();
+            id.operativo = true;
+            id.description = data.at(1).simplified().replace("\"","").replace("'","");
             m_lstInterfacesInfo.append(id);
         }        
     }    
@@ -1071,12 +1046,12 @@ void InterfaceInfo::on_term_receiveText_ServiceInstances()
         exp.setPattern("Service Instance ID: (.+)$"); //Service Instance ID: 1194
         if ( line.contains(exp) )
         {
-            sii = new SInterfaceIOSServiceInstanceInfo;
-            sii->queryParent = m_queriesParent;
-            sii->serviceinstance = exp.cap(1);
-            sii->datetime = QDateTime::currentDateTime();
-            sii->operativo = true;
-            m_lstInterfaceServiceInstance.append( sii );
+            SInterfaceIOSServiceInstanceInfo i;
+            i.serviceinstance = exp.cap(1);
+            i.datetime = QDateTime::currentDateTime();
+            i.operativo = true;
+            m_lstInterfaceServiceInstance.append(i);
+            sii = &i;
             continue;
         }
 
@@ -1116,32 +1091,48 @@ void InterfaceInfo::on_term_receiveText_ServiceInstances()
 
 QStringList InterfaceInfo::interfacePermitedVlans(QString interface)
 {
-    foreach (SInterfaceVlans *i, m_lstInterfacesPermitedVlans)
+    for (SInterfaceVlans &i : m_lstInterfacesPermitedVlans)
     {
-        if ( interface == i->interfaz )
-            return i->vlans;
+        if ( interface == i.interfaz )
+            return i.vlans;
     }
     return QStringList();
 }
 
-SInterfaceInfo *InterfaceInfo::interfaceInfo(QString interfaz)
+SInterfaceInfo* InterfaceInfo::interfaceInfo(QString interfaz)
 {
-    foreach (SInterfaceInfo *i, m_lstInterfacesInfo)
+    for (SInterfaceInfo &i : m_lstInterfacesInfo)
     {
-        if ( interfaz == i->interfaz )
-            return i;
+        if ( interfaz == i.interfaz )
+            return &i;
     }
     return nullptr;
 }
 
 QString InterfaceInfo::ipFromInterfaz(QString interfaz)
 {
-    foreach (SIpInfo *i, m_lstInterfacesIPAddresses)
+    for (SIpInfo &i : m_lstInterfacesIPAddresses)
     {
-        if ( interfaz == i->interfaz )
-            return i->ip;
+        if ( interfaz == i.interfaz )
+            return i.ip;
     }
     return "";
+}
+
+QDataStream& operator<<(QDataStream& out, const InterfaceInfo& ii)
+{
+    out << ii.m_lstInterfacesIPAddresses;
+    out << ii.m_lstInterfacesInfo;
+    out << ii.m_lstInterfacesPermitedVlans;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, InterfaceInfo& ii)
+{
+    in >> ii.m_lstInterfacesIPAddresses;
+    in >> ii.m_lstInterfacesInfo;
+    in >> ii.m_lstInterfacesPermitedVlans;
+    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const InterfaceInfo* ii)
@@ -1154,7 +1145,7 @@ QDataStream& operator<<(QDataStream& out, const InterfaceInfo* ii)
 
 QDataStream& operator>>(QDataStream& in, InterfaceInfo*& ii)
 {
-    ii = new InterfaceInfo(nullptr,nullptr);
+    ii = new InterfaceInfo;
     in >> ii->m_lstInterfacesIPAddresses;
     in >> ii->m_lstInterfacesInfo;
     in >> ii->m_lstInterfacesPermitedVlans;
@@ -1164,20 +1155,20 @@ QDataStream& operator>>(QDataStream& in, InterfaceInfo*& ii)
 QDebug operator<<(QDebug dbg, const InterfaceInfo &info)
 {
     dbg.nospace() << "InterfaceInfo:\n";
-    foreach (SIpInfo *i, info.m_lstInterfacesIPAddresses)
-        dbg.space() << i->interfaz << i->ip << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+    for (SIpInfo i : info.m_lstInterfacesIPAddresses)
+        dbg.space() << i.interfaz << i.ip << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
-    foreach (SInterfaceInfo *i, info.m_lstInterfacesInfo)
-        dbg.space() << i->interfaz << i->status << i->mac << i->description <<
-                       i->ratein << i->rateout << i->dropsin << i->dropsout << i->errorsin << i->errorsout <<
-                       i->CRC << i->overrun << i->collisions << i->bandwidth << i->mtu << i->duplex << i->speed <<
-                       i->opticalRx << i->mediaType << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+    for (SInterfaceInfo i: info.m_lstInterfacesInfo)
+        dbg.space() << i.interfaz << i.status << i.mac << i.description <<
+                       i.ratein << i.rateout << i.dropsin << i.dropsout << i.errorsin << i.errorsout <<
+                       i.CRC << i.overrun << i.collisions << i.bandwidth << i.mtu << i.duplex << i.speed <<
+                       i.opticalRx << i.mediaType << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
-    foreach (SInterfaceVlans *i, info.m_lstInterfacesPermitedVlans)
-        dbg.space() << i->interfaz << i->vlans << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+    for (SInterfaceVlans i: info.m_lstInterfacesPermitedVlans)
+        dbg.space() << i.interfaz << i.vlans << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
-    for ( SInterfaceIOSServiceInstanceInfo *i : info.m_lstInterfaceServiceInstance )
-        dbg.space() << i->serviceinstance << i->description << i->interfaz << i->vlan << i->bridgedomain;
+    for ( SInterfaceIOSServiceInstanceInfo i : info.m_lstInterfaceServiceInstance )
+        dbg.space() << i.serviceinstance << i.description << i.interfaz << i.vlan << i.bridgedomain;
 
     dbg.nospace() << "\n";
 

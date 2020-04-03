@@ -5,6 +5,9 @@ DESTDIR = $$APP_BUILD_TREE
 
 INCLUDEPATH += base
 
+CONFIG += c++11
+
+QT += dbus
 TARGET = qnetworkcliqueries
 TEMPLATE = lib
 

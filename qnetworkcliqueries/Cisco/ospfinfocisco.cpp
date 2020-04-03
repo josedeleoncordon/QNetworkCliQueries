@@ -41,16 +41,15 @@ void OSPFInfoCisco::on_term_receiveTextNeighbors()
         if ( !line.contains(exp) )
             continue;
 
-        SOSPFInfo *oii = new SOSPFInfo;
-        oii->queryParent = m_queriesParent;
-        oii->datetime = QDateTime::currentDateTime();
-        oii->operativo = true;
+        SOSPFInfo oii;
+        oii.datetime = QDateTime::currentDateTime();
+        oii.operativo = true;
         QStringList lstColumns = line.split(" ",QString::SkipEmptyParts);
 
-        oii->id = lstColumns.at(0).simplified();
-        oii->state = lstColumns.at(2).simplified();
-        oii->address = lstColumns.at( lstColumns.size()-2 ).simplified();
-        oii->interfaz = estandarizarInterfaz( lstColumns.last().simplified() );
+        oii.id = lstColumns.at(0).simplified();
+        oii.state = lstColumns.at(2).simplified();
+        oii.address = lstColumns.at( lstColumns.size()-2 ).simplified();
+        oii.interfaz = estandarizarInterfaz( lstColumns.last().simplified() );
 
         m_lstOSPFInfo.append(oii);
     }
@@ -83,7 +82,7 @@ void OSPFInfoCisco::on_term_receiveTextInterfaces()
     QString lastArea;
     QString lastPID;
 
-    foreach (QString line, lines)
+    for (QString line : lines)
     {
         exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
         if ( !line.contains(exp) )
@@ -97,22 +96,22 @@ void OSPFInfoCisco::on_term_receiveTextInterfaces()
         if ( interfaz.contains(QRegExp("BV\\d+")) )
             interfaz.replace("BV","BVI");
 
-        for ( SOSPFInfo *oii : m_lstOSPFInfo )
+        for ( SOSPFInfo &oii : m_lstOSPFInfo )
         {            
-            if ( oii->interfaz == estandarizarInterfaz( interfaz ) )
+            if ( oii.interfaz == estandarizarInterfaz( interfaz ) )
             {                
-                oii->process = lstColumns.at(1).simplified();
-                oii->cost = lstColumns.at(4).simplified();
-                oii->area = lstColumns.at(2).simplified();
+                oii.process = lstColumns.at(1).simplified();
+                oii.cost = lstColumns.at(4).simplified();
+                oii.area = lstColumns.at(2).simplified();
 
                 if ( lastArea.isEmpty() )
-                    lastArea = oii->area;
-                else if ( lastArea != oii->area )
+                    lastArea = oii.area;
+                else if ( lastArea != oii.area )
                     m_abr=true;
 
                 if ( lastPID.isEmpty() )
-                    lastPID = oii->process;
-                else if ( lastPID != oii->process )
+                    lastPID = oii.process;
+                else if ( lastPID != oii.process )
                     m_asbr=true;
             }
         }

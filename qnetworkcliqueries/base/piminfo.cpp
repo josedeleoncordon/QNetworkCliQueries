@@ -7,28 +7,27 @@ SPIMInfo::SPIMInfo(const SPIMInfo &other)
     nbrCount = other.nbrCount;
 }
 
-QDataStream& operator<<(QDataStream& out, const SPIMInfo* data)
+QDataStream& operator<<(QDataStream& out, const SPIMInfo& data)
 {
-    out << data->interfaz;
-    out << data->nbrCount;
+    out << data.interfaz;
+    out << data.nbrCount;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SPIMInfo*& data)
+QDataStream& operator>>(QDataStream& in, SPIMInfo& data)
 {
-    data = new SPIMInfo;
-    in >> data->interfaz;
-    in >> data->nbrCount;
+    in >> data.interfaz;
+    in >> data.nbrCount;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SPIMInfo *> &lstDest, QList<SPIMInfo *> &lstOrigin )
+void updateInfoList(QList<SPIMInfo> &lstDest, QList<SPIMInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -37,28 +36,28 @@ void updateInfoList(QList<SPIMInfo *> &lstDest, QList<SPIMInfo *> &lstOrigin )
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SPIMInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SPIMInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SPIMInfo *origin, lstOrigin )
+    for ( SPIMInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SPIMInfo *dest, lstDest )
+        for ( SPIMInfo &dest : lstDest )
         {
-            if ( origin->interfaz == dest->interfaz )
+            if ( origin.interfaz == dest.interfaz )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->nbrCount = origin->nbrCount;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.nbrCount = origin.nbrCount;
                 encontrado=true;
                 break;
             }
@@ -80,25 +79,14 @@ PIMInfo::PIMInfo(const PIMInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    foreach (SPIMInfo *ii, other.m_lstPIMNeighbors)
-    {
-        SPIMInfo *ii2 = new SPIMInfo(*ii);
-        m_lstPIMNeighbors.append(ii2);
-    }
-    foreach (SPIMInfo *ii, other.m_lstPimInterfaces)
-    {
-        SPIMInfo *ii2 = new SPIMInfo(*ii);
-        m_lstPimInterfaces.append(ii2);
-    }
+    m_lstPIMNeighbors = other.m_lstPIMNeighbors;
+    m_lstPimInterfaces = other.m_lstPimInterfaces;
     m_lstRouterPim = other.m_lstRouterPim;
     m_lstMulticastRouting = other.m_lstMulticastRouting;
 }
 
 PIMInfo::~PIMInfo()
-{
-    qDeleteAll(m_lstPIMNeighbors);
-    qDeleteAll(m_lstPimInterfaces);
-}
+{}
 
 //void PIMInfo::getPIMNeighbors()
 //{
@@ -159,12 +147,11 @@ void PIMInfo::on_term_receiveTextInterfaces()
         {
             QStringList data=line.split(" ",QString::SkipEmptyParts);
 
-            SPIMInfo *pi = new SPIMInfo;
-            pi->queryParent = m_queriesParent;
-            pi->interfaz = estandarizarInterfaz( data.at(1) );
-            pi->nbrCount = data.at(3);
-            pi->datetime = QDateTime::currentDateTime();
-            pi->operativo = true;
+            SPIMInfo pi;
+            pi.interfaz = estandarizarInterfaz( data.at(1) );
+            pi.nbrCount = data.at(3);
+            pi.datetime = QDateTime::currentDateTime();
+            pi.operativo = true;
             m_lstPimInterfaces.append(pi);
         }
     }
@@ -254,12 +241,12 @@ void PIMInfo::on_term_receiveTextMulticastRouting()
         }
     }
 
-    foreach (SPIMInfo *ii, m_lstPimInterfaces)
+    for (SPIMInfo &ii : m_lstPimInterfaces)
     {
         bool encontrado=false;
-        foreach (QString interfaz, m_lstRouterPim)
+        for (QString &interfaz : m_lstRouterPim)
         {
-            if ( ii->interfaz == interfaz )
+            if ( ii.interfaz == interfaz )
             {
                 m_lstPIMNeighbors.append( ii );
                 encontrado=true;
@@ -269,9 +256,9 @@ void PIMInfo::on_term_receiveTextMulticastRouting()
 
         if ( !encontrado )
         {
-            foreach (QString interfaz, m_lstMulticastRouting)
+            for (QString &interfaz : m_lstMulticastRouting)
             {
-                if ( ii->interfaz == interfaz )
+                if ( ii.interfaz == interfaz )
                 {
                     m_lstPIMNeighbors.append( ii );
                     break;
@@ -285,11 +272,11 @@ void PIMInfo::on_term_receiveTextMulticastRouting()
 
 bool PIMInfo::interfaceStatus(QString interfaz, QString& txtStatusOut)
 {
-    foreach (SPIMInfo *p, m_lstPIMNeighbors)
+    for (SPIMInfo &p : m_lstPIMNeighbors)
     {
-        if ( p->interfaz == interfaz)
+        if ( p.interfaz == interfaz)
         {
-            if ( p->nbrCount == "0" )
+            if ( p.nbrCount == "0" )
             {
                 txtStatusOut = "down";
                 return false;
@@ -307,6 +294,18 @@ bool PIMInfo::interfaceStatus(QString interfaz, QString& txtStatusOut)
     return true;
 }
 
+QDataStream& operator<<(QDataStream& out, const PIMInfo& info)
+{
+    out << info.m_lstPIMNeighbors;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, PIMInfo& info)
+{
+    in >> info.m_lstPIMNeighbors;
+    return in;
+}
+
 QDataStream& operator<<(QDataStream& out, const PIMInfo* info)
 {
     out << info->m_lstPIMNeighbors;
@@ -315,7 +314,7 @@ QDataStream& operator<<(QDataStream& out, const PIMInfo* info)
 
 QDataStream& operator>>(QDataStream& in, PIMInfo*& info)
 {
-    info =new PIMInfo(nullptr,nullptr);
+    info = new PIMInfo;
     in >> info->m_lstPIMNeighbors;
     return in;
 }
@@ -323,8 +322,8 @@ QDataStream& operator>>(QDataStream& in, PIMInfo*& info)
 QDebug operator<<(QDebug dbg, const PIMInfo &info)
 {
     dbg.nospace() << "PIMInfo:\n";
-    foreach (SPIMInfo *i, info.m_lstPIMNeighbors)
-        dbg.space() << i->interfaz << i->nbrCount  << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+    for (SPIMInfo i : info.m_lstPIMNeighbors)
+        dbg.space() << i.interfaz << i.nbrCount  << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     dbg.nospace() << "\n";
 

@@ -12,38 +12,37 @@ SOSPFInfo::SOSPFInfo(const SOSPFInfo &other)
     area = other.area;
 }
 
-QDataStream& operator<<(QDataStream& out, const SOSPFInfo* data)
+QDataStream& operator<<(QDataStream& out, const SOSPFInfo& data)
 {
-    out << data->address;
-    out << data->cost;
-    out << data->id;
-    out << data->interfaz;
-    out << data->process;
-    out << data->state;
-    out << data->area;
+    out << data.address;
+    out << data.cost;
+    out << data.id;
+    out << data.interfaz;
+    out << data.process;
+    out << data.state;
+    out << data.area;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SOSPFInfo*& data)
+QDataStream& operator>>(QDataStream& in, SOSPFInfo& data)
 {
-    data = new SOSPFInfo;
-    in >> data->address;
-    in >> data->cost;
-    in >> data->id;
-    in >> data->interfaz;
-    in >> data->process;
-    in >> data->state;
-    in >> data->area;
+    in >> data.address;
+    in >> data.cost;
+    in >> data.id;
+    in >> data.interfaz;
+    in >> data.process;
+    in >> data.state;
+    in >> data.area;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SOSPFInfo *> &lstDest, QList<SOSPFInfo *> &lstOrigin )
+void updateInfoList(QList<SOSPFInfo> &lstDest, QList<SOSPFInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -52,33 +51,33 @@ void updateInfoList(QList<SOSPFInfo *> &lstDest, QList<SOSPFInfo *> &lstOrigin )
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SOSPFInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SOSPFInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SOSPFInfo *origin, lstOrigin )
+    for ( SOSPFInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SOSPFInfo *dest, lstDest )
+        for ( SOSPFInfo &dest : lstDest )
         {
-            if ( origin->interfaz == dest->interfaz )
+            if ( origin.interfaz == dest.interfaz )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->cost = origin->cost;
-                dest->id = origin->id;
-                dest->state = origin->state;
-                dest->address = origin->address;
-                dest->process = origin->process;
-                dest->area = origin->area;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.cost = origin.cost;
+                dest.id = origin.id;
+                dest.state = origin.state;
+                dest.address = origin.address;
+                dest.process = origin.process;
+                dest.area = origin.area;
                 encontrado=true;
                 break;
             }
@@ -108,17 +107,11 @@ OSPFInfo::OSPFInfo(const OSPFInfo &other):
     m_ip = other.m_ip;
     m_abr = other.m_abr;
     m_asbr = other.m_asbr;
-    foreach (SOSPFInfo *ii, other.m_lstOSPFInfo)
-    {
-        SOSPFInfo *ii2 = new SOSPFInfo(*ii);
-        m_lstOSPFInfo.append(ii2);
-    }    
+    m_lstOSPFInfo = other.m_lstOSPFInfo;
 }
 
 OSPFInfo::~OSPFInfo()
-{
-    qDeleteAll(m_lstOSPFInfo);
-}
+{}
 
 void OSPFInfo::getOSPFInfo()
 {
@@ -127,22 +120,38 @@ void OSPFInfo::getOSPFInfo()
 
 bool OSPFInfo::interfaceHasNeighbor(QString interface)
 {
-    foreach (SOSPFInfo *o, m_lstOSPFInfo)
+    for (SOSPFInfo &o : m_lstOSPFInfo)
     {
-        if ( o->interfaz == interface )
+        if ( o.interfaz == interface )
             return true;
     }
     return false;
 }
 
-SOSPFInfo* OSPFInfo::interfaceOspfInfo(QString interface)
+SOSPFInfo *OSPFInfo::interfaceOspfInfo(QString interface)
 {
-    foreach (SOSPFInfo *o, m_lstOSPFInfo)
+    for (SOSPFInfo &o : m_lstOSPFInfo)
     {
-        if ( o->interfaz == interface )
-            return o;
+        if ( o.interfaz == interface )
+            return &o;
     }
     return nullptr;
+}
+
+QDataStream& operator<<(QDataStream& out, const OSPFInfo& info)
+{
+    out << info.m_lstOSPFInfo;
+    out << info.m_abr;
+    out << info.m_asbr;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, OSPFInfo& info)
+{
+    in >> info.m_lstOSPFInfo;
+    in >> info.m_abr;
+    in >> info.m_asbr;
+    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const OSPFInfo* info)
@@ -155,7 +164,7 @@ QDataStream& operator<<(QDataStream& out, const OSPFInfo* info)
 
 QDataStream& operator>>(QDataStream& in, OSPFInfo*& info)
 {
-    info =new OSPFInfo(nullptr,nullptr);
+    info = new OSPFInfo;
     in >> info->m_lstOSPFInfo;
     in >> info->m_abr;
     in >> info->m_asbr;
@@ -165,9 +174,9 @@ QDataStream& operator>>(QDataStream& in, OSPFInfo*& info)
 QDebug operator<<(QDebug dbg, const OSPFInfo &info)
 {
     dbg.space() << "OSPFInfo" << "ABR:" << info.m_abr << "ASBR:" << info.m_asbr << ":\n";
-    foreach (SOSPFInfo *i, info.m_lstOSPFInfo)
-        dbg.space() << "Id:" << i->id << i->interfaz << i->process << i->area << i->state << "Ad:" << i->address
-                    << i->cost << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+    for (SOSPFInfo i : info.m_lstOSPFInfo)
+        dbg.space() << "Id:" << i.id << i.interfaz << i.process << i.area << i.state << "Ad:" << i.address
+                    << i.cost << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     dbg.nospace() << "\n";
 

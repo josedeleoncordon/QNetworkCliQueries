@@ -17,11 +17,7 @@ MacInfoRAD::MacInfoRAD(const MacInfoRAD &other):
     m_ip = other.m_ip;
     m_mac = other.m_mac;
     m_vlan = other.m_vlan;
-    foreach (SMacInfo *ii, other.m_lstMacs)
-    {
-        SMacInfo *ii2 = new SMacInfo(*ii);
-        m_lstMacs.append(ii2);
-    }
+    m_lstMacs = other.m_lstMacs;
 }
 
 MacInfoRAD::~MacInfoRAD()
@@ -86,13 +82,12 @@ void MacInfoRAD::on_term_receiveTextETX1()
             mac.insert(4,".");
             mac.insert(9,".");
 
-            SMacInfo *m = new SMacInfo;
-            m->queryParent = m_queriesParent;
-            m->datetime = QDateTime::currentDateTime();
-            m->operativo = true;
-            m->mac = mac.toLower();
-            m->interfaz = expmac.cap(3);
-            m->vlan = expmac.cap(1);
+            SMacInfo m;
+            m.datetime = QDateTime::currentDateTime();
+            m.operativo = true;
+            m.mac = mac.toLower();
+            m.interfaz = expmac.cap(3);
+            m.vlan = expmac.cap(1);
 
             //verificando si la mac esta en la vlans permitidas, si se configuro
             QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip);
@@ -100,10 +95,8 @@ void MacInfoRAD::on_term_receiveTextETX1()
                 m_lstMacs.append(m);
             else
             {
-                if ( vlanfilter.contains( m->vlan ) )
+                if ( vlanfilter.contains( m.vlan ) )
                     m_lstMacs.append(m);
-                else
-                    delete m;
             }
         }
     }
@@ -222,10 +215,10 @@ void MacInfoRAD::on_term_receiveTextETX1002001300()
             {
                 //buscando si ya existe la mac
                 bool encontrado=false;
-                foreach (SMacInfo *m, m_lstMacs)
+                for (SMacInfo &m : m_lstMacs)
                 {
-                    if ( m->mac == mac &&
-                         m->vlan == vlan )
+                    if ( m.mac == mac &&
+                         m.vlan == vlan )
                     {
                         encontrado=true;
                         break;
@@ -235,12 +228,11 @@ void MacInfoRAD::on_term_receiveTextETX1002001300()
                 if ( !encontrado )
                 {
                     //agregamos esta mac ya que es nueva
-                    SMacInfo *m = new SMacInfo;
-                    m_queriesParent = m_queriesParent;
-                    m->datetime = QDateTime::currentDateTime();
-                    m->mac = mac;
-                    m->interfaz = iface;
-                    m->vlan = vlan;
+                    SMacInfo m;
+                    m.datetime = QDateTime::currentDateTime();
+                    m.mac = mac;
+                    m.interfaz = iface;
+                    m.vlan = vlan;
                     m_lstMacs.append( m );
                     etxAgregadaMAC=true;
                 }

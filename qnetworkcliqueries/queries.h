@@ -76,13 +76,13 @@ public:
     InterfaceInfo *interfacesPermitedVlansQuery;
     InterfaceInfo *interfacesDescriptionsQuery;
     InterfaceInfo *interfacesIpAddressesQuery;
-    OSPFInfo* ospfQuery;
+    OSPFInfo *ospfQuery;
     MplsTEtunnelsInfo *mplsTEtunnelsQuery;
     MplsL2TransportInfo *mplsL2TransportQuery;
-    MplsLdpInfo* mplsLdpDiscoveryQuery;
-    MplsLdpInfo* mplsLdpNeighborsQuery;
-    MplsLdpInfo* mplsLdpInterfacesQuery;
-    PIMInfo* pimInteracesQuery;
+    MplsLdpInfo *mplsLdpDiscoveryQuery;
+    MplsLdpInfo *mplsLdpNeighborsQuery;
+    MplsLdpInfo *mplsLdpInterfacesQuery;
+    PIMInfo *pimInteracesQuery;
     MacInfo *macsQuery;
     PortChannelsInfo *portChannelInfoQuery;
     VrfInfo *vrfsFromVlansQuery;
@@ -99,43 +99,43 @@ public:
     bool isConnected() { return m_connected; }
     bool successful() { return !m_error; }
     bool isReachable() { return m_ipreachable; }
-    QString id() { return m_id; }
-    QString hostName() { return m_name; }
-    QString country() { return m_country; }
-    QString platform() { return m_platform; }
-    QString location() { return m_location; }
-    QString brand() { return m_brand; }
-    QString gw() { return m_gw; }
+    QString& id() { return m_id; }
+    QString& hostName() { return m_name; }
+    QString& country() { return m_country; }
+    QString& platform() { return m_platform; }
+    QString& location() { return m_location; }
+    QString& brand() { return m_brand; }
+    QString& gw() { return m_gw; }
     void setConnectionProtocol(QRemoteShell::ConnectionProtocol cp) { m_connectionprotol = cp; }   //
-    QDateTime dateTime() { return m_datetime; }
-    bool operativo() { return m_operativo; }
-    QString ip() { return m_ip; }
-    QString ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; } //
+    QDateTime& dateTime() { return m_datetime; }
+    bool& operativo() { return m_operativo; }
+    QString& ip() { return m_ip; }
+    QString& ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; } //
 
-    QList<SEquipmentNeighborsInfo*>& equipmentNeighborsInfo() { return equipmentNeighborsInfoQuery->equipmentNeighborsInfo(); }
-    QList<SInterfaceInfo*>& interfacesInfo() { return interfacesInfoQuery->interfacesInfo(); }
-    QList<SInterfaceVlans*>& interfacesPermitedVlansInfo() { return interfacesPermitedVlansQuery->interfacesPermitedVlansInfo(); }
-    QList<SInterfaceInfo*>& interfacesDescriptionsInfo() { return interfacesDescriptionsQuery->interfacesInfo(); }
-    QList<SIpInfo*>& interfacesIpAddressesInfo() { return interfacesIpAddressesQuery->interfacesIpAddressesInfo(); }
-    QList<SOSPFInfo*>& ospfInfo() { return ospfQuery->ospfInfo(); }
+    QList<SEquipmentNeighborsInfo>& equipmentNeighborsInfo() { return equipmentNeighborsInfoQuery->equipmentNeighborsInfo(); }
+    QList<SInterfaceInfo>& interfacesInfo() { return interfacesInfoQuery->interfacesInfo(); }
+    QList<SInterfaceVlans>& interfacesPermitedVlansInfo() { return interfacesPermitedVlansQuery->interfacesPermitedVlansInfo(); }
+    QList<SInterfaceInfo>& interfacesDescriptionsInfo() { return interfacesDescriptionsQuery->interfacesInfo(); }
+    QList<SIpInfo>& interfacesIpAddressesInfo() { return interfacesIpAddressesQuery->interfacesIpAddressesInfo(); }
+    QList<SOSPFInfo>& ospfInfo() { return ospfQuery->ospfInfo(); }
     QString& mplsLdpLocalIDInfo() { return mplsLdpDiscoveryQuery->ldpLocalIDInfo(); }
-    QList<SMplsTETunnelInfo*>& mplsTETunnelsInfo() { return mplsTEtunnelsQuery->mplsTEtunnelsInfo(); }
-    QList<SMplsL2XconnectInfo*>& mplsL2TransportXconnectsInfo() { return mplsL2TransportQuery->mplsL2XconnectsInfo(); }
-    QList<SMplsL2VFIInfo*>& mplsL2TransportVFIsInfo() { return mplsL2TransportQuery->mplsL2VFIsInfo(); }
-    QList<SMplsLdpInfo*>& mplsLdpDiscoveryInfo() { return mplsLdpDiscoveryQuery->mplsLdpDiscoveryInfo(); }
-    QList<SMplsLdpInfo*>& mplsLdpNeighborsInfo() { return mplsLdpNeighborsQuery->mplsLdpNeighborsInfo(); }
-    QList<SMplsLdpInfo*>& mplsLdpInterfacesInfo() { return mplsLdpInterfacesQuery->mplsLdpInterfacesInfo(); }
+    QList<SMplsTETunnelInfo>& mplsTETunnelsInfo() { return mplsTEtunnelsQuery->mplsTEtunnelsInfo(); }
+    QList<SMplsL2XconnectInfo>& mplsL2TransportXconnectsInfo() { return mplsL2TransportQuery->mplsL2XconnectsInfo(); }
+    QList<SMplsL2VFIInfo>& mplsL2TransportVFIsInfo() { return mplsL2TransportQuery->mplsL2VFIsInfo(); }
+    QList<SMplsLdpInfo>& mplsLdpDiscoveryInfo() { return mplsLdpDiscoveryQuery->mplsLdpDiscoveryInfo(); }
+    QList<SMplsLdpInfo>& mplsLdpNeighborsInfo() { return mplsLdpNeighborsQuery->mplsLdpNeighborsInfo(); }
+    QList<SMplsLdpInfo>& mplsLdpInterfacesInfo() { return mplsLdpInterfacesQuery->mplsLdpInterfacesInfo(); }
 //    QList<SPIMInfo*>& pimNeighbors() { return pimNeighborsQuery->pimNeighbors(); }
-    QList<SPIMInfo*>& pimInterfacesInfo() { return pimInteracesQuery->pimIntefacesInfo(); }
-    QList<SMacInfo*>& macInfo() { return macsQuery->macInfo(); }
-    QList<SPortChannel*>& portChannelInfo() { return portChannelInfoQuery->portChannelInfo(); }
+    QList<SPIMInfo>& pimInterfacesInfo() { return pimInteracesQuery->pimIntefacesInfo(); }
+    QList<SMacInfo>& macInfo() { return macsQuery->macInfo(); }
+    QList<SPortChannel>& portChannelInfo() { return portChannelInfoQuery->portChannelInfo(); }
     QStringList& vrfsFromVlansInfo() { return vrfsFromVlansQuery->vrfsFromVlansInfo(); }
     QString& vrfFromRTInfo() { return vrfFromRTQuery->vrfFromRTInfo(); }
-    QList<SVrfInfo*>& vrfsInfo() { return vrfsQuery->vrfsInfo(); } //
-    QList<SIpInfo*>& arpsInfo() { return arpsQuery->arpInfo(); } //
+    QList<SVrfInfo>& vrfsInfo() { return vrfsQuery->vrfsInfo(); } //
+    QList<SIpInfo>& arpsInfo() { return arpsQuery->arpInfo(); } //
     QStringList& bgpNeighborsInfo() { return bgpNeighborsQuery->bgpNeighborInfo(); }
-    QList<SBGPNetwork*>& bgpNetworksInfo() { return bgpNetworksQuery->bgpNetworksInfo(); }
-    QList<SIpRouteInfo*>& ipRoutesInfo() { return ipRoutesQuery->ipRouteInfo(); }
+    QList<SBGPNetwork>& bgpNetworksInfo() { return bgpNetworksQuery->bgpNetworksInfo(); }
+    QList<SIpRouteInfo>& ipRoutesInfo() { return ipRoutesQuery->ipRouteInfo(); }
     QString& funcionTxtInfo() { return funcionQuery->txtReceived(); }
 
     void setId(QString id) { m_id = id; }
@@ -157,8 +157,13 @@ public:
     void startSync(); //
 
     static QMap<QString,QString> queriesArgumentosAceptados(); //
-    static void updateInfoQueries( QList<Queries*> &lstDest, QList<Queries*> &lstOrigin, QStringList lstIPsConsulta ); //
+    static void updateInfoQueries( QList<Queries> &lstDest, QList<Queries> &lstOrigin, QStringList lstIPsConsulta ); //
 
+    bool operator==(Queries&);
+    Queries& operator=(const Queries&);
+
+    friend QDataStream& operator<<(QDataStream& out, const Queries& query);
+    friend QDataStream& operator>>(QDataStream& in, Queries& query);
     friend QDataStream& operator<<(QDataStream& out, const Queries* query);
     friend QDataStream& operator>>(QDataStream& in, Queries*& query);
     friend QDebug operator<<(QDebug dbg, const Queries &info);
@@ -231,19 +236,23 @@ protected:
     //despues de terminar una consulta se crean las funciones que no se configuraron
     //por si el usuario trata a accesder a ellas tenga consultas vacias
     void crearFuncionesFaltantes();
+
+private:
+    void clone(const Queries& other);
 };
 
 class QNETWORKCLIQUERIES_EXPORT LstQueries
 {
 public:
-    LstQueries() {}
-    LstQueries(LstQueries* lstOrigen);
+    LstQueries() { opcionesConsulta=0; }
+    LstQueries(const LstQueries &lstOrigen);
     ~LstQueries();
+    bool isEmpty();
 
     QString grupo;
     int opcionesConsulta;
     QString gw;
-    QList<Queries*> lstQueries;
+    QList<Queries> lstQueries;
     QStringList lstIPsAconsultadas;
     QStringList lstIPsConectadasPorGW;
     QMap<QString, QString> errorMap;
@@ -253,8 +262,8 @@ public:
     QString label;
     QString tipoconsulta;
 
-    friend QDataStream& operator<<(QDataStream& out, const LstQueries* lstquery);
-    friend QDataStream& operator>>(QDataStream& in, LstQueries*& lstquery);
+    friend QDataStream& operator<<(QDataStream& out, const LstQueries& lstquery);
+    friend QDataStream& operator>>(QDataStream& in, LstQueries& lstquery);
     friend QDebug operator<<(QDebug dbg, const LstQueries &info);
 };
 

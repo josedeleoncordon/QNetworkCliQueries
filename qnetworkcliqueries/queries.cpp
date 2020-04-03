@@ -34,47 +34,7 @@ Queries::Queries()
 Queries::Queries(const Queries &other) : QObject(other.parent())
 {
     iniciar();
-    m_connected = other.m_connected;
-    m_name = other.m_name;
-    m_fullName = other.m_fullName;
-    m_country = other.m_country;
-    m_platform = other.m_platform;
-    m_equipmenttype = other.m_equipmenttype;
-    m_brand = other.m_brand;
-    m_datetime = other.m_datetime;
-    m_connectionprotol = other.m_connectionprotol;   
-    m_operativo = other.m_operativo;    
-    m_contieneconsultas = other.m_contieneconsultas;
-    m_xr_location = other.m_xr_location;
-    m_location = other.m_location;
-    m_ip = other.m_ip;
-    m_user = other.m_user;
-    m_gw = other.m_gw;
-    m_pwd = other.m_pwd;
-
-    if ( other.pi ) pi = new PlatformInfo( *other.pi );
-    if ( other.equipmentNeighborsInfoQuery )equipmentNeighborsInfoQuery = new EquipmentNeighborsInfo( *other.equipmentNeighborsInfoQuery );
-    if ( other.interfacesInfoQuery ) interfacesInfoQuery = new InterfaceInfo( *other.interfacesInfoQuery );
-    if ( other.interfacesPermitedVlansQuery ) interfacesPermitedVlansQuery = new InterfaceInfo( *other.interfacesPermitedVlansQuery );
-    if ( other.interfacesDescriptionsQuery ) interfacesDescriptionsQuery = new InterfaceInfo( *other.interfacesDescriptionsQuery );
-    if ( other.interfacesIpAddressesQuery ) interfacesIpAddressesQuery = new InterfaceInfo( *other.interfacesIpAddressesQuery );
-    if ( other.ospfQuery ) ospfQuery = new OSPFInfo( *other.ospfQuery );
-    if ( other.mplsTEtunnelsQuery ) mplsTEtunnelsQuery = new MplsTEtunnelsInfo( *other.mplsTEtunnelsQuery );
-    if ( other.mplsL2TransportQuery ) mplsL2TransportQuery = new MplsL2TransportInfo( *other.mplsL2TransportQuery );
-    if ( other.mplsLdpDiscoveryQuery ) mplsLdpDiscoveryQuery = new MplsLdpInfo( *other.mplsLdpDiscoveryQuery );
-    if ( other.mplsLdpNeighborsQuery ) mplsLdpNeighborsQuery = new MplsLdpInfo( *other.mplsLdpNeighborsQuery );
-    if ( other.mplsLdpInterfacesQuery ) mplsLdpInterfacesQuery = new MplsLdpInfo( *other.mplsLdpInterfacesQuery );
-    if ( other.pimInteracesQuery ) pimInteracesQuery = new PIMInfo( *other.pimInteracesQuery );
-    if ( other.macsQuery ) macsQuery = new MacInfo( *other.macsQuery );
-    if ( other.portChannelInfoQuery ) portChannelInfoQuery = new PortChannelsInfo( *other.portChannelInfoQuery );
-    if ( other.vrfsFromVlansQuery ) vrfsFromVlansQuery = new VrfInfo( *other.vrfsFromVlansQuery );
-    if ( other.vrfFromRTQuery ) vrfFromRTQuery = new VrfInfo( *other.vrfFromRTQuery );
-    if ( other.vrfsQuery ) vrfsQuery = new VrfInfo( *other.vrfsQuery );
-    if ( other.arpsQuery ) arpsQuery = new ArpInfo( *other.arpsQuery );
-    if ( other.bgpNeighborsQuery ) bgpNeighborsQuery = new BGPInfo( *other.bgpNeighborsQuery );
-    if ( other.bgpNetworksQuery ) bgpNetworksQuery = new BGPInfo( *other.bgpNetworksQuery );
-    if ( other.ipRoutesQuery ) ipRoutesQuery = new IPRouteInfo( *other.ipRoutesQuery );
-    if ( other.funcionQuery ) funcionQuery = new FuncionInfo( *other.funcionQuery );
+    clone(other);
 }
 
 Queries::~Queries()
@@ -132,6 +92,51 @@ void Queries::iniciar()
     queryTimer->setInterval( 20000 );
     queryTimer->setSingleShot( true );
     connect(queryTimer,SIGNAL(timeout()),SLOT(on_queryTimer_timeout()));
+}
+
+void Queries::clone(const Queries& other)
+{
+    m_connected = other.m_connected;
+    m_name = other.m_name;
+    m_fullName = other.m_fullName;
+    m_country = other.m_country;
+    m_platform = other.m_platform;
+    m_equipmenttype = other.m_equipmenttype;
+    m_brand = other.m_brand;
+    m_datetime = other.m_datetime;
+    m_connectionprotol = other.m_connectionprotol;
+    m_operativo = other.m_operativo;
+    m_contieneconsultas = other.m_contieneconsultas;
+    m_xr_location = other.m_xr_location;
+    m_location = other.m_location;
+    m_ip = other.m_ip;
+    m_user = other.m_user;
+    m_gw = other.m_gw;
+    m_pwd = other.m_pwd;
+
+    if ( other.pi ) pi = new PlatformInfo( *other.pi );
+    if ( other.equipmentNeighborsInfoQuery )equipmentNeighborsInfoQuery = new EquipmentNeighborsInfo( *other.equipmentNeighborsInfoQuery );
+    if ( other.interfacesInfoQuery ) interfacesInfoQuery = new InterfaceInfo( *other.interfacesInfoQuery );
+    if ( other.interfacesPermitedVlansQuery ) interfacesPermitedVlansQuery = new InterfaceInfo( *other.interfacesPermitedVlansQuery );
+    if ( other.interfacesDescriptionsQuery ) interfacesDescriptionsQuery = new InterfaceInfo( *other.interfacesDescriptionsQuery );
+    if ( other.interfacesIpAddressesQuery ) interfacesIpAddressesQuery = new InterfaceInfo( *other.interfacesIpAddressesQuery );
+    if ( other.ospfQuery ) ospfQuery = new OSPFInfo( *other.ospfQuery );
+    if ( other.mplsTEtunnelsQuery ) mplsTEtunnelsQuery = new MplsTEtunnelsInfo( *other.mplsTEtunnelsQuery );
+    if ( other.mplsL2TransportQuery ) mplsL2TransportQuery = new MplsL2TransportInfo( *other.mplsL2TransportQuery );
+    if ( other.mplsLdpDiscoveryQuery ) mplsLdpDiscoveryQuery = new MplsLdpInfo( *other.mplsLdpDiscoveryQuery );
+    if ( other.mplsLdpNeighborsQuery ) mplsLdpNeighborsQuery = new MplsLdpInfo( *other.mplsLdpNeighborsQuery );
+    if ( other.mplsLdpInterfacesQuery ) mplsLdpInterfacesQuery = new MplsLdpInfo( *other.mplsLdpInterfacesQuery );
+    if ( other.pimInteracesQuery ) pimInteracesQuery = new PIMInfo( *other.pimInteracesQuery );
+    if ( other.macsQuery ) macsQuery = new MacInfo( *other.macsQuery );
+    if ( other.portChannelInfoQuery ) portChannelInfoQuery = new PortChannelsInfo( *other.portChannelInfoQuery );
+    if ( other.vrfsFromVlansQuery ) vrfsFromVlansQuery = new VrfInfo( *other.vrfsFromVlansQuery );
+    if ( other.vrfFromRTQuery ) vrfFromRTQuery = new VrfInfo( *other.vrfFromRTQuery );
+    if ( other.vrfsQuery ) vrfsQuery = new VrfInfo( *other.vrfsQuery );
+    if ( other.arpsQuery ) arpsQuery = new ArpInfo( *other.arpsQuery );
+    if ( other.bgpNeighborsQuery ) bgpNeighborsQuery = new BGPInfo( *other.bgpNeighborsQuery );
+    if ( other.bgpNetworksQuery ) bgpNetworksQuery = new BGPInfo( *other.bgpNetworksQuery );
+    if ( other.ipRoutesQuery ) ipRoutesQuery = new IPRouteInfo( *other.ipRoutesQuery );
+    if ( other.funcionQuery ) funcionQuery = new FuncionInfo( *other.funcionQuery );
 }
 
 void Queries::limpiarConsultas()
@@ -568,12 +573,12 @@ void Queries::nextProcess()
 
                 //si hay informacion de OSPF se cambia la IP de la interfaz que se conoce por cdp/lldp
                 //y se reemplaza por el ID
-                for ( SEquipmentNeighborsInfo *e : equipmentNeighborsInfo() )
-                    for ( SOSPFInfo *oi : ospfInfo() )
+                for ( SEquipmentNeighborsInfo &e : equipmentNeighborsInfo() )
+                    for ( SOSPFInfo &oi : ospfInfo() )
                     {
-                        if ( oi->interfaz == e->interfazestesalida )
+                        if ( oi.interfaz == e.interfazestesalida )
                         {
-                            e->ip = oi->id;
+                            e.ip = oi.id;
                             break;
                         }
                     }
@@ -1083,6 +1088,7 @@ void Queries::nextProcess()
         configQuery->setBrand(m_brand);
         configQuery->setHostName(m_fullName);
         configQuery->setIp(m_ip);
+        configQuery->setParentQuery(this);
         connect(configQuery,SIGNAL(processFinished()),SLOT(processConfigFinished()));
         connect(configQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(configQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -1403,7 +1409,7 @@ QMap<QString,QString> Queries::queriesArgumentosAceptados()
     return map;
 }
 
-void Queries::updateInfoQueries(QList<Queries*> &lstDest, QList<Queries *> &lstOrigin , QStringList lstIPsConsulta)
+void Queries::updateInfoQueries(QList<Queries> &lstDest, QList<Queries> &lstOrigin , QStringList lstIPsConsulta)
 {
     //origen = nuevo
     //destino = anterior
@@ -1412,205 +1418,202 @@ void Queries::updateInfoQueries(QList<Queries*> &lstDest, QList<Queries *> &lstO
     //realizar la fusión si hay una nueva consulta se pondra en true
     for ( int c=0; c<lstDest.size(); )
     {
-        Queries *dest = lstDest.at(c);
-        if ( dest->m_datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->m_operativo)
-        {
-            delete dest;
+        Queries &dest = lstDest[c];
+        if ( dest.m_datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.m_operativo)
             lstDest.removeAt( c );
-        }
         else
         {
-            if ( lstIPsConsulta.contains( dest->m_ip ) )
-               dest->m_operativo=false;
+            if ( lstIPsConsulta.contains( dest.m_ip ) )
+               dest.m_operativo=false;
             c++;
         }
     }
 
-    foreach (Queries *origin, lstOrigin)
+    for (Queries &origin : lstOrigin)
     {
         bool encontrado=false;
-        foreach (Queries* dest, lstDest)
+        for (Queries &dest : lstDest)
         {
             //Se busca coincidencia de IP o nombre, porque puede que uno haya cambiado
             //Esto para que no se pierda el equipo y se agregue uno nuevo duplicando asi los equipos.
             //Esto es pensando que nunca va a cambiar la IP y el nombre de equipo al mismo tiempo.
-            if ( (dest->ip() == origin->ip() ||
-                 dest->hostName() == origin->hostName()) && origin->operativo() )
+            if ( (dest.ip() == origin.ip() ||
+                 dest.hostName() == origin.hostName()) && origin.operativo() )
             {
-                dest->m_name = origin->m_name;
-                dest->m_fullName = origin->m_fullName;
-                dest->m_country = origin->m_country;
-                dest->m_platform = origin->m_platform;
-                dest->m_brand = origin->m_brand;
-                dest->m_datetime = origin->m_datetime;
-                dest->m_operativo = origin->m_operativo;
-                dest->m_xr_location = origin->m_xr_location;
-                dest->m_location = origin->m_location;
-                dest->m_ip = origin->m_ip;
+                dest.m_name = origin.m_name;
+                dest.m_fullName = origin.m_fullName;
+                dest.m_country = origin.m_country;
+                dest.m_platform = origin.m_platform;
+                dest.m_brand = origin.m_brand;
+                dest.m_datetime = origin.m_datetime;
+                dest.m_operativo = origin.m_operativo;
+                dest.m_xr_location = origin.m_xr_location;
+                dest.m_location = origin.m_location;
+                dest.m_ip = origin.m_ip;
 
-                if ( origin->equipmentNeighborsInfoQuery )
+                if ( origin.equipmentNeighborsInfoQuery )
                 {
-                    if ( dest->equipmentNeighborsInfoQuery )
-                        updateInfoList( dest->equipmentNeighborsInfo(), origin->equipmentNeighborsInfo() );
+                    if ( dest.equipmentNeighborsInfoQuery )
+                        updateInfoList( dest.equipmentNeighborsInfo(), origin.equipmentNeighborsInfo() );
                     else
-                        dest->equipmentNeighborsInfoQuery = origin->equipmentNeighborsInfoQuery;
+                        dest.equipmentNeighborsInfoQuery = origin.equipmentNeighborsInfoQuery;
                 }
-                if ( origin->interfacesInfoQuery )
+                if ( origin.interfacesInfoQuery )
                 {
-                    if ( dest->interfacesInfoQuery )
-                        updateInfoList( dest->interfacesInfo(), origin->interfacesInfo() );
+                    if ( dest.interfacesInfoQuery )
+                        updateInfoList( dest.interfacesInfo(), origin.interfacesInfo() );
                     else
-                        dest->interfacesInfoQuery = origin->interfacesInfoQuery;
+                        dest.interfacesInfoQuery = origin.interfacesInfoQuery;
                 }
-                if ( origin->interfacesPermitedVlansQuery )
+                if ( origin.interfacesPermitedVlansQuery )
                 {
-                    if ( dest->interfacesPermitedVlansQuery )
-                        updateInfoList( dest->interfacesPermitedVlansInfo(), origin->interfacesPermitedVlansInfo() );
+                    if ( dest.interfacesPermitedVlansQuery )
+                        updateInfoList( dest.interfacesPermitedVlansInfo(), origin.interfacesPermitedVlansInfo() );
                     else
-                        dest->interfacesPermitedVlansQuery = origin->interfacesPermitedVlansQuery;
+                        dest.interfacesPermitedVlansQuery = origin.interfacesPermitedVlansQuery;
                 }
-                if ( origin->interfacesDescriptionsQuery )
+                if ( origin.interfacesDescriptionsQuery )
                 {
-                    if ( dest->interfacesDescriptionsQuery )
-                        updateInfoList( dest->interfacesDescriptionsInfo(), origin->interfacesDescriptionsInfo() );
+                    if ( dest.interfacesDescriptionsQuery )
+                        updateInfoList( dest.interfacesDescriptionsInfo(), origin.interfacesDescriptionsInfo() );
                     else
-                        dest->interfacesDescriptionsQuery = origin->interfacesDescriptionsQuery;
+                        dest.interfacesDescriptionsQuery = origin.interfacesDescriptionsQuery;
                 }
-                if ( origin->interfacesIpAddressesQuery )
+                if ( origin.interfacesIpAddressesQuery )
                 {
-                    if ( dest->interfacesIpAddressesQuery )
-                        updateInfoList( dest->interfacesIpAddressesInfo(), origin->interfacesIpAddressesInfo() );
+                    if ( dest.interfacesIpAddressesQuery )
+                        updateInfoList( dest.interfacesIpAddressesInfo(), origin.interfacesIpAddressesInfo() );
                     else
-                        dest->interfacesIpAddressesQuery = origin->interfacesIpAddressesQuery;
+                        dest.interfacesIpAddressesQuery = origin.interfacesIpAddressesQuery;
                 }
-                if ( origin->ospfQuery )
+                if ( origin.ospfQuery )
                 {
-                    if ( dest->ospfQuery )
+                    if ( dest.ospfQuery )
                     {
-                        dest->ospfQuery->m_abr = origin->ospfQuery->m_abr; //TODO cambiar a algo final en cada clase
-                        dest->ospfQuery->m_asbr = origin->ospfQuery->m_asbr; //TODO cambiar a algo final en cada clase
-                        updateInfoList( dest->ospfInfo(), origin->ospfInfo() );
+                        dest.ospfQuery->m_abr = origin.ospfQuery->m_abr; //TODO cambiar a algo final en cada clase
+                        dest.ospfQuery->m_asbr = origin.ospfQuery->m_asbr; //TODO cambiar a algo final en cada clase
+                        updateInfoList( dest.ospfInfo(), origin.ospfInfo() );
                     }
                     else
-                        dest->ospfQuery = origin->ospfQuery ;
+                        dest.ospfQuery = origin.ospfQuery ;
                 }
-                if ( origin->mplsTEtunnelsQuery )
+                if ( origin.mplsTEtunnelsQuery )
                 {
-                    if ( dest->mplsTEtunnelsQuery )
-                        updateInfoList( dest->mplsTETunnelsInfo(), origin->mplsTETunnelsInfo() );
+                    if ( dest.mplsTEtunnelsQuery )
+                        updateInfoList( dest.mplsTETunnelsInfo(), origin.mplsTETunnelsInfo() );
                     else
-                        dest->mplsTEtunnelsQuery = origin->mplsTEtunnelsQuery;
+                        dest.mplsTEtunnelsQuery = origin.mplsTEtunnelsQuery;
                 }
-                if ( origin->mplsL2TransportQuery )
+                if ( origin.mplsL2TransportQuery )
                 {
-                    if ( dest->mplsL2TransportQuery )
+                    if ( dest.mplsL2TransportQuery )
                     {
-                        updateInfoList( dest->mplsL2TransportXconnectsInfo(), origin->mplsL2TransportXconnectsInfo() );
-                        updateInfoList( dest->mplsL2TransportVFIsInfo(), origin->mplsL2TransportVFIsInfo() );
+                        updateInfoList( dest.mplsL2TransportXconnectsInfo(), origin.mplsL2TransportXconnectsInfo() );
+                        updateInfoList( dest.mplsL2TransportVFIsInfo(), origin.mplsL2TransportVFIsInfo() );
                     }
                     else
-                        dest->mplsTEtunnelsQuery = origin->mplsTEtunnelsQuery;
+                        dest.mplsTEtunnelsQuery = origin.mplsTEtunnelsQuery;
                 }
-                if ( origin->mplsLdpDiscoveryQuery )
+                if ( origin.mplsLdpDiscoveryQuery )
                 {
-                    if ( dest->mplsLdpDiscoveryQuery )
+                    if ( dest.mplsLdpDiscoveryQuery )
                     {
-                        dest->mplsLdpLocalIDInfo() = origin->mplsLdpLocalIDInfo();
-                        updateInfoList( dest->mplsLdpDiscoveryInfo(), origin->mplsLdpDiscoveryInfo() );
+                        dest.mplsLdpLocalIDInfo() = origin.mplsLdpLocalIDInfo();
+                        updateInfoList( dest.mplsLdpDiscoveryInfo(), origin.mplsLdpDiscoveryInfo() );
                     }
                     else
-                        dest->mplsLdpDiscoveryQuery = origin->mplsLdpDiscoveryQuery;
+                        dest.mplsLdpDiscoveryQuery = origin.mplsLdpDiscoveryQuery;
                 }
-                if ( origin->mplsLdpNeighborsQuery )
+                if ( origin.mplsLdpNeighborsQuery )
                 {
-                    if ( dest->mplsLdpNeighborsQuery )
-                        updateInfoList( dest->mplsLdpNeighborsInfo(), origin->mplsLdpNeighborsInfo() );
+                    if ( dest.mplsLdpNeighborsQuery )
+                        updateInfoList( dest.mplsLdpNeighborsInfo(), origin.mplsLdpNeighborsInfo() );
                     else
-                        dest->mplsLdpNeighborsQuery = origin->mplsLdpNeighborsQuery;
+                        dest.mplsLdpNeighborsQuery = origin.mplsLdpNeighborsQuery;
                 }
-                if ( origin->mplsLdpInterfacesQuery )
+                if ( origin.mplsLdpInterfacesQuery )
                 {
-                    if ( dest->mplsLdpInterfacesQuery )
-                        updateInfoList( dest->mplsLdpInterfacesInfo(), origin->mplsLdpInterfacesInfo() );
+                    if ( dest.mplsLdpInterfacesQuery )
+                        updateInfoList( dest.mplsLdpInterfacesInfo(), origin.mplsLdpInterfacesInfo() );
                     else
-                        dest->mplsLdpInterfacesQuery = origin->mplsLdpInterfacesQuery;
+                        dest.mplsLdpInterfacesQuery = origin.mplsLdpInterfacesQuery;
                 }
-                if ( origin->pimInteracesQuery )
+                if ( origin.pimInteracesQuery )
                 {
-                    if ( dest->pimInteracesQuery )
-                        updateInfoList( dest->pimInterfacesInfo(), origin->pimInterfacesInfo() );
+                    if ( dest.pimInteracesQuery )
+                        updateInfoList( dest.pimInterfacesInfo(), origin.pimInterfacesInfo() );
                     else
-                        dest->pimInteracesQuery = origin->pimInteracesQuery;
+                        dest.pimInteracesQuery = origin.pimInteracesQuery;
                 }
-                if ( origin->macsQuery )
+                if ( origin.macsQuery )
                 {
-                    if ( dest->macsQuery )
-                        updateInfoList( dest->macInfo(), origin->macInfo() );
+                    if ( dest.macsQuery )
+                        updateInfoList( dest.macInfo(), origin.macInfo() );
                     else
-                        dest->macsQuery = origin->macsQuery;
+                        dest.macsQuery = origin.macsQuery;
                 }
-                if ( origin->portChannelInfoQuery )
+                if ( origin.portChannelInfoQuery )
                 {
-                    if ( dest->portChannelInfoQuery )
-                        updateInfoList( dest->portChannelInfo(), origin->portChannelInfo() );
+                    if ( dest.portChannelInfoQuery )
+                        updateInfoList( dest.portChannelInfo(), origin.portChannelInfo() );
                     else
-                        dest->portChannelInfoQuery = origin->portChannelInfoQuery;
+                        dest.portChannelInfoQuery = origin.portChannelInfoQuery;
                 }
-                if ( origin->vrfsFromVlansQuery )
+                if ( origin.vrfsFromVlansQuery )
                 {
-                    if ( dest->vrfsFromVlansQuery )
-                        dest->vrfsFromVlansInfo() = origin->vrfsFromVlansInfo();
+                    if ( dest.vrfsFromVlansQuery )
+                        dest.vrfsFromVlansInfo() = origin.vrfsFromVlansInfo();
                     else
-                        dest->vrfsFromVlansQuery = origin->vrfsFromVlansQuery;
+                        dest.vrfsFromVlansQuery = origin.vrfsFromVlansQuery;
                 }
-                if ( origin->vrfFromRTQuery )
+                if ( origin.vrfFromRTQuery )
                 {
-                    if ( dest->vrfFromRTQuery )
-                        dest->vrfFromRTInfo() = origin->vrfFromRTInfo();
+                    if ( dest.vrfFromRTQuery )
+                        dest.vrfFromRTInfo() = origin.vrfFromRTInfo();
                     else
-                        dest->vrfFromRTQuery = origin->vrfFromRTQuery;
+                        dest.vrfFromRTQuery = origin.vrfFromRTQuery;
                 }
-                if ( origin->vrfsQuery )
+                if ( origin.vrfsQuery )
                 {
-                    if ( dest->vrfsQuery )
-                        updateInfoList( dest->vrfsInfo(), origin->vrfsInfo() );
+                    if ( dest.vrfsQuery )
+                        updateInfoList( dest.vrfsInfo(), origin.vrfsInfo() );
                     else
-                        dest->vrfsQuery = origin->vrfsQuery;
+                        dest.vrfsQuery = origin.vrfsQuery;
                 }
-                if ( origin->arpsQuery )
+                if ( origin.arpsQuery )
                 {
-                    if ( dest->arpsQuery )
-                        updateInfoList( dest->arpsInfo(), origin->arpsInfo() );
+                    if ( dest.arpsQuery )
+                        updateInfoList( dest.arpsInfo(), origin.arpsInfo() );
                     else
-                        dest->arpsQuery = origin->arpsQuery;
+                        dest.arpsQuery = origin.arpsQuery;
                 }
-                if ( origin->bgpNeighborsQuery )
+                if ( origin.bgpNeighborsQuery )
                 {
-                    if ( dest->bgpNeighborsQuery )
-                        dest->bgpNeighborsInfo() = origin->bgpNeighborsInfo();
+                    if ( dest.bgpNeighborsQuery )
+                        dest.bgpNeighborsInfo() = origin.bgpNeighborsInfo();
                     else
-                        dest->bgpNeighborsQuery = origin->bgpNeighborsQuery;
+                        dest.bgpNeighborsQuery = origin.bgpNeighborsQuery;
                 }
-                if ( origin->bgpNetworksQuery )
+                if ( origin.bgpNetworksQuery )
                 {
-                    if ( dest->bgpNetworksQuery )
-                        dest->bgpNetworksInfo() = origin->bgpNetworksInfo();
+                    if ( dest.bgpNetworksQuery )
+                        dest.bgpNetworksInfo() = origin.bgpNetworksInfo();
                     else
-                        dest->bgpNetworksQuery = origin->bgpNetworksQuery;
+                        dest.bgpNetworksQuery = origin.bgpNetworksQuery;
                 }
-                if ( origin->ipRoutesQuery )
+                if ( origin.ipRoutesQuery )
                 {
-                    if ( dest->ipRoutesQuery )                        
-                        dest->ipRoutesInfo() = origin->ipRoutesInfo();
+                    if ( dest.ipRoutesQuery )
+                        dest.ipRoutesInfo() = origin.ipRoutesInfo();
                     else
-                        dest->ipRoutesQuery = origin->ipRoutesQuery;
+                        dest.ipRoutesQuery = origin.ipRoutesQuery;
                 }
-                if ( origin->funcionQuery )
+                if ( origin.funcionQuery )
                 {
-                    if ( dest->funcionQuery )
-                        dest->funcionTxtInfo() = origin->funcionTxtInfo();
+                    if ( dest.funcionQuery )
+                        dest.funcionTxtInfo() = origin.funcionTxtInfo();
                     else
-                        dest->funcionQuery = origin->funcionQuery;
+                        dest.funcionQuery = origin.funcionQuery;
                 }
 
                 encontrado=true;
@@ -1622,179 +1625,179 @@ void Queries::updateInfoQueries(QList<Queries*> &lstDest, QList<Queries *> &lstO
     }
 }
 
-QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Queries* query)
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Queries& query)
 {
     //guardar
 
-    out << query->m_name;
-    out << query->m_fullName;
-    out << query->m_country;
-    out << query->m_platform;
-    out << query->m_xr_location;
-    out << query->m_location;
-    out << query->m_brand;
-    out << query->m_datetime;
-    out << query->m_operativo;
-    out << query->m_ip;
+    out << query.m_name;
+    out << query.m_fullName;
+    out << query.m_country;
+    out << query.m_platform;
+    out << query.m_xr_location;
+    out << query.m_location;
+    out << query.m_brand;
+    out << query.m_datetime;
+    out << query.m_operativo;
+    out << query.m_ip;
 
-    if ( query->equipmentNeighborsInfoQuery )
+    if ( query.equipmentNeighborsInfoQuery )
     {
         out << true;
-        out << query->equipmentNeighborsInfoQuery;
+        out << query.equipmentNeighborsInfoQuery;
     }
     else
         out << false;
-    if ( query->interfacesInfoQuery )
+    if ( query.interfacesInfoQuery )
     {
         out << true;
-        out << query->interfacesInfoQuery;
+        out << query.interfacesInfoQuery;
     }
     else
         out << false;
-    if ( query->interfacesDescriptionsQuery )
+    if ( query.interfacesDescriptionsQuery )
     {
         out << true;
-        out << query->interfacesDescriptionsQuery;
+        out << query.interfacesDescriptionsQuery;
     }
     else
         out << false;
-    if ( query->interfacesIpAddressesQuery )
+    if ( query.interfacesIpAddressesQuery )
     {
         out << true;
-        out << query->interfacesIpAddressesQuery;
+        out << query.interfacesIpAddressesQuery;
     }
     else
         out << false;
-    if ( query->interfacesPermitedVlansQuery )
+    if ( query.interfacesPermitedVlansQuery )
     {
         out << true;
-        out << query->interfacesPermitedVlansQuery;
+        out << query.interfacesPermitedVlansQuery;
     }
     else
         out << false;
-    if ( query->ospfQuery )
+    if ( query.ospfQuery )
     {
         out << true;
-        out << query->ospfQuery;
+        out << query.ospfQuery;
     }
     else
         out << false;    
-    if ( query->mplsTEtunnelsQuery )
+    if ( query.mplsTEtunnelsQuery )
     {
         out << true;
-        out << query->mplsTEtunnelsQuery;
+        out << query.mplsTEtunnelsQuery;
     }
     else
         out << false;
-    if ( query->mplsL2TransportQuery )
+    if ( query.mplsL2TransportQuery )
     {
         out << true;
-        out << query->mplsL2TransportQuery;
+        out << query.mplsL2TransportQuery;
     }
     else
         out << false;
-    if ( query->mplsLdpDiscoveryQuery )
+    if ( query.mplsLdpDiscoveryQuery )
     {
         out << true;
-        out << query->mplsLdpDiscoveryQuery;
+        out << query.mplsLdpDiscoveryQuery;
     }
     else
         out << false;
-    if ( query->mplsLdpNeighborsQuery )
+    if ( query.mplsLdpNeighborsQuery )
     {
         out << true;
-        out << query->mplsLdpNeighborsQuery;
+        out << query.mplsLdpNeighborsQuery;
     }
     else
         out << false;
-    if ( query->mplsLdpInterfacesQuery )
+    if ( query.mplsLdpInterfacesQuery )
     {
         out << true;
-        out << query->mplsLdpInterfacesQuery;
+        out << query.mplsLdpInterfacesQuery;
     }
     else
         out << false;
-//    if ( query->pimNeighborsQuery )
+//    if ( query.pimNeighborsQuery )
 //    {
 //        out << true;
-//        out << query->pimNeighborsQuery;
+//        out << query.pimNeighborsQuery;
 //    }
 //    else
 //        out << false;
-    if ( query->pimInteracesQuery )
+    if ( query.pimInteracesQuery )
     {
         out << true;
-        out << query->pimInteracesQuery;
+        out << query.pimInteracesQuery;
     }
     else
         out << false;
-    if ( query->macsQuery )
+    if ( query.macsQuery )
     {
         out << true;
-        out << query->macsQuery;
+        out << query.macsQuery;
     }
     else
         out << false;
-    if ( query->portChannelInfoQuery )
+    if ( query.portChannelInfoQuery )
     {
         out << true;
-        out << query->portChannelInfoQuery;
+        out << query.portChannelInfoQuery;
     }
     else
         out << false;
-    if ( query->vrfsFromVlansQuery )
+    if ( query.vrfsFromVlansQuery )
     {
         out << true;
-        out << query->vrfsFromVlansQuery;
+        out << query.vrfsFromVlansQuery;
     }
     else
         out << false;
-    if ( query->vrfFromRTQuery )
+    if ( query.vrfFromRTQuery )
     {
         out << true;
-        out << query->vrfFromRTQuery;
+        out << query.vrfFromRTQuery;
     }
     else
         out << false;
-    if ( query->vrfsQuery )
+    if ( query.vrfsQuery )
     {
         out << true;
-        out << query->vrfsQuery;
+        out << query.vrfsQuery;
     }
     else
         out << false;
-    if ( query->arpsQuery )
+    if ( query.arpsQuery )
     {
         out << true;
-        out << query->arpsQuery;
+        out << query.arpsQuery;
     }
     else
         out << false;
-    if ( query->bgpNeighborsQuery )
+    if ( query.bgpNeighborsQuery )
     {
         out << true;
-        out << query->bgpNeighborsQuery;
+        out << query.bgpNeighborsQuery;
     }
     else
         out << false;
-    if ( query->bgpNetworksQuery )
+    if ( query.bgpNetworksQuery )
     {
         out << true;
-        out << query->bgpNetworksQuery;
+        out << query.bgpNetworksQuery;
     }
     else
         out << false;
-    if ( query->ipRoutesQuery )
+    if ( query.ipRoutesQuery )
     {
         out << true;
-        out << query->ipRoutesQuery;
+        out << query.ipRoutesQuery;
     }
     else
         out << false;
-//    if ( query->funcionQuery )
+//    if ( query.funcionQuery )
 //    {
 //        out << true;
-//        out << query->funcionQuery;
+//        out << query.funcionQuery;
 //    }
 //    else
 //        out << false;
@@ -1802,181 +1805,110 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     return out;
 }
 
-QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries*& query)
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries& query)
 {
     //abrir
 
-    query = new Queries;
     bool a;
 
-    in >> query->m_name;
-    in >> query->m_fullName;
-    in >> query->m_country;
-    in >> query->m_platform;
-    in >> query->m_xr_location;
-    in >> query->m_location;
-    in >> query->m_brand;
-    in >> query->m_datetime;
-    in >> query->m_operativo;
-    in >> query->m_ip;
+    in >> query.m_name;
+    in >> query.m_fullName;
+    in >> query.m_country;
+    in >> query.m_platform;
+    in >> query.m_xr_location;
+    in >> query.m_location;
+    in >> query.m_brand;
+    in >> query.m_datetime;
+    in >> query.m_operativo;
+    in >> query.m_ip;
 
     in >> a;
     if ( a )
-    {
-        in >> query->equipmentNeighborsInfoQuery;
-        foreach (SEquipmentNeighborsInfo *i, query->equipmentNeighborsInfo())
-            i->queryParent = query;
-    }
+        in >> query.equipmentNeighborsInfoQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->interfacesInfoQuery;
-        foreach (SInterfaceInfo *i, query->interfacesInfo())
-            i->queryParent = query;
-    }
+        in >> query.interfacesInfoQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->interfacesDescriptionsQuery;
-        foreach (SInterfaceInfo *i, query->interfacesDescriptionsInfo())
-            i->queryParent = query;
-    }
+        in >> query.interfacesDescriptionsQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->interfacesIpAddressesQuery;
-        foreach (SIpInfo *i, query->interfacesIpAddressesInfo() )
-            i->queryParent = query;
-    }
+        in >> query.interfacesIpAddressesQuery;
     in >> a;    
     if ( a )
-    {
-        in >> query->interfacesPermitedVlansQuery;
-        foreach (SInterfaceVlans *i, query->interfacesPermitedVlansInfo() )
-            i->queryParent = query;
-    }
+        in >> query.interfacesPermitedVlansQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->ospfQuery;
-        foreach (SOSPFInfo *i, query->ospfInfo() )
-            i->queryParent = query;
-    }
+        in >> query.ospfQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->mplsTEtunnelsQuery;
-        foreach (SMplsTETunnelInfo *i, query->mplsTETunnelsInfo() )
-            i->queryParent = query;
-    }
+        in >> query.mplsTEtunnelsQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->mplsL2TransportQuery;
-        foreach (SMplsL2XconnectInfo *i, query->mplsL2TransportXconnectsInfo() )
-            i->queryParent = query;
-        foreach (SMplsL2VFIInfo *i, query->mplsL2TransportVFIsInfo() )
-            i->queryParent = query;
-    }
+        in >> query.mplsL2TransportQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->mplsLdpDiscoveryQuery;
-        foreach (SMplsLdpInfo *i, query->mplsLdpDiscoveryInfo() )
-            i->queryParent = query;
-    }
+        in >> query.mplsLdpDiscoveryQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->mplsLdpNeighborsQuery;
-        foreach (SMplsLdpInfo *i, query->mplsLdpNeighborsInfo() )
-            i->queryParent = query;
-    }
+        in >> query.mplsLdpNeighborsQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->mplsLdpInterfacesQuery;
-        foreach (SMplsLdpInfo *i, query->mplsLdpInterfacesInfo() )
-            i->queryParent = query;
-    }
+        in >> query.mplsLdpInterfacesQuery;
 //    in >> a;
 //    if ( a )
 //    {
-//        in >> query->pimNeighborsQuery;
+//        in >> query.pimNeighborsQuery;
 //    }
     in >> a;
     if ( a )
-    {
-        in >> query->pimInteracesQuery;
-        foreach (SPIMInfo *i, query->pimInterfacesInfo() )
-            i->queryParent = query;
-    }
+        in >> query.pimInteracesQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->macsQuery;
-        foreach (SMacInfo *i, query->macInfo() )
-            i->queryParent = query;
-    }
+        in >> query.macsQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->portChannelInfoQuery;
-        foreach (SPortChannel *i, query->portChannelInfo() )
-            i->queryParent = query;
-    }
+        in >> query.portChannelInfoQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->vrfsFromVlansQuery;
-        //no se puede establecer el queryParent, no es una estructura
-    }
+        in >> query.vrfsFromVlansQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->vrfFromRTQuery;
-        //no se puede establecer el queryParent, no es una estructura
-    }
+        in >> query.vrfFromRTQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->vrfsQuery;
-        foreach (SVrfInfo *i, query->vrfsInfo() )
-            i->queryParent = query;
-    }
+        in >> query.vrfsQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->arpsQuery;
-        foreach (SIpInfo *i, query->arpsInfo() )
-            i->queryParent = query;
-    }
+        in >> query.arpsQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->bgpNeighborsQuery;
-        //no se puede establecer el queryParent, no es una estructura
-    }
+        in >> query.bgpNeighborsQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->bgpNetworksQuery;
-        foreach (SBGPNetwork *i, query->bgpNetworksInfo() )
-            i->queryParent = query;
-    }
+        in >> query.bgpNetworksQuery;
     in >> a;
     if ( a )
-    {
-        in >> query->ipRoutesQuery;
-        foreach (SIpRouteInfo *i, query->ipRoutesInfo() )
-            i->queryParent = query;
-    }
+        in >> query.ipRoutesQuery;
 //    if ( a )
 //    {
-//        in >> query->funcionQuery;
+//        in >> query.funcionQuery;
 //        //no se puede establecer el queryParent, no es una estructura
 //    }
 
+    return in;
+}
+
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Queries*& query)
+{
+    out << *query;
+    return out;
+}
+
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries* query)
+{
+    query = new Queries;
+    in >> *query;
     return in;
 }
 
@@ -2065,55 +1997,80 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
     return dbg.maybeSpace();
 }
 
-LstQueries::LstQueries(LstQueries* lstOrigen)
+QNETWORKCLIQUERIES_EXPORT bool Queries::operator==(Queries& other)
 {
-    grupo = lstOrigen->grupo;
-    opcionesConsulta = lstOrigen->opcionesConsulta;
-    gw = lstOrigen->gw;
-    for ( Queries *q : lstOrigen->lstQueries )
-        lstQueries.append( new Queries(*q) );
-    lstIPsAconsultadas = lstOrigen->lstIPsAconsultadas;
-    lstIPsConectadasPorGW = lstOrigen->lstIPsConectadasPorGW;
-    errorMap = lstOrigen->errorMap;
-    lstQueriesParameters = lstOrigen->lstQueriesParameters;
-    dateTime = lstOrigen->dateTime;
-    label = lstOrigen->label;
-    tipoconsulta = lstOrigen->tipoconsulta;
+    return ( m_ip == other.m_ip &&
+             m_name == other.m_name &&
+             m_id == other.m_id &&
+             m_brand == other.m_brand &&
+             m_platform == other.m_platform &&
+             m_country == other.m_country &&
+             m_datetime == other.m_datetime &&
+             m_ipreachable == other.m_ipreachable);
+}
+
+QNETWORKCLIQUERIES_EXPORT  Queries& Queries::operator=(const Queries& other)
+{
+    iniciar();
+    clone(other);
+    return *this;
+}
+
+LstQueries::LstQueries(const LstQueries &lstOrigen)
+{
+    grupo = lstOrigen.grupo;
+    opcionesConsulta = lstOrigen.opcionesConsulta;
+    gw = lstOrigen.gw;
+    lstQueries = lstOrigen.lstQueries;
+    lstIPsAconsultadas = lstOrigen.lstIPsAconsultadas;
+    lstIPsConectadasPorGW = lstOrigen.lstIPsConectadasPorGW;
+    errorMap = lstOrigen.errorMap;
+    lstQueriesParameters = lstOrigen.lstQueriesParameters;
+    dateTime = lstOrigen.dateTime;
+    label = lstOrigen.label;
+    tipoconsulta = lstOrigen.tipoconsulta;
 }
 
 LstQueries::~LstQueries()
 {}
 
-QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const LstQueries* lstquery)
+bool LstQueries::isEmpty()
+{
+    if ( !opcionesConsulta && lstQueries.isEmpty() )
+        return false;
+
+    return true;
+}
+
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const LstQueries& lstquery)
 {
     //guardar
-    out << lstquery->grupo;
-    out << lstquery->opcionesConsulta;
-    out << lstquery->lstQueries;
-    out << lstquery->errorMap;
-    out << lstquery->dateTime;
-    out << lstquery->label;
-    out << lstquery->tipoconsulta;
-    out << lstquery->lstQueriesParameters;
-    out << lstquery->lstIPsAconsultadas;
-    out << lstquery->gw;
+    out << lstquery.grupo;
+    out << lstquery.opcionesConsulta;
+    out << lstquery.lstQueries;
+    out << lstquery.errorMap;
+    out << lstquery.dateTime;
+    out << lstquery.label;
+    out << lstquery.tipoconsulta;
+    out << lstquery.lstQueriesParameters;
+    out << lstquery.lstIPsAconsultadas;
+    out << lstquery.gw;
     return out;
 }
 
-QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, LstQueries*& lstquery)
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, LstQueries& lstquery)
 {
     //abrir
-    lstquery = new LstQueries;
-    in >> lstquery->grupo;
-    in >> lstquery->opcionesConsulta;
-    in >> lstquery->lstQueries;
-    in >> lstquery->errorMap;
-    in >> lstquery->dateTime;
-    in >> lstquery->label;
-    in >> lstquery->tipoconsulta;
-    in >> lstquery->lstQueriesParameters;
-    in >> lstquery->lstIPsAconsultadas;
-    in >> lstquery->gw;
+    in >> lstquery.grupo;
+    in >> lstquery.opcionesConsulta;
+    in >> lstquery.lstQueries;
+    in >> lstquery.errorMap;
+    in >> lstquery.dateTime;
+    in >> lstquery.label;
+    in >> lstquery.tipoconsulta;
+    in >> lstquery.lstQueriesParameters;
+    in >> lstquery.lstIPsAconsultadas;
+    in >> lstquery.gw;
     return in;
 }
 

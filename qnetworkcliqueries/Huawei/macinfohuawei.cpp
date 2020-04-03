@@ -15,11 +15,7 @@ MacInfoHuawei::MacInfoHuawei(const MacInfoHuawei &other):
     m_ip = other.m_ip;
     m_mac = other.m_mac;
     m_vlan = other.m_vlan;
-    foreach (SMacInfo *ii, other.m_lstMacs)
-    {
-        SMacInfo *ii2 = new SMacInfo(*ii);
-        m_lstMacs.append(ii2);
-    }
+    m_lstMacs = other.m_lstMacs;
 }
 
 MacInfoHuawei::~MacInfoHuawei()
@@ -48,42 +44,33 @@ void MacInfoHuawei::on_term_receiveText()
              line.contains("drop",Qt::CaseInsensitive) )
              continue;
 
-        SMacInfo *mac = nullptr;
         QStringList data = line.split(" ",QString::SkipEmptyParts);
         QString m = data.at(0).simplified();
         m.replace("-",".");
 
-        mac = new SMacInfo;
-        mac->queryParent = m_queriesParent;
-        mac->datetime = QDateTime::currentDateTime();
-        mac->operativo = true;
-        mac->mac = m;
+        SMacInfo mac;
+        mac.datetime = QDateTime::currentDateTime();
+        mac.operativo = true;
+        mac.mac = m;
 
         if ( data.size() == 7 )
         {
-            mac->vlan = data.at(1).simplified();
-            mac->interfaz = estandarizarInterfaz(data.at(4).simplified());
+            mac.vlan = data.at(1).simplified();
+            mac.interfaz = estandarizarInterfaz(data.at(4).simplified());
         }
         else if ( data.size() > 7 )
         {
-            mac->vlan = data.at(2).simplified();
-            mac->interfaz = estandarizarInterfaz(data.at(5).simplified());
+            mac.vlan = data.at(2).simplified();
+            mac.interfaz = estandarizarInterfaz(data.at(5).simplified());
         }
-
-        if ( !mac )
-            continue;
 
         //verificando si la mac esta en la vlans permitidas, si se configuro
         QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip);
         if ( vlanfilter.isEmpty() )
             m_lstMacs.append(mac);
         else
-        {
-            if ( vlanfilter.contains( mac->vlan ) )
+            if ( vlanfilter.contains( mac.vlan ) )
                 m_lstMacs.append(mac);
-            else
-                delete mac;
-        }
     }
 
     finished();

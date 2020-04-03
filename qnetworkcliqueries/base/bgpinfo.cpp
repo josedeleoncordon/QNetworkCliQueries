@@ -13,28 +13,62 @@ SBGPNetwork::SBGPNetwork(const SBGPNetwork &other)
     operativo = other.operativo;
 }
 
-QDataStream& operator<<(QDataStream& out, const SBGPNetwork* data)
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNetwork& data)
 {
-    out << data->neighborip;
-    out << data->network;
-    out << data->RD;
-    out << data->nexthop;
-    out << data->from;
-    out << data->path;
+    out << data.neighborip;
+    out << data.network;
+    out << data.RD;
+    out << data.nexthop;
+    out << data.from;
+    out << data.path;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SBGPNetwork*& data)
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNetwork& data)
 {
-    data = new SBGPNetwork;
-    in >> data->network;
-    in >> data->nexthop;
-    in >> data->RD;
-    in >> data->path;
+    in >> data.neighborip;
+    in >> data.network;
+    in >> data.RD;
+    in >> data.nexthop;
+    in >> data.from;
+    in >> data.path;
+    //infobase
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
+}
+
+QNETWORKCLIQUERIES_EXPORT QDBusArgument& operator<<(QDBusArgument &argument, const SBGPNetwork &data)
+{
+    argument.beginStructure();
+    argument << data.neighborip;
+    argument << data.network;
+    argument << data.RD;
+    argument << data.nexthop;
+    argument << data.from;
+    argument << data.path;
+    argument << data.datetime;
+    argument << data.operativo;
+    argument.endStructure();
+    return argument;
+}
+
+QNETWORKCLIQUERIES_EXPORT const QDBusArgument& operator>>(const QDBusArgument& argument, SBGPNetwork &data)
+{
+    argument.beginStructure();
+    argument >> data.neighborip;
+    argument >> data.network;
+    argument >> data.RD;
+    argument >> data.nexthop;
+    argument >> data.from;
+    argument >> data.path;
+    argument >> data.datetime;
+    argument >> data.operativo;
+    argument.endStructure();
+    return argument;
 }
 
 BGPInfo::BGPInfo(QRemoteShell *terminal, QObject *parent):
@@ -51,6 +85,7 @@ BGPInfo::BGPInfo(const BGPInfo &other):
     m_name = other.m_name;
     m_ip = other.m_ip;
     m_lstIPs = other.m_lstIPs;
+    m_lstNetworks = other.m_lstNetworks;
     m_type = other.m_type;
 }
 
@@ -193,13 +228,15 @@ void BGPInfo::on_term_receiveText_networks()
         exp.setPattern("(\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+) +(\\d+\\.\\d+\\.\\d+\\.\\d+) +(\\d+\\.\\d+\\.\\d+\\.\\d+) ");
         if ( line.contains(exp) )
         {
-            SBGPNetwork *s = new SBGPNetwork;
+            SBGPNetwork s;
             network = exp.cap(1);
-            s->neighborip = m_currentNeighbor;
-            s->network = network;
-            s->nexthop = exp.cap(2);
-            s->from = exp.cap(3);
-            s->path = line.mid( pathi ).replace("i","").simplified();
+            s.neighborip = m_currentNeighbor;
+            s.network = network;
+            s.nexthop = exp.cap(2);
+            s.from = exp.cap(3);
+            s.path = line.mid( pathi ).replace("i","").simplified();
+            s.operativo = true;
+            s.datetime = QDateTime::currentDateTime();
 
             m_lstNetworks.append(s);
             continue;
@@ -209,12 +246,14 @@ void BGPInfo::on_term_receiveText_networks()
         exp.setPattern("(\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+) +(\\d+\\.\\d+\\.\\d+\\.\\d+) ");
         if ( line.contains(exp) )
         {
-            SBGPNetwork *s = new SBGPNetwork;
+            SBGPNetwork s;
             network = exp.cap(1);
-            s->neighborip = m_currentNeighbor;
-            s->network = network;
-            s->nexthop = exp.cap(2);
-            s->path = line.mid( pathi ).replace("i","").simplified();
+            s.neighborip = m_currentNeighbor;
+            s.network = network;
+            s.nexthop = exp.cap(2);
+            s.path = line.mid( pathi ).replace("i","").simplified();
+            s.operativo = true;
+            s.datetime = QDateTime::currentDateTime();
 
             m_lstNetworks.append(s);
             continue;
@@ -223,11 +262,13 @@ void BGPInfo::on_term_receiveText_networks()
         exp.setPattern(" +(\\d+\\.\\d+\\.\\d+\\.\\d+) ");
         if ( line.contains(exp) )
         {
-            SBGPNetwork *s = new SBGPNetwork;
-            s->neighborip = m_currentNeighbor;
-            s->network = network;
-            s->nexthop = exp.cap(1);
-            s->path = line.mid( pathi ).replace("i","").simplified();
+            SBGPNetwork s;
+            s.neighborip = m_currentNeighbor;
+            s.network = network;
+            s.nexthop = exp.cap(1);
+            s.path = line.mid( pathi ).replace("i","").simplified();
+            s.operativo = true;
+            s.datetime = QDateTime::currentDateTime();
 
             m_lstNetworks.append(s);
             continue;
@@ -238,6 +279,20 @@ void BGPInfo::on_term_receiveText_networks()
         finished();
     else
         networksNextNeighbor();
+}
+
+QDataStream& operator<<(QDataStream& out, const BGPInfo& info)
+{
+    out << info.m_lstIPs;
+    out << info.m_lstNetworks;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, BGPInfo& info)
+{
+    in >> info.m_lstIPs;
+    in >> info.m_lstNetworks;
+    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const BGPInfo* info)
@@ -269,8 +324,10 @@ QDebug operator<<(QDebug dbg, const BGPInfo &info)
     if ( !info.m_lstNetworks.isEmpty() )
     {
         dbg.nospace() << "BGPNetworks:\n";
-        for (SBGPNetwork *i : info.m_lstNetworks)
-            dbg.space() << i->neighborip << i->network << i->nexthop << i->from << i->path << "\n";
+
+        for (SBGPNetwork i : info.m_lstNetworks)
+            dbg.space() << i.neighborip << i.network << i.nexthop
+                        << i.from << i.path << i.datetime << "\n";
     }
 
     dbg.nospace() << "\n";

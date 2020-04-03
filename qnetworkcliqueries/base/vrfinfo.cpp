@@ -7,28 +7,27 @@ SVrfInfo::SVrfInfo(const SVrfInfo &other)
     vrf = other.vrf;
 }
 
-QDataStream& operator<<(QDataStream& out, const SVrfInfo* data)
+QDataStream& operator<<(QDataStream& out, const SVrfInfo& data)
 {
-    out << data->interfaz;
-    out << data->vrf;
+    out << data.interfaz;
+    out << data.vrf;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SVrfInfo*& data)
+QDataStream& operator>>(QDataStream& in, SVrfInfo& data)
 {
-    data = new SVrfInfo;
-    in >> data->interfaz;
-    in >> data->vrf;
+    in >> data.interfaz;
+    in >> data.vrf;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SVrfInfo*> &lstDest, QList<SVrfInfo*> &lstOrigin )
+void updateInfoList(QList<SVrfInfo> &lstDest, QList<SVrfInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -37,28 +36,28 @@ void updateInfoList(QList<SVrfInfo*> &lstDest, QList<SVrfInfo*> &lstOrigin )
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SVrfInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SVrfInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SVrfInfo *origin, lstOrigin )
+    for ( SVrfInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SVrfInfo *dest, lstDest )
+        for ( SVrfInfo &dest : lstDest )
         {
-            if ( origin->interfaz == dest->interfaz )
+            if ( origin.interfaz == dest.interfaz )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->vrf = origin->vrf;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.vrf = origin.vrf;
                 encontrado=true;
                 break;
             }
@@ -82,19 +81,13 @@ VrfInfo::VrfInfo(const VrfInfo &other):
     m_ip = other.m_ip;
     m_vlans = other.m_vlans;
     m_lstVrf = other.m_lstVrf;
-    foreach (SVrfInfo *ii, other.m_lstVrfInfo)
-    {
-        SVrfInfo *ii2 = new SVrfInfo(*ii);
-        m_lstVrfInfo.append(ii2);
-    }
+    m_lstVrfInfo = other.m_lstVrfInfo;
     m_vrf = other.m_vrf;
     m_rt = other.m_rt;
 }
 
 VrfInfo::~VrfInfo()
-{
-    qDeleteAll(m_lstVrfInfo);
-}
+{}
 
 void VrfInfo::getVRFsFromVLans()
 {
@@ -348,12 +341,11 @@ void VrfInfo::on_term_receiveTextVRFs()
                 if ( lastVrf == "default" )
                     lastVrf.clear();
 
-                SVrfInfo *vi =new SVrfInfo;
-                vi->queryParent = m_queriesParent;
-                vi->interfaz = lastInterface;
-                vi->vrf = lastVrf;
-                vi->datetime = QDateTime::currentDateTime();
-                vi->operativo = true;
+                SVrfInfo vi;
+                vi.interfaz = lastInterface;
+                vi.vrf = lastVrf;
+                vi.datetime = QDateTime::currentDateTime();
+                vi.operativo = true;
                 m_lstVrfInfo.append(vi);
 
                 qDebug() << "agrgando vrf";
@@ -381,12 +373,11 @@ void VrfInfo::on_term_receiveTextVRFs()
             else if ( data.size() == 1 )
                 lastInterface = estandarizarInterfaz( data.at(0).simplified() );            
 
-            SVrfInfo *vi = new SVrfInfo;
-            vi->queryParent = m_queriesParent;
-            vi->interfaz = lastInterface;
-            vi->vrf = lastVrf;
-            vi->datetime = QDateTime::currentDateTime();
-            vi->operativo = true;
+            SVrfInfo vi;
+            vi.interfaz = lastInterface;
+            vi.vrf = lastVrf;
+            vi.datetime = QDateTime::currentDateTime();
+            vi.operativo = true;
             m_lstVrfInfo.append(vi);
 
             continue;
@@ -435,12 +426,11 @@ void VrfInfo::on_term_receiveTextVRFs()
             if (hagregar)
             {
                 hagregar=false;
-                SVrfInfo *vi = new SVrfInfo;
-                vi->queryParent = m_queriesParent;
-                vi->interfaz = lastInterface;
-                vi->vrf = lastVrf;
-                vi->datetime = QDateTime::currentDateTime();
-                vi->operativo = true;
+                SVrfInfo vi;
+                vi.interfaz = lastInterface;
+                vi.vrf = lastVrf;
+                vi.datetime = QDateTime::currentDateTime();
+                vi.operativo = true;
                 m_lstVrfInfo.append(vi);
                 lastInterface.clear();
             }
@@ -451,12 +441,28 @@ void VrfInfo::on_term_receiveTextVRFs()
 
 QString VrfInfo::vrfFromInterface(QString interface)
 {
-    foreach (SVrfInfo *vi, m_lstVrfInfo)
+    for (SVrfInfo vi : m_lstVrfInfo)
     {
-        if ( vi->interfaz == interface )
-            return vi->vrf;
+        if ( vi.interfaz == interface )
+            return vi.vrf;
     }
     return "";
+}
+
+QDataStream& operator<<(QDataStream& out, const VrfInfo& info)
+{
+    out << info.m_lstVrf;
+    out << info.m_vrf;
+    out << info.m_lstVrfInfo;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, VrfInfo& info)
+{
+    in >> info.m_lstVrf;
+    in >> info.m_vrf;
+    in >> info.m_lstVrfInfo;
+    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const VrfInfo* info)
@@ -469,7 +475,7 @@ QDataStream& operator<<(QDataStream& out, const VrfInfo* info)
 
 QDataStream& operator>>(QDataStream& in, VrfInfo*& info)
 {
-    info =new VrfInfo(nullptr,nullptr);
+    info = new VrfInfo;
     in >> info->m_lstVrf;
     in >> info->m_vrf;
     in >> info->m_lstVrfInfo;
@@ -488,8 +494,8 @@ QDebug operator<<(QDebug dbg, const VrfInfo &info)
         dbg.space() << i << "\n";
 
     dbg.space() << "\nVRFs:" << "\n";
-    foreach (SVrfInfo *i, info.m_lstVrfInfo)
-        dbg.space() << i->interfaz << i->vrf << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+    foreach (SVrfInfo i, info.m_lstVrfInfo)
+        dbg.space() << i.interfaz << i.vrf << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     dbg.nospace() << "\n";
 

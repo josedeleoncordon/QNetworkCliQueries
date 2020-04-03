@@ -15,50 +15,45 @@ SMplsTETunnelInfo::SMplsTETunnelInfo(const SMplsTETunnelInfo &other)
     autoRouteDestinationsCount = other.autoRouteDestinationsCount;
 }
 
-QDataStream& operator<<(QDataStream& out, const SMplsTETunnelInfo* data)
+QDataStream& operator<<(QDataStream& out, const SMplsTETunnelInfo& data)
 {
-    out << data->name;
-    out << data->origen;
-    out << data->destino;
-    out << data->TuID;
-    out << data->route;
-    out << data->role;
-    out << data->InterfaceIn;
-    out << data->InterfaceOut;
-    out << data->status;
-    out << data->autoRouteDestinationsCount;
+    out << data.name;
+    out << data.origen;
+    out << data.destino;
+    out << data.TuID;
+    out << data.route;
+    out << data.role;
+    out << data.InterfaceIn;
+    out << data.InterfaceOut;
+    out << data.status;
+    out << data.autoRouteDestinationsCount;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SMplsTETunnelInfo*& data)
+QDataStream& operator>>(QDataStream& in, SMplsTETunnelInfo& data)
 {
-    data = new SMplsTETunnelInfo;
-    in >> data->name;
-    in >> data->origen;
-    in >> data->destino;
-    in >> data->TuID;
-    in >> data->route;
-    in >> data->role;
-    in >> data->InterfaceIn;
-    in >> data->InterfaceOut;
-    in >> data->status;
-    in >> data->autoRouteDestinationsCount;
+    in >> data.name;
+    in >> data.origen;
+    in >> data.destino;
+    in >> data.TuID;
+    in >> data.route;
+    in >> data.role;
+    in >> data.InterfaceIn;
+    in >> data.InterfaceOut;
+    in >> data.status;
+    in >> data.autoRouteDestinationsCount;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SMplsTETunnelInfo*> &lstDest, QList<SMplsTETunnelInfo*> &lstOrigin )
+void updateInfoList(QList<SMplsTETunnelInfo> &lstDest, QList<SMplsTETunnelInfo> &lstOrigin )
 {
     //Los tuneles TEs no es necesario fusionar, simplemente reemplazar los viejos por los nuevos
-
-    qDeleteAll(lstDest);
-    lstDest.clear();
-
     lstDest = lstOrigin;
 }
 
@@ -74,17 +69,11 @@ MplsTEtunnelsInfo::MplsTEtunnelsInfo(const MplsTEtunnelsInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    foreach (SMplsTETunnelInfo *ii, other.m_lstMplsTEtunnels)
-    {
-        SMplsTETunnelInfo *ii2 = new SMplsTETunnelInfo(*ii);
-        m_lstMplsTEtunnels.append(ii2);
-    }
+    m_lstMplsTEtunnels = other.m_lstMplsTEtunnels;
 }
 
 MplsTEtunnelsInfo::~MplsTEtunnelsInfo()
-{
-    qDeleteAll(m_lstMplsTEtunnels);
-}
+{}
 
 void MplsTEtunnelsInfo::getMplsTETunnels()
 {
@@ -121,14 +110,14 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             if ( line.contains(exp) )
             {
                 //head
-                tunel = new SMplsTETunnelInfo;
-                tunel->queryParent = m_queriesParent;
-                tunel->datetime = QDateTime::currentDateTime();
-                tunel->operativo = true;
-                tunel->role = "Head";
-                tunel->TuID = exp.cap(1).simplified();
-                tunel->destino = exp.cap(2).simplified();
-                m_lstMplsTEtunnels.append( tunel );
+                SMplsTETunnelInfo i;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                i.role = "Head";
+                i.TuID = exp.cap(1).simplified();
+                i.destino = exp.cap(2).simplified();
+                m_lstMplsTEtunnels.append( i );
+                tunel = &i;
                 continue;
             }
             //LSP Tunnel 172.16.30.2 1 [7603] is signalled, Signaling State: up
@@ -136,12 +125,12 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             if ( line.contains(exp) )
             {
                 //mid tail
-                tunel = new SMplsTETunnelInfo;
-                tunel->queryParent = m_queriesParent;
-                tunel->datetime = QDateTime::currentDateTime();
-                tunel->operativo = true;
-                tunel->status = exp.cap(1).simplified();
-                m_lstMplsTEtunnels.append( tunel );
+                SMplsTETunnelInfo i;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                i.status = exp.cap(1).simplified();
+                m_lstMplsTEtunnels.append( i );
+                tunel = &i;
                 continue;
             }
 
@@ -259,28 +248,28 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             exp.setPattern("Name: (.+)\\(Tunnel\\d+\\) Des");
             if ( line.contains(exp) )
             {
-                tunel = new SMplsTETunnelInfo;
-                tunel->queryParent = m_queriesParent;
-                tunel->datetime = QDateTime::currentDateTime();
-                tunel->operativo = true;
-                tunel->name = exp.cap(1).simplified();
-                tunel->role = "Head";
-                m_lstMplsTEtunnels.append( tunel );
-                qCDebug(mplstetunnels) << "Nuevo tunnel" << tunel->name << tunel->role;
+                SMplsTETunnelInfo i;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                i.name = exp.cap(1).simplified();
+                i.role = "Head";
+                m_lstMplsTEtunnels.append( i );
+                tunel = &i;
+                qCDebug(mplstetunnels) << "Nuevo tunnel" << i.name << i.role;
                 continue;
             }
             //LSP Tunnel FROM-CMY3-TO-WBP is signalled, connection is up
             exp2.setPattern("LSP Tunnel (.+) is .+ connection is (.+)$");
             if ( line.contains(exp2) )
             {
-                tunel = new SMplsTETunnelInfo;
-                tunel->queryParent = m_queriesParent;
-                tunel->datetime = QDateTime::currentDateTime();
-                tunel->operativo = true;
-                tunel->name = exp2.cap(1).simplified();
-                tunel->status = exp2.cap(2).simplified();
-                m_lstMplsTEtunnels.append( tunel );
-                qCDebug(mplstetunnels) << "Nuevo tunnel" << tunel->name << tunel->role;
+                SMplsTETunnelInfo i;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                i.name = exp2.cap(1).simplified();
+                i.status = exp2.cap(2).simplified();
+                m_lstMplsTEtunnels.append( i );
+                tunel = &i;
+                qCDebug(mplstetunnels) << "Nuevo tunnel" << i.name << i.role;
                 continue;
             }
 
@@ -360,12 +349,24 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
 
 SMplsTETunnelInfo *MplsTEtunnelsInfo::mplsTEsFromTunnel(QString interfaz)
 {
-    for ( SMplsTETunnelInfo* mi : m_lstMplsTEtunnels )
+    for ( SMplsTETunnelInfo &mi : m_lstMplsTEtunnels )
     {
-        if ( mi->TuID == interfaz )
-            return mi;
+        if ( mi.TuID == interfaz )
+            return &mi;
     }
     return nullptr;
+}
+
+QDataStream& operator<<(QDataStream& out, const MplsTEtunnelsInfo& info)
+{
+    out << info.m_lstMplsTEtunnels;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, MplsTEtunnelsInfo& info)
+{
+    in >> info.m_lstMplsTEtunnels;
+    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const MplsTEtunnelsInfo* info)
@@ -376,7 +377,7 @@ QDataStream& operator<<(QDataStream& out, const MplsTEtunnelsInfo* info)
 
 QDataStream& operator>>(QDataStream& in, MplsTEtunnelsInfo*& info)
 {
-    info =new MplsTEtunnelsInfo(nullptr,nullptr);
+    info = new MplsTEtunnelsInfo;
     in >> info->m_lstMplsTEtunnels;
     return in;
 }
@@ -385,10 +386,10 @@ QDebug operator<<(QDebug dbg, const MplsTEtunnelsInfo &info)
 {
     dbg.nospace() << "MplsTEtunnels:\n";
 
-    foreach (SMplsTETunnelInfo *i, info.m_lstMplsTEtunnels)
-        dbg.space() << i->TuID << i->name << i->status << i->origen << i->destino
-                    << i->role << i->InterfaceIn << i->InterfaceOut
-                    << i->route << i->autoRouteDestinationsCount << "\n";
+    for (SMplsTETunnelInfo i : info.m_lstMplsTEtunnels)
+        dbg.space() << i.TuID << i.name << i.status << i.origen << i.destino
+                    << i.role << i.InterfaceIn << i.InterfaceOut
+                    << i.route << i.autoRouteDestinationsCount << "\n";
 
     dbg.nospace() << "\n";
 

@@ -69,6 +69,8 @@ void QRemoteShell::host_connect()
         if ( m_socket->state() == QAbstractSocket::ConnectedState ||
              m_socket->error() == QAbstractSocket::ConnectionRefusedError ) //si se rechaza la conexion es alcanzable
         {
+            qCDebug(qremoteshell) << m_ip  << "QRemoteShell::host_connect() reachable" << m_ip;
+
             emit reachable();
 
             m_terminal = new Terminal( m_ip,m_linuxprompt );

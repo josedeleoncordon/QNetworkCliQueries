@@ -7,28 +7,27 @@ SMplsLdpInfo::SMplsLdpInfo(const SMplsLdpInfo &other)
     interfaz = other.interfaz;
 }
 
-QDataStream& operator<<(QDataStream& out, const SMplsLdpInfo* data)
+QDataStream& operator<<(QDataStream& out, const SMplsLdpInfo& data)
 {
-    out << data->interfaz;
-    out << data->neighbor;
+    out << data.interfaz;
+    out << data.neighbor;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SMplsLdpInfo*& data)
+QDataStream& operator>>(QDataStream& in, SMplsLdpInfo& data)
 {
-    data = new SMplsLdpInfo;
-    in >> data->interfaz;
-    in >> data->neighbor;
+    in >> data.interfaz;
+    in >> data.neighbor;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SMplsLdpInfo *> &lstDest, QList<SMplsLdpInfo *> &lstOrigin )
+void updateInfoList(QList<SMplsLdpInfo> &lstDest, QList<SMplsLdpInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -37,28 +36,28 @@ void updateInfoList(QList<SMplsLdpInfo *> &lstDest, QList<SMplsLdpInfo *> &lstOr
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SMplsLdpInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SMplsLdpInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SMplsLdpInfo *origin, lstOrigin )
+    for ( SMplsLdpInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SMplsLdpInfo *dest, lstDest )
+        for ( SMplsLdpInfo &dest : lstDest )
         {
-            if ( origin->interfaz == dest->interfaz )
+            if ( origin.interfaz == dest.interfaz )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->neighbor = origin->neighbor;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.neighbor = origin.neighbor;
                 encontrado=true;
                 break;
             }
@@ -81,17 +80,11 @@ MplsLdpInfo::MplsLdpInfo(const MplsLdpInfo &other):
     m_name = other.m_name;
     m_ip = other.m_ip;
     m_localID = other.m_localID;
-    foreach (SMplsLdpInfo *ii, other.m_lstMplsLdpInfo)
-    {
-        SMplsLdpInfo *ii2 = new SMplsLdpInfo(*ii);
-        m_lstMplsLdpInfo.append(ii2);
-    }
+    m_lstMplsLdpInfo = other.m_lstMplsLdpInfo;
 }
 
 MplsLdpInfo::~MplsLdpInfo()
-{
-    qDeleteAll(m_lstMplsLdpInfo);
-}
+{}
 
 void MplsLdpInfo::getMplsLdpDiscovery()
 {
@@ -190,11 +183,10 @@ void MplsLdpInfo::on_term_receiveTextDiscovery()
             QRegExp exp("(([a-zA-Z]|\\-)+\\d+(/\\d+)*(\\.\\d+)*).+xmit/recv");
             if ( line.contains(exp) )
             {
-                SMplsLdpInfo *sm = new SMplsLdpInfo;
-                sm->queryParent = m_queriesParent;
-                sm->interfaz = estandarizarInterfaz( exp.cap(1) );
-                sm->datetime = QDateTime::currentDateTime();
-                sm->operativo = true;
+                SMplsLdpInfo sm;
+                sm.interfaz = estandarizarInterfaz( exp.cap(1) );
+                sm.datetime = QDateTime::currentDateTime();
+                sm.operativo = true;
                 m_lstMplsLdpInfo.append(sm);
             }
         }
@@ -217,11 +209,10 @@ void MplsLdpInfo::on_term_receiveTextNeighbors()
         exp.setMinimal(false);
         if ( line.contains(exp) )
         {            
-            SMplsLdpInfo *sm = new SMplsLdpInfo;
-            sm->queryParent = m_queriesParent;
-            sm->interfaz = estandarizarInterfaz( exp.cap(0) );
-            sm->datetime = QDateTime::currentDateTime();
-            sm->operativo = true;
+            SMplsLdpInfo sm;
+            sm.interfaz = estandarizarInterfaz( exp.cap(0) );
+            sm.datetime = QDateTime::currentDateTime();
+            sm.operativo = true;
             m_lstMplsLdpInfo.append(sm);
         }
     }
@@ -244,14 +235,27 @@ void MplsLdpInfo::on_term_receiveTextInterfaces()
         if ( !line.contains("Yes") )
             continue;
 
-        SMplsLdpInfo *sm = new SMplsLdpInfo;
-        sm->queryParent = m_queriesParent;
-        sm->interfaz = estandarizarInterfaz( line.split(" ",QString::SkipEmptyParts).at(0) );
-        sm->datetime = QDateTime::currentDateTime();
-        sm->operativo = true;
+        SMplsLdpInfo sm;
+        sm.interfaz = estandarizarInterfaz( line.split(" ",QString::SkipEmptyParts).at(0) );
+        sm.datetime = QDateTime::currentDateTime();
+        sm.operativo = true;
         m_lstMplsLdpInfo.append(sm);
     }
     finished();
+}
+
+QDataStream& operator<<(QDataStream& out, const MplsLdpInfo& info)
+{
+    out << info.m_localID;
+    out << info.m_lstMplsLdpInfo;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, MplsLdpInfo& info)
+{
+    in >> info.m_localID;
+    in >> info.m_lstMplsLdpInfo;
+    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const MplsLdpInfo* info)
@@ -263,7 +267,7 @@ QDataStream& operator<<(QDataStream& out, const MplsLdpInfo* info)
 
 QDataStream& operator>>(QDataStream& in, MplsLdpInfo*& info)
 {
-    info =new MplsLdpInfo(nullptr,nullptr);
+    info = new MplsLdpInfo;
     in >> info->m_localID;
     in >> info->m_lstMplsLdpInfo;
     return in;
@@ -276,8 +280,8 @@ QDebug operator<<(QDebug dbg, const MplsLdpInfo &info)
     if ( !info.m_localID.isEmpty() )
         dbg.space() << "Local ID:" << info.m_localID;
 
-    foreach (SMplsLdpInfo *i, info.m_lstMplsLdpInfo)
-        dbg.space() << i->interfaz << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+    for (SMplsLdpInfo i : info.m_lstMplsLdpInfo)
+        dbg.space() << i.interfaz << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     dbg.nospace() << "\n";
 

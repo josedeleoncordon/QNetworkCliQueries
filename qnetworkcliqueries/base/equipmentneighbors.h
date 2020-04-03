@@ -10,42 +10,47 @@ struct SEquipmentNeighborsInfo : public InfoBase
     QString interfazestesalida;
     QString interfazotroentrada;
     QString plataforma;
-    QList<SEquipmentNeighborsInfo*> lstEquipos;
+    QList<SEquipmentNeighborsInfo> lstEquipos;
 
     SEquipmentNeighborsInfo() {}
     SEquipmentNeighborsInfo(const SEquipmentNeighborsInfo &other);
 };
 
-QDataStream& operator<<(QDataStream& out, const SEquipmentNeighborsInfo* data);
-QDataStream& operator>>(QDataStream& in, SEquipmentNeighborsInfo*& data);
+QDataStream& operator<<(QDataStream& out, const SEquipmentNeighborsInfo &data);
+QDataStream& operator>>(QDataStream& in, SEquipmentNeighborsInfo& data);
 
-void updateInfoList(QList<SEquipmentNeighborsInfo*> &lstDest, QList<SEquipmentNeighborsInfo*> &lstOrigin );
+void updateInfoList(QList<SEquipmentNeighborsInfo> &lstDest, QList<SEquipmentNeighborsInfo> &lstOrigin );
 
 class QNETWORKCLIQUERIES_EXPORT EquipmentNeighborsInfo : public FuncionBase
 {
     Q_OBJECT
 protected:
-    QList<SEquipmentNeighborsInfo*> m_lstEquipos;
+    QList<SEquipmentNeighborsInfo> m_lstEquipos;
 
 public:
     //usada para sacar las interfaces del comando show lldp neigh y usarlas si lldp neigh detail no las muestra
     QMap<QString,QString> mapInterfazLocales;
 
-    EquipmentNeighborsInfo(QRemoteShell *terminal, QObject *parent=0);
+    EquipmentNeighborsInfo() {}
+    EquipmentNeighborsInfo(QRemoteShell *terminal, QObject *parent=nullptr);
     EquipmentNeighborsInfo(const EquipmentNeighborsInfo &other);
     ~EquipmentNeighborsInfo();
     virtual void getEquipmentNeighborsInfo();
 
     //
-    QList<SEquipmentNeighborsInfo*>& equipmentNeighborsInfo() { return m_lstEquipos; }
+    QList<SEquipmentNeighborsInfo>& equipmentNeighborsInfo() { return m_lstEquipos; }
 
     //
     QList<SEquipmentNeighborsInfo*> equipmentNeighborsInfoFromInterface(QString interfaz);
 
     //
-    friend QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo* info);
-    friend QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo*& info);
-    friend QDebug operator<<(QDebug dbg, const EquipmentNeighborsInfo &info);
+    friend QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo& data);
+    friend QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo& data);
+
+    friend QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo* data);
+    friend QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo*& data);
+
+    friend QDebug operator<<(QDebug dbg, const EquipmentNeighborsInfo &data);
 
 private slots:
     void on_term_receiveText_CDP();
@@ -53,5 +58,7 @@ private slots:
     void on_term_receiveText_LLDP_Cisco_detail();
     void on_term_receiveText_LLDP_Huawei();
 };
+
+Q_DECLARE_METATYPE(SEquipmentNeighborsInfo)
 
 #endif // EQUIPMENTNEIGHBORSINFO_H

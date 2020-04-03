@@ -151,7 +151,7 @@ void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
     query->setPassword2( m_pwd2 );
 
     QThread *thr = new QThread(this);
-    query->moveToThread( thr );    
+    query->moveToThread( thr );
 
     connect(thr,SIGNAL(started()),query,SLOT( start()) );
     connect(query,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);
@@ -206,23 +206,23 @@ void QueriesThread::equipoConsultado(Queries *qry)
             if ( m_equipmentNeighborsConsultarVecinos )
             {
                 //agregando vecinos de cdp/llp a la consulta
-                for (SEquipmentNeighborsInfo *e : qry->equipmentNeighborsInfo())
+                for (SEquipmentNeighborsInfo &e : qry->equipmentNeighborsInfo())
                 {
                     validarYagregarVecinoAconsulta( qry,
-                                                    e->ip,
+                                                    e.ip,
                                                     qry->ipOinterfazMismoDominioOSPFDondeSeViene(),
-                                                    e->interfazestesalida,
-                                                    e->interfazotroentrada);
+                                                    e.interfazestesalida,
+                                                    e.interfazotroentrada);
                 }
 
                 //agregando los vecinos de ospf que no se agregaron por cdp/llp a la consulta
-                for ( SOSPFInfo *o : qry->ospfInfo() )
+                for ( SOSPFInfo &o : qry->ospfInfo() )
                 {
-                    QString ipInterfazSiguiente = qry->interfacesIpAddressesQuery->ipFromInterfaz(o->interfaz);
+                    QString ipInterfazSiguiente = qry->interfacesIpAddressesQuery->ipFromInterfaz(o.interfaz);
                     validarYagregarVecinoAconsulta( qry,
-                                                    o->id,
+                                                    o.id,
                                                     qry->ipOinterfazMismoDominioOSPFDondeSeViene(),
-                                                    o->interfaz,
+                                                    o.interfaz,
                                                     ipInterfazSiguiente );
                 }
 
@@ -233,7 +233,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
             //si ya hubiera otra consulta del mismo equipo se elimina porque pudo haberse realizado debido a que
             //se agrego el equipo por equipmentNeighbors cuando aun no existia el mismo, esto ya que hay varios equipos en consulta a la vez
             bool encontrado=false;
-            foreach (Queries *q, lstQueries())
+            for (Queries *q : m_lstQueries)
             {
                 if ( qry->hostName() == q->hostName() &&
                      !qry->hostName().isEmpty() )
@@ -349,7 +349,7 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
     if ( !m_lstIP.contains(ip) &&
          !( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( ip ) ) )
     {
-        //que este en el listado de segmentos
+        //que este en el listado de segmentos de links
         for ( QString segmento : m_lstLinksEnSegmentos )
         {
             bool encontrado=false;
@@ -363,19 +363,32 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                 return;
         }
 
+        //que este en el listado de segmentos de loopbacks
+        for ( QString segmento : m_lstLoopbacksEnSegmentos )
+        {
+            bool encontrado=false;
+            if ( validarIPperteneceAsegmento( ip,segmento) )
+            {
+                encontrado=true;
+                break;
+            }
+            if ( !encontrado )
+                return;
+        }
+
         //ospf area
         if ( !m_consultaOSPFArea.isEmpty() )
         {
-            for ( SOSPFInfo *oi : qry->ospfInfo() )
-                if ( oi->interfaz == interfazEsteEquipoSalida &&
-                     oi->area != m_consultaOSPFArea )
+            for ( SOSPFInfo &oi : qry->ospfInfo() )
+                if ( oi.interfaz == interfazEsteEquipoSalida &&
+                     oi.area != m_consultaOSPFArea )
                     return;
         }
 
         //ospf mismo dominio
         if ( m_consultarVecinosOSPFMismoDominio )
         {
-            if ( !continuarPorsiguienteInterfazMismoDominioOSPF( qry,
+            if ( !continuarPorsiguienteInterfazMismoDominioOSPF( *qry,
                                                                  ipOinterfazDondeSeViene,
                                                                  interfazEsteEquipoSalida ) )
                 return;
@@ -388,6 +401,16 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
         m_mapOSPFVecinosInterfazDondeVienen.insert( ip, interfazSiguienteEquipoEntrada );
     }
     return;
+}
+
+QList<Queries> QueriesThread::lstQueries()
+{
+    QList<Queries> lst;
+
+    for ( Queries *qry : m_lstQueries )
+        lst.append(*qry);
+
+    return lst;
 }
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,
@@ -418,3 +441,5 @@ QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QStr
 
     return salida;
 }
+
+

@@ -27,37 +27,32 @@ SMplsL2VFIInfo::SMplsL2VFIInfo(const SMplsL2VFIInfo &other)
     AC = other.AC;
     descripcion = other.descripcion;
     bridge = other.bridge;
-    for ( SMplsL2PWInfo *i : other.lstPWs )
-    {
-        SMplsL2PWInfo *ii = new SMplsL2PWInfo( *i );
-        lstPWs.append( ii );
-    }
+    lstPWs = other.lstPWs;
 }
 
-QDataStream& operator<<(QDataStream& out, const SMplsL2PWInfo* data)
+QDataStream& operator<<(QDataStream& out, const SMplsL2PWInfo& data)
 {
-    out << data->VCID;
-    out << data->destino;
-    out << data->preferredPath;
-    out << data->remoteDescripcion;
-    out << data->estado;
+    out << data.VCID;
+    out << data.destino;
+    out << data.preferredPath;
+    out << data.remoteDescripcion;
+    out << data.estado;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SMplsL2PWInfo*& data)
+QDataStream& operator>>(QDataStream& in, SMplsL2PWInfo& data)
 {
-    data = new SMplsL2XconnectInfo;
-    in >> data->VCID;
-    in >> data->destino;
-    in >> data->preferredPath;
-    in >> data->remoteDescripcion;
-    in >> data->estado;
+    in >> data.VCID;
+    in >> data.destino;
+    in >> data.preferredPath;
+    in >> data.remoteDescripcion;
+    in >> data.estado;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
@@ -68,69 +63,67 @@ QDebug operator<<(QDebug dbg, const SMplsL2PWInfo &info)
     return dbg.maybeSpace();
 }
 
-QDataStream& operator<<(QDataStream& out, const SMplsL2XconnectInfo* data)
+QDataStream& operator<<(QDataStream& out, const SMplsL2XconnectInfo& data)
 {
-    out << data->VCID;
-    out << data->AC;
-    out << data->destino;
-    out << data->preferredPath;
-    out << data->remoteDescripcion;
-    out << data->estado;
-    out << data->xc;
-    out << data->descripcion;
-    out << data->AC;
+    out << data.VCID;
+    out << data.AC;
+    out << data.destino;
+    out << data.preferredPath;
+    out << data.remoteDescripcion;
+    out << data.estado;
+    out << data.xc;
+    out << data.descripcion;
+    out << data.AC;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SMplsL2XconnectInfo*& data)
+QDataStream& operator>>(QDataStream& in, SMplsL2XconnectInfo& data)
 {
-    data = new SMplsL2XconnectInfo;
-    in >> data->VCID;
-    in >> data->AC;
-    in >> data->destino;
-    in >> data->preferredPath;
-    in >> data->remoteDescripcion;
-    in >> data->estado;
-    in >> data->xc;
-    in >> data->descripcion;
-    in >> data->AC;
+    in >> data.VCID;
+    in >> data.AC;
+    in >> data.destino;
+    in >> data.preferredPath;
+    in >> data.remoteDescripcion;
+    in >> data.estado;
+    in >> data.xc;
+    in >> data.descripcion;
+    in >> data.AC;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-QDataStream& operator<<(QDataStream& out, const SMplsL2VFIInfo* data)
+QDataStream& operator<<(QDataStream& out, const SMplsL2VFIInfo& data)
 {
-    out << data->vfi;
-    out << data->AC;
-    out << data->descripcion;
-    out << data->bridge;
-    out << data->lstPWs;
+    out << data.vfi;
+    out << data.AC;
+    out << data.descripcion;
+    out << data.bridge;
+    out << data.lstPWs;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SMplsL2VFIInfo*& data)
+QDataStream& operator>>(QDataStream& in, SMplsL2VFIInfo& data)
 {
-    data = new SMplsL2VFIInfo;
-    in >> data->vfi;
-    in >> data->AC;
-    in >> data->descripcion;
-    in >> data->bridge;
-    in >> data->lstPWs;
+    in >> data.vfi;
+    in >> data.AC;
+    in >> data.descripcion;
+    in >> data.bridge;
+    in >> data.lstPWs;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SMplsL2XconnectInfo*> &lstDest, QList<SMplsL2XconnectInfo*> &lstOrigin )
+void updateInfoList(QList<SMplsL2XconnectInfo> &lstDest, QList<SMplsL2XconnectInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -139,35 +132,35 @@ void updateInfoList(QList<SMplsL2XconnectInfo*> &lstDest, QList<SMplsL2XconnectI
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SMplsL2XconnectInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SMplsL2XconnectInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SMplsL2XconnectInfo *origin, lstOrigin )
+    for ( SMplsL2XconnectInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SMplsL2XconnectInfo *dest, lstDest )
+        for ( SMplsL2XconnectInfo &dest : lstDest )
         {
-            if ( origin->xc == dest->xc )
+            if ( origin.xc == dest.xc )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->VCID = origin->VCID;
-                dest->AC = origin->AC;
-                dest->destino = origin->destino;
-                dest->preferredPath = origin->preferredPath;
-                dest->remoteDescripcion = origin->remoteDescripcion;
-                dest->estado = origin->estado;
-                dest->descripcion = origin->descripcion;
-                dest->AC = origin->AC;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.VCID = origin.VCID;
+                dest.AC = origin.AC;
+                dest.destino = origin.destino;
+                dest.preferredPath = origin.preferredPath;
+                dest.remoteDescripcion = origin.remoteDescripcion;
+                dest.estado = origin.estado;
+                dest.descripcion = origin.descripcion;
+                dest.AC = origin.AC;
                 encontrado=true;
                 break;
             }
@@ -178,7 +171,7 @@ void updateInfoList(QList<SMplsL2XconnectInfo*> &lstDest, QList<SMplsL2XconnectI
     }
 }
 
-void updateInfoList(QList<SMplsL2VFIInfo*> &lstDest, QList<SMplsL2VFIInfo*> &lstOrigin )
+void updateInfoList(QList<SMplsL2VFIInfo> &lstDest, QList<SMplsL2VFIInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -187,32 +180,32 @@ void updateInfoList(QList<SMplsL2VFIInfo*> &lstDest, QList<SMplsL2VFIInfo*> &lst
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SMplsL2VFIInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SMplsL2VFIInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SMplsL2VFIInfo *origin, lstOrigin )
+    for ( SMplsL2VFIInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SMplsL2VFIInfo *dest, lstDest )
+        for ( SMplsL2VFIInfo &dest : lstDest )
         {
-            if ( origin->vfi == dest->vfi && origin )
+            if ( origin.vfi == dest.vfi )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->vfi = origin->vfi;
-                dest->AC = origin->AC;
-                dest->descripcion = origin->descripcion;
-                dest->bridge = origin->bridge;
-                dest->lstPWs = origin->lstPWs;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.vfi = origin.vfi;
+                dest.AC = origin.AC;
+                dest.descripcion = origin.descripcion;
+                dest.bridge = origin.bridge;
+                dest.lstPWs = origin.lstPWs;
                 encontrado=true;
                 break;
             }
@@ -235,23 +228,12 @@ MplsL2TransportInfo::MplsL2TransportInfo(const MplsL2TransportInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    foreach (SMplsL2XconnectInfo *ii, other.m_lstMplsL2Xconnects)
-    {
-        SMplsL2XconnectInfo *ii2 = new SMplsL2XconnectInfo(*ii);
-        m_lstMplsL2Xconnects.append(ii2);
-    }
-    foreach (SMplsL2VFIInfo *ii, other.m_lstMplsL2VFIs)
-    {
-        SMplsL2VFIInfo *ii2 = new SMplsL2VFIInfo(*ii);
-        m_lstMplsL2VFIs.append(ii2);
-    }
+    m_lstMplsL2Xconnects = other.m_lstMplsL2Xconnects;
+    m_lstMplsL2VFIs = other.m_lstMplsL2VFIs;
 }
 
 MplsL2TransportInfo::~MplsL2TransportInfo()
-{
-    qDeleteAll(m_lstMplsL2Xconnects);
-    qDeleteAll(m_lstMplsL2VFIs);
-}
+{}
 
 void MplsL2TransportInfo::getMplsL2Transport()
 {
@@ -296,9 +278,10 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_VFI()
         QRegExp exp("VFI name: (\\S+), state: \\S+,");
         if ( line.contains(exp) )
         {
-            mvi = new SMplsL2VFIInfo;
-            mvi->vfi = exp.cap( 1 );
-            m_lstMplsL2VFIs.append( mvi );
+            SMplsL2VFIInfo i;
+            i.vfi = exp.cap( 1 );
+            m_lstMplsL2VFIs.append( i );
+            mvi = &i;
         }
 
         if ( !mvi )
@@ -314,10 +297,10 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_VFI()
         exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) (\\d+) \\S");
         if ( line.contains(exp) )
         {
-            SMplsL2PWInfo *pi = new SMplsL2PWInfo;
-            pi->VCID = exp.cap(2);
-            pi->destino = exp.cap(1);
-            mvi->lstPWs.append( pi );
+            SMplsL2PWInfo i;
+            i.VCID = exp.cap(2);
+            i.destino = exp.cap(1);
+            mvi->lstPWs.append( i );
             continue;
         }
     }
@@ -361,9 +344,10 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_L2Transport()
             lastVCID.clear();
             lastDestino.clear();
 
-            mxi = new SMplsL2XconnectInfo;
+            SMplsL2XconnectInfo i;
             mxi->AC = exp.cap(1);
-            m_lstMplsL2Xconnects.append(mxi);
+            m_lstMplsL2Xconnects.append(i);
+            mxi = &i;
         }
 
         if ( !mxi && lastVFI.isEmpty() )
@@ -446,11 +430,11 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_Xconnect()
         QRegExp exp("(UP|DN) \\S+ ac (\\S+):(\\d+)\\(Eth VLAN\\) (UP|DN) mpls (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d+) (UP|DN)");
         if ( line.contains(exp) )
         {
-            for ( SMplsL2XconnectInfo *i : m_lstMplsL2Xconnects )
+            for ( SMplsL2XconnectInfo &i : m_lstMplsL2Xconnects )
             {
-                if ( i->AC == exp.cap(2) && i->VCID == exp.cap(6) && i->destino == exp.cap(5) )
+                if ( i.AC == exp.cap(2) && i.VCID == exp.cap(6) && i.destino == exp.cap(5) )
                 {
-                    i->AC.append( ":"+exp.cap(3) );
+                    i.AC.append( ":"+exp.cap(3) );
                     break;
                 }
             }
@@ -492,9 +476,10 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_BD()
         QRegExp exp("Bridge group: \\S+, bridge-domain: (\\S+),");
         if ( line.contains(exp) )
         {
-            mvi = new SMplsL2VFIInfo;
+            SMplsL2VFIInfo i;
             mvi->bridge = exp.cap(1);
-            m_lstMplsL2VFIs.append(mvi);
+            m_lstMplsL2VFIs.append(i);
+            mvi = &i;
             continue;
         }
 
@@ -525,11 +510,12 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_BD()
         exp.setPattern("PW: neighbor (\\S+), PW ID (\\d+), state is (\\S+) ");
         if ( line.contains(exp) )
         {
-            pw = new SMplsL2PWInfo;
-            pw->destino = exp.cap(1);
-            pw->VCID = exp.cap(2);
-            pw->estado = exp.cap(3);
-            mvi->lstPWs.append(pw);
+            SMplsL2PWInfo i;
+            i.destino = exp.cap(1);
+            i.VCID = exp.cap(2);
+            i.estado = exp.cap(3);
+            mvi->lstPWs.append(i);
+            pw = &i;
         }
 
         exp.setPattern("Preferred path Active : (\\S+),");
@@ -573,9 +559,10 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_Xconnect()
         QRegExp exp("Group \\S+, XC (\\S+), state");
         if ( line.contains(exp) )
         {
-            xi = new SMplsL2XconnectInfo;
-            xi->xc = exp.cap(1);
-            m_lstMplsL2Xconnects.append(xi);
+            SMplsL2XconnectInfo i;
+            i.xc = exp.cap(1);
+            m_lstMplsL2Xconnects.append(i);
+            xi = &i;
             continue;
         }
 
@@ -610,14 +597,14 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_Xconnect()
 
 SMplsL2PWInfo* MplsL2TransportInfo::buscarVFI_PW(QString vfi, QString destino, QString vcid)
 {
-    for ( SMplsL2VFIInfo *i : m_lstMplsL2VFIs )
+    for ( SMplsL2VFIInfo &i : m_lstMplsL2VFIs )
     {
-        if ( i->vfi == vfi  )
+        if ( i.vfi == vfi  )
         {
-           for ( SMplsL2PWInfo *p : i->lstPWs )
+           for ( SMplsL2PWInfo &p : i.lstPWs )
            {
-               if ( p->VCID == vcid && p->destino == destino )
-                   return p;
+               if ( p.VCID == vcid && p.destino == destino )
+                   return &p;
            }
         }
     }
@@ -629,16 +616,30 @@ SMplsL2PWInfo* MplsL2TransportInfo::mplsL2PWfromPreferredPath(QString pp)
     if ( pp.isEmpty() )
         return nullptr;
 
-    for ( SMplsL2VFIInfo *i : m_lstMplsL2VFIs )
-        for ( SMplsL2PWInfo *p : i->lstPWs )
-            if ( p->preferredPath == pp )
-                return p;
+    for ( SMplsL2VFIInfo &i : m_lstMplsL2VFIs )
+        for ( SMplsL2PWInfo &p : i.lstPWs )
+            if ( p.preferredPath == pp )
+                return &p;
 
-    for ( SMplsL2XconnectInfo *i : m_lstMplsL2Xconnects )
-        if ( i->preferredPath == pp )
-            return i;
+    for ( SMplsL2XconnectInfo &i : m_lstMplsL2Xconnects )
+        if ( i.preferredPath == pp )
+            return &i;
 
     return nullptr;
+}
+
+QDataStream& operator<<(QDataStream& out, const MplsL2TransportInfo& info)
+{
+    out << info.m_lstMplsL2Xconnects;
+    out << info.m_lstMplsL2VFIs;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, MplsL2TransportInfo& info)
+{
+    in >> info.m_lstMplsL2Xconnects;
+    in >> info.m_lstMplsL2VFIs;
+    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const MplsL2TransportInfo* info)
@@ -650,7 +651,7 @@ QDataStream& operator<<(QDataStream& out, const MplsL2TransportInfo* info)
 
 QDataStream& operator>>(QDataStream& in, MplsL2TransportInfo*& info)
 {
-    info =new MplsL2TransportInfo(nullptr,nullptr);
+    info = new MplsL2TransportInfo;
     in >> info->m_lstMplsL2Xconnects;
     in >> info->m_lstMplsL2VFIs;
     return in;
@@ -661,18 +662,18 @@ QDebug operator<<(QDebug dbg, const MplsL2TransportInfo &info)
     dbg.nospace() << "MplsL2TransportInfo:\n";
 
     dbg.nospace() << "XConnects:\n";
-    foreach (SMplsL2XconnectInfo *i, info.m_lstMplsL2Xconnects)
-        dbg.space() << i->xc << i->AC << i->descripcion << i->VCID <<
-                       i->estado << i->destino << i->preferredPath << i->remoteDescripcion << "\n";
+    for (SMplsL2XconnectInfo i : info.m_lstMplsL2Xconnects)
+        dbg.space() << i.xc << i.AC << i.descripcion << i.VCID <<
+                       i.estado << i.destino << i.preferredPath << i.remoteDescripcion << "\n";
 
     dbg.nospace() << "\n";
     dbg.nospace() << "VFIs:\n";
-    for ( SMplsL2VFIInfo *i : info.m_lstMplsL2VFIs )
+    for ( SMplsL2VFIInfo i : info.m_lstMplsL2VFIs )
     {
-        dbg.space() << i->vfi << i->bridge << i->descripcion << "\n";
+        dbg.space() << i.vfi << i.bridge << i.descripcion << "\n";
         dbg.space() << " PWs:\n";
-        for ( SMplsL2PWInfo *pw : i->lstPWs )
-            dbg.space() << " " << *pw << "\n";
+        for ( SMplsL2PWInfo pw : i.lstPWs )
+            dbg.space() << " " << pw << "\n";
     }
 
     dbg.nospace() << "\n";

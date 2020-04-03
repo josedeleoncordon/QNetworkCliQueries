@@ -17,10 +17,10 @@ struct SOSPFInfo : InfoBase
    SOSPFInfo(const SOSPFInfo &other);
 };
 
-QDataStream& operator<<(QDataStream& out, const SOSPFInfo* data);
-QDataStream& operator>>(QDataStream& in, SOSPFInfo*& data);
+QDataStream& operator<<(QDataStream& out, const SOSPFInfo& data);
+QDataStream& operator>>(QDataStream& in, SOSPFInfo& data);
 
-void updateInfoList(QList<SOSPFInfo*> &lstDest, QList<SOSPFInfo*> &lstOrigin );
+void updateInfoList(QList<SOSPFInfo> &lstDest, QList<SOSPFInfo> &lstOrigin );
 
 class QNETWORKCLIQUERIES_EXPORT OSPFInfo : public FuncionBase
 {
@@ -32,9 +32,10 @@ protected:
     int m_process;
     bool m_abr;
     bool m_asbr;
-    QList<SOSPFInfo*> m_lstOSPFInfo;
+    QList<SOSPFInfo> m_lstOSPFInfo;
 
 public:
+    OSPFInfo() {}
     OSPFInfo(QRemoteShell *terminal, QObject *parent=0);
     OSPFInfo(const OSPFInfo &other);
     ~OSPFInfo();
@@ -42,7 +43,7 @@ public:
     virtual void getOSPFInfo();
 
     //
-    QList<SOSPFInfo*>& ospfInfo() { return m_lstOSPFInfo; }
+    QList<SOSPFInfo>& ospfInfo() { return m_lstOSPFInfo; }
 
     //
     bool interfaceHasNeighbor(QString);
@@ -51,9 +52,13 @@ public:
     bool isASBR() { return m_asbr; }
 
     //
+    friend QDataStream& operator<<(QDataStream& out, const OSPFInfo& info);
+    friend QDataStream& operator>>(QDataStream& in, OSPFInfo& info);
     friend QDataStream& operator<<(QDataStream& out, const OSPFInfo* info);
     friend QDataStream& operator>>(QDataStream& in, OSPFInfo*& info);
     friend QDebug operator<<(QDebug dbg, const OSPFInfo &info);
 };
+
+Q_DECLARE_METATYPE(SOSPFInfo)
 
 #endif // OSPFINFO_H

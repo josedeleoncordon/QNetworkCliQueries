@@ -13,38 +13,37 @@ SIpInfo::SIpInfo(const SIpInfo &other)
     operativo = other.operativo;
 }
 
-QDataStream& operator<<(QDataStream& out, const SIpInfo* data)
+QDataStream& operator<<(QDataStream& out, const SIpInfo& data)
 {
-    out << data->ip;
-    out << data->vrf;
+    out << data.ip;
+    out << data.vrf;
     //macinfo
-    out << data->mac;
-    out << data->vlan;
-    out << data->interfaz;
-    out << data->age;
+    out << data.mac;
+    out << data.vlan;
+    out << data.interfaz;
+    out << data.age;
     //infobase
-    out << data->datetime;
-    out << data->operativo;
+    out << data.datetime;
+    out << data.operativo;
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, SIpInfo*& data)
+QDataStream& operator>>(QDataStream& in, SIpInfo& data)
 {
-    data = new SIpInfo;
-    in >> data->ip;
-    in >> data->vrf;
+    in >> data.ip;
+    in >> data.vrf;
     //macinfo
-    in >> data->mac;
-    in >> data->vlan;
-    in >> data->interfaz;    
-    in >> data->age;
+    in >> data.mac;
+    in >> data.vlan;
+    in >> data.interfaz;
+    in >> data.age;
     //infobase
-    in >> data->datetime;
-    in >> data->operativo;
+    in >> data.datetime;
+    in >> data.operativo;
     return in;
 }
 
-void updateInfoList(QList<SIpInfo *> &lstDest, QList<SIpInfo *> &lstOrigin )
+void updateInfoList(QList<SIpInfo> &lstDest, QList<SIpInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -53,32 +52,32 @@ void updateInfoList(QList<SIpInfo *> &lstDest, QList<SIpInfo *> &lstOrigin )
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SIpInfo *dest = lstDest.at(c);
-        if ( dest->datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest->operativo )
+        SIpInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
         {
-            dest->operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
             c++;
         }
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    foreach ( SIpInfo *origin, lstOrigin )
+    for ( SIpInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        foreach ( SIpInfo *dest, lstDest )
+        for ( SIpInfo &dest : lstDest )
         {
-            if ( origin->ip == dest->ip &&
-                 origin->vlan == dest->vlan )
+            if ( origin.ip == dest.ip &&
+                 origin.vlan == dest.vlan )
             {
                 //Si se encontro, actualizamos los datos
-                dest->datetime = origin->datetime;
-                dest->operativo = true;
-                dest->interfaz = origin->interfaz;
-                dest->age = origin->age;
-                dest->mac = origin->mac;
-                dest->vrf = origin->vrf;
+                dest.datetime = origin.datetime;
+                dest.operativo = true;
+                dest.interfaz = origin.interfaz;
+                dest.age = origin.age;
+                dest.mac = origin.mac;
+                dest.vrf = origin.vrf;
                 encontrado=true;
                 break;
             }
@@ -102,11 +101,7 @@ ArpInfo::ArpInfo(const ArpInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    foreach (SIpInfo *ii, other.m_lstArp)
-    {
-        SIpInfo *ii2 = new SIpInfo(*ii);
-        m_lstArp.append(ii2);
-    }
+    m_lstArp = other.m_lstArp;
     m_vrfsPos=-1;
     m_vrfs = other.m_vrfs;
     m_vrf = other.m_vrf;
@@ -115,9 +110,7 @@ ArpInfo::ArpInfo(const ArpInfo &other):
 }
 
 ArpInfo::~ArpInfo()
-{
-    qDeleteAll(m_lstArp);
-}
+{}
 
 void ArpInfo::getArpInfo()
 {
@@ -126,32 +119,45 @@ void ArpInfo::getArpInfo()
 
 QString ArpInfo::macFromIP(QString ip)
 {
-    foreach (SIpInfo *m, m_lstArp)
+    for (SIpInfo &m : m_lstArp)
     {
-        if ( ip == m->ip )
-            return m->mac;
+        if ( ip == m.ip )
+            return m.mac;
     }
     return "";
 }
 
+QDataStream& operator<<(QDataStream& out, const ArpInfo& info)
+{
+    out << info.m_lstArp;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, ArpInfo& info)
+{
+    in >> info.m_lstArp;
+    return in;
+}
+
 QDataStream& operator<<(QDataStream& out, const ArpInfo* info)
 {
-    out << info->m_lstArp;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, ArpInfo*& info)
 {
-    info = new ArpInfo(nullptr,nullptr);
-    in >> info->m_lstArp;
+    info = new ArpInfo;
+    in >> *info;
     return in;
 }
 
 QDebug operator<<(QDebug dbg, const ArpInfo &info)
 {
     dbg.nospace() << "ArpInfo:\n";
-    foreach (SIpInfo *i, info.m_lstArp)
-        dbg.space() << i->ip << i->mac << i->vlan << i->age << i->vrf << i->interfaz << i->datetime.toString("yyyy-MM-dd_hh:mm:ss") << i->operativo << "\n";
+    for (SIpInfo i : info.m_lstArp)
+        dbg.space() << i.ip << i.mac << i.vlan << i.age << i.vrf
+                    << i.interfaz << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << i.operativo << "\n";
 
     dbg.nospace() << "\n";
 
