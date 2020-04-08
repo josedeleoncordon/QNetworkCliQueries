@@ -117,7 +117,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 i.TuID = exp.cap(1).simplified();
                 i.destino = exp.cap(2).simplified();
                 m_lstMplsTEtunnels.append( i );
-                tunel = &i;
+                tunel = &m_lstMplsTEtunnels.last();
                 continue;
             }
             //LSP Tunnel 172.16.30.2 1 [7603] is signalled, Signaling State: up
@@ -130,7 +130,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 i.operativo = true;
                 i.status = exp.cap(1).simplified();
                 m_lstMplsTEtunnels.append( i );
-                tunel = &i;
+                tunel = &m_lstMplsTEtunnels.last();
                 continue;
             }
 
@@ -254,7 +254,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 i.name = exp.cap(1).simplified();
                 i.role = "Head";
                 m_lstMplsTEtunnels.append( i );
-                tunel = &i;
+                tunel = &m_lstMplsTEtunnels.last();
                 qCDebug(mplstetunnels) << "Nuevo tunnel" << i.name << i.role;
                 continue;
             }
@@ -268,7 +268,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 i.name = exp2.cap(1).simplified();
                 i.status = exp2.cap(2).simplified();
                 m_lstMplsTEtunnels.append( i );
-                tunel = &i;
+                tunel = &m_lstMplsTEtunnels.last();
                 qCDebug(mplstetunnels) << "Nuevo tunnel" << i.name << i.role;
                 continue;
             }

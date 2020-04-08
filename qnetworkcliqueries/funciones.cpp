@@ -195,6 +195,7 @@ bool validateIpQuery(Queries &qry, QString ip)
     //validamos primero la ip, si la enviada concide exactamente se devuleve
     if ( qry.ip() == ip )
         return true;
+
     else if ( qry.interfacesIpAddressesQuery )
     {
         //el query tiene informacion de las ips del equipo. Validamos la IP
@@ -794,14 +795,15 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
             }
         }
 
-        //no se logro encontrar la interfaz a la que pertenece la ip, no se puede continuar
-        return false;
+        if ( interfazDeDondeSeViene.isEmpty() )
+            return false;
     }
 
     //buscamos el proceso de la interfaz de donde se viene
     interfazDeDondeSeViene = interfaceToPortChannelInterface(q.portChannelInfo(),
                                                              interfazDeDondeSeViene,
                                                              q.platform());
+
     for ( SOSPFInfo &oi : q.ospfInfo() )
     {
         if ( oi.interfaz == interfazDeDondeSeViene )
@@ -810,6 +812,7 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
             break;
         }
     }
+
     if ( ospfProceso.isEmpty() )
         return false;
 
@@ -817,6 +820,7 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
     interfazSiguienteEquipo = interfaceToPortChannelInterface(q.portChannelInfo(),
                                                               interfazSiguienteEquipo,
                                                               q.platform());
+
     for ( SOSPFInfo &oi : q.ospfInfo() )
     {
         if ( oi.interfaz == interfazSiguienteEquipo )

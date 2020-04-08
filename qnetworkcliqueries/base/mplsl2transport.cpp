@@ -281,7 +281,7 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_VFI()
             SMplsL2VFIInfo i;
             i.vfi = exp.cap( 1 );
             m_lstMplsL2VFIs.append( i );
-            mvi = &i;
+            mvi = &m_lstMplsL2VFIs.last();
         }
 
         if ( !mvi )
@@ -347,7 +347,7 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_L2Transport()
             SMplsL2XconnectInfo i;
             mxi->AC = exp.cap(1);
             m_lstMplsL2Xconnects.append(i);
-            mxi = &i;
+            mxi = &m_lstMplsL2Xconnects.last();
         }
 
         if ( !mxi && lastVFI.isEmpty() )
@@ -479,7 +479,7 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_BD()
             SMplsL2VFIInfo i;
             mvi->bridge = exp.cap(1);
             m_lstMplsL2VFIs.append(i);
-            mvi = &i;
+            mvi = &m_lstMplsL2VFIs.last();
             continue;
         }
 
@@ -515,7 +515,7 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_BD()
             i.VCID = exp.cap(2);
             i.estado = exp.cap(3);
             mvi->lstPWs.append(i);
-            pw = &i;
+            pw = &mvi->lstPWs.last();
         }
 
         exp.setPattern("Preferred path Active : (\\S+),");
@@ -562,7 +562,7 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_Xconnect()
             SMplsL2XconnectInfo i;
             i.xc = exp.cap(1);
             m_lstMplsL2Xconnects.append(i);
-            xi = &i;
+            xi = &m_lstMplsL2Xconnects.last();
             continue;
         }
 
