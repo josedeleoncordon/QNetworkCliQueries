@@ -32,7 +32,7 @@ public:
     void setInterval(int interval) { m_interval = interval; }
     void setSimultaneos(int simultaneos) { m_simultaneos = simultaneos; }
     void setMaxParalelos(int max) { m_maxparalelos = max; }
-    void setOpciones(int opciones) { m_opciones = opciones; }
+    void setOpciones(uint opciones);
     void setEquipmentNeighborsConsultarVecinos(bool consultar) { m_equipmentNeighborsConsultarVecinos=consultar; }
     void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
     void setEquipmentNeighborsOSPFArea(QString area) { m_consultaOSPFArea=area; }
@@ -78,7 +78,7 @@ private:
    QStringList lstIPsConsultaAnterior;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;
    int m_lstIpPos;
-   int m_opciones;
+   uint m_opciones;
    int m_simultaneos; //cantidad de equipos se suman al mismo tiempo al grupo,
    QStringList m_equiposenconsulta;
    QStringList m_lstLinksEnSegmentos;
@@ -107,6 +107,7 @@ private:
    QMutex m_mutex;
    QMap<QString,QString> m_mapOSPFVecinosInterfazDondeVienen;
 
+   void _clear();
    void conectarOtroEquipo(QString ip, bool gw=false);
    void validarYagregarVecinoAconsulta(Queries *qry,
                                        QString ip,

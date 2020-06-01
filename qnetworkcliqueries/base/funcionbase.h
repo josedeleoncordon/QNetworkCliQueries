@@ -23,6 +23,7 @@ class Queries;
 
 struct InfoBase
 {
+    QString equipo;
     QDateTime datetime;
     bool operativo;
 
@@ -35,10 +36,11 @@ class QNETWORKCLIQUERIES_EXPORT QueriesConfigurationValue
 public:
 
     QString _key;
-    QVariant _value;
-    QString _IP;
+    QString _value;
+    QString _IPoPlatform;
+    bool _appendValue;
 
-    QueriesConfigurationValue(QString key, QVariant value, QString IP="*");
+    QueriesConfigurationValue(QString key, QString value, QString IPoPlataforma, bool appendValue=true);
     QueriesConfigurationValue(const QueriesConfigurationValue &other);
     QueriesConfigurationValue() {}
 
@@ -54,7 +56,7 @@ private:
     QList<QueriesConfigurationValue> m_lstQueryParameters;
     QList<QueriesConfigurationValue> m_lstConfiguration;
 
-    QVariant m_find(QString parameter, QString IP);
+    QVariant m_find(QString parameter, QString IP, QString platform);
 
 public:
     QueriesConfiguration();
@@ -63,13 +65,15 @@ public:
     void addQueryParameter(const QList<QueriesConfigurationValue>&);
     void addConfiguration(const QList<QueriesConfigurationValue>&);
 
-    bool state(QString paramete, QString IP);
-    QString value(QString parameter, QString IP);
-    QStringList values(QString parameter, QString IP);
+    bool state(QString parameter, QString IP, QString platform);
+    QString value(QString parameter, QString IP, QString platform);
+    QStringList values(QString parameter, QString IP, QString platform);
 
     QString configuration(QString platform, QString os, QString IP);
 
     QList<QueriesConfigurationValue> lstQueryParameters() { return m_lstQueryParameters; }
+
+    void clear();
 };
 
 class QNETWORKCLIQUERIES_EXPORT FuncionBase : public QObject

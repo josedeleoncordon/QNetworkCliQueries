@@ -28,7 +28,7 @@ MacInfoRAD::~MacInfoRAD()
 
 void MacInfoRAD::getMacInfo()
 {
-    m_mac = QueriesConfiguration::instance()->value("MAC_MAC",m_ip);
+    m_mac = QueriesConfiguration::instance()->value("MAC_MAC",m_ip,m_os);
     if ( m_platform == "ETX-1" )
     {
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextETX1()));
@@ -90,7 +90,7 @@ void MacInfoRAD::on_term_receiveTextETX1()
             m.vlan = expmac.cap(1);
 
             //verificando si la mac esta en la vlans permitidas, si se configuro
-            QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip);
+            QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip,m_os);
             if ( vlanfilter.isEmpty() )
                 m_lstMacs.append(m);
             else

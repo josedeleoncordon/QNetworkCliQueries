@@ -1,4 +1,5 @@
 #include "bgpinfo.h"
+#include "queries.h"
 
 SBGPNetwork::SBGPNetwork(const SBGPNetwork &other)
 {
@@ -11,6 +12,7 @@ SBGPNetwork::SBGPNetwork(const SBGPNetwork &other)
     //infobase
     datetime = other.datetime;
     operativo = other.operativo;
+    equipo = other.equipo;
 }
 
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNetwork& data)
@@ -24,6 +26,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNe
     //infobase
     out << data.datetime;
     out << data.operativo;
+    out << data.equipo;
     return out;
 }
 
@@ -38,6 +41,33 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNetwork& 
     //infobase
     in >> data.datetime;
     in >> data.operativo;
+    in >> data.equipo;
+    return in;
+}
+
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNeighbor &data)
+{
+    out << data.neighborip;
+    out << data.as;
+    out << data.upDownTime;
+    out << data.prfxRcd;
+    //infobase
+    out << data.datetime;
+    out << data.operativo;
+    out << data.equipo;
+    return out;
+}
+
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNeighbor& data)
+{
+    in >> data.neighborip;
+    in >> data.as;
+    in >> data.upDownTime;
+    in >> data.prfxRcd;
+    //infobase
+    in >> data.datetime;
+    in >> data.operativo;
+    in >> data.equipo;
     return in;
 }
 
@@ -52,6 +82,7 @@ QNETWORKCLIQUERIES_EXPORT QDBusArgument& operator<<(QDBusArgument &argument, con
     argument << data.path;
     argument << data.datetime;
     argument << data.operativo;
+    argument << data.equipo;
     argument.endStructure();
     return argument;
 }
@@ -67,15 +98,14 @@ QNETWORKCLIQUERIES_EXPORT const QDBusArgument& operator>>(const QDBusArgument& a
     argument >> data.path;
     argument >> data.datetime;
     argument >> data.operativo;
+    argument >> data.equipo;
     argument.endStructure();
     return argument;
 }
 
 BGPInfo::BGPInfo(QRemoteShell *terminal, QObject *parent):
     FuncionBase(terminal,parent)
-{
-    m_type = IPV4;
-}
+{}
 
 BGPInfo::BGPInfo(const BGPInfo &other):
     FuncionBase(other.term,other.parent())
@@ -84,7 +114,7 @@ BGPInfo::BGPInfo(const BGPInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_lstIPs = other.m_lstIPs;
+    m_lstNeigbors= other.m_lstNeigbors;
     m_lstNetworks = other.m_lstNetworks;
     m_type = other.m_type;
 }
@@ -99,16 +129,24 @@ void BGPInfo::getBGPNeighbors()
     }    
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_BGPNeighbors()));
 
-    m_type = QueriesConfiguration::instance()->value("BGPNeig_Type",m_ip);
-    if ( m_type.isEmpty() )
-        m_type = "VPNV4";
+    m_type = QueriesConfiguration::instance()->value("BGPNeig_Type",m_ip,m_os);
 
-    if ( m_type == "VPNV4" )
+    if ( m_type.isEmpty() )
+        m_type = "IPV4";
+
+    if ( m_type == "IPV4" )
+    {
+        if ( m_os == "IOS XR" )
+            termSendText("show bgp ipv4 labeled-unicast summary");
+        else
+            termSendText("sh bgp ipv4 unicast summary");
+    }
+    else if ( m_type == "VPNV4" )
     {
         if ( m_os == "IOS XR" )
             termSendText("sh bgp vpnv4 unicast summary");
         else
-            termSendText("sh ip bgp vpnv4 all summary");
+            termSendText("sh bgp vpnv4 unicast all summary");
     }
 }
 
@@ -119,14 +157,23 @@ void BGPInfo::on_term_receiveText_BGPNeighbors()
         return;
 
     QStringList lines = txt.split("\n");
-    foreach (QString line, lines)
+    for (QString line : lines)
     {
         exp.setPattern("^(\\d+\\.\\d+\\.\\d+\\.\\d+).+");
         if ( ! line.contains(exp) )
             continue;
 
         QStringList data = line.split(" ",QString::SkipEmptyParts);
-        m_lstIPs.append( data.at(0).simplified() );
+        if ( data.size() < 10 )
+            continue;
+
+        SBGPNeighbor s;
+        s.neighborip = data.at(0).simplified();
+        s.as = data.at(2).simplified();
+        s.upDownTime = data.at(8).simplified();
+        s.prfxRcd = data.at(9).simplified();
+
+        m_lstNeigbors.append(s);
     }
     finished();
 }
@@ -141,10 +188,13 @@ void BGPInfo::getNetworks()
     }
 
     m_neighborsPos=-1;
-    m_neighborIPs = QueriesConfiguration::instance()->values("BGPNetworks_NeighborIP",m_ip);
-    m_vrf = QueriesConfiguration::instance()->value("BGPNetworks_VRF",m_ip);
-    m_community = QueriesConfiguration::instance()->value("BGPNetworks_Community",m_ip);
-    m_neighbor_int_out = QueriesConfiguration::instance()->value("BGPNetworks_NeighborIn_Out",m_ip);
+    m_neighborIPs = QueriesConfiguration::instance()->values("BGPNetworks_NeighborIP",m_ip,m_os);
+    m_vrf = QueriesConfiguration::instance()->value("BGPNetworks_VRF",m_ip,m_os);
+    m_community = QueriesConfiguration::instance()->value("BGPNetworks_Community",m_ip,m_os);
+    m_neighbor_int_out = QueriesConfiguration::instance()->value("BGPNetworks_NeighborIn_Out",m_ip,m_os);
+
+    qDebug() << "\n BGP getNetworks";
+    qDebug() << m_vrf << m_neighborIPs;
 
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_networks()));
 
@@ -225,7 +275,7 @@ void BGPInfo::on_term_receiveText_networks()
             continue;
 
         //Advertised-routes
-        exp.setPattern("(\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+) +(\\d+\\.\\d+\\.\\d+\\.\\d+) +(\\d+\\.\\d+\\.\\d+\\.\\d+) ");
+        exp.setPattern("(\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+) +(\\d+\\.\\d+\\.\\d+\\.\\d+) +((\\d+\\.\\d+\\.\\d+\\.\\d+|Local)) ");
         if ( line.contains(exp) )
         {
             SBGPNetwork s;
@@ -237,6 +287,7 @@ void BGPInfo::on_term_receiveText_networks()
             s.path = line.mid( pathi ).replace("i","").simplified();
             s.operativo = true;
             s.datetime = QDateTime::currentDateTime();
+            s.equipo = m_parentQuery->hostName();
 
             m_lstNetworks.append(s);
             continue;
@@ -254,6 +305,7 @@ void BGPInfo::on_term_receiveText_networks()
             s.path = line.mid( pathi ).replace("i","").simplified();
             s.operativo = true;
             s.datetime = QDateTime::currentDateTime();
+            s.equipo = m_parentQuery->hostName();
 
             m_lstNetworks.append(s);
             continue;
@@ -269,6 +321,7 @@ void BGPInfo::on_term_receiveText_networks()
             s.path = line.mid( pathi ).replace("i","").simplified();
             s.operativo = true;
             s.datetime = QDateTime::currentDateTime();
+            s.equipo = m_parentQuery->hostName();
 
             m_lstNetworks.append(s);
             continue;
@@ -283,21 +336,21 @@ void BGPInfo::on_term_receiveText_networks()
 
 QDataStream& operator<<(QDataStream& out, const BGPInfo& info)
 {
-    out << info.m_lstIPs;
+    out << info.m_lstNeigbors;
     out << info.m_lstNetworks;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, BGPInfo& info)
 {
-    in >> info.m_lstIPs;
+    in >> info.m_lstNeigbors;
     in >> info.m_lstNetworks;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const BGPInfo* info)
 {
-    out << info->m_lstIPs;
+    out << info->m_lstNeigbors;
     out << info->m_lstNetworks;
     return out;
 }
@@ -305,7 +358,7 @@ QDataStream& operator<<(QDataStream& out, const BGPInfo* info)
 QDataStream& operator>>(QDataStream& in, BGPInfo*& info)
 {
     info =new BGPInfo(nullptr,nullptr);
-    in >> info->m_lstIPs;
+    in >> info->m_lstNeigbors;
     in >> info->m_lstNetworks;
     return in;
 }
@@ -314,11 +367,11 @@ QDebug operator<<(QDebug dbg, const BGPInfo &info)
 {
     dbg.nospace() << "\n";
 
-    if ( !info.m_lstIPs.isEmpty() )
+    if ( !info.m_lstNeigbors.isEmpty() )
     {
         dbg.nospace() << "BGPNeighbor:\n";
-        for (QString i : info.m_lstIPs)
-            dbg.space() << i << "\n";
+        for (SBGPNeighbor i: info.m_lstNeigbors)
+            dbg.space() << i.neighborip << i.as << i.upDownTime << i.prfxRcd << "\n";
     }
 
     if ( !info.m_lstNetworks.isEmpty() )

@@ -23,7 +23,7 @@ MacInfoHuawei::~MacInfoHuawei()
 
 void MacInfoHuawei::getMacInfo()
 {
-    m_mac = QueriesConfiguration::instance()->value("MAC_MAC",m_ip);
+    m_mac = QueriesConfiguration::instance()->value("MAC_MAC",m_ip,m_os);
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
     termSendText("display mac-address");
 }
@@ -65,7 +65,7 @@ void MacInfoHuawei::on_term_receiveText()
         }
 
         //verificando si la mac esta en la vlans permitidas, si se configuro
-        QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip);
+        QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip,m_os);
         if ( vlanfilter.isEmpty() )
             m_lstMacs.append(mac);
         else

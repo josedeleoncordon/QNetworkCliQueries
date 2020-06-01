@@ -133,10 +133,10 @@ public:
     QString& vrfFromRTInfo() { return vrfFromRTQuery->vrfFromRTInfo(); }
     QList<SVrfInfo>& vrfsInfo() { return vrfsQuery->vrfsInfo(); } //
     QList<SIpInfo>& arpsInfo() { return arpsQuery->arpInfo(); } //
-    QStringList& bgpNeighborsInfo() { return bgpNeighborsQuery->bgpNeighborInfo(); }
+	QList<SBGPNeighbor>& bgpNeighborsInfo() { return bgpNeighborsQuery->bgpNeighborInfo(); }
     QList<SBGPNetwork>& bgpNetworksInfo() { return bgpNetworksQuery->bgpNetworksInfo(); }
     QList<SIpRouteInfo>& ipRoutesInfo() { return ipRoutesQuery->ipRouteInfo(); }
-    QString& funcionTxtInfo() { return funcionQuery->txtReceived(); }
+	QString funcionTxtInfo() { return funcionQuery->txtReceived(); }
 
     void setId(QString id) { m_id = id; }
     void setGW(QString GW); //
@@ -178,6 +178,7 @@ protected slots:
     void processPlatform(); //
     void processConfigFinished(); //
     void processFinished(); //
+    void processExit();
     void processKeepWorking(); //
     void on_m_keepAliveTimer_timeout(); //
     void on_query_lastCommand(QString); //

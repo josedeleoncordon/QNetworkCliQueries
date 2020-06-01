@@ -57,19 +57,19 @@ void QRemoteShell::host_connect()
 {
     if ( m_gw.isEmpty() )
     {
-        //conexion directa al equipo
-        if ( m_socket )
-            delete m_socket;
+//        //conexion directa al equipo
+//        if ( m_socket )
+//            delete m_socket;
 
-        qCDebug(qremoteshell) << m_ip  << "QRemoteShell::host_connect()" << m_ip;
-        m_socket = new QTcpSocket(this); //usamos un socket para ver si el equipo es alcanzable
-        m_socket->connectToHost( m_ip, 1 );
-        m_socket->waitForConnected(10000);
+//        qCDebug(qremoteshell) << m_ip  << "QRemoteShell::host_connect()" << m_ip;
+//        m_socket = new QTcpSocket(this); //usamos un socket para ver si el equipo es alcanzable
+//        m_socket->connectToHost( m_ip, 1 );
+//        m_socket->waitForConnected(20000);
 
-        if ( m_socket->state() == QAbstractSocket::ConnectedState ||
-             m_socket->error() == QAbstractSocket::ConnectionRefusedError ) //si se rechaza la conexion es alcanzable
-        {
-            qCDebug(qremoteshell) << m_ip  << "QRemoteShell::host_connect() reachable" << m_ip;
+//        if ( m_socket->state() == QAbstractSocket::ConnectedState ||
+//             m_socket->error() == QAbstractSocket::ConnectionRefusedError ) //si se rechaza la conexion es alcanzable
+//        {
+//            qCDebug(qremoteshell) << m_ip  << "QRemoteShell::host_connect() reachable" << m_ip;
 
             emit reachable();
 
@@ -77,13 +77,13 @@ void QRemoteShell::host_connect()
             connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool)));
             connect(m_terminal,SIGNAL(receivedData(QString)),SLOT(m_terminal_detaReceived(QString)));
             connect(m_terminal,SIGNAL(finished()),SLOT(m_terminal_finished()));
-        }
-        else //SocketTimeoutError no alcanzable
-        {
-            qCDebug(qremoteshell) << m_ip  << "equipo no alcanzable";
-            host_disconnect();
-        }
-        m_socket->close();
+//        }
+//        else //SocketTimeoutError no alcanzable
+//        {
+//            qCDebug(qremoteshell) << m_ip  << "equipo no alcanzable" << m_socket->state() <<  m_socket->error();
+//            host_disconnect();
+//        }
+//        m_socket->close();
     }
     else
     {

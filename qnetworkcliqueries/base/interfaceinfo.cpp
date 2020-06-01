@@ -283,8 +283,8 @@ InterfaceInfo::~InterfaceInfo()
 void InterfaceInfo::getInterfacesInfo()
 {
     m_interfacesPos=-1;
-    m_interfaces = QueriesConfiguration::instance()->values("InterfaceInfo_Interfaces",m_ip);
-    m_onlyphysicalinterfaces = QueriesConfiguration::instance()->state("InterfaceInfo_XRonlyPhisical",m_ip);
+    m_interfaces = QueriesConfiguration::instance()->values("InterfaceInfo_Interfaces",m_ip,m_os);
+    m_onlyphysicalinterfaces = QueriesConfiguration::instance()->state("InterfaceInfo_XRonlyPhisical",m_ip,m_os);
 
     _getInterfacesInfoNextInteface();
 }

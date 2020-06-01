@@ -24,9 +24,10 @@ QStringList lstGrupos()
 
 QString equipmentOSFromPlatform(QString platform)
 {
+    QRegExp expNCS("NCS-[5-6]\\d{3,}");
     if ( platform.contains("ASR9K") ||
          platform.contains("CRS") ||
-         platform.contains("NCS-6000") )
+         platform.contains(expNCS) )
         return "IOS XR";
     else if ( platform.contains("mwr") ||
               platform.contains("760") ||
@@ -62,6 +63,22 @@ QString openFile(QString path)
     QString txt = in.readAll();
     file.close();
     return txt;
+}
+
+QStringList openFile2List( QString path, bool eliminarDuplicados )
+{
+    QStringList lst;
+    QStringList lstmie = openFile( path ).split("\n",QString::SkipEmptyParts);
+    if ( eliminarDuplicados )
+    {
+        for ( QString line : lstmie )
+            if ( !lst.contains( line ) )
+                lst.append(line);
+    }
+    else
+        lst = lstmie;
+
+    return lst;
 }
 
 void saveFile(QString txt, QString path, QIODevice::OpenModeFlag openmode)

@@ -83,6 +83,7 @@ IPRouteInfo::IPRouteInfo(QRemoteShell *terminal, QObject *parent):
     FuncionBase(terminal,parent)
 {
     m_vrfsPos=-1;
+    m_redPos=-1;
 }
 
 IPRouteInfo::IPRouteInfo(const IPRouteInfo &other):
@@ -109,17 +110,35 @@ void IPRouteInfo::getIPRouteInfo()
         return;
     }
 
-    m_vrfs = QueriesConfiguration::instance()->values("IPRoutes_VRFs",m_ip);
-    m_protocol = QueriesConfiguration::instance()->value("IPRoutes_protocol",m_ip);
+    m_vrfs = QueriesConfiguration::instance()->values("IPRoutes_VRFs",m_ip,m_os);
+    m_protocol = QueriesConfiguration::instance()->value("IPRoutes_protocol",m_ip,m_os);
+    m_redes = QueriesConfiguration::instance()->values("IPRoutes_redes",m_ip,m_os);
 
     if ( m_vrfs.isEmpty() )
         m_vrfs.append(""); //para la global
 
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
-    m_siguienteVRF();
+    if ( m_redes.isEmpty() ) {
+        //consulta de tabla completa
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_general()));
+        m_generalSiguienteVRF();
+    }
+    else {
+        if ( m_vrfs.size() == 1 )
+        {
+            //consulta de rutas individuales
+            m_vrf = m_vrfs.first();
+            connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_individual()));
+            m_individualSiguienteRed();
+        }
+        else {
+            qDebug() << "IPRouteInfo::getIPRouteInfo() consulta individual de rutas. Unicamente establecer un maximo de 1 vrf";
+            finished();
+            return;
+        }
+    }
 }
 
-void IPRouteInfo::m_siguienteVRF()
+void IPRouteInfo::m_generalSiguienteVRF()
 {
     if ( m_vrfsPos < m_vrfs.size()-1 )
     {
@@ -137,7 +156,7 @@ void IPRouteInfo::m_siguienteVRF()
         finished();
 }
 
-void IPRouteInfo::on_term_receiveText()
+void IPRouteInfo::on_term_receiveText_general()
 {
     txt.append(term->dataReceived());
     if ( !allTextReceived() )
@@ -279,7 +298,68 @@ void IPRouteInfo::on_term_receiveText()
             }
         }
     }
-    m_siguienteVRF();
+    m_generalSiguienteVRF();
+}
+
+void IPRouteInfo::m_individualSiguienteRed()
+{
+    if ( m_redPos < m_redes.size()-1 )
+    {
+        m_redPos++;
+        m_red = m_redes.at( m_redPos );
+        m_red.replace( QRegExp("/\\d+"),"" );
+
+        if ( m_brand == "Cisco" )
+            termSendText("sh ip route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" "+m_red );
+        else
+        {
+            finished();
+            return;
+        }
+    }
+    else
+        finished();
+}
+
+void IPRouteInfo::on_term_receiveText_individual()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    SIpRouteInfo *route = nullptr;
+
+    for (QString line : lines)
+    {
+        line = line.simplified();
+
+        QRegExp exp("Routing entry for (\\S+)/(\\d+)$");
+        if ( line.contains(exp) )
+        {
+            SIpRouteInfo ri;
+            ri.vrf = m_vrf;
+            ri.network = exp.cap(1);
+            ri.mask = exp.cap(2);
+            ri.datetime = QDateTime::currentDateTime();
+            ri.operativo = true;
+            m_lstRoutes.append(ri);
+            route = &m_lstRoutes.last();
+            continue;
+        }
+
+        if ( !route )
+            continue;
+
+        exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*, from ");
+        if ( line.contains(exp) )
+        {
+            route->via.append( exp.cap(1) );
+            continue;
+        }
+    }
+
+    m_individualSiguienteRed();
 }
 
 QDataStream& operator<<(QDataStream& out, const IPRouteInfo& info)

@@ -24,6 +24,8 @@ Terminal::Terminal(QString debugIP, QString linuxprompt, QObject *parent) : QObj
 
     m_linuxprompt = linuxprompt;
 
+    qDebug() << "m_linuxprompt" << m_linuxprompt;
+
     _timer=new QTimer;
     _timer->setInterval(3000);
     _timer->setSingleShot(true);
@@ -62,8 +64,6 @@ Terminal::~Terminal()
 void Terminal::onReceiveBlock( const char * buf, int len )
 {
     QString received = QString::fromLatin1( buf, len ).toLatin1();
-
-    //qCDebug(terminal) << _debugIP << "onReceiveBlock" << received;
 
     if ( !_ready )
     {

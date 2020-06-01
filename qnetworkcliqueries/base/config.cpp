@@ -19,7 +19,7 @@ Config::~Config() {}
 
 void Config::configApply()
 {
-    m_config = QueriesConfiguration::instance()->configuration( m_platform,m_os,m_ip );
+//	m_config = QueriesConfiguration::instance()->configuration( m_platform,m_os,m_ip );   modificar segun comentario dentro de QueriesConfiguration
 
     m_lstComandos = m_config.split("\n",QString::SkipEmptyParts);
 

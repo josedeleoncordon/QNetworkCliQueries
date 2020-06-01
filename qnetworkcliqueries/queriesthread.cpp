@@ -11,21 +11,14 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_simultaneos=0;
     m_maxparalelos=0;
     m_opciones=0;
-    m_consultaSimultaneos=0;
-    m_equiposConsultados=0;
-    m_conerrores=0;
-    m_sinconexion=0;
-    m_equiposExitosos=0;
-    m_conexionerrores=0;
-    m_lstIpPos=-1;
-    m_equiposPorGWenConsulta=0;
     m_connectionprotocol = QRemoteShell::SSHTelnet;
-    m_detener=false;
-    m_cancelar=false;
     m_principaluserfirst=true;
     m_soloequiposnuevos=false;
     m_consultarVecinosOSPFMismoDominio=false;
     m_equipmentNeighborsConsultarVecinos=false;
+    m_timer = nullptr;
+    m_timerActivity = nullptr;
+    _clear();
 
     m_user = Properties::Instance()->user;
     m_password = Properties::Instance()->password;
@@ -36,6 +29,41 @@ QueriesThread::~QueriesThread()
 {
     //TODO verificar porq truena al eliminar m_lstIP
 //    qDeleteAll(m_lstIP);
+}
+
+void QueriesThread::_clear()
+{
+    m_consultaSimultaneos=0;
+    m_equiposConsultados=0;
+    m_conerrores=0;
+    m_sinconexion=0;
+    m_equiposExitosos=0;
+    m_conexionerrores=0;
+    m_lstIpPos=-1;
+    m_equiposPorGWenConsulta=0;
+    m_detener=false;
+    m_cancelar=false;
+    m_queriesenconsulta.clear();
+    m_equiposenconsulta.clear();
+    m_errorMap.clear();
+    m_mapOSPFVecinosInterfazDondeVienen.clear();
+    m_lstIPsAintentarPorGW.clear();
+    if ( m_timer )
+    {
+        delete m_timer;
+        m_timer = nullptr;
+    }
+    if ( m_timerActivity )
+    {
+        delete m_timerActivity;
+        m_timerActivity = nullptr;
+    }
+}
+
+void QueriesThread::setOpciones(uint opciones)
+{
+    m_opciones = opciones;
+    _clear();
 }
 
 void QueriesThread::iniciar()
@@ -139,7 +167,20 @@ void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
 {
     qCDebug(queriesthread) << ip << "QueriesThread::conectarOtroEquipo()" << "GW" << gw;
 
+    //buscando si ya exite el query, por si fuera una consulta despues de haberse echo la conexion
+//    for ( Queries *qry : m_lstQueries )
+//        if ( qry->ip() == ip )
+//        {
+//            qCDebug(queriesthread) << "continuando consulta en equipo" << ip;
+//            qDebug() << "query thr" << qry->thread();
+//            qry->setOptions( m_opciones );
+//            qry->thread()->start();
+
+//            return;
+//        }
+
     Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);
+
     query->setCountry( m_grupo );
     if ( gw )
         query->setGW( m_gw );
@@ -152,6 +193,8 @@ void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
 
     QThread *thr = new QThread(this);
     query->moveToThread( thr );
+
+    qDebug() << "query thr" << query->thread();
 
     connect(thr,SIGNAL(started()),query,SLOT( start()) );
     connect(query,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);

@@ -5,6 +5,14 @@
 #include "funcionbase.h"
 #include "macinfo.h"
 
+struct SBGPNeighbor : InfoBase
+{
+    QString neighborip;
+    QString as;
+    QString upDownTime;
+    QString prfxRcd;
+};
+
 struct SBGPNetwork : InfoBase
 {
     QString neighborip;
@@ -21,6 +29,9 @@ struct SBGPNetwork : InfoBase
 QDataStream& operator<<(QDataStream& out, const SBGPNetwork &data);
 QDataStream& operator>>(QDataStream& in, SBGPNetwork& data);
 
+QDataStream& operator<<(QDataStream& out, const SBGPNeighbor &data);
+QDataStream& operator>>(QDataStream& in, SBGPNeighbor& data);
+
 QDBusArgument& operator<<(QDBusArgument &argument, const SBGPNetwork &data);
 const QDBusArgument& operator>>(const QDBusArgument& argument, SBGPNetwork &data);
 
@@ -30,10 +41,10 @@ class QNETWORKCLIQUERIES_EXPORT BGPInfo : public FuncionBase
 protected:
     QStringList m_neighborIPs;
     QString m_type;
-    QString m_vrf;
     QString m_neighbor_int_out;
     QString m_community;
-    QStringList m_lstIPs;
+    QList<SBGPNeighbor> m_lstNeigbors;
+    QString m_vrf;
     QList<SBGPNetwork> m_lstNetworks;
 
     int m_neighborsPos;
@@ -46,16 +57,11 @@ public:
     BGPInfo(QRemoteShell *terminal, QObject *parent=nullptr);
     BGPInfo(const BGPInfo &other);
 
-    enum Type
-    {
-        IPV4,
-        VPNV4
-    };    
     virtual void getBGPNeighbors();
     virtual void getNetworks();
 
     //
-    QStringList& bgpNeighborInfo() { return m_lstIPs; }
+    QList<SBGPNeighbor>& bgpNeighborInfo() { return m_lstNeigbors; }
     QList<SBGPNetwork>& bgpNetworksInfo() { return m_lstNetworks; }
 
     //

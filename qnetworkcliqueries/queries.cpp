@@ -568,7 +568,6 @@ void Queries::nextProcess()
             {
                 qCDebug(queries) << m_ip  << "Mayor a Exit" << m_ip;
 
-                borrarTerminal();
                 crearFuncionesFaltantes();
 
                 //si hay informacion de OSPF se cambia la IP de la interfaz que se conoce por cdp/lldp
@@ -653,6 +652,7 @@ void Queries::nextProcess()
         equipmentNeighborsInfoQuery->setXRLocation(m_xr_location);
         equipmentNeighborsInfoQuery->setHostName(m_fullName);
         equipmentNeighborsInfoQuery->setIp(m_ip);
+        equipmentNeighborsInfoQuery->setParentQuery(this);
         connect(equipmentNeighborsInfoQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(equipmentNeighborsInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(equipmentNeighborsInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -677,6 +677,7 @@ void Queries::nextProcess()
         interfacesInfoQuery->setXRLocation(m_xr_location);
         interfacesInfoQuery->setHostName(m_fullName);
         interfacesInfoQuery->setIp(m_ip);
+        interfacesInfoQuery->setParentQuery(this);
         connect(interfacesInfoQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(interfacesInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(interfacesInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -701,6 +702,7 @@ void Queries::nextProcess()
         interfacesDescriptionsQuery->setXRLocation(m_xr_location);
         interfacesDescriptionsQuery->setHostName(m_fullName);
         interfacesDescriptionsQuery->setIp(m_ip);
+        interfacesDescriptionsQuery->setParentQuery(this);
         connect(interfacesDescriptionsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(interfacesDescriptionsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(interfacesDescriptionsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));        
@@ -725,6 +727,7 @@ void Queries::nextProcess()
         interfacesIpAddressesQuery->setXRLocation(m_xr_location);
         interfacesIpAddressesQuery->setHostName(m_fullName);
         interfacesIpAddressesQuery->setIp(m_ip);
+        interfacesIpAddressesQuery->setParentQuery(this);
         connect(interfacesIpAddressesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(interfacesIpAddressesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(interfacesIpAddressesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -749,6 +752,7 @@ void Queries::nextProcess()
         interfacesPermitedVlansQuery->setXRLocation(m_xr_location);
         interfacesPermitedVlansQuery->setHostName(m_fullName);
         interfacesPermitedVlansQuery->setIp(m_ip);
+        interfacesPermitedVlansQuery->setParentQuery(this);
         connect(interfacesPermitedVlansQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(interfacesPermitedVlansQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(interfacesPermitedVlansQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -768,6 +772,7 @@ void Queries::nextProcess()
         ospfQuery->setBrand(m_brand);
         ospfQuery->setHostName(m_fullName);
         ospfQuery->setIp(m_ip);
+        ospfQuery->setParentQuery(this);
         connect(ospfQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(ospfQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(ospfQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -787,6 +792,7 @@ void Queries::nextProcess()
         mplsTEtunnelsQuery->setBrand(m_brand);
         mplsTEtunnelsQuery->setHostName(m_fullName);
         mplsTEtunnelsQuery->setIp(m_ip);
+        mplsTEtunnelsQuery->setParentQuery(this);
         connect(mplsTEtunnelsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(mplsTEtunnelsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(mplsTEtunnelsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -806,6 +812,7 @@ void Queries::nextProcess()
         mplsL2TransportQuery->setBrand(m_brand);
         mplsL2TransportQuery->setHostName(m_fullName);
         mplsL2TransportQuery->setIp(m_ip);
+        mplsL2TransportQuery->setParentQuery(this);
         connect(mplsL2TransportQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(mplsL2TransportQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(mplsL2TransportQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -825,6 +832,7 @@ void Queries::nextProcess()
         mplsLdpDiscoveryQuery->setBrand(m_brand);
         mplsLdpDiscoveryQuery->setHostName(m_fullName);
         mplsLdpDiscoveryQuery->setIp(m_ip);
+        mplsLdpDiscoveryQuery->setParentQuery(this);
         connect(mplsLdpDiscoveryQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(mplsLdpDiscoveryQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(mplsLdpDiscoveryQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -844,6 +852,7 @@ void Queries::nextProcess()
         mplsLdpNeighborsQuery->setBrand(m_brand);
         mplsLdpNeighborsQuery->setHostName(m_fullName);
         mplsLdpNeighborsQuery->setIp(m_ip);
+        mplsLdpNeighborsQuery->setParentQuery(this);
         connect(mplsLdpNeighborsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(mplsLdpNeighborsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(mplsLdpNeighborsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -863,6 +872,7 @@ void Queries::nextProcess()
         mplsLdpInterfacesQuery->setBrand(m_brand);
         mplsLdpInterfacesQuery->setHostName(m_fullName);
         mplsLdpInterfacesQuery->setIp(m_ip);
+        mplsLdpInterfacesQuery->setParentQuery(this);
         connect(mplsLdpInterfacesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(mplsLdpInterfacesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(mplsLdpInterfacesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -888,6 +898,7 @@ void Queries::nextProcess()
         pimInteracesQuery->setBrand(m_brand);
         pimInteracesQuery->setHostName(m_fullName);
         pimInteracesQuery->setIp(m_ip);
+        pimInteracesQuery->setParentQuery(this);
         connect(pimInteracesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(pimInteracesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(pimInteracesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -915,6 +926,7 @@ void Queries::nextProcess()
         macsQuery->setXRLocation(m_xr_location);
         macsQuery->setHostName(m_fullName);
         macsQuery->setIp(m_ip);
+        macsQuery->setParentQuery(this);
         connect(macsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(macsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(macsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -934,6 +946,7 @@ void Queries::nextProcess()
         portChannelInfoQuery->setXRLocation(m_xr_location);
         portChannelInfoQuery->setHostName(m_fullName);
         portChannelInfoQuery->setIp(m_ip);
+        portChannelInfoQuery->setParentQuery(this);
         connect(portChannelInfoQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(portChannelInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(portChannelInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -953,6 +966,7 @@ void Queries::nextProcess()
         vrfsFromVlansQuery->setXRLocation(m_xr_location);
         vrfsFromVlansQuery->setHostName(m_fullName);
         vrfsFromVlansQuery->setIp(m_ip);
+        vrfsFromVlansQuery->setParentQuery(this);
         connect(vrfsFromVlansQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(vrfsFromVlansQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(vrfsFromVlansQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -972,6 +986,7 @@ void Queries::nextProcess()
         vrfFromRTQuery->setXRLocation(m_xr_location);
         vrfFromRTQuery->setHostName(m_fullName);
         vrfFromRTQuery->setIp(m_ip);
+        vrfFromRTQuery->setParentQuery(this);
         connect(vrfFromRTQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(vrfFromRTQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(vrfFromRTQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -991,6 +1006,7 @@ void Queries::nextProcess()
         vrfsQuery->setXRLocation(m_xr_location);
         vrfsQuery->setHostName(m_fullName);
         vrfsQuery->setIp(m_ip);
+        vrfsQuery->setParentQuery(this);
         connect(vrfsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(vrfsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(vrfsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -1012,6 +1028,7 @@ void Queries::nextProcess()
         arpsQuery->setXRLocation(m_xr_location);
         arpsQuery->setHostName(m_fullName);
         arpsQuery->setIp(m_ip);
+        arpsQuery->setParentQuery(this);
         connect(arpsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(arpsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(arpsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -1031,6 +1048,7 @@ void Queries::nextProcess()
         bgpNeighborsQuery->setBrand(m_brand);
         bgpNeighborsQuery->setHostName(m_fullName);
         bgpNeighborsQuery->setIp(m_ip);
+        bgpNeighborsQuery->setParentQuery(this);
         connect(bgpNeighborsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(bgpNeighborsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(bgpNeighborsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -1050,6 +1068,7 @@ void Queries::nextProcess()
         bgpNetworksQuery->setBrand(m_brand);
         bgpNetworksQuery->setHostName(m_fullName);
         bgpNetworksQuery->setIp(m_ip);
+        bgpNetworksQuery->setParentQuery(this);
         connect(bgpNetworksQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(bgpNetworksQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(bgpNetworksQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -1069,6 +1088,7 @@ void Queries::nextProcess()
         ipRoutesQuery->setBrand(m_brand);
         ipRoutesQuery->setHostName(m_fullName);
         ipRoutesQuery->setIp(m_ip);
+        ipRoutesQuery->setParentQuery(this);
         connect(ipRoutesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(ipRoutesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(ipRoutesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -1108,7 +1128,8 @@ void Queries::nextProcess()
         funcionQuery->setBrand(m_brand);
         funcionQuery->setHostName(m_fullName);
         funcionQuery->setIp(m_ip);
-        connect(funcionQuery,SIGNAL(processFinished()),SLOT(processConfigFinished()));
+        funcionQuery->setParentQuery(this);
+        connect(funcionQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(funcionQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(funcionQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
         funcionQuery->getTXT();
@@ -1130,6 +1151,7 @@ void Queries::nextProcess()
         exitQuery->setHostName(m_fullName);
         exitQuery->setIp(m_ip);
         exitQuery->setConnectedByGW( !m_gw.isEmpty() );
+        exitQuery->setParentQuery(this);
         connect(exitQuery,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(exitQuery,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(exitQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
@@ -1294,6 +1316,14 @@ void Queries::processFinished()
 {
     qCDebug(queries) << m_ip  << "Queries::processFinished()";
     m_contieneconsultas=true;
+    queryTimer->stop();
+    nextProcess();
+}
+
+void Queries::processExit()
+{
+    qCDebug(queries) << m_ip  << "Queries::processExit()";
+    borrarTerminal();
     queryTimer->stop();
     nextProcess();
 }
@@ -1794,13 +1824,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     }
     else
         out << false;
-//    if ( query.funcionQuery )
-//    {
-//        out << true;
-//        out << query.funcionQuery;
-//    }
-//    else
-//        out << false;
+    if ( query.funcionQuery )
+    {
+        out << true;
+        out << query.funcionQuery;
+    }
+    else
+        out << false;
 
     return out;
 }
@@ -1890,11 +1920,9 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries& quer
     in >> a;
     if ( a )
         in >> query.ipRoutesQuery;
-//    if ( a )
-//    {
-//        in >> query.funcionQuery;
-//        //no se puede establecer el queryParent, no es una estructura
-//    }
+    in >> a;
+    if ( a )
+        in >> query.funcionQuery;
 
     return in;
 }
@@ -1989,8 +2017,8 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
     if ( info.configQuery )
         dbg.space() << "Configuration" << *info.configQuery;
 
-    if ( info.configQuery )
-        dbg.space() << "Funcion" << *info.configQuery;
+    if ( info.funcionQuery )
+        dbg.space() << "Funcion" << *info.funcionQuery;
 
     dbg.nospace() << "--\n\n";
 

@@ -3,41 +3,45 @@
 
 #include <QEventLoop>
 
-QueriesConfigurationValue::QueriesConfigurationValue(QString key, QVariant value, QString IP)
+QueriesConfigurationValue::QueriesConfigurationValue(QString key, QString value, QString IPoPlataforma, bool appendValue)
 {
     _key = key;
     _value = value;
-    _IP = IP;
+    _IPoPlatform = IPoPlataforma;
+    _appendValue = appendValue;
 }
 
 QueriesConfigurationValue::QueriesConfigurationValue(const QueriesConfigurationValue &other)
 {
     _key = other._key;
     _value = other._value;
-    _IP = other._IP;
+    _IPoPlatform = other._IPoPlatform;
+    _appendValue = other._appendValue;
 }
 
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const QueriesConfigurationValue& qcv)
 {
     //guardar
-    out << qcv._IP;
+    out << qcv._IPoPlatform;
     out << qcv._key;
     out << qcv._value;
+    out << qcv._appendValue;
     return out;
 }
 
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, QueriesConfigurationValue& qcv)
 {
     //abrir
-    in >> qcv._IP;
+    in >> qcv._IPoPlatform;
     in >> qcv._key;
     in >> qcv._value;
+    in >> qcv._appendValue;
     return in;
 }
 
 QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const QueriesConfigurationValue &info)
 {
-     dbg.space() << info._key << info._value << info._IP;
+     dbg.space() << info._key << info._value << info._IPoPlatform << info._appendValue;
      return dbg;
 }
 
@@ -56,7 +60,23 @@ QueriesConfiguration *QueriesConfiguration::instance()
 
 void QueriesConfiguration::addQueryParameter(const QList<QueriesConfigurationValue>& c)
 {
-    m_lstQueryParameters.append(c);
+    //buscamos si ya existe, si si lo adjunta al existente, si no, se agrega completo
+    for ( QueriesConfigurationValue n : c )
+    {
+        bool encontrado=false;
+        for ( QueriesConfigurationValue &e : m_lstQueryParameters )
+        {
+            if ( n._IPoPlatform == e._IPoPlatform &&
+                 n._key == e._key )
+            {
+                encontrado=true;
+                if ( n._appendValue ) e._value.append(","+n._value); else e._value = n._value;
+                break;
+            }
+        }
+        if ( !encontrado )
+            m_lstQueryParameters.append(n);
+    }
 }
 
 void QueriesConfiguration::addConfiguration(const QList<QueriesConfigurationValue>& c)
@@ -64,57 +84,73 @@ void QueriesConfiguration::addConfiguration(const QList<QueriesConfigurationValu
     m_lstConfiguration.append(c);
 }
 
-QVariant QueriesConfiguration::m_find(QString parameter, QString IP)
+QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString platform)
 {
     //por IP especifica
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
     {
-        if ( v._key == parameter && v._IP == IP  )
+        if ( v._key == parameter && v._IPoPlatform == IP  )
             return v._value;
     }
 
-    //no hay para un equipo especifico, regresamos el general
+    //plataforma
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
     {
-        if ( v._key == parameter && v._IP == QString("*") )
+        if ( v._key == parameter && v._IPoPlatform == platform  )
+            return v._value;
+    }
+
+    //no hay para una ip o plataforma, regresamos el general
+    for ( QueriesConfigurationValue v : m_lstQueryParameters )
+    {
+        if ( v._key == parameter && v._IPoPlatform == QString("*") )
             return v._value;
     }
 
     return QVariant();
 }
 
-bool QueriesConfiguration::state(QString parameter, QString IP)
+bool QueriesConfiguration::state(QString parameter, QString IP, QString platform)
 {
-    return m_find(parameter,IP).toBool();
+    return m_find(parameter,IP,platform).toBool();
 }
 
-QString QueriesConfiguration::value(QString parameter, QString IP)
+QString QueriesConfiguration::value(QString parameter, QString IP, QString platform)
 {
-    return m_find(parameter,IP).toString();
+    return m_find(parameter,IP,platform).toString();
 }
 
-QStringList QueriesConfiguration::values(QString parameter, QString IP)
+QStringList QueriesConfiguration::values(QString parameter, QString IP, QString platform)
 {
-    return value(parameter,IP).split(",",QString::SkipEmptyParts);
+    return value(parameter,IP,platform).split(",",QString::SkipEmptyParts);
 }
 
 QString QueriesConfiguration::configuration(QString platform, QString os, QString IP)
 {
+    return "";   // TODO Modificar ya no usando QueriesConfigurationValue o adaptar
+
+
     //por IP especifica
     for ( QueriesConfigurationValue v : m_lstConfiguration )
     {
-        if ( (v._key == platform || v._key == os ) && v._IP == IP  )
-            return v._value.toString();
+        if ( (v._key == platform || v._key == os ) && v._IPoPlatform == IP  )
+            return v._value;
     }
 
     //no hay para un equipo especifico, regresamos el general
     for ( QueriesConfigurationValue v : m_lstConfiguration )
     {
-        if ( (v._key == platform || v._key == os ) && v._IP == QString("*") )
-            return v._value.toString();
+        if ( (v._key == platform || v._key == os ) && v._IPoPlatform == QString("*") )
+            return v._value;
     }
 
     return "";
+}
+
+void QueriesConfiguration::clear()
+{
+    m_lstQueryParameters.clear();
+    m_lstConfiguration.clear();
 }
 
 FuncionBase::FuncionBase()
@@ -139,6 +175,7 @@ void FuncionBase::init()
     m_brand="Cisco";
     exp.setMinimal(true);
     exp2.setMinimal(true);
+    m_parentQuery=nullptr;
 }
 
 void FuncionBase::setPlatform(QString platform)

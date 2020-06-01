@@ -8,7 +8,10 @@ class QNETWORKCLIQUERIES_EXPORT FuncionInfo : public FuncionBase
 {
     Q_OBJECT
 protected:
-    QString _txt;
+    QStringList _lstTxt;
+    QStringList _lstFunciones;
+
+    void _siguienteFuncion();
 
 public:
     FuncionInfo() {}
@@ -18,11 +21,14 @@ public:
     void getTXT();
 
     //
-    QString &txtReceived() { return _txt; }
+    QString txtReceived() { return _lstTxt.join("\n"); }
+    QStringList &lstTxtReceived() { return _lstTxt; }
 
     //
 
     //
+    friend QDataStream& operator<<(QDataStream& out, const FuncionInfo& info);
+    friend QDataStream& operator>>(QDataStream& in, FuncionInfo& info);
     friend QDataStream& operator<<(QDataStream& out, const FuncionInfo* info);
     friend QDataStream& operator>>(QDataStream& in, FuncionInfo*& info);
     friend QDebug operator<<(QDebug dbg, const FuncionInfo &info);

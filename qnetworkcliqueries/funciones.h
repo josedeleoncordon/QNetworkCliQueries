@@ -24,6 +24,9 @@ QString equipmentOSFromPlatform(QString platform);
 //Abre un archivo de texto
 QString openFile(QString path);
 
+//Abre un archivo y lo devuelve en lista
+QStringList openFile2List(QString path, bool eliminarDuplicados = false );
+
 //Guarda un archivo de texto
 void saveFile(QString txt,QString path,QIODevice::OpenModeFlag openmode = QIODevice::WriteOnly);
 

@@ -345,7 +345,7 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_L2Transport()
             lastDestino.clear();
 
             SMplsL2XconnectInfo i;
-            mxi->AC = exp.cap(1);
+            i.AC = exp.cap(1);
             m_lstMplsL2Xconnects.append(i);
             mxi = &m_lstMplsL2Xconnects.last();
         }
@@ -477,7 +477,7 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_BD()
         if ( line.contains(exp) )
         {
             SMplsL2VFIInfo i;
-            mvi->bridge = exp.cap(1);
+            i.bridge = exp.cap(1);
             m_lstMplsL2VFIs.append(i);
             mvi = &m_lstMplsL2VFIs.last();
             continue;

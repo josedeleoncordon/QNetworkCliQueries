@@ -18,7 +18,7 @@ void MacInfoCisco::getMacInfo()
 {
     qDebug() << "MacInfoCisco::getMacInfo()";
 
-    m_mac = QueriesConfiguration::instance()->value("MAC_MAC",m_ip);
+    m_mac = QueriesConfiguration::instance()->value("MAC_MAC",m_ip,m_os);
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
 
     if ( m_platform.contains("ASR-9") ||
@@ -143,7 +143,7 @@ void MacInfoCisco::on_term_receiveText()
         }
 
         //verificando si la mac esta en la vlans permitidas, si se configuro
-        QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip);
+        QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip,m_os);
         if ( vlanfilter.isEmpty() )
             m_lstMacs.append(mac);
         else
