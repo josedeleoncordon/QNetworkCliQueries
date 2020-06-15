@@ -84,7 +84,7 @@ QStringList openFile2List( QString path, bool eliminarDuplicados )
 void saveFile(QString txt, QString path, QIODevice::OpenModeFlag openmode)
 {
     QFile file(path);
-    if (!file.open( openmode | QIODevice::Text ))
+    if (!file.open( openmode | QIODevice::Text|QIODevice::WriteOnly ))
         return;
 
     QTextStream out(&file);
