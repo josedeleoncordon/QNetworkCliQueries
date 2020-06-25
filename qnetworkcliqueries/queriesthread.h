@@ -61,9 +61,11 @@ signals:
 private slots:
     void on_timer_timeOut();
     void on_timerActivity_timeOut();
-    void equipoConsultado(Queries *qry);
 
-private:
+protected slots:
+    virtual void equipoConsultado(Queries *qry);
+
+protected:
    QString m_grupo;
    QString m_user;
    QString m_gw;

@@ -39,6 +39,7 @@ HEADERS += \
     queries.h \
 #    queriesdao.h \
     queriesmessagehandler.h \
+    queriesmie.h \
     queriesthread.h \
     base/platforminfo.h \
     Cisco/macinfocisco.h \
@@ -76,6 +77,7 @@ SOURCES += \
     queries.cpp \
 #    queriesdao.cpp \
     queriesmessagehandler.cpp \
+    queriesmie.cpp \
     queriesthread.cpp \
     base/platforminfo.cpp \
     Cisco/macinfocisco.cpp \
