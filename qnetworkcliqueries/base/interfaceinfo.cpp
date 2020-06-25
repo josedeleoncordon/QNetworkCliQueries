@@ -265,6 +265,7 @@ InterfaceInfo::InterfaceInfo(const InterfaceInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
+    m_queryoption = other.m_queryoption;
     m_InterfacesInfo_onlyPhysicalInterfaces = other.m_InterfacesInfo_onlyPhysicalInterfaces;
     m_lstInterfacesIPAddresses = other.m_lstInterfacesIPAddresses;
     m_lstInterfacesInfo = other.m_lstInterfacesInfo;

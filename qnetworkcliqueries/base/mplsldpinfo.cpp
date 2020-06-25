@@ -79,6 +79,7 @@ MplsLdpInfo::MplsLdpInfo(const MplsLdpInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
+    m_queryoption = other.m_queryoption;
     m_localID = other.m_localID;
     m_lstMplsLdpInfo = other.m_lstMplsLdpInfo;
 }

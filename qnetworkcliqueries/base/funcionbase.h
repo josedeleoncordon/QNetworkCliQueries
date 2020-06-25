@@ -108,6 +108,38 @@ public:
     FuncionBase(QRemoteShell *terminal, QObject *parent = nullptr);
     ~FuncionBase();
 
+    enum QueryOpcion {
+        Null,
+        Connect,
+        Platform,
+        EquipmentNeighbors,
+        MacAddress,
+        InterfaceInformation,
+        InterfacePermitedVlans,
+        InterfaceDescription,
+        InterfaceIpAddresses,
+        Ospf,
+        MplsTEtunnels,
+        MplsLdpDiscovery,
+        MplsLdpNeighbors,
+        MplsLdpInterfaces,
+        PimInterfaces,
+        PortChannel,
+        VRFfVlans,
+        VRFfRT,
+        VRFs,
+        Arp,
+        BGPNeig,
+        IpRoutes,
+        Configuration,
+        Mplsl2Transport,
+        Funcion,
+        BGPNetworks,
+        Exit
+    }m_queryoption=Null;
+
+    QueryOpcion queryOption() { return m_queryoption; };
+
     void setBrand(QString brand) { m_brand = brand; }
     void setPlatform(QString platform);
     void setXRLocation(QString location) { m_xr_location=location; }

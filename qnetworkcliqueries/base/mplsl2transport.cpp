@@ -228,6 +228,7 @@ MplsL2TransportInfo::MplsL2TransportInfo(const MplsL2TransportInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
+    m_queryoption = other.m_queryoption;
     m_lstMplsL2Xconnects = other.m_lstMplsL2Xconnects;
     m_lstMplsL2VFIs = other.m_lstMplsL2VFIs;
 }

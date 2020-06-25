@@ -105,6 +105,7 @@ OSPFInfo::OSPFInfo(const OSPFInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
+    m_queryoption = other.m_queryoption;
     m_abr = other.m_abr;
     m_asbr = other.m_asbr;
     m_lstOSPFInfo = other.m_lstOSPFInfo;

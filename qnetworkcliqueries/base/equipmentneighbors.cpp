@@ -100,7 +100,8 @@ EquipmentNeighborsInfo::EquipmentNeighborsInfo(const EquipmentNeighborsInfo &oth
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_lstEquipos = other.m_lstEquipos;
+    m_queryoption = other.m_queryoption;
+    m_lstEquipos = other.m_lstEquipos;    
 }
 
 EquipmentNeighborsInfo::~EquipmentNeighborsInfo()

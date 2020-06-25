@@ -101,6 +101,7 @@ ArpInfo::ArpInfo(const ArpInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
+    m_queryoption = other.m_queryoption;
     m_lstArp = other.m_lstArp;
     m_vrfsPos=-1;
     m_vrfs = other.m_vrfs;

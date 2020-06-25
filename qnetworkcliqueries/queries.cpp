@@ -46,33 +46,7 @@ Queries::~Queries()
 void Queries::iniciar()
 {    
     term = nullptr;
-    pi = nullptr;
     m_keepAliveTimer=nullptr;
-    equipmentNeighborsInfoQuery = nullptr;
-    interfacesInfoQuery = nullptr;
-    interfacesPermitedVlansQuery = nullptr;
-    interfacesDescriptionsQuery = nullptr;
-    interfacesIpAddressesQuery = nullptr;
-    ospfQuery = nullptr;
-    mplsTEtunnelsQuery = nullptr;
-    mplsL2TransportQuery = nullptr;
-    mplsLdpDiscoveryQuery = nullptr;
-    mplsLdpNeighborsQuery = nullptr;
-    mplsLdpInterfacesQuery = nullptr;
-//    pimNeighborsQuery = nullptr;
-    pimInteracesQuery = nullptr;
-    macsQuery = nullptr;
-    portChannelInfoQuery = nullptr;
-    vrfsFromVlansQuery = nullptr;
-    vrfFromRTQuery = nullptr;
-    vrfsQuery = nullptr;
-    arpsQuery = nullptr;
-    bgpNeighborsQuery = nullptr;
-    bgpNetworksQuery = nullptr;
-    ipRoutesQuery = nullptr;
-    configQuery = nullptr;
-    exitQuery = nullptr;
-    funcionQuery = nullptr;
     m_connectionprotol = QRemoteShell::SSHTelnet;
 
     m_connected=false;
@@ -113,30 +87,113 @@ void Queries::clone(const Queries& other)
     m_user = other.m_user;
     m_gw = other.m_gw;
     m_pwd = other.m_pwd;
+    m_lstOpciones = other.m_lstOpciones;
 
-    if ( other.pi ) pi = new PlatformInfo( *other.pi );
-    if ( other.equipmentNeighborsInfoQuery )equipmentNeighborsInfoQuery = new EquipmentNeighborsInfo( *other.equipmentNeighborsInfoQuery );
-    if ( other.interfacesInfoQuery ) interfacesInfoQuery = new InterfaceInfo( *other.interfacesInfoQuery );
-    if ( other.interfacesPermitedVlansQuery ) interfacesPermitedVlansQuery = new InterfaceInfo( *other.interfacesPermitedVlansQuery );
-    if ( other.interfacesDescriptionsQuery ) interfacesDescriptionsQuery = new InterfaceInfo( *other.interfacesDescriptionsQuery );
-    if ( other.interfacesIpAddressesQuery ) interfacesIpAddressesQuery = new InterfaceInfo( *other.interfacesIpAddressesQuery );
-    if ( other.ospfQuery ) ospfQuery = new OSPFInfo( *other.ospfQuery );
-    if ( other.mplsTEtunnelsQuery ) mplsTEtunnelsQuery = new MplsTEtunnelsInfo( *other.mplsTEtunnelsQuery );
-    if ( other.mplsL2TransportQuery ) mplsL2TransportQuery = new MplsL2TransportInfo( *other.mplsL2TransportQuery );
-    if ( other.mplsLdpDiscoveryQuery ) mplsLdpDiscoveryQuery = new MplsLdpInfo( *other.mplsLdpDiscoveryQuery );
-    if ( other.mplsLdpNeighborsQuery ) mplsLdpNeighborsQuery = new MplsLdpInfo( *other.mplsLdpNeighborsQuery );
-    if ( other.mplsLdpInterfacesQuery ) mplsLdpInterfacesQuery = new MplsLdpInfo( *other.mplsLdpInterfacesQuery );
-    if ( other.pimInteracesQuery ) pimInteracesQuery = new PIMInfo( *other.pimInteracesQuery );
-    if ( other.macsQuery ) macsQuery = new MacInfo( *other.macsQuery );
-    if ( other.portChannelInfoQuery ) portChannelInfoQuery = new PortChannelsInfo( *other.portChannelInfoQuery );
-    if ( other.vrfsFromVlansQuery ) vrfsFromVlansQuery = new VrfInfo( *other.vrfsFromVlansQuery );
-    if ( other.vrfFromRTQuery ) vrfFromRTQuery = new VrfInfo( *other.vrfFromRTQuery );
-    if ( other.vrfsQuery ) vrfsQuery = new VrfInfo( *other.vrfsQuery );
-    if ( other.arpsQuery ) arpsQuery = new ArpInfo( *other.arpsQuery );
-    if ( other.bgpNeighborsQuery ) bgpNeighborsQuery = new BGPInfo( *other.bgpNeighborsQuery );
-    if ( other.bgpNetworksQuery ) bgpNetworksQuery = new BGPInfo( *other.bgpNetworksQuery );
-    if ( other.ipRoutesQuery ) ipRoutesQuery = new IPRouteInfo( *other.ipRoutesQuery );
-    if ( other.funcionQuery ) funcionQuery = new FuncionInfo( *other.funcionQuery );
+    for ( FuncionBase *f : other.m_lstFunciones )
+    {
+        switch (f->queryOption()) {
+        case (FuncionBase::EquipmentNeighbors): {
+            m_lstFunciones.append( new EquipmentNeighborsInfo(*dynamic_cast<EquipmentNeighborsInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::MacAddress): {
+            m_lstFunciones.append( new MacInfo(*dynamic_cast<MacInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::InterfaceInformation):
+        case (FuncionBase::InterfacePermitedVlans):
+        case (FuncionBase::InterfaceDescription):
+        case (FuncionBase::InterfaceIpAddresses):
+        {
+            m_lstFunciones.append( new InterfaceInfo(*dynamic_cast<InterfaceInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::Ospf): {
+            m_lstFunciones.append( new OSPFInfo(*dynamic_cast<OSPFInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::MplsTEtunnels): {
+            m_lstFunciones.append( new MplsTEtunnelsInfo(*dynamic_cast<MplsTEtunnelsInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::MplsLdpDiscovery):
+        case (FuncionBase::MplsLdpNeighbors):
+        case (FuncionBase::MplsLdpInterfaces):
+        {
+            m_lstFunciones.append( new MplsLdpInfo(*dynamic_cast<MplsLdpInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::PimInterfaces): {
+            m_lstFunciones.append( new PIMInfo(*dynamic_cast<PIMInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::PortChannel): {
+            m_lstFunciones.append( new PortChannelsInfo(*dynamic_cast<PortChannelsInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::VRFfVlans):
+        case (FuncionBase::VRFfRT):
+        case (FuncionBase::VRFs):
+        {
+            m_lstFunciones.append( new VrfInfo(*dynamic_cast<VrfInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::Arp): {
+            m_lstFunciones.append( new ArpInfo(*dynamic_cast<ArpInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::BGPNeig):
+        case (FuncionBase::BGPNetworks):
+        {
+            m_lstFunciones.append( new BGPInfo(*dynamic_cast<BGPInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::IpRoutes): {
+            m_lstFunciones.append( new IPRouteInfo(*dynamic_cast<IPRouteInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::Mplsl2Transport): {
+            m_lstFunciones.append( new MplsL2TransportInfo(*dynamic_cast<MplsL2TransportInfo*>(f)) );
+            break;
+        }
+        case (FuncionBase::Funcion): {
+            m_lstFunciones.append( new FuncionInfo(*dynamic_cast<FuncionInfo*>(f)) );
+            break;
+        }
+        default: {}
+        }
+    }
+}
+
+FuncionBase *Queries::createQuerie(FuncionBase::QueryOpcion option)
+{
+    switch (option) {
+    case (FuncionBase::EquipmentNeighbors): { return factoryNewEquipmentNeighborsInfo(m_brand,); }
+    case (FuncionBase::MacAddress): {  }
+    case (FuncionBase::InterfaceInformation): {  }
+    case (FuncionBase::InterfacePermitedVlans): {  }
+    case (FuncionBase::InterfaceDescription): {  }
+    case (FuncionBase::InterfaceIpAddresses): {  }
+    case (FuncionBase::Ospf): {  }
+    case (FuncionBase::MplsTEtunnels): {  }
+    case (FuncionBase::MplsLdpDiscovery): {  }
+    case (FuncionBase::MplsLdpNeighbors): {  }
+    case (FuncionBase::MplsLdpInterfaces): {  }
+    case (FuncionBase::PimInterfaces): {  }
+    case (FuncionBase::PortChannel): {  }
+    case (FuncionBase::VRFfVlans): {  }
+    case (FuncionBase::VRFfRT): {  }
+    case (FuncionBase::VRFs): {  }
+    case (FuncionBase::Arp): {  }
+    case (FuncionBase::BGPNeig): {  }
+    case (FuncionBase::IpRoutes): {  }
+    case (FuncionBase::Configuration): {  }
+    case (FuncionBase::Mplsl2Transport): {  }
+    case (FuncionBase::Funcion): {  }
+    case (FuncionBase::BGPNetworks): {  }
+    case (FuncionBase::Exit): {  }
+    default: { return nullptr; }
+    }
 }
 
 void Queries::limpiarConsultas()
@@ -294,26 +351,10 @@ void Queries::setKeepAlive(bool enable)
         m_keepAliveTimer->stop();
 }
 
-void Queries::setOptions(unsigned int options)
+void Queries::addOption( QList<FuncionBase::QueryOpcion> lst )
 {
-    opcionActual=0;
-    flags = options;
-
-    if ( m_connected )
-    {
-        //despues de realizar unas consultas y se quiere realizar otras en la misma conexion
-        //eliminando las anteriores.
-        m_queriescreated=false;
-        limpiarConsultas();
-        createQueries();
-    }
+    m_lstOpciones.append( lst );
 }
-
-//void Queries::addAndCreateOptions(unsigned int options)
-//{
-//    flags = flags | options;
-//    createOptions();
-//}
 
 void Queries::setGW(QString GW)
 {

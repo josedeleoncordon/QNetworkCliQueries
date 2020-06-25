@@ -93,6 +93,7 @@ IPRouteInfo::IPRouteInfo(const IPRouteInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;    
+    m_queryoption = other.m_queryoption;
     m_lstRoutes = other.m_lstRoutes;
     m_protocol = other.m_protocol;
     m_vrfs = other.m_vrfs;

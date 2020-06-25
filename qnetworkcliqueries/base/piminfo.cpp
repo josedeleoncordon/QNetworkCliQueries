@@ -79,6 +79,7 @@ PIMInfo::PIMInfo(const PIMInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
+    m_queryoption = other.m_queryoption;
     m_lstPIMNeighbors = other.m_lstPIMNeighbors;
     m_lstPimInterfaces = other.m_lstPimInterfaces;
     m_lstRouterPim = other.m_lstRouterPim;

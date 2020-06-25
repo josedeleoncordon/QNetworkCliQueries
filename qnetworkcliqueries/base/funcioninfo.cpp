@@ -7,6 +7,11 @@ FuncionInfo::FuncionInfo(QRemoteShell *terminal, QObject *parent):
 FuncionInfo::FuncionInfo(const FuncionInfo &other):
     FuncionBase(other.term,other.parent())
 {
+    m_brand = other.m_brand;
+    m_platform = other.m_platform;
+    m_name = other.m_name;
+    m_ip = other.m_ip;
+    m_queryoption = other.m_queryoption;
     _lstTxt = other._lstTxt;
 }
 

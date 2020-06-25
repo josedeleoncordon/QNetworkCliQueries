@@ -79,6 +79,7 @@ VrfInfo::VrfInfo(const VrfInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
+    m_queryoption = other.m_queryoption;
     m_vlans = other.m_vlans;
     m_lstVrf = other.m_lstVrf;
     m_lstVrfInfo = other.m_lstVrfInfo;
