@@ -55,7 +55,6 @@ public:
     QString& ip() { return m_ip; }
     QString& ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; }
 
-
     bool existsQueryInformation(QueryOpcion option,int i=1);
     FuncionBase *getQuery(QueryOpcion option,int i=1);
 
@@ -137,11 +136,12 @@ protected:
     QList<QueryOpcion> m_lstOpciones;
     QueryOpcion m_opcionActual;
     QList<FuncionBase*> m_lstFunciones;
+    FuncionBase *m_currentFuncion;
+
     QTimer *queryTimer;
     bool m_connected;
     bool m_error;
     bool m_ipreachable;
-    bool m_queriescreated;
     bool m_contieneconsultas;
 
     short int m_consultaIntentos;

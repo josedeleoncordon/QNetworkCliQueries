@@ -50,7 +50,7 @@ void Queries::iniciar()
     m_opcionActual = QueryOpcion::Null;
     m_connected=false;
     m_error=false;
-    m_queriescreated=false;
+    m_currentFuncion=nullptr;
     m_ipreachable=false;    
     m_conectionSecondTriedOtherUserPassword=false;    
     m_reintentandoConsulta=false;
@@ -259,7 +259,10 @@ FuncionBase *Queries::getQuery(QueryOpcion option,int i)
 
 QList<SEquipmentNeighborsInfo>& Queries::equipmentNeighborsInfo(int i)
 {
-    return dynamic_cast<EquipmentNeighborsInfo*>(getQuery(EquipmentNeighbors,i))->equipmentNeighborsInfo();
+    FuncionBase *f = getQuery(EquipmentNeighbors,i);
+//    QList<SEquipmentNeighborsInfo> lst;
+//    if ( !f ) return lst;
+    return dynamic_cast<EquipmentNeighborsInfo*>(f)->equipmentNeighborsInfo();
 }
 
 QList<SInterfaceInfo>& Queries::interfacesInfo(int i)
@@ -314,67 +317,67 @@ QList<SMplsLdpInfo>& Queries::mplsLdpDiscoveryInfo(int i)
 
 QList<SMplsLdpInfo>& Queries::mplsLdpNeighborsInfo(int i)
 {
-    return mplsLdpNeighborsQuery->mplsLdpNeighborsInfo();
+    return dynamic_cast<MplsLdpInfo*>(getQuery(MplsLdpNeighbors,i))->mplsLdpNeighborsInfo();
 }
 
 QList<SMplsLdpInfo>& Queries::mplsLdpInterfacesInfo(int i)
 {
-    return mplsLdpInterfacesQuery->mplsLdpInterfacesInfo();
+    return dynamic_cast<MplsLdpInfo*>(getQuery(MplsLdpInterfaces,i))->mplsLdpInterfacesInfo();
 }
 
 QList<SPIMInfo>& Queries::pimInterfacesInfo(int i)
 {
-    return pimInteracesQuery->pimIntefacesInfo();
+    return dynamic_cast<PIMInfo*>(getQuery(PimInterfaces,i))->pimIntefacesInfo();
 }
 
 QList<SMacInfo>& Queries::macInfo(int i)
 {
-    return macsQuery->macInfo();
+    return dynamic_cast<MacInfo*>(getQuery(MacAddress,i))->macInfo();
 }
 
 QList<SPortChannel>& Queries::portChannelInfo(int i)
 {
-    return portChannelInfoQuery->portChannelInfo();
+    return dynamic_cast<PortChannelsInfo*>(getQuery(PortChannel,i))->portChannelInfo();
 }
 
 QStringList& Queries::vrfsFromVlansInfo(int i)
 {
-    return vrfsFromVlansQuery->vrfsFromVlansInfo();
+    return dynamic_cast<VrfInfo*>(getQuery(VRFfVlans,i))->vrfsFromVlansInfo();
 }
 
 QString& Queries::vrfFromRTInfo(int i)
 {
-    return vrfFromRTQuery->vrfFromRTInfo();
+    return dynamic_cast<VrfInfo*>(getQuery(VRFfRT,i))->vrfFromRTInfo();
 }
 
 QList<SVrfInfo>& Queries::vrfsInfo(int i)
 {
-    return vrfsQuery->vrfsInfo();
+    return dynamic_cast<VrfInfo*>(getQuery(VRFs,i))->vrfsInfo();
 }
 
 QList<SIpInfo>& Queries::arpsInfo(int i)
 {
-    return arpsQuery->arpInfo();
+    return dynamic_cast<ArpInfo*>(getQuery(Arp,i))->arpInfo();
 }
 
 QList<SBGPNeighbor>& Queries::bgpNeighborsInfo(int i)
 {
-    return bgpNeighborsQuery->bgpNeighborInfo();
+    return dynamic_cast<BGPInfo*>(getQuery(BGPNeig,i))->bgpNeighborInfo();
 }
 
 QList<SBGPNetwork>& Queries::bgpNetworksInfo(int i)
 {
-    return bgpNetworksQuery->bgpNetworksInfo();
+    return dynamic_cast<BGPInfo*>(getQuery(BGPNetworks,i))->bgpNetworksInfo();
 }
 
 QList<SIpRouteInfo>& Queries::ipRoutesInfo(int i)
 {
-    return ipRoutesQuery->ipRouteInfo();
+    return dynamic_cast<IPRouteInfo*>(getQuery(IpRoutes,i))->ipRouteInfo();
 }
 
 QString Queries::funcionTxtInfo(int i)
 {
-    return funcionQuery->txtReceived();
+    return dynamic_cast<FuncionInfo*>(getQuery(Funcion,i))->txtReceived();
 }
 
 void Queries::nextProcess()
@@ -388,7 +391,7 @@ void Queries::nextProcess()
             //no hay funciones a ejecutar, se finaliza
 
             //si hay informacion de OSPF se cambia la IP de la interfaz que se conoce por cdp/lldp
-            //y se reemplaza por el ID
+            //y se reemplaza por el ID            
             for ( SEquipmentNeighborsInfo &e : equipmentNeighborsInfo() )
                 for ( SOSPFInfo &oi : ospfInfo() )
                 {
@@ -401,66 +404,34 @@ void Queries::nextProcess()
 
             emit finished(this);
             disconnect();
+
             return;
         }
 
         m_opcionActual = m_lstOpciones.takeFirst();
     }
-
-
-
-
-    if ( !m_reintentandoConsulta )
-    {
-        do
-        {
-            //estableciendo la siguiente opcion que se ejecutara
-            if ( ! opcionActual )
-                //primera vez que se entra, se establece Connect para ser evaluada primero
-                opcionActual = Connect;
-            else
-                opcionActual = opcionActual << 1;
-
-            if ( opcionActual > Exit )
-            {
-                qCDebug(queries) << m_ip  << "Mayor a Exit" << m_ip;
-
-                crearFuncionesFaltantes();
-
-                //si hay informacion de OSPF se cambia la IP de la interfaz que se conoce por cdp/lldp
-                //y se reemplaza por el ID
-                for ( SEquipmentNeighborsInfo &e : equipmentNeighborsInfo() )
-                    for ( SOSPFInfo &oi : ospfInfo() )
-                    {
-                        if ( oi.interfaz == e.interfazestesalida )
-                        {
-                            e.ip = oi.id;
-                            break;
-                        }
-                    }
-
-                emit finished(this);
-                disconnect();
-
-                qCDebug(queries) << m_ip << "Queries_finished"; //No eliminar. Cierra el archivo de log
-
-//                qDebug() << m_ip << "Informacion de Queries" << *this; //mie
-                return;
-            }
-        }
-        while( (flags & opcionActual) == 0 );
-    }
     else
-        m_queriescreated=false; //para que se creen nuevamente las consultas desde donde se quedo
+    {
+        if ( m_currentFuncion ) delete m_currentFuncion;
+        m_reintentandoConsulta = false;
+    }
 
-    qCDebug(queries) << m_ip  << "NextProcess:" << opcionActual;
+    qCDebug(queries) << m_ip  << "NextProcess:" << m_opcionActual;
+
+    m_currentFuncion = createQuerie( m_opcionActual );
+    if ( !m_currentFuncion )
+    {
+        qCDebug(queries) << m_ip  << "Queries::nextProcess() No se creo la funcion para m_opcionActual" << m_opcionActual;
+        nextProcess();
+        return;
+    }
 
     queryTimer->setInterval( 20000 );
     queryTimer->start();
 
     //consultas CLI    
 
-    if ( opcionActual & flags & Connect )
+    if ( m_opcionActual & Connect )
     {        
         qCDebug(queries) << m_ip  << "creando term";
         conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
@@ -470,16 +441,11 @@ void Queries::nextProcess()
     if ( !m_connected )
         return;
 
-    if ( opcionActual & flags & Platform )
+    if ( m_opcionActual & Platform )
     {                
         if ( m_platform.isEmpty() )
         {
-            if ( m_reintentandoConsulta )
-            {
-                m_reintentandoConsulta=false;
-                createQueries( Platform );
-            }
-
+            PlatformInfo *pi=dynamic_cast<PlatformInfo*>(m_currentFuncion);
             pi->setBrand(m_brand);
             pi->setHostName(m_fullName);
             pi->setIp(m_ip);
@@ -496,14 +462,9 @@ void Queries::nextProcess()
         }
         return;
     }
-    else if ( opcionActual & flags & EquipmentNeighbors )
+    else if ( m_opcionActual & EquipmentNeighbors )
     {        
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( EquipmentNeighbors );
-        }
-
+        EquipmentNeighborsInfo *equipmentNeighborsInfoQuery=dynamic_cast<EquipmentNeighborsInfo*>(m_currentFuncion);
         equipmentNeighborsInfoQuery->setBrand(m_brand);
         equipmentNeighborsInfoQuery->setPlatform(m_platform);
         equipmentNeighborsInfoQuery->setXRLocation(m_xr_location);
@@ -516,19 +477,14 @@ void Queries::nextProcess()
         equipmentNeighborsInfoQuery->getEquipmentNeighborsInfo();
         return;
     }
-    else if ( opcionActual & flags & InterfaceInformation )
+    else if ( m_opcionActual & InterfaceInformation )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
              m_platform.contains("NCS-6000") )
             queryTimer->setInterval( 200000 );
 
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( InterfaceInformation );
-        }
-
+        InterfaceInfo *interfacesInfoQuery = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
         interfacesInfoQuery->setBrand(m_brand);
         interfacesInfoQuery->setPlatform( m_platform );
         interfacesInfoQuery->setXRLocation(m_xr_location);
@@ -541,19 +497,14 @@ void Queries::nextProcess()
         interfacesInfoQuery->getInterfacesInfo();
         return;
     }
-    else if ( opcionActual & flags & InterfaceDescription )
+    else if ( m_opcionActual & InterfaceDescription )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
              m_platform.contains("NCS-6000") )
             queryTimer->setInterval( 200000 );
 
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( InterfaceDescription );
-        }
-
+        InterfaceInfo *interfacesDescriptionsQuery = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
         interfacesDescriptionsQuery->setBrand(m_brand);
         interfacesDescriptionsQuery->setPlatform( m_platform );
         interfacesDescriptionsQuery->setXRLocation(m_xr_location);
@@ -566,19 +517,14 @@ void Queries::nextProcess()
         interfacesDescriptionsQuery->getInterfacesDescriptions();
         return;
     }
-    else if ( opcionActual & flags & InterfaceIpAddresses )
+    else if ( m_opcionActual & InterfaceIpAddresses )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
              m_platform.contains("NCS-6000") )
             queryTimer->setInterval( 200000 );
 
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( InterfaceIpAddresses );
-        }
-
+        InterfaceInfo *interfacesIpAddressesQuery = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
         interfacesIpAddressesQuery->setBrand(m_brand);
         interfacesIpAddressesQuery->setPlatform( m_platform );
         interfacesIpAddressesQuery->setXRLocation(m_xr_location);
@@ -591,19 +537,14 @@ void Queries::nextProcess()
         interfacesIpAddressesQuery->getInterfacesIpAddresses();
         return;
     }
-    else if ( opcionActual & flags & InterfacePermitedVlans )
+    else if ( m_opcionActual & InterfacePermitedVlans )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
              m_platform.contains("NCS-6000") )
             queryTimer->setInterval( 200000 );
 
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( InterfacePermitedVlans );
-        }
-
+        InterfaceInfo *interfacesPermitedVlansQuery = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
         interfacesPermitedVlansQuery->setBrand(m_brand);
         interfacesPermitedVlansQuery->setPlatform( m_platform );
         interfacesPermitedVlansQuery->setXRLocation(m_xr_location);
@@ -616,14 +557,9 @@ void Queries::nextProcess()
         interfacesPermitedVlansQuery->getInterfacesPermitedVlans();
         return;
     }
-    else if (  opcionActual & flags & Ospf )
+    else if (  m_opcionActual & Ospf )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( Ospf );
-        }
-
+        OSPFInfo *ospfQuery = dynamic_cast<OSPFInfo*>(m_currentFuncion);
         ospfQuery->setPlatform(m_platform);
         ospfQuery->setXRLocation(m_xr_location);
         ospfQuery->setBrand(m_brand);
@@ -636,14 +572,9 @@ void Queries::nextProcess()
         ospfQuery->getOSPFInfo();
         return;
     }    
-    else if (  opcionActual & flags & MplsTEtunnels )
+    else if (  m_opcionActual & MplsTEtunnels )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( MplsTEtunnels );
-        }
-
+        MplsTEtunnelsInfo *mplsTEtunnelsQuery = dynamic_cast<MplsTEtunnelsInfo*>(m_currentFuncion);
         mplsTEtunnelsQuery->setPlatform(m_platform);
         mplsTEtunnelsQuery->setXRLocation(m_xr_location);
         mplsTEtunnelsQuery->setBrand(m_brand);
@@ -656,14 +587,9 @@ void Queries::nextProcess()
         mplsTEtunnelsQuery->getMplsTETunnels();
         return;
     }
-    else if (  opcionActual & flags & Mplsl2Transport )
+    else if (  m_opcionActual & Mplsl2Transport )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( Mplsl2Transport );
-        }
-
+        MplsL2TransportInfo *mplsL2TransportQuery = dynamic_cast<MplsL2TransportInfo*>(m_currentFuncion);
         mplsL2TransportQuery->setPlatform(m_platform);
         mplsL2TransportQuery->setXRLocation(m_xr_location);
         mplsL2TransportQuery->setBrand(m_brand);
@@ -676,14 +602,9 @@ void Queries::nextProcess()
         mplsL2TransportQuery->getMplsL2Transport();
         return;
     }
-    else if (  opcionActual & flags & MplsLdpDiscovery )
+    else if (  m_opcionActual & MplsLdpDiscovery )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( MplsLdpDiscovery );
-        }
-
+        MplsLdpInfo *mplsLdpDiscoveryQuery = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
         mplsLdpDiscoveryQuery->setPlatform(m_platform);
         mplsLdpDiscoveryQuery->setXRLocation(m_xr_location);
         mplsLdpDiscoveryQuery->setBrand(m_brand);
@@ -696,14 +617,9 @@ void Queries::nextProcess()
         mplsLdpDiscoveryQuery->getMplsLdpDiscovery();
         return;
     }
-    else if (  opcionActual & flags & MplsLdpNeighbors )
+    else if (  m_opcionActual & MplsLdpNeighbors )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( MplsLdpNeighbors );
-        }
-
+        MplsLdpInfo *mplsLdpNeighborsQuery = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
         mplsLdpNeighborsQuery->setPlatform(m_platform);
         mplsLdpNeighborsQuery->setXRLocation(m_xr_location);
         mplsLdpNeighborsQuery->setBrand(m_brand);
@@ -716,14 +632,9 @@ void Queries::nextProcess()
         mplsLdpNeighborsQuery->getMplsLdpNeighbors();
         return;
     }
-    else if (  opcionActual & flags & MplsLdpInterfaces )
+    else if (  m_opcionActual & MplsLdpInterfaces )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( MplsLdpInterfaces );
-        }
-
+        MplsLdpInfo *mplsLdpInterfacesQuery = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
         mplsLdpInterfacesQuery->setPlatform(m_platform);
         mplsLdpInterfacesQuery->setXRLocation(m_xr_location);
         mplsLdpInterfacesQuery->setBrand(m_brand);
@@ -736,20 +647,15 @@ void Queries::nextProcess()
         mplsLdpInterfacesQuery->getMplsLdpInterfaces();
         return;
     }
-//    if (  opcionActual & flags & PimNeighbors )
+//    if (  m_opcionActual & PimNeighbors )
 //    {
 //        connect(pimNeighborsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
 //        pimNeighborsQuery->getPIMNeighbors();
 //        return;
 //    }
-    else if (  opcionActual & flags & PimInterfaces )
+    else if (  m_opcionActual & PimInterfaces )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( PimInterfaces );
-        }
-
+        PIMInfo *pimInteracesQuery = dynamic_cast<PIMInfo*>(m_currentFuncion);
         pimInteracesQuery->setPlatform(m_platform);
         pimInteracesQuery->setXRLocation(m_xr_location);
         pimInteracesQuery->setBrand(m_brand);
@@ -762,7 +668,7 @@ void Queries::nextProcess()
         pimInteracesQuery->getPIMInterfaces();
         return;
     }
-    else if ( opcionActual & flags & MacAddress )
+    else if ( m_opcionActual & MacAddress )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
@@ -770,14 +676,9 @@ void Queries::nextProcess()
              m_platform.contains("760"))
             queryTimer->setInterval( 200000 );
 
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( MacAddress );
-        }
-
         qCDebug(queries) << m_ip  << "Next: MacAddress";
 
+        MacInfo *macsQuery = dynamic_cast<MacInfo*>(m_currentFuncion);
         macsQuery->setBrand( m_brand );
         macsQuery->setPlatform( m_platform );        
         macsQuery->setXRLocation(m_xr_location);
@@ -790,14 +691,9 @@ void Queries::nextProcess()
         macsQuery->getMacInfo();
         return;
     }
-    else if ( opcionActual & flags & PortChannel )
+    else if ( m_opcionActual & PortChannel )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( PortChannel );
-        }
-
+        PortChannelsInfo *portChannelInfoQuery = dynamic_cast<PortChannelsInfo*>(m_currentFuncion);
         portChannelInfoQuery->setBrand(m_brand);
         portChannelInfoQuery->setPlatform( m_platform );
         portChannelInfoQuery->setXRLocation(m_xr_location);
@@ -810,14 +706,9 @@ void Queries::nextProcess()
         portChannelInfoQuery->getPortChannelsInfo();
         return;
     }
-    else if ( opcionActual & flags & VRFfVlans )
+    else if ( m_opcionActual & VRFfVlans )
     {        
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( VRFfVlans );
-        }
-
+        VrfInfo *vrfsFromVlansQuery = dynamic_cast<VrfInfo*>(m_currentFuncion);
         vrfsFromVlansQuery->setBrand( m_brand );
         vrfsFromVlansQuery->setPlatform( m_platform );
         vrfsFromVlansQuery->setXRLocation(m_xr_location);
@@ -830,14 +721,9 @@ void Queries::nextProcess()
         vrfsFromVlansQuery->getVRFsFromVLans();
         return;
     }
-    else if ( opcionActual & flags & VRFfRT )
+    else if ( m_opcionActual & VRFfRT )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( VRFfRT );
-        }
-
+        VrfInfo *vrfFromRTQuery = dynamic_cast<VrfInfo*>(m_currentFuncion);
         vrfFromRTQuery->setBrand( m_brand );
         vrfFromRTQuery->setPlatform( m_platform );
         vrfFromRTQuery->setXRLocation(m_xr_location);
@@ -850,14 +736,9 @@ void Queries::nextProcess()
         vrfFromRTQuery->getVRFfromRT();
         return;
     }
-    else if ( opcionActual & flags & VRFs )
+    else if ( m_opcionActual & VRFs )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( VRFs );
-        }
-
+        VrfInfo *vrfsQuery = dynamic_cast<VrfInfo*>(m_currentFuncion);
         vrfsQuery->setBrand( m_brand );
         vrfsQuery->setPlatform( m_platform );
         vrfsQuery->setXRLocation(m_xr_location);
@@ -870,16 +751,11 @@ void Queries::nextProcess()
         vrfsQuery->getVRFs();
         return;
     }
-    else if ( opcionActual & flags & Arp )
+    else if ( m_opcionActual & Arp )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( Arp );
-        }
-
         qCDebug(queries) << m_ip  << "empezando ARP";
 
+        ArpInfo *arpsQuery = dynamic_cast<ArpInfo*>(m_currentFuncion);
         arpsQuery->setBrand(m_brand);
         arpsQuery->setPlatform(m_platform);
         arpsQuery->setXRLocation(m_xr_location);
@@ -892,14 +768,9 @@ void Queries::nextProcess()
         arpsQuery->getArpInfo();
         return;
     }
-    else if ( opcionActual & flags & BGPNeig )
+    else if ( m_opcionActual & BGPNeig )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( BGPNeig );
-        }
-
+        BGPInfo *bgpNeighborsQuery = dynamic_cast<BGPInfo*>(m_currentFuncion);
         bgpNeighborsQuery->setPlatform( m_platform );
         bgpNeighborsQuery->setXRLocation(m_xr_location);
         bgpNeighborsQuery->setBrand(m_brand);
@@ -912,14 +783,9 @@ void Queries::nextProcess()
         bgpNeighborsQuery->getBGPNeighbors();
         return;
     }
-    else if ( opcionActual & flags & BGPNetworks )
+    else if ( m_opcionActual & BGPNetworks )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( BGPNetworks );
-        }
-
+        BGPInfo *bgpNetworksQuery = dynamic_cast<BGPInfo*>(m_currentFuncion);
         bgpNetworksQuery->setPlatform( m_platform );
         bgpNetworksQuery->setXRLocation(m_xr_location);
         bgpNetworksQuery->setBrand(m_brand);
@@ -932,14 +798,9 @@ void Queries::nextProcess()
         bgpNetworksQuery->getNetworks();
         return;
     }
-    else if ( opcionActual & flags & IpRoutes )
+    else if ( m_opcionActual & IpRoutes )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( IpRoutes );
-        }
-
+        IPRouteInfo *ipRoutesQuery = dynamic_cast<IPRouteInfo*>(m_currentFuncion);
         ipRoutesQuery->setPlatform( m_platform );
         ipRoutesQuery->setXRLocation(m_xr_location);
         ipRoutesQuery->setBrand(m_brand);
@@ -952,14 +813,9 @@ void Queries::nextProcess()
         ipRoutesQuery->getIPRouteInfo();
         return;
     }
-    else if ( opcionActual & flags & Configuration )
+    else if ( m_opcionActual & Configuration )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( Configuration );
-        }        
-
+        Config *configQuery = dynamic_cast<Config*>(m_currentFuncion);
         configQuery->setPlatform(m_platform);
         configQuery->setXRLocation(m_xr_location);
         configQuery->setBrand(m_brand);
@@ -972,14 +828,9 @@ void Queries::nextProcess()
         configQuery->configApply();
         return;
     }
-    else if ( opcionActual & flags & Funcion )
+    else if ( m_opcionActual & Funcion )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( Funcion );
-        }
-
+        FuncionInfo *funcionQuery = dynamic_cast<FuncionInfo*>(m_currentFuncion);
         funcionQuery->setPlatform(m_platform);
         funcionQuery->setXRLocation(m_xr_location);
         funcionQuery->setBrand(m_brand);
@@ -992,17 +843,11 @@ void Queries::nextProcess()
         funcionQuery->getTXT();
         return;
     }
-    else if ( opcionActual & flags & Exit )
+    else if ( m_opcionActual & Exit )
     {
-        if ( m_reintentandoConsulta )
-        {
-            m_reintentandoConsulta=false;
-            createQueries( Exit );
-        }
         queryTimer->setInterval( 3000 );
 
-        qCDebug(queries) << m_ip  << "exit" << exitQuery;
-
+        ExitInfo *exitQuery = dynamic_cast<ExitInfo*>(m_currentFuncion);
         exitQuery->setPlatform(m_platform);
         exitQuery->setBrand(m_brand);
         exitQuery->setHostName(m_fullName);
@@ -1034,7 +879,7 @@ void Queries::start() //ASync
 void Queries::processConnectToHostDisconnected()
 {
     //si se desconecto el equipo porque finalizo exitosamente
-    if ( opcionActual >= Exit )
+    if ( m_opcionActual >= Exit )
         return;
 
     qCDebug(queries) << m_ip  << "Queries::processConnectToHostDisconnected()" << m_ip << m_name;
@@ -1045,7 +890,7 @@ void Queries::processConnectToHostDisconnected()
     {
         //se logro la conexion pero a media consulta se desconecto
         qCDebug(queries) << m_ip  << "**Equipo desconectado a media consulta**" << m_ip << m_name <<
-                    "opcionActual" << opcionActual << "intentos" << m_consultaIntentos;
+                    "opcionActual" << m_opcionActual << "intentos" << m_consultaIntentos;
 
         if ( m_consultaIntentos <= 3 )
         {
@@ -1111,7 +956,7 @@ void Queries::processConnectToHostConnected()
         
     queryTimer->stop();
 
-    if ( opcionActual == Connect )
+    if ( m_opcionActual == Connect )
     {   
         //no se ha logrado conectar
         qCDebug(queries) << m_ip  << "Conectado. Primer intento" << m_ip << m_name;
@@ -1122,8 +967,6 @@ void Queries::processConnectToHostConnected()
             m_platform = term->platform();
             m_equipmenttype=equipmentOSFromPlatform( m_platform );
         }
-
-        createQueries();
 
         if ( m_name.isEmpty() )
         {
@@ -1148,6 +991,7 @@ void Queries::processPlatform()
     m_contieneconsultas=true;
     if ( m_platform.isEmpty() )
     {
+        PlatformInfo *pi=dynamic_cast<PlatformInfo*>(m_currentFuncion);
         m_platform=pi->platformInfo();
         m_xr_location=pi->xr_location();
         m_location=pi->location();
@@ -1158,6 +1002,7 @@ void Queries::processPlatform()
 
 void Queries::processConfigFinished()
 {
+    Config *configQuery=dynamic_cast<Config*>(m_currentFuncion);
     if ( configQuery->error() )
     {
         m_error = true;
@@ -1191,12 +1036,6 @@ void Queries::processKeepWorking()
     queryTimer->start();
 }
 
-void Queries::on_m_keepAliveTimer_timeout()
-{
-    qCDebug(queries) << m_ip  << "Queries::on_m_keepAliveTimer_timeout()";
-    term->sendCommand( " " );
-}
-
 void Queries::on_query_lastCommand(QString txt)
 {
     emit lastCommand(this,txt);
@@ -1208,7 +1047,7 @@ void Queries::on_queryTimer_timeout()
 
     //caso equipos que al salir de ellos no regresan al prompt del SO, simulamos que regreso para que se
     //envie la señal de finalizacion
-    if ( opcionActual >= Exit )
+    if ( m_opcionActual >= Exit )
     {
         nextProcess();
         return;
