@@ -37,10 +37,7 @@ public:
     explicit Queries(QString IP, QString user, QString pwd, QString linuxprompt, QObject *parent = nullptr);
     explicit Queries();
     Queries(const Queries &other);
-    ~Queries();    
-
-    QList<FuncionBase::QueryOpcion> m_lstOpciones;
-    QList<FuncionBase*> m_lstFunciones;
+    ~Queries();        
 
     bool isConnected() { return m_connected; }
     bool successful() { return !m_error; }
@@ -58,46 +55,48 @@ public:
     QString& ip() { return m_ip; }
     QString& ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; }
 
-    QList<SEquipmentNeighborsInfo>& equipmentNeighborsInfo() { return equipmentNeighborsInfoQuery->equipmentNeighborsInfo(); }
-    QList<SInterfaceInfo>& interfacesInfo() { return interfacesInfoQuery->interfacesInfo(); }
-    QList<SInterfaceVlans>& interfacesPermitedVlansInfo() { return interfacesPermitedVlansQuery->interfacesPermitedVlansInfo(); }
-    QList<SInterfaceInfo>& interfacesDescriptionsInfo() { return interfacesDescriptionsQuery->interfacesInfo(); }
-    QList<SIpInfo>& interfacesIpAddressesInfo() { return interfacesIpAddressesQuery->interfacesIpAddressesInfo(); }
-    QList<SOSPFInfo>& ospfInfo() { return ospfQuery->ospfInfo(); }
-    QString& mplsLdpLocalIDInfo() { return mplsLdpDiscoveryQuery->ldpLocalIDInfo(); }
-    QList<SMplsTETunnelInfo>& mplsTETunnelsInfo() { return mplsTEtunnelsQuery->mplsTEtunnelsInfo(); }
-    QList<SMplsL2XconnectInfo>& mplsL2TransportXconnectsInfo() { return mplsL2TransportQuery->mplsL2XconnectsInfo(); }
-    QList<SMplsL2VFIInfo>& mplsL2TransportVFIsInfo() { return mplsL2TransportQuery->mplsL2VFIsInfo(); }
-    QList<SMplsLdpInfo>& mplsLdpDiscoveryInfo() { return mplsLdpDiscoveryQuery->mplsLdpDiscoveryInfo(); }
-    QList<SMplsLdpInfo>& mplsLdpNeighborsInfo() { return mplsLdpNeighborsQuery->mplsLdpNeighborsInfo(); }
-    QList<SMplsLdpInfo>& mplsLdpInterfacesInfo() { return mplsLdpInterfacesQuery->mplsLdpInterfacesInfo(); }
-//    QList<SPIMInfo*>& pimNeighbors() { return pimNeighborsQuery->pimNeighbors(); }
-    QList<SPIMInfo>& pimInterfacesInfo() { return pimInteracesQuery->pimIntefacesInfo(); }
-    QList<SMacInfo>& macInfo() { return macsQuery->macInfo(); }
-    QList<SPortChannel>& portChannelInfo() { return portChannelInfoQuery->portChannelInfo(); }
-    QStringList& vrfsFromVlansInfo() { return vrfsFromVlansQuery->vrfsFromVlansInfo(); }
-    QString& vrfFromRTInfo() { return vrfFromRTQuery->vrfFromRTInfo(); }
-    QList<SVrfInfo>& vrfsInfo() { return vrfsQuery->vrfsInfo(); } //
-    QList<SIpInfo>& arpsInfo() { return arpsQuery->arpInfo(); } //
-	QList<SBGPNeighbor>& bgpNeighborsInfo() { return bgpNeighborsQuery->bgpNeighborInfo(); }
-    QList<SBGPNetwork>& bgpNetworksInfo() { return bgpNetworksQuery->bgpNetworksInfo(); }
-    QList<SIpRouteInfo>& ipRoutesInfo() { return ipRoutesQuery->ipRouteInfo(); }
-	QString funcionTxtInfo() { return funcionQuery->txtReceived(); }
+
+    bool existsQueryInformation(QueryOpcion option,int i=1);
+    FuncionBase *getQuery(QueryOpcion option,int i=1);
+
+    QList<SEquipmentNeighborsInfo>& equipmentNeighborsInfo(int i=1);
+    QList<SInterfaceInfo>& interfacesInfo(int i=1);
+    QList<SInterfaceVlans>& interfacesPermitedVlansInfo(int i=1);
+    QList<SInterfaceInfo>& interfacesDescriptionsInfo(int i=1);
+    QList<SIpInfo>& interfacesIpAddressesInfo(int i=1);
+    QList<SOSPFInfo>& ospfInfo(int i=1);
+    QString& mplsLdpLocalIDInfo(int i=1);
+    QList<SMplsTETunnelInfo>& mplsTETunnelsInfo(int i=1);
+    QList<SMplsL2XconnectInfo>& mplsL2TransportXconnectsInfo(int i=1);
+    QList<SMplsL2VFIInfo>& mplsL2TransportVFIsInfo(int i=1);
+    QList<SMplsLdpInfo>& mplsLdpDiscoveryInfo(int i=1);
+    QList<SMplsLdpInfo>& mplsLdpNeighborsInfo(int i=1);
+    QList<SMplsLdpInfo>& mplsLdpInterfacesInfo(int i=1);
+    QList<SPIMInfo>& pimInterfacesInfo(int i=1);
+    QList<SMacInfo>& macInfo(int i=1);
+    QList<SPortChannel>& portChannelInfo(int i=1);
+    QStringList& vrfsFromVlansInfo(int i=1);
+    QString& vrfFromRTInfo(int i=1);
+    QList<SVrfInfo>& vrfsInfo(int i=1);
+    QList<SIpInfo>& arpsInfo(int i=1);
+    QList<SBGPNeighbor>& bgpNeighborsInfo(int i=1);
+    QList<SBGPNetwork>& bgpNetworksInfo(int i=1);
+    QList<SIpRouteInfo>& ipRoutesInfo(int i=1);
+    QString funcionTxtInfo(int i=1);
 
     void setId(QString id) { m_id = id; }
     void setGW(QString GW);
     void updateDate() { m_datetime = QDateTime::currentDateTime(); }
     void setKeepAlive(bool enable);
     void setRemoteShell(QRemoteShell *remoteShell) { term = remoteShell; }
-    void addOption( QList<FuncionBase::QueryOpcion> lst );
+    void addOption( QList<QueryOpcion> lst );
     void setOperativo(bool OPERATIVO) { m_operativo = OPERATIVO; }
     void setCountry(QString COUNTRY) { m_country = COUNTRY; }
     void setIP(QString IP) { m_ip = IP; }
     void setHostName(QString NAME) { m_name = NAME; }
     void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }    
-    void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; } //
-    void createEmptyQueries();
-    void clear();
+    void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; }
+
     void setUser2(QString user) { m_user2=user; }
     void setPassword2(QString pwd) { m_pwd2=pwd; }
     void startSync();
@@ -126,7 +125,6 @@ protected slots:
     void processFinished();
     void processExit();
     void processKeepWorking();
-    void on_m_keepAliveTimer_timeout();
     void on_query_lastCommand(QString);
     void on_queryTimer_timeout();
 
@@ -136,8 +134,9 @@ signals:
 
 protected:
     QRemoteShell *term;
-    unsigned int flags;
-    unsigned int opcionActual;
+    QList<QueryOpcion> m_lstOpciones;
+    QueryOpcion m_opcionActual;
+    QList<FuncionBase*> m_lstFunciones;
     QTimer *queryTimer;
     bool m_connected;
     bool m_error;
@@ -162,7 +161,6 @@ protected:
     bool m_operativo;
     QString m_ip;
 
-    QTimer *m_keepAliveTimer;
     QString m_gw;
     QString m_user;
     QString m_user2;
@@ -174,15 +172,10 @@ protected:
     QString m_ipOinterfazMismoDominioOSPFdondeSeViene;
 
     void iniciar();
-    FuncionBase* createQuerie(FuncionBase::QueryOpcion option);
+    FuncionBase* createQuerie(QueryOpcion option);
     void conectarAequipo(QString ip, QString user, QString pwd, QString platform, QString linuxprompt);
     void nextProcess();    
     void borrarTerminal();
-    void limpiarConsultas();
-
-    //despues de terminar una consulta se crean las funciones que no se configuraron
-    //por si el usuario trata a accesder a ellas tenga consultas vacias
-    void crearFuncionesFaltantes();
 
 private:
     void clone(const Queries& other);

@@ -40,15 +40,14 @@ Queries::Queries(const Queries &other) : QObject(other.parent())
 Queries::~Queries()
 {
     qCDebug(queries) << m_ip << "Queries::~Queries()";
-    limpiarConsultas();
+    qDeleteAll(m_lstFunciones);
 }
 
 void Queries::iniciar()
 {    
     term = nullptr;
-    m_keepAliveTimer=nullptr;
     m_connectionprotol = QRemoteShell::SSHTelnet;
-
+    m_opcionActual = QueryOpcion::Null;
     m_connected=false;
     m_error=false;
     m_queriescreated=false;
@@ -57,8 +56,6 @@ void Queries::iniciar()
     m_reintentandoConsulta=false;
     m_contieneconsultas=false;
     m_consultaIntentos=0;     
-    opcionActual=0;
-    flags=0;
     m_operativo=true;
     m_datetime = QDateTime::currentDateTime();
 
@@ -92,71 +89,72 @@ void Queries::clone(const Queries& other)
     for ( FuncionBase *f : other.m_lstFunciones )
     {
         switch (f->queryOption()) {
-        case (FuncionBase::EquipmentNeighbors): {
+        case (QueryOpcion::EquipmentNeighbors): {
             m_lstFunciones.append( new EquipmentNeighborsInfo(*dynamic_cast<EquipmentNeighborsInfo*>(f)) );
             break;
         }
-        case (FuncionBase::MacAddress): {
+        case (QueryOpcion::MacAddress): {
             m_lstFunciones.append( new MacInfo(*dynamic_cast<MacInfo*>(f)) );
             break;
         }
-        case (FuncionBase::InterfaceInformation):
-        case (FuncionBase::InterfacePermitedVlans):
-        case (FuncionBase::InterfaceDescription):
-        case (FuncionBase::InterfaceIpAddresses):
+        case (QueryOpcion::InterfaceInformation):
+        case (QueryOpcion::InterfacePermitedVlans):
+        case (QueryOpcion::InterfaceDescription):
+        case (QueryOpcion::InterfaceIpAddresses):
         {
             m_lstFunciones.append( new InterfaceInfo(*dynamic_cast<InterfaceInfo*>(f)) );
             break;
         }
-        case (FuncionBase::Ospf): {
+        case (QueryOpcion::Ospf): {
             m_lstFunciones.append( new OSPFInfo(*dynamic_cast<OSPFInfo*>(f)) );
             break;
         }
-        case (FuncionBase::MplsTEtunnels): {
+        case (QueryOpcion::MplsTEtunnels): {
             m_lstFunciones.append( new MplsTEtunnelsInfo(*dynamic_cast<MplsTEtunnelsInfo*>(f)) );
             break;
         }
-        case (FuncionBase::MplsLdpDiscovery):
-        case (FuncionBase::MplsLdpNeighbors):
-        case (FuncionBase::MplsLdpInterfaces):
+        case (QueryOpcion::MplsLdpDiscovery):
+        case (QueryOpcion::MplsLdpNeighbors):
+        case (QueryOpcion::MplsLdpInterfaces):
         {
             m_lstFunciones.append( new MplsLdpInfo(*dynamic_cast<MplsLdpInfo*>(f)) );
             break;
         }
-        case (FuncionBase::PimInterfaces): {
+        case (QueryOpcion::PimInterfaces): {
             m_lstFunciones.append( new PIMInfo(*dynamic_cast<PIMInfo*>(f)) );
             break;
         }
-        case (FuncionBase::PortChannel): {
+        case (QueryOpcion::PortChannel): {
             m_lstFunciones.append( new PortChannelsInfo(*dynamic_cast<PortChannelsInfo*>(f)) );
             break;
         }
-        case (FuncionBase::VRFfVlans):
-        case (FuncionBase::VRFfRT):
-        case (FuncionBase::VRFs):
+        case (QueryOpcion::VRFfVlans):
+        case (QueryOpcion::VRFfRT):
+        case (QueryOpcion::VRFs):
         {
             m_lstFunciones.append( new VrfInfo(*dynamic_cast<VrfInfo*>(f)) );
             break;
         }
-        case (FuncionBase::Arp): {
+        case (QueryOpcion::Arp): {
             m_lstFunciones.append( new ArpInfo(*dynamic_cast<ArpInfo*>(f)) );
             break;
         }
-        case (FuncionBase::BGPNeig):
-        case (FuncionBase::BGPNetworks):
+        case (QueryOpcion::BGPNeig):
+
+        case (QueryOpcion::BGPNetworks):
         {
             m_lstFunciones.append( new BGPInfo(*dynamic_cast<BGPInfo*>(f)) );
             break;
         }
-        case (FuncionBase::IpRoutes): {
+        case (QueryOpcion::IpRoutes): {
             m_lstFunciones.append( new IPRouteInfo(*dynamic_cast<IPRouteInfo*>(f)) );
             break;
         }
-        case (FuncionBase::Mplsl2Transport): {
+        case (QueryOpcion::Mplsl2Transport): {
             m_lstFunciones.append( new MplsL2TransportInfo(*dynamic_cast<MplsL2TransportInfo*>(f)) );
             break;
         }
-        case (FuncionBase::Funcion): {
+        case (QueryOpcion::Funcion): {
             m_lstFunciones.append( new FuncionInfo(*dynamic_cast<FuncionInfo*>(f)) );
             break;
         }
@@ -165,398 +163,46 @@ void Queries::clone(const Queries& other)
     }
 }
 
-FuncionBase *Queries::createQuerie(FuncionBase::QueryOpcion option)
+FuncionBase *Queries::createQuerie(QueryOpcion option)
 {
     switch (option) {
-    case (FuncionBase::EquipmentNeighbors): { return factoryNewEquipmentNeighborsInfo(m_brand,); }
-    case (FuncionBase::MacAddress): {  }
-    case (FuncionBase::InterfaceInformation): {  }
-    case (FuncionBase::InterfacePermitedVlans): {  }
-    case (FuncionBase::InterfaceDescription): {  }
-    case (FuncionBase::InterfaceIpAddresses): {  }
-    case (FuncionBase::Ospf): {  }
-    case (FuncionBase::MplsTEtunnels): {  }
-    case (FuncionBase::MplsLdpDiscovery): {  }
-    case (FuncionBase::MplsLdpNeighbors): {  }
-    case (FuncionBase::MplsLdpInterfaces): {  }
-    case (FuncionBase::PimInterfaces): {  }
-    case (FuncionBase::PortChannel): {  }
-    case (FuncionBase::VRFfVlans): {  }
-    case (FuncionBase::VRFfRT): {  }
-    case (FuncionBase::VRFs): {  }
-    case (FuncionBase::Arp): {  }
-    case (FuncionBase::BGPNeig): {  }
-    case (FuncionBase::IpRoutes): {  }
-    case (FuncionBase::Configuration): {  }
-    case (FuncionBase::Mplsl2Transport): {  }
-    case (FuncionBase::Funcion): {  }
-    case (FuncionBase::BGPNetworks): {  }
-    case (FuncionBase::Exit): {  }
+    case (QueryOpcion::EquipmentNeighbors): { return factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::MacAddress): { return factoryNewMacInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::InterfaceInformation):
+    case (QueryOpcion::InterfacePermitedVlans):
+    case (QueryOpcion::InterfaceDescription):
+    case (QueryOpcion::InterfaceIpAddresses): { return factoryNewInterfaceInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::Ospf): { return factoryNewOSPFInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::MplsTEtunnels): { return factoryNewMplsTEtunnelsInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::MplsLdpDiscovery):
+    case (QueryOpcion::MplsLdpNeighbors):
+    case (QueryOpcion::MplsLdpInterfaces): { return factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::PimInterfaces): { return factoryNewPIMInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::PortChannel): { return factoryNewPortChannelsInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::VRFfVlans):
+    case (QueryOpcion::VRFfRT):
+    case (QueryOpcion::VRFs): { return factoryNewVrfInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::Arp): { return factoryNewArpInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::BGPNeig): { return factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::BGPNetworks): { return factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::IpRoutes): { return factoryNewIPRouteInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::Configuration): { return factoryNewConfig(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::Mplsl2Transport): { return factoryNewMplsL2TransportInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::Funcion): { return factoryNewFuncionInfo(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::Exit): { return factoryNewExit(m_brand,m_equipmenttype,term); }
     default: { return nullptr; }
     }
 }
 
-void Queries::limpiarConsultas()
+void Queries::addOption( QList<QueryOpcion> lst )
 {
-    if (pi)
-    {
-        delete pi;
-        pi=nullptr;
-    }
-    if (equipmentNeighborsInfoQuery)
-    {
-        delete equipmentNeighborsInfoQuery;
-        equipmentNeighborsInfoQuery=nullptr;
-    }
-    if (interfacesInfoQuery)
-    {
-        delete interfacesInfoQuery;
-        interfacesInfoQuery=nullptr;
-    }
-    if (interfacesPermitedVlansQuery)
-    {
-        delete interfacesPermitedVlansQuery;
-        interfacesPermitedVlansQuery=nullptr;
-    }
-    if (interfacesDescriptionsQuery)
-    {
-        delete interfacesDescriptionsQuery;
-        interfacesDescriptionsQuery=nullptr;
-    }
-    if (interfacesIpAddressesQuery)
-    {
-        delete interfacesIpAddressesQuery;
-        interfacesIpAddressesQuery=nullptr;
-    }
-    if (ospfQuery)
-    {
-        delete ospfQuery;
-        ospfQuery=nullptr;
-    }
-    if (mplsTEtunnelsQuery)
-    {
-        delete mplsTEtunnelsQuery;
-        mplsTEtunnelsQuery=nullptr;
-    }
-    if (mplsL2TransportQuery)
-    {
-        delete mplsL2TransportQuery;
-        mplsL2TransportQuery=nullptr;
-    }
-    if (mplsLdpDiscoveryQuery)
-    {
-        delete mplsLdpDiscoveryQuery;
-        mplsLdpDiscoveryQuery=nullptr;
-    }
-    if (mplsLdpNeighborsQuery)
-    {
-        delete mplsLdpNeighborsQuery;
-        mplsLdpNeighborsQuery=nullptr;
-    }
-    if (mplsLdpInterfacesQuery)
-    {
-        delete mplsLdpInterfacesQuery;
-        mplsLdpInterfacesQuery=nullptr;
-    }
-//    if (pimNeighborsQuery)
-//        delete pimNeighborsQuery;
-    if (pimInteracesQuery)
-    {
-        delete pimInteracesQuery;
-        pimInteracesQuery=nullptr;
-    }
-    if (macsQuery)
-    {
-        delete macsQuery;
-        macsQuery=nullptr;
-    }
-    if (portChannelInfoQuery)
-    {
-        delete portChannelInfoQuery;
-        portChannelInfoQuery=nullptr;
-    }
-    if (vrfsFromVlansQuery)
-    {
-        delete vrfsFromVlansQuery;
-        vrfsFromVlansQuery=nullptr;
-    }
-    if (vrfFromRTQuery)
-    {
-        delete vrfFromRTQuery;
-        vrfFromRTQuery=nullptr;
-    }
-    if (vrfsQuery)
-    {
-        delete vrfsQuery;
-        vrfsQuery=nullptr;
-    }
-    if (arpsQuery)
-    {
-        delete arpsQuery;
-        arpsQuery=nullptr;
-    }
-    if (bgpNeighborsQuery)
-    {
-        delete bgpNeighborsQuery;
-        bgpNeighborsQuery=nullptr;
-    }
-    if (bgpNetworksQuery)
-    {
-        delete bgpNetworksQuery;
-        bgpNetworksQuery=nullptr;
-    }
-    if (ipRoutesQuery)
-    {
-        delete ipRoutesQuery;
-        ipRoutesQuery=nullptr;
-    }
-    if (configQuery)
-    {
-        delete configQuery;
-        configQuery=nullptr;
-    }
-    if (funcionQuery)
-    {
-        delete funcionQuery;
-        funcionQuery=nullptr;
-    }
-    if (exitQuery)
-    {
-        delete exitQuery;
-        exitQuery=nullptr;
-    }
-}
-
-void Queries::clear()
-{
-    disconnect();    
-    opcionActual=0;
-    flags = 0;
-    limpiarConsultas();
-}
-
-void Queries::setKeepAlive(bool enable)
-{
-    if ( enable )
-    {
-        if ( !m_keepAliveTimer )
-        {
-            m_keepAliveTimer = new QTimer();
-            m_keepAliveTimer->setInterval( 300000 );
-            connect(m_keepAliveTimer,SIGNAL(timeout()),SLOT(on_m_keepAliveTimer_timeout()));
-            m_keepAliveTimer->start();
-        }
-    }
-    else
-        m_keepAliveTimer->stop();
-}
-
-void Queries::addOption( QList<FuncionBase::QueryOpcion> lst )
-{
+    lst.removeAll( QueryOpcion::Null ); //unicamente opciones validas
     m_lstOpciones.append( lst );
 }
 
 void Queries::setGW(QString GW)
 {
     m_gw = GW;
-}
-
-void Queries::createQueries(Queries::Opcion option)
-{
-    if ( m_queriescreated )
-        return;
-
-    unsigned int oActual = option;
-    if ( !oActual )
-        oActual=Platform;
-
-    do
-    {
-        if ( flags & Platform & oActual )
-        {
-            if (pi)
-                delete pi;
-
-            pi = new PlatformInfo(term);
-        }
-        else if ( flags & EquipmentNeighbors & oActual )
-        {
-            if (equipmentNeighborsInfoQuery)
-                delete equipmentNeighborsInfoQuery;
-
-            equipmentNeighborsInfoQuery = factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & InterfaceInformation & oActual )
-        {
-            if (interfacesInfoQuery)
-                delete interfacesInfoQuery;
-
-            interfacesInfoQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
-        }
-        else if ( flags & InterfacePermitedVlans & oActual )
-        {
-            if (interfacesPermitedVlansQuery)
-                delete interfacesPermitedVlansQuery;
-
-            interfacesPermitedVlansQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & InterfaceDescription & oActual )
-        {
-            if (interfacesDescriptionsQuery)
-                delete interfacesDescriptionsQuery;
-
-            interfacesDescriptionsQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & InterfaceIpAddresses & oActual )
-        {
-            if (interfacesIpAddressesQuery)
-                delete interfacesIpAddressesQuery;
-
-            interfacesIpAddressesQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & Ospf & oActual )
-        {
-            if (ospfQuery)
-                delete ospfQuery;
-
-            ospfQuery = factoryNewOSPFInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & MplsTEtunnels & oActual )
-        {
-            if (mplsTEtunnelsQuery)
-                delete mplsTEtunnelsQuery;
-
-            mplsTEtunnelsQuery = factoryNewMplsTEtunnelsInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & Mplsl2Transport & oActual )
-        {
-            if (mplsL2TransportQuery)
-                delete mplsL2TransportQuery;
-
-            mplsL2TransportQuery = factoryNewMplsL2TransportInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & MplsLdpDiscovery & oActual )
-        {
-            if (mplsLdpDiscoveryQuery)
-                delete mplsLdpDiscoveryQuery;
-
-            mplsLdpDiscoveryQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & MplsLdpNeighbors & oActual )
-        {
-            if (mplsLdpNeighborsQuery)
-                delete mplsLdpNeighborsQuery;
-
-            mplsLdpNeighborsQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & MplsLdpInterfaces & oActual )
-        {
-            if (mplsLdpInterfacesQuery)
-                delete mplsLdpInterfacesQuery;
-
-            mplsLdpInterfacesQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & PimInterfaces & oActual )
-        {
-            if (pimInteracesQuery)
-                delete pimInteracesQuery;
-
-            pimInteracesQuery = factoryNewPIMInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & MacAddress & oActual )
-        {
-            if (macsQuery)
-                delete macsQuery;
-
-            macsQuery = factoryNewMacInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & PortChannel & oActual )
-        {
-            if (portChannelInfoQuery)
-                delete portChannelInfoQuery;
-
-            portChannelInfoQuery = factoryNewPortChannelsInfo(m_brand,m_equipmenttype,term);
-        }
-
-        else if ( flags & VRFfVlans & oActual )
-        {
-            if (vrfsFromVlansQuery)
-                delete vrfsFromVlansQuery;
-
-            vrfsFromVlansQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term);
-        }
-
-        else if ( flags & VRFfRT & oActual )
-        {
-            if (vrfFromRTQuery)
-                delete vrfFromRTQuery;
-
-            vrfFromRTQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term);
-        }
-
-        else if ( flags & VRFs & oActual )
-        {
-            if (vrfsQuery)
-                delete vrfsQuery;
-
-            vrfsQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term);
-        }
-
-        else if ( flags & Arp & oActual )
-        {
-            if (arpsQuery)
-                delete arpsQuery;
-
-            arpsQuery = factoryNewArpInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & BGPNeig & oActual )
-        {
-            if (bgpNeighborsQuery)
-                delete bgpNeighborsQuery;
-
-            bgpNeighborsQuery = factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & BGPNetworks & oActual )
-        {
-            if (bgpNetworksQuery)
-                delete bgpNetworksQuery;
-
-            bgpNetworksQuery = factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & IpRoutes & oActual )
-        {
-            if (ipRoutesQuery)
-                delete ipRoutesQuery;
-
-            ipRoutesQuery = factoryNewIPRouteInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & Configuration & oActual )
-        {
-            if (configQuery)
-                delete configQuery;
-
-            configQuery = factoryNewConfig(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & Funcion & oActual )
-        {
-            if (funcionQuery)
-                delete funcionQuery;
-
-            funcionQuery = factoryNewFuncionInfo(m_brand,m_equipmenttype,term);
-        }
-        else if ( flags & Exit & oActual )
-        {
-            if (exitQuery)
-                delete exitQuery;
-
-            exitQuery = factoryNewExit(m_brand,m_equipmenttype,term);
-        }
-
-        oActual = oActual << 1;
-    }
-    while (oActual <= Exit);
-
-    m_queriescreated=true;
 }
 
 void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString platform, QString linuxprompt)
@@ -590,9 +236,179 @@ void Queries::borrarTerminal()
     }
 }
 
+bool Queries::existsQueryInformation(QueryOpcion option, int i)
+{
+    return getQuery(option,i);
+}
+
+FuncionBase *Queries::getQuery(QueryOpcion option,int i)
+{
+    int c=1;
+    for ( FuncionBase *f : m_lstFunciones )
+    {
+        if ( f->queryOption() == option )
+        {
+            if ( c != i )
+                c++;
+            else
+                return f;
+        }
+    }
+    return nullptr;
+}
+
+QList<SEquipmentNeighborsInfo>& Queries::equipmentNeighborsInfo(int i)
+{
+    return dynamic_cast<EquipmentNeighborsInfo*>(getQuery(EquipmentNeighbors,i))->equipmentNeighborsInfo();
+}
+
+QList<SInterfaceInfo>& Queries::interfacesInfo(int i)
+{
+    return dynamic_cast<InterfaceInfo*>(getQuery(InterfaceInformation,i))->interfacesInfo();
+}
+
+QList<SInterfaceVlans>& Queries::interfacesPermitedVlansInfo(int i)
+{
+    return dynamic_cast<InterfaceInfo*>(getQuery(InterfacePermitedVlans,i))->interfacesPermitedVlansInfo();
+}
+
+QList<SInterfaceInfo>& Queries::interfacesDescriptionsInfo(int i)
+{
+    return dynamic_cast<InterfaceInfo*>(getQuery(InterfaceDescription,i))->interfacesInfo();
+}
+
+QList<SIpInfo>& Queries::interfacesIpAddressesInfo(int i)
+{
+    return dynamic_cast<InterfaceInfo*>(getQuery(InterfaceIpAddresses,i))->interfacesIpAddressesInfo();
+}
+
+QList<SOSPFInfo>& Queries::ospfInfo(int i)
+{
+    return dynamic_cast<OSPFInfo*>(getQuery(Ospf,i))->ospfInfo();
+}
+
+QString& Queries::mplsLdpLocalIDInfo(int i)
+{
+    return dynamic_cast<MplsLdpInfo*>(getQuery(MplsLdpDiscovery,i))->ldpLocalIDInfo();
+}
+
+QList<SMplsTETunnelInfo>& Queries::mplsTETunnelsInfo(int i)
+{
+    return dynamic_cast<MplsTEtunnelsInfo*>(getQuery(MplsTEtunnels,i))->mplsTEtunnelsInfo();
+}
+
+QList<SMplsL2XconnectInfo>& Queries::mplsL2TransportXconnectsInfo(int i)
+{
+    return dynamic_cast<MplsL2TransportInfo*>(getQuery(Mplsl2Transport,i))->mplsL2XconnectsInfo();
+}
+
+QList<SMplsL2VFIInfo>& Queries::mplsL2TransportVFIsInfo(int i)
+{
+    return dynamic_cast<MplsL2TransportInfo*>(getQuery(Mplsl2Transport,i))->mplsL2VFIsInfo();
+}
+
+QList<SMplsLdpInfo>& Queries::mplsLdpDiscoveryInfo(int i)
+{
+    return dynamic_cast<MplsLdpInfo*>(getQuery(MplsLdpDiscovery,i))->mplsLdpDiscoveryInfo();
+}
+
+QList<SMplsLdpInfo>& Queries::mplsLdpNeighborsInfo(int i)
+{
+    return mplsLdpNeighborsQuery->mplsLdpNeighborsInfo();
+}
+
+QList<SMplsLdpInfo>& Queries::mplsLdpInterfacesInfo(int i)
+{
+    return mplsLdpInterfacesQuery->mplsLdpInterfacesInfo();
+}
+
+QList<SPIMInfo>& Queries::pimInterfacesInfo(int i)
+{
+    return pimInteracesQuery->pimIntefacesInfo();
+}
+
+QList<SMacInfo>& Queries::macInfo(int i)
+{
+    return macsQuery->macInfo();
+}
+
+QList<SPortChannel>& Queries::portChannelInfo(int i)
+{
+    return portChannelInfoQuery->portChannelInfo();
+}
+
+QStringList& Queries::vrfsFromVlansInfo(int i)
+{
+    return vrfsFromVlansQuery->vrfsFromVlansInfo();
+}
+
+QString& Queries::vrfFromRTInfo(int i)
+{
+    return vrfFromRTQuery->vrfFromRTInfo();
+}
+
+QList<SVrfInfo>& Queries::vrfsInfo(int i)
+{
+    return vrfsQuery->vrfsInfo();
+}
+
+QList<SIpInfo>& Queries::arpsInfo(int i)
+{
+    return arpsQuery->arpInfo();
+}
+
+QList<SBGPNeighbor>& Queries::bgpNeighborsInfo(int i)
+{
+    return bgpNeighborsQuery->bgpNeighborInfo();
+}
+
+QList<SBGPNetwork>& Queries::bgpNetworksInfo(int i)
+{
+    return bgpNetworksQuery->bgpNetworksInfo();
+}
+
+QList<SIpRouteInfo>& Queries::ipRoutesInfo(int i)
+{
+    return ipRoutesQuery->ipRouteInfo();
+}
+
+QString Queries::funcionTxtInfo(int i)
+{
+    return funcionQuery->txtReceived();
+}
+
 void Queries::nextProcess()
 {
     qCDebug(queries) << m_ip  << "Queries::nextProcess()";
+
+    if ( !m_reintentandoConsulta )
+    {
+        if ( m_lstOpciones.isEmpty() )
+        {
+            //no hay funciones a ejecutar, se finaliza
+
+            //si hay informacion de OSPF se cambia la IP de la interfaz que se conoce por cdp/lldp
+            //y se reemplaza por el ID
+            for ( SEquipmentNeighborsInfo &e : equipmentNeighborsInfo() )
+                for ( SOSPFInfo &oi : ospfInfo() )
+                {
+                    if ( oi.interfaz == e.interfazestesalida )
+                    {
+                        e.ip = oi.id;
+                        break;
+                    }
+                }
+
+            emit finished(this);
+            disconnect();
+            return;
+        }
+
+        m_opcionActual = m_lstOpciones.takeFirst();
+    }
+
+
+
 
     if ( !m_reintentandoConsulta )
     {
@@ -1206,7 +1022,7 @@ void Queries::startSync() //Sync
     disconnect(); //desconectamos todas las señales antes configuradas
     QEventLoop loop;
     connect(this, SIGNAL(finished(Queries*)), &loop, SLOT(quit()));
-    nextProcess();
+    start();
     loop.exec();
 }
 
@@ -1400,65 +1216,6 @@ void Queries::on_queryTimer_timeout()
 
     //timeout consultas normales
     processConnectToHostDisconnected();
-}
-
-void Queries::crearFuncionesFaltantes()
-{
-    //TODO no se crean al principio en CreateQueries por el crash de QSocketNotifier, :V investigar
-
-    if (!equipmentNeighborsInfoQuery)
-        equipmentNeighborsInfoQuery = factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term);
-    if (!interfacesInfoQuery)
-        interfacesInfoQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,this);
-    if (!interfacesPermitedVlansQuery)
-        interfacesPermitedVlansQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term);
-    if (!interfacesDescriptionsQuery)
-        interfacesDescriptionsQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term);
-    if (!interfacesIpAddressesQuery)
-        interfacesIpAddressesQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term);
-    if (!ospfQuery)
-        ospfQuery = factoryNewOSPFInfo(m_brand,m_equipmenttype,term);
-    if (!mplsTEtunnelsQuery)
-        mplsTEtunnelsQuery = factoryNewMplsTEtunnelsInfo(m_brand,m_equipmenttype,term);
-    if (!mplsL2TransportQuery)
-        mplsL2TransportQuery = factoryNewMplsL2TransportInfo(m_brand,m_equipmenttype,term);
-    if (!mplsLdpDiscoveryQuery)
-        mplsLdpDiscoveryQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term);
-    if (!mplsLdpNeighborsQuery)
-        mplsLdpNeighborsQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term);
-    if (!mplsLdpInterfacesQuery)
-        mplsLdpInterfacesQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term);
-    if (!pimInteracesQuery)
-        pimInteracesQuery = factoryNewPIMInfo(m_brand,m_equipmenttype,term);
-    if (!macsQuery)
-        macsQuery = factoryNewMacInfo(m_brand,m_equipmenttype,term);
-    if (!portChannelInfoQuery)
-        portChannelInfoQuery = factoryNewPortChannelsInfo(m_brand,m_equipmenttype,term);
-    if (!vrfsFromVlansQuery)
-        vrfsFromVlansQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term);
-    if (!vrfFromRTQuery)
-        vrfFromRTQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term);
-    if (!vrfsQuery)
-        vrfsQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term);
-    if (!arpsQuery)
-        arpsQuery = factoryNewArpInfo(m_brand,m_equipmenttype,term);
-    if (!bgpNeighborsQuery)
-        bgpNeighborsQuery = factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term);
-    if (!bgpNetworksQuery)
-        bgpNetworksQuery = factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term);
-    if (!ipRoutesQuery)
-        ipRoutesQuery = factoryNewIPRouteInfo(m_brand,m_equipmenttype,term);
-    if (!configQuery)
-        configQuery = factoryNewConfig(m_brand,m_equipmenttype,term);
-    if (!funcionQuery)
-        funcionQuery = factoryNewFuncionInfo(m_brand,m_equipmenttype,term);
-    if (!exitQuery)
-        exitQuery = factoryNewExit(m_brand,m_equipmenttype,term);
-}
-
-void Queries::createEmptyQueries()
-{
-    crearFuncionesFaltantes();
 }
 
 QMap<QString,QString> Queries::queriesArgumentosAceptados()

@@ -30,6 +30,36 @@ struct InfoBase
     QString id;
 };
 
+enum QueryOpcion {
+    Null,
+    Connect,
+    Platform,
+    EquipmentNeighbors,
+    MacAddress,
+    InterfaceInformation,
+    InterfacePermitedVlans,
+    InterfaceDescription,
+    InterfaceIpAddresses,
+    Ospf,
+    MplsTEtunnels,
+    MplsLdpDiscovery,
+    MplsLdpNeighbors,
+    MplsLdpInterfaces,
+    PimInterfaces,
+    PortChannel,
+    VRFfVlans,
+    VRFfRT,
+    VRFs,
+    Arp,
+    BGPNeig,
+    IpRoutes,
+    Configuration,
+    Mplsl2Transport,
+    Funcion,
+    BGPNetworks,
+    Exit
+};
+
 class QNETWORKCLIQUERIES_EXPORT QueriesConfigurationValue
 {
 
@@ -94,6 +124,7 @@ protected:
     QString m_name;
     QString m_ip;
     Queries* m_parentQuery;
+    QueryOpcion m_queryoption=Null;
 
     QString m_lastCommand;
 
@@ -107,36 +138,6 @@ public:
     FuncionBase();
     FuncionBase(QRemoteShell *terminal, QObject *parent = nullptr);
     ~FuncionBase();
-
-    enum QueryOpcion {
-        Null,
-        Connect,
-        Platform,
-        EquipmentNeighbors,
-        MacAddress,
-        InterfaceInformation,
-        InterfacePermitedVlans,
-        InterfaceDescription,
-        InterfaceIpAddresses,
-        Ospf,
-        MplsTEtunnels,
-        MplsLdpDiscovery,
-        MplsLdpNeighbors,
-        MplsLdpInterfaces,
-        PimInterfaces,
-        PortChannel,
-        VRFfVlans,
-        VRFfRT,
-        VRFs,
-        Arp,
-        BGPNeig,
-        IpRoutes,
-        Configuration,
-        Mplsl2Transport,
-        Funcion,
-        BGPNetworks,
-        Exit
-    }m_queryoption=Null;
 
     QueryOpcion queryOption() { return m_queryoption; };
 
