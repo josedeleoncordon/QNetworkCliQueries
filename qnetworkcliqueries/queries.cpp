@@ -46,6 +46,31 @@ Queries::~Queries()
 void Queries::iniciar()
 {    
     term = nullptr;
+    pi = nullptr;
+    equipmentNeighborsInfoQuery = nullptr;
+    interfacesInfoQuery = nullptr;
+    interfacesPermitedVlansQuery = nullptr;
+    interfacesDescriptionsQuery = nullptr;
+    interfacesIpAddressesQuery = nullptr;
+    ospfQuery = nullptr;
+    mplsTEtunnelsQuery = nullptr;
+    mplsL2TransportQuery = nullptr;
+    mplsLdpDiscoveryQuery = nullptr;
+    mplsLdpNeighborsQuery = nullptr;
+    mplsLdpInterfacesQuery = nullptr;
+    pimInteracesQuery = nullptr;
+    macsQuery = nullptr;
+    portChannelInfoQuery = nullptr;
+    vrfsFromVlansQuery = nullptr;
+    vrfFromRTQuery = nullptr;
+    vrfsQuery = nullptr;
+    arpsQuery = nullptr;
+    bgpNeighborsQuery = nullptr;
+    bgpNetworksQuery = nullptr;
+    ipRoutesQuery = nullptr;
+    configQuery = nullptr;
+    exitQuery = nullptr;
+    funcionQuery = nullptr;
     m_connectionprotol = QRemoteShell::SSHTelnet;
     m_opcionActual = QueryOpcion::Null;
     m_connected=false;
@@ -260,123 +285,168 @@ FuncionBase *Queries::getQuery(QueryOpcion option,int i)
 QList<SEquipmentNeighborsInfo>& Queries::equipmentNeighborsInfo(int i)
 {
     FuncionBase *f = getQuery(EquipmentNeighbors,i);
-//    QList<SEquipmentNeighborsInfo> lst;
-//    if ( !f ) return lst;
+    if ( !f ) return _lstSEquipmentNeighborsInfo;
     return dynamic_cast<EquipmentNeighborsInfo*>(f)->equipmentNeighborsInfo();
 }
 
 QList<SInterfaceInfo>& Queries::interfacesInfo(int i)
 {
+    FuncionBase *f = getQuery(InterfaceInformation,i);
+    if ( !f ) return _lstSInterfaceInfo;
     return dynamic_cast<InterfaceInfo*>(getQuery(InterfaceInformation,i))->interfacesInfo();
 }
 
 QList<SInterfaceVlans>& Queries::interfacesPermitedVlansInfo(int i)
 {
+    FuncionBase *f = getQuery(InterfacePermitedVlans,i);
+    if ( !f ) return _lstSInterfaceVlans;
     return dynamic_cast<InterfaceInfo*>(getQuery(InterfacePermitedVlans,i))->interfacesPermitedVlansInfo();
 }
 
 QList<SInterfaceInfo>& Queries::interfacesDescriptionsInfo(int i)
 {
+    FuncionBase *f = getQuery(InterfaceDescription,i);
+    if ( !f ) return _lstSInterfaceInfo;
     return dynamic_cast<InterfaceInfo*>(getQuery(InterfaceDescription,i))->interfacesInfo();
 }
 
 QList<SIpInfo>& Queries::interfacesIpAddressesInfo(int i)
 {
+    FuncionBase *f = getQuery(InterfaceIpAddresses,i);
+    if ( !f ) return _lstSIpInfo;
     return dynamic_cast<InterfaceInfo*>(getQuery(InterfaceIpAddresses,i))->interfacesIpAddressesInfo();
 }
 
 QList<SOSPFInfo>& Queries::ospfInfo(int i)
 {
+    FuncionBase *f = getQuery(Ospf,i);
+    if ( !f ) return _lstSOSPFInfo;
     return dynamic_cast<OSPFInfo*>(getQuery(Ospf,i))->ospfInfo();
 }
 
 QString& Queries::mplsLdpLocalIDInfo(int i)
 {
+    FuncionBase *f = getQuery(MplsLdpDiscovery,i);
+    if ( !f ) return _qstring;
     return dynamic_cast<MplsLdpInfo*>(getQuery(MplsLdpDiscovery,i))->ldpLocalIDInfo();
 }
 
 QList<SMplsTETunnelInfo>& Queries::mplsTETunnelsInfo(int i)
 {
+    FuncionBase *f = getQuery(MplsTEtunnels,i);
+    if ( !f ) return _lstSMplsTETunnelInfo;
     return dynamic_cast<MplsTEtunnelsInfo*>(getQuery(MplsTEtunnels,i))->mplsTEtunnelsInfo();
 }
 
 QList<SMplsL2XconnectInfo>& Queries::mplsL2TransportXconnectsInfo(int i)
 {
+    FuncionBase *f = getQuery(Mplsl2Transport,i);
+    if ( !f ) return _lstSMplsL2XconnectInfo;
     return dynamic_cast<MplsL2TransportInfo*>(getQuery(Mplsl2Transport,i))->mplsL2XconnectsInfo();
 }
 
 QList<SMplsL2VFIInfo>& Queries::mplsL2TransportVFIsInfo(int i)
 {
+    FuncionBase *f = getQuery(Mplsl2Transport,i);
+    if ( !f ) return _lstSMplsL2VFIInfo;
     return dynamic_cast<MplsL2TransportInfo*>(getQuery(Mplsl2Transport,i))->mplsL2VFIsInfo();
 }
 
 QList<SMplsLdpInfo>& Queries::mplsLdpDiscoveryInfo(int i)
 {
+    FuncionBase *f = getQuery(MplsLdpDiscovery,i);
+    if ( !f ) return _lstSMplsLdpInfo;
     return dynamic_cast<MplsLdpInfo*>(getQuery(MplsLdpDiscovery,i))->mplsLdpDiscoveryInfo();
 }
 
 QList<SMplsLdpInfo>& Queries::mplsLdpNeighborsInfo(int i)
 {
+    FuncionBase *f = getQuery(MplsLdpNeighbors,i);
+    if ( !f ) return _lstSMplsLdpInfo;
     return dynamic_cast<MplsLdpInfo*>(getQuery(MplsLdpNeighbors,i))->mplsLdpNeighborsInfo();
 }
 
 QList<SMplsLdpInfo>& Queries::mplsLdpInterfacesInfo(int i)
 {
+    FuncionBase *f = getQuery(MplsLdpInterfaces,i);
+    if ( !f ) return _lstSMplsLdpInfo;
     return dynamic_cast<MplsLdpInfo*>(getQuery(MplsLdpInterfaces,i))->mplsLdpInterfacesInfo();
 }
 
 QList<SPIMInfo>& Queries::pimInterfacesInfo(int i)
 {
+    FuncionBase *f = getQuery(PimInterfaces,i);
+    if ( !f ) return _lstSPIMInfo;
     return dynamic_cast<PIMInfo*>(getQuery(PimInterfaces,i))->pimIntefacesInfo();
 }
 
 QList<SMacInfo>& Queries::macInfo(int i)
 {
+    FuncionBase *f = getQuery(MacAddress,i);
+    if ( !f ) return _lstSMacInfo;
     return dynamic_cast<MacInfo*>(getQuery(MacAddress,i))->macInfo();
 }
 
 QList<SPortChannel>& Queries::portChannelInfo(int i)
 {
+    FuncionBase *f = getQuery(PortChannel,i);
+    if ( !f ) return _lstSPortChannel;
     return dynamic_cast<PortChannelsInfo*>(getQuery(PortChannel,i))->portChannelInfo();
 }
 
 QStringList& Queries::vrfsFromVlansInfo(int i)
 {
+    FuncionBase *f = getQuery(VRFfVlans,i);
+    if ( !f ) return _lstQStringList;
     return dynamic_cast<VrfInfo*>(getQuery(VRFfVlans,i))->vrfsFromVlansInfo();
 }
 
 QString& Queries::vrfFromRTInfo(int i)
 {
+    FuncionBase *f = getQuery(VRFfRT,i);
+    if ( !f ) return _qstring;
     return dynamic_cast<VrfInfo*>(getQuery(VRFfRT,i))->vrfFromRTInfo();
 }
 
 QList<SVrfInfo>& Queries::vrfsInfo(int i)
 {
+    FuncionBase *f = getQuery(VRFs,i);
+    if ( !f ) return _lstSVrfInfo;
     return dynamic_cast<VrfInfo*>(getQuery(VRFs,i))->vrfsInfo();
 }
 
 QList<SIpInfo>& Queries::arpsInfo(int i)
 {
+    FuncionBase *f = getQuery(Arp,i);
+    if ( !f ) return _lstSIpInfo;
     return dynamic_cast<ArpInfo*>(getQuery(Arp,i))->arpInfo();
 }
 
 QList<SBGPNeighbor>& Queries::bgpNeighborsInfo(int i)
 {
+    FuncionBase *f = getQuery(BGPNeig,i);
+    if ( !f ) return _lstSBGPNeighbor;
     return dynamic_cast<BGPInfo*>(getQuery(BGPNeig,i))->bgpNeighborInfo();
 }
 
 QList<SBGPNetwork>& Queries::bgpNetworksInfo(int i)
 {
+    FuncionBase *f = getQuery(BGPNetworks,i);
+    if ( !f ) return _lstSBGPNetwork;
     return dynamic_cast<BGPInfo*>(getQuery(BGPNetworks,i))->bgpNetworksInfo();
 }
 
 QList<SIpRouteInfo>& Queries::ipRoutesInfo(int i)
 {
+    FuncionBase *f = getQuery(IpRoutes,i);
+    if ( !f ) return _lstSIpRouteInfo;
     return dynamic_cast<IPRouteInfo*>(getQuery(IpRoutes,i))->ipRouteInfo();
 }
 
 QString Queries::funcionTxtInfo(int i)
 {
+    FuncionBase *f = getQuery(Funcion,i);
+    if ( !f ) return _qstring;
     return dynamic_cast<FuncionInfo*>(getQuery(Funcion,i))->txtReceived();
 }
 
@@ -445,14 +515,15 @@ void Queries::nextProcess()
     {                
         if ( m_platform.isEmpty() )
         {
-            PlatformInfo *pi=dynamic_cast<PlatformInfo*>(m_currentFuncion);
-            pi->setBrand(m_brand);
-            pi->setHostName(m_fullName);
-            pi->setIp(m_ip);
-            connect(pi,SIGNAL(processFinished()),SLOT(processPlatform()));
-            connect(pi,SIGNAL(working()),SLOT(processKeepWorking()));
-            connect(pi,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-            pi->getPlatformInfo();
+            PlatformInfo *f=dynamic_cast<PlatformInfo*>(m_currentFuncion);
+            if ( !pi ) pi = f;
+            f->setBrand(m_brand);
+            f->setHostName(m_fullName);
+            f->setIp(m_ip);
+            connect(f,SIGNAL(processFinished()),SLOT(processPlatform()));
+            connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+            connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+            f->getPlatformInfo();
         }
         else
         {
@@ -464,17 +535,18 @@ void Queries::nextProcess()
     }
     else if ( m_opcionActual & EquipmentNeighbors )
     {        
-        EquipmentNeighborsInfo *equipmentNeighborsInfoQuery=dynamic_cast<EquipmentNeighborsInfo*>(m_currentFuncion);
-        equipmentNeighborsInfoQuery->setBrand(m_brand);
-        equipmentNeighborsInfoQuery->setPlatform(m_platform);
-        equipmentNeighborsInfoQuery->setXRLocation(m_xr_location);
-        equipmentNeighborsInfoQuery->setHostName(m_fullName);
-        equipmentNeighborsInfoQuery->setIp(m_ip);
-        equipmentNeighborsInfoQuery->setParentQuery(this);
-        connect(equipmentNeighborsInfoQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(equipmentNeighborsInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(equipmentNeighborsInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        equipmentNeighborsInfoQuery->getEquipmentNeighborsInfo();
+        EquipmentNeighborsInfo *f=dynamic_cast<EquipmentNeighborsInfo*>(m_currentFuncion);
+        if ( !equipmentNeighborsInfoQuery ) equipmentNeighborsInfoQuery = f;
+        f->setBrand(m_brand);
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getEquipmentNeighborsInfo();
         return;
     }
     else if ( m_opcionActual & InterfaceInformation )
@@ -484,17 +556,18 @@ void Queries::nextProcess()
              m_platform.contains("NCS-6000") )
             queryTimer->setInterval( 200000 );
 
-        InterfaceInfo *interfacesInfoQuery = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
-        interfacesInfoQuery->setBrand(m_brand);
-        interfacesInfoQuery->setPlatform( m_platform );
-        interfacesInfoQuery->setXRLocation(m_xr_location);
-        interfacesInfoQuery->setHostName(m_fullName);
-        interfacesInfoQuery->setIp(m_ip);
-        interfacesInfoQuery->setParentQuery(this);
-        connect(interfacesInfoQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(interfacesInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(interfacesInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        interfacesInfoQuery->getInterfacesInfo();
+        InterfaceInfo *f = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
+        if ( !interfacesInfoQuery ) interfacesInfoQuery = f;
+        f->setBrand(m_brand);
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getInterfacesInfo();
         return;
     }
     else if ( m_opcionActual & InterfaceDescription )
@@ -504,17 +577,18 @@ void Queries::nextProcess()
              m_platform.contains("NCS-6000") )
             queryTimer->setInterval( 200000 );
 
-        InterfaceInfo *interfacesDescriptionsQuery = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
-        interfacesDescriptionsQuery->setBrand(m_brand);
-        interfacesDescriptionsQuery->setPlatform( m_platform );
-        interfacesDescriptionsQuery->setXRLocation(m_xr_location);
-        interfacesDescriptionsQuery->setHostName(m_fullName);
-        interfacesDescriptionsQuery->setIp(m_ip);
-        interfacesDescriptionsQuery->setParentQuery(this);
-        connect(interfacesDescriptionsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(interfacesDescriptionsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(interfacesDescriptionsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));        
-        interfacesDescriptionsQuery->getInterfacesDescriptions();
+        InterfaceInfo *f = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
+        if ( !interfacesDescriptionsQuery ) interfacesDescriptionsQuery = f;
+        f->setBrand(m_brand);
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getInterfacesDescriptions();
         return;
     }
     else if ( m_opcionActual & InterfaceIpAddresses )
@@ -524,17 +598,18 @@ void Queries::nextProcess()
              m_platform.contains("NCS-6000") )
             queryTimer->setInterval( 200000 );
 
-        InterfaceInfo *interfacesIpAddressesQuery = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
-        interfacesIpAddressesQuery->setBrand(m_brand);
-        interfacesIpAddressesQuery->setPlatform( m_platform );
-        interfacesIpAddressesQuery->setXRLocation(m_xr_location);
-        interfacesIpAddressesQuery->setHostName(m_fullName);
-        interfacesIpAddressesQuery->setIp(m_ip);
-        interfacesIpAddressesQuery->setParentQuery(this);
-        connect(interfacesIpAddressesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(interfacesIpAddressesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(interfacesIpAddressesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        interfacesIpAddressesQuery->getInterfacesIpAddresses();
+        InterfaceInfo *f = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
+        if ( !interfacesIpAddressesQuery ) interfacesIpAddressesQuery = f;
+        f->setBrand(m_brand);
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getInterfacesIpAddresses();
         return;
     }
     else if ( m_opcionActual & InterfacePermitedVlans )
@@ -544,107 +619,114 @@ void Queries::nextProcess()
              m_platform.contains("NCS-6000") )
             queryTimer->setInterval( 200000 );
 
-        InterfaceInfo *interfacesPermitedVlansQuery = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
-        interfacesPermitedVlansQuery->setBrand(m_brand);
-        interfacesPermitedVlansQuery->setPlatform( m_platform );
-        interfacesPermitedVlansQuery->setXRLocation(m_xr_location);
-        interfacesPermitedVlansQuery->setHostName(m_fullName);
-        interfacesPermitedVlansQuery->setIp(m_ip);
-        interfacesPermitedVlansQuery->setParentQuery(this);
-        connect(interfacesPermitedVlansQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(interfacesPermitedVlansQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(interfacesPermitedVlansQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        interfacesPermitedVlansQuery->getInterfacesPermitedVlans();
+        InterfaceInfo *f = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
+        if (!interfacesPermitedVlansQuery) interfacesPermitedVlansQuery=f;
+        f->setBrand(m_brand);
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getInterfacesPermitedVlans();
         return;
     }
     else if (  m_opcionActual & Ospf )
     {
-        OSPFInfo *ospfQuery = dynamic_cast<OSPFInfo*>(m_currentFuncion);
-        ospfQuery->setPlatform(m_platform);
-        ospfQuery->setXRLocation(m_xr_location);
-        ospfQuery->setBrand(m_brand);
-        ospfQuery->setHostName(m_fullName);
-        ospfQuery->setIp(m_ip);
-        ospfQuery->setParentQuery(this);
-        connect(ospfQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(ospfQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(ospfQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        ospfQuery->getOSPFInfo();
+        OSPFInfo *f = dynamic_cast<OSPFInfo*>(m_currentFuncion);
+        if (!ospfQuery) ospfQuery=f;
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getOSPFInfo();
         return;
     }    
     else if (  m_opcionActual & MplsTEtunnels )
     {
-        MplsTEtunnelsInfo *mplsTEtunnelsQuery = dynamic_cast<MplsTEtunnelsInfo*>(m_currentFuncion);
-        mplsTEtunnelsQuery->setPlatform(m_platform);
-        mplsTEtunnelsQuery->setXRLocation(m_xr_location);
-        mplsTEtunnelsQuery->setBrand(m_brand);
-        mplsTEtunnelsQuery->setHostName(m_fullName);
-        mplsTEtunnelsQuery->setIp(m_ip);
-        mplsTEtunnelsQuery->setParentQuery(this);
-        connect(mplsTEtunnelsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(mplsTEtunnelsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(mplsTEtunnelsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        mplsTEtunnelsQuery->getMplsTETunnels();
+        MplsTEtunnelsInfo *f = dynamic_cast<MplsTEtunnelsInfo*>(m_currentFuncion);
+        if (!mplsTEtunnelsQuery) mplsTEtunnelsQuery=f;
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getMplsTETunnels();
         return;
     }
     else if (  m_opcionActual & Mplsl2Transport )
     {
-        MplsL2TransportInfo *mplsL2TransportQuery = dynamic_cast<MplsL2TransportInfo*>(m_currentFuncion);
-        mplsL2TransportQuery->setPlatform(m_platform);
-        mplsL2TransportQuery->setXRLocation(m_xr_location);
-        mplsL2TransportQuery->setBrand(m_brand);
-        mplsL2TransportQuery->setHostName(m_fullName);
-        mplsL2TransportQuery->setIp(m_ip);
-        mplsL2TransportQuery->setParentQuery(this);
-        connect(mplsL2TransportQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(mplsL2TransportQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(mplsL2TransportQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        mplsL2TransportQuery->getMplsL2Transport();
+        MplsL2TransportInfo *f = dynamic_cast<MplsL2TransportInfo*>(m_currentFuncion);
+        if (!mplsL2TransportQuery) mplsL2TransportQuery=f;
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getMplsL2Transport();
         return;
     }
     else if (  m_opcionActual & MplsLdpDiscovery )
     {
-        MplsLdpInfo *mplsLdpDiscoveryQuery = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
-        mplsLdpDiscoveryQuery->setPlatform(m_platform);
-        mplsLdpDiscoveryQuery->setXRLocation(m_xr_location);
-        mplsLdpDiscoveryQuery->setBrand(m_brand);
-        mplsLdpDiscoveryQuery->setHostName(m_fullName);
-        mplsLdpDiscoveryQuery->setIp(m_ip);
-        mplsLdpDiscoveryQuery->setParentQuery(this);
-        connect(mplsLdpDiscoveryQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(mplsLdpDiscoveryQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(mplsLdpDiscoveryQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        mplsLdpDiscoveryQuery->getMplsLdpDiscovery();
+        MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
+        if (!mplsLdpDiscoveryQuery) mplsLdpDiscoveryQuery=f;
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getMplsLdpDiscovery();
         return;
     }
     else if (  m_opcionActual & MplsLdpNeighbors )
     {
-        MplsLdpInfo *mplsLdpNeighborsQuery = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
-        mplsLdpNeighborsQuery->setPlatform(m_platform);
-        mplsLdpNeighborsQuery->setXRLocation(m_xr_location);
-        mplsLdpNeighborsQuery->setBrand(m_brand);
-        mplsLdpNeighborsQuery->setHostName(m_fullName);
-        mplsLdpNeighborsQuery->setIp(m_ip);
-        mplsLdpNeighborsQuery->setParentQuery(this);
-        connect(mplsLdpNeighborsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(mplsLdpNeighborsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(mplsLdpNeighborsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        mplsLdpNeighborsQuery->getMplsLdpNeighbors();
+        MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
+        if (!mplsLdpNeighborsQuery) mplsLdpNeighborsQuery=f;
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getMplsLdpNeighbors();
         return;
     }
     else if (  m_opcionActual & MplsLdpInterfaces )
     {
-        MplsLdpInfo *mplsLdpInterfacesQuery = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
-        mplsLdpInterfacesQuery->setPlatform(m_platform);
-        mplsLdpInterfacesQuery->setXRLocation(m_xr_location);
-        mplsLdpInterfacesQuery->setBrand(m_brand);
-        mplsLdpInterfacesQuery->setHostName(m_fullName);
-        mplsLdpInterfacesQuery->setIp(m_ip);
-        mplsLdpInterfacesQuery->setParentQuery(this);
-        connect(mplsLdpInterfacesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(mplsLdpInterfacesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(mplsLdpInterfacesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        mplsLdpInterfacesQuery->getMplsLdpInterfaces();
+        MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
+        if (!mplsLdpInterfacesQuery) mplsLdpInterfacesQuery=f;
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getMplsLdpInterfaces();
         return;
     }
 //    if (  m_opcionActual & PimNeighbors )
@@ -655,17 +737,18 @@ void Queries::nextProcess()
 //    }
     else if (  m_opcionActual & PimInterfaces )
     {
-        PIMInfo *pimInteracesQuery = dynamic_cast<PIMInfo*>(m_currentFuncion);
-        pimInteracesQuery->setPlatform(m_platform);
-        pimInteracesQuery->setXRLocation(m_xr_location);
-        pimInteracesQuery->setBrand(m_brand);
-        pimInteracesQuery->setHostName(m_fullName);
-        pimInteracesQuery->setIp(m_ip);
-        pimInteracesQuery->setParentQuery(this);
-        connect(pimInteracesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(pimInteracesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(pimInteracesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        pimInteracesQuery->getPIMInterfaces();
+        PIMInfo *f = dynamic_cast<PIMInfo*>(m_currentFuncion);
+        if (!pimInteracesQuery) pimInteracesQuery=f;
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getPIMInterfaces();
         return;
     }
     else if ( m_opcionActual & MacAddress )
@@ -678,186 +761,198 @@ void Queries::nextProcess()
 
         qCDebug(queries) << m_ip  << "Next: MacAddress";
 
-        MacInfo *macsQuery = dynamic_cast<MacInfo*>(m_currentFuncion);
-        macsQuery->setBrand( m_brand );
-        macsQuery->setPlatform( m_platform );        
-        macsQuery->setXRLocation(m_xr_location);
-        macsQuery->setHostName(m_fullName);
-        macsQuery->setIp(m_ip);
-        macsQuery->setParentQuery(this);
-        connect(macsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(macsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(macsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        macsQuery->getMacInfo();
+        MacInfo *f = dynamic_cast<MacInfo*>(m_currentFuncion);
+        if (!macsQuery) macsQuery=f;
+        f->setBrand( m_brand );
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getMacInfo();
         return;
     }
     else if ( m_opcionActual & PortChannel )
     {
-        PortChannelsInfo *portChannelInfoQuery = dynamic_cast<PortChannelsInfo*>(m_currentFuncion);
-        portChannelInfoQuery->setBrand(m_brand);
-        portChannelInfoQuery->setPlatform( m_platform );
-        portChannelInfoQuery->setXRLocation(m_xr_location);
-        portChannelInfoQuery->setHostName(m_fullName);
-        portChannelInfoQuery->setIp(m_ip);
-        portChannelInfoQuery->setParentQuery(this);
-        connect(portChannelInfoQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(portChannelInfoQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(portChannelInfoQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        portChannelInfoQuery->getPortChannelsInfo();
+        PortChannelsInfo *f = dynamic_cast<PortChannelsInfo*>(m_currentFuncion);
+        if (!portChannelInfoQuery) portChannelInfoQuery=f;
+        f->setBrand(m_brand);
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getPortChannelsInfo();
         return;
     }
     else if ( m_opcionActual & VRFfVlans )
     {        
-        VrfInfo *vrfsFromVlansQuery = dynamic_cast<VrfInfo*>(m_currentFuncion);
-        vrfsFromVlansQuery->setBrand( m_brand );
-        vrfsFromVlansQuery->setPlatform( m_platform );
-        vrfsFromVlansQuery->setXRLocation(m_xr_location);
-        vrfsFromVlansQuery->setHostName(m_fullName);
-        vrfsFromVlansQuery->setIp(m_ip);
-        vrfsFromVlansQuery->setParentQuery(this);
-        connect(vrfsFromVlansQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(vrfsFromVlansQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(vrfsFromVlansQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        vrfsFromVlansQuery->getVRFsFromVLans();
+        VrfInfo *f = dynamic_cast<VrfInfo*>(m_currentFuncion);
+        if (!vrfsFromVlansQuery) vrfsFromVlansQuery=f;
+        f->setBrand( m_brand );
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getVRFsFromVLans();
         return;
     }
     else if ( m_opcionActual & VRFfRT )
     {
-        VrfInfo *vrfFromRTQuery = dynamic_cast<VrfInfo*>(m_currentFuncion);
-        vrfFromRTQuery->setBrand( m_brand );
-        vrfFromRTQuery->setPlatform( m_platform );
-        vrfFromRTQuery->setXRLocation(m_xr_location);
-        vrfFromRTQuery->setHostName(m_fullName);
-        vrfFromRTQuery->setIp(m_ip);
-        vrfFromRTQuery->setParentQuery(this);
-        connect(vrfFromRTQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(vrfFromRTQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(vrfFromRTQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        vrfFromRTQuery->getVRFfromRT();
+        VrfInfo *f = dynamic_cast<VrfInfo*>(m_currentFuncion);
+        if (!vrfFromRTQuery) vrfFromRTQuery=f;
+        f->setBrand( m_brand );
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getVRFfromRT();
         return;
     }
     else if ( m_opcionActual & VRFs )
     {
-        VrfInfo *vrfsQuery = dynamic_cast<VrfInfo*>(m_currentFuncion);
-        vrfsQuery->setBrand( m_brand );
-        vrfsQuery->setPlatform( m_platform );
-        vrfsQuery->setXRLocation(m_xr_location);
-        vrfsQuery->setHostName(m_fullName);
-        vrfsQuery->setIp(m_ip);
-        vrfsQuery->setParentQuery(this);
-        connect(vrfsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(vrfsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(vrfsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        vrfsQuery->getVRFs();
+        VrfInfo *f = dynamic_cast<VrfInfo*>(m_currentFuncion);
+        if (!vrfsQuery) vrfsQuery=f;
+        f->setBrand( m_brand );
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getVRFs();
         return;
     }
     else if ( m_opcionActual & Arp )
     {
         qCDebug(queries) << m_ip  << "empezando ARP";
 
-        ArpInfo *arpsQuery = dynamic_cast<ArpInfo*>(m_currentFuncion);
-        arpsQuery->setBrand(m_brand);
-        arpsQuery->setPlatform(m_platform);
-        arpsQuery->setXRLocation(m_xr_location);
-        arpsQuery->setHostName(m_fullName);
-        arpsQuery->setIp(m_ip);
-        arpsQuery->setParentQuery(this);
-        connect(arpsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(arpsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(arpsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        arpsQuery->getArpInfo();
+        ArpInfo *f = dynamic_cast<ArpInfo*>(m_currentFuncion);
+        if (!arpsQuery) arpsQuery=f;
+        f->setBrand(m_brand);
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getArpInfo();
         return;
     }
     else if ( m_opcionActual & BGPNeig )
     {
-        BGPInfo *bgpNeighborsQuery = dynamic_cast<BGPInfo*>(m_currentFuncion);
-        bgpNeighborsQuery->setPlatform( m_platform );
-        bgpNeighborsQuery->setXRLocation(m_xr_location);
-        bgpNeighborsQuery->setBrand(m_brand);
-        bgpNeighborsQuery->setHostName(m_fullName);
-        bgpNeighborsQuery->setIp(m_ip);
-        bgpNeighborsQuery->setParentQuery(this);
-        connect(bgpNeighborsQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(bgpNeighborsQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(bgpNeighborsQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        bgpNeighborsQuery->getBGPNeighbors();
+        BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
+        if (!bgpNeighborsQuery) bgpNeighborsQuery=f;
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getBGPNeighbors();
         return;
     }
     else if ( m_opcionActual & BGPNetworks )
     {
-        BGPInfo *bgpNetworksQuery = dynamic_cast<BGPInfo*>(m_currentFuncion);
-        bgpNetworksQuery->setPlatform( m_platform );
-        bgpNetworksQuery->setXRLocation(m_xr_location);
-        bgpNetworksQuery->setBrand(m_brand);
-        bgpNetworksQuery->setHostName(m_fullName);
-        bgpNetworksQuery->setIp(m_ip);
-        bgpNetworksQuery->setParentQuery(this);
-        connect(bgpNetworksQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(bgpNetworksQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(bgpNetworksQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        bgpNetworksQuery->getNetworks();
+        BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
+        if (!bgpNetworksQuery) bgpNetworksQuery=f;
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getNetworks();
         return;
     }
     else if ( m_opcionActual & IpRoutes )
     {
-        IPRouteInfo *ipRoutesQuery = dynamic_cast<IPRouteInfo*>(m_currentFuncion);
-        ipRoutesQuery->setPlatform( m_platform );
-        ipRoutesQuery->setXRLocation(m_xr_location);
-        ipRoutesQuery->setBrand(m_brand);
-        ipRoutesQuery->setHostName(m_fullName);
-        ipRoutesQuery->setIp(m_ip);
-        ipRoutesQuery->setParentQuery(this);
-        connect(ipRoutesQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(ipRoutesQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(ipRoutesQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        ipRoutesQuery->getIPRouteInfo();
+        IPRouteInfo *f = dynamic_cast<IPRouteInfo*>(m_currentFuncion);
+        if (!ipRoutesQuery) ipRoutesQuery=f;
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getIPRouteInfo();
         return;
     }
     else if ( m_opcionActual & Configuration )
     {
-        Config *configQuery = dynamic_cast<Config*>(m_currentFuncion);
-        configQuery->setPlatform(m_platform);
-        configQuery->setXRLocation(m_xr_location);
-        configQuery->setBrand(m_brand);
-        configQuery->setHostName(m_fullName);
-        configQuery->setIp(m_ip);
-        configQuery->setParentQuery(this);
-        connect(configQuery,SIGNAL(processFinished()),SLOT(processConfigFinished()));
-        connect(configQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(configQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        configQuery->configApply();
+        Config *f = dynamic_cast<Config*>(m_currentFuncion);
+        if (!configQuery) configQuery=f;
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processConfigFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->configApply();
         return;
     }
     else if ( m_opcionActual & Funcion )
     {
-        FuncionInfo *funcionQuery = dynamic_cast<FuncionInfo*>(m_currentFuncion);
-        funcionQuery->setPlatform(m_platform);
-        funcionQuery->setXRLocation(m_xr_location);
-        funcionQuery->setBrand(m_brand);
-        funcionQuery->setHostName(m_fullName);
-        funcionQuery->setIp(m_ip);
-        funcionQuery->setParentQuery(this);
-        connect(funcionQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(funcionQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(funcionQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        funcionQuery->getTXT();
+        FuncionInfo *f = dynamic_cast<FuncionInfo*>(m_currentFuncion);
+        if (!funcionQuery) funcionQuery=f;
+        f->setPlatform(m_platform);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getTXT();
         return;
     }
     else if ( m_opcionActual & Exit )
     {
         queryTimer->setInterval( 3000 );
 
-        ExitInfo *exitQuery = dynamic_cast<ExitInfo*>(m_currentFuncion);
-        exitQuery->setPlatform(m_platform);
-        exitQuery->setBrand(m_brand);
-        exitQuery->setHostName(m_fullName);
-        exitQuery->setIp(m_ip);
-        exitQuery->setConnectedByGW( !m_gw.isEmpty() );
-        exitQuery->setParentQuery(this);
-        connect(exitQuery,SIGNAL(processFinished()),SLOT(processFinished()));
-        connect(exitQuery,SIGNAL(working()),SLOT(processKeepWorking()));
-        connect(exitQuery,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
-        exitQuery->exit();
+        ExitInfo *f = dynamic_cast<ExitInfo*>(m_currentFuncion);
+        if (!exitQuery) exitQuery=f;
+        f->setPlatform(m_platform);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setConnectedByGW( !m_gw.isEmpty() );
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->exit();
         return;
     }
 }
@@ -1701,7 +1796,7 @@ LstQueries::~LstQueries()
 
 bool LstQueries::isEmpty()
 {
-    if ( !opcionesConsulta && lstQueries.isEmpty() )
+    if ( opcionesConsulta.isEmpty() && lstQueries.isEmpty() )
         return false;
 
     return true;

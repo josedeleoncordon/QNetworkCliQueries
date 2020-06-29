@@ -2,13 +2,11 @@
 
 #include <QEventLoop>
 #include <QDir>
-#include "queries.h"
 #include "funciones.h"
 #include "properties.h"
 
 ConsultaEquipos::ConsultaEquipos(QObject *parent) : QObject(parent)
-{    
-    opciones=0;
+{
     m_queriesThread = new QueriesThread(this);
     m_consultaConErrores=false;
     m_consultaAgregarVecinos=false;
@@ -57,37 +55,10 @@ void ConsultaEquipos::setLstQ(LstQueries &lQ)
         lstIPAnteriores.append( q.ip() );
 }
 
-void ConsultaEquipos::addOpcionesConsulta(QList<Queries::Opcion> lst)
+void ConsultaEquipos::addOpcionesConsulta(QList<QueryOpcion> lst)
 {
-    for ( Queries::Opcion op : lst )
-    {
-        if (op == Queries::Connect ) opciones |= 4;
-        if (op == Queries::Platform ) opciones |= 8;
-        if (op == Queries::EquipmentNeighbors ) opciones |= 16;
-        if (op == Queries::MacAddress ) opciones |= 32;
-        if (op == Queries::InterfaceInformation ) opciones |= 64;
-        if (op == Queries::InterfacePermitedVlans ) opciones |= 128;
-        if (op == Queries::InterfaceDescription ) opciones |= 256;
-        if (op == Queries::InterfaceIpAddresses ) opciones |= 512;
-        if (op == Queries::Ospf ) opciones |= 1024;
-        if (op == Queries::MplsTEtunnels ) opciones |= 2048;
-        if (op == Queries::MplsLdpDiscovery ) opciones |= 4096;
-        if (op == Queries::MplsLdpNeighbors ) opciones |= 8192;
-        if (op == Queries::MplsLdpInterfaces ) opciones |= 16384;
-        if (op == Queries::PimInterfaces ) opciones |= 32768;
-        if (op == Queries::PortChannel ) opciones |= 65536;
-        if (op == Queries::VRFfVlans ) opciones |= 131072;
-        if (op == Queries::VRFfRT ) opciones |= 262144;
-        if (op == Queries::VRFs ) opciones |= 524288;
-        if (op == Queries::Arp ) opciones |= 1048576;
-        if (op == Queries::BGPNeig ) opciones |= 2097152;
-        if (op == Queries::IpRoutes ) opciones |= 4194304;
-        if (op == Queries::Configuration ) opciones |= 8388608;
-        if (op == Queries::Mplsl2Transport ) opciones |= 16777216;
-        if (op == Queries::Funcion ) opciones |= 33554432;
-        if (op == Queries::BGPNetworks ) opciones |= 67108864;
-        if (op == Queries::Exit ) opciones |= 134217728;
-    }
+	lst.removeAll( QueryOpcion::Null ); //unicamente opciones validas
+	opciones.append( lst );
 }
 
 void ConsultaEquipos::addParametrosConsulta(const QList<QueriesConfigurationValue> &c)
@@ -126,9 +97,9 @@ void ConsultaEquipos::consultarEquipos()
     }
 
     //opciones de consulta
-    if ( !opciones )
+	if ( opciones.isEmpty() )
         opciones = _lstQ.opcionesConsulta; //si no se configuro opciones se usa la de la consulta anterior
-    if ( !opciones )
+	if ( opciones.isEmpty() )
     {
         _error = "Opciones de consulta no configuradas";
         emit error();
@@ -194,7 +165,7 @@ void ConsultaEquipos::consultarEquipos()
     m_queriesThread->setUser2( m_user2 );
     m_queriesThread->setPassword2( m_pwd2 );
     m_queriesThread->setLinuxPrompt( m_linuxprompt );
-    m_queriesThread->setOpciones( opciones );
+	m_queriesThread->addOpciones( opciones );
     m_queriesThread->setEquipmentNeighborsConsultarVecinos( m_consultaAgregarVecinos );
     m_queriesThread->setEquipmentNeighborsOSPFMismoDominio( m_consultaOSPFMismoDominio );
     m_queriesThread->setEquipmentNeighborsOSPFArea( m_consultaOSPFArea );

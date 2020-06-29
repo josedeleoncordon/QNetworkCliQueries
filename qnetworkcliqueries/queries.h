@@ -39,6 +39,33 @@ public:
     Queries(const Queries &other);
     ~Queries();        
 
+    //accesos rapidos a la primera consulta de una funcion, que es la mayoria
+    PlatformInfo *pi;
+    EquipmentNeighborsInfo *equipmentNeighborsInfoQuery;
+    InterfaceInfo *interfacesInfoQuery;
+    InterfaceInfo *interfacesPermitedVlansQuery;
+    InterfaceInfo *interfacesDescriptionsQuery;
+    InterfaceInfo *interfacesIpAddressesQuery;
+    OSPFInfo *ospfQuery;
+    MplsTEtunnelsInfo *mplsTEtunnelsQuery;
+    MplsL2TransportInfo *mplsL2TransportQuery;
+    MplsLdpInfo *mplsLdpDiscoveryQuery;
+    MplsLdpInfo *mplsLdpNeighborsQuery;
+    MplsLdpInfo *mplsLdpInterfacesQuery;
+    PIMInfo *pimInteracesQuery;
+    MacInfo *macsQuery;
+    PortChannelsInfo *portChannelInfoQuery;
+    VrfInfo *vrfsFromVlansQuery;
+    VrfInfo *vrfFromRTQuery;
+    VrfInfo *vrfsQuery;
+    ArpInfo *arpsQuery;
+    BGPInfo *bgpNeighborsQuery;
+    BGPInfo *bgpNetworksQuery;
+    IPRouteInfo *ipRoutesQuery;
+    Config *configQuery;
+    FuncionInfo *funcionQuery;
+    ExitInfo *exitQuery;
+
     bool isConnected() { return m_connected; }
     bool successful() { return !m_error; }
     bool isReachable() { return m_ipreachable; }
@@ -171,6 +198,26 @@ protected:
 
     QString m_ipOinterfazMismoDominioOSPFdondeSeViene;
 
+    //para regresar si un query no esta disponible
+    QList<SEquipmentNeighborsInfo> _lstSEquipmentNeighborsInfo;
+    QList<SInterfaceInfo> _lstSInterfaceInfo;
+    QList<SInterfaceVlans> _lstSInterfaceVlans;
+    QList<SIpInfo> _lstSIpInfo;
+    QList<SOSPFInfo> _lstSOSPFInfo;
+    QString _qstring;
+    QList<SMplsTETunnelInfo> _lstSMplsTETunnelInfo;
+    QList<SMplsL2XconnectInfo> _lstSMplsL2XconnectInfo;
+    QList<SMplsL2VFIInfo> _lstSMplsL2VFIInfo;
+    QList<SMplsLdpInfo> _lstSMplsLdpInfo;
+    QList<SPIMInfo> _lstSPIMInfo;
+    QList<SMacInfo> _lstSMacInfo;
+    QList<SPortChannel> _lstSPortChannel;
+    QStringList _lstQStringList;
+    QList<SVrfInfo> _lstSVrfInfo;
+    QList<SBGPNeighbor> _lstSBGPNeighbor;
+    QList<SBGPNetwork> _lstSBGPNetwork;
+    QList<SIpRouteInfo> _lstSIpRouteInfo;
+
     void iniciar();
     FuncionBase* createQuerie(QueryOpcion option);
     void conectarAequipo(QString ip, QString user, QString pwd, QString platform, QString linuxprompt);
@@ -184,13 +231,13 @@ private:
 class QNETWORKCLIQUERIES_EXPORT LstQueries
 {
 public:
-    LstQueries() { opcionesConsulta=0; }
+    LstQueries() {}
     LstQueries(const LstQueries &lstOrigen);
     ~LstQueries();
     bool isEmpty();
 
     QString grupo;
-    int opcionesConsulta;
+    QList<QueryOpcion> opcionesConsulta;
     QString gw;
     QList<Queries> lstQueries;
     QStringList lstIPsAconsultadas;

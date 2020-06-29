@@ -10,7 +10,6 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_interval=0;
     m_simultaneos=0;
     m_maxparalelos=0;
-    m_opciones=0;
     m_connectionprotocol = QRemoteShell::SSHTelnet;
     m_principaluserfirst=true;
     m_soloequiposnuevos=false;
@@ -60,9 +59,10 @@ void QueriesThread::_clear()
     }
 }
 
-void QueriesThread::setOpciones(uint opciones)
+void QueriesThread::addOpciones(QList<QueryOpcion> opciones)
 {
-    m_opciones = opciones;
+    opciones.removeAll( QueryOpcion::Null ); //unicamente opciones validas
+    m_opciones.append(opciones);
     _clear();
 }
 
@@ -71,7 +71,7 @@ void QueriesThread::iniciar()
     if ( m_interval==0 ||
          m_simultaneos==0 ||
          m_maxparalelos==0 ||
-         m_opciones==0 ||
+         m_opciones.isEmpty() ||
          m_lstIP.isEmpty() ||
          m_equiposConsultados > 0 )
     {
@@ -186,7 +186,7 @@ void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
         query->setGW( m_gw );
     if ( m_consultarVecinosOSPFMismoDominio )
         query->setIpOInterfazMismoDominioOSPFDondeSeViene( m_mapOSPFVecinosInterfazDondeVienen.value( ip ) );
-    query->setOptions( m_opciones );
+    query->addOption( m_opciones );
     query->setConnectionProtocol( m_connectionprotocol );
     query->setUser2( m_user2 );
     query->setPassword2( m_pwd2 );
