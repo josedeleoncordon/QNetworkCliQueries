@@ -190,7 +190,9 @@ void Queries::clone(const Queries& other)
 
 FuncionBase *Queries::createQuerie(QueryOpcion option)
 {
-    switch (option) {
+     qCDebug(queries) << m_ip  << "Queries::createQuerie" << option;
+
+    switch (option) {    
     case (QueryOpcion::EquipmentNeighbors): { return factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term); }
     case (QueryOpcion::MacAddress): { return factoryNewMacInfo(m_brand,m_equipmenttype,term); }
     case (QueryOpcion::InterfaceInformation):
@@ -458,6 +460,8 @@ void Queries::nextProcess()
     {
         if ( m_lstOpciones.isEmpty() )
         {
+             qCDebug(queries) << m_ip  << "Finalizando, ya no hay mas opciones a ejectar";
+
             //no hay funciones a ejecutar, se finaliza
 
             //si hay informacion de OSPF se cambia la IP de la interfaz que se conoce por cdp/lldp
@@ -488,12 +492,15 @@ void Queries::nextProcess()
 
     qCDebug(queries) << m_ip  << "NextProcess:" << m_opcionActual;
 
-    m_currentFuncion = createQuerie( m_opcionActual );
-    if ( !m_currentFuncion )
+    if ( m_opcionActual > Connect )
     {
-        qCDebug(queries) << m_ip  << "Queries::nextProcess() No se creo la funcion para m_opcionActual" << m_opcionActual;
-        nextProcess();
-        return;
+        m_currentFuncion = createQuerie( m_opcionActual );
+        if ( !m_currentFuncion )
+        {
+            qCDebug(queries) << m_ip  << "Queries::nextProcess() No se creo la funcion para m_opcionActual" << m_opcionActual;
+            nextProcess();
+            return;
+        }
     }
 
     queryTimer->setInterval( 20000 );
