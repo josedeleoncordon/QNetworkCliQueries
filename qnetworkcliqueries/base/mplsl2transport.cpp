@@ -216,19 +216,18 @@ void updateInfoList(QList<SMplsL2VFIInfo> &lstDest, QList<SMplsL2VFIInfo> &lstOr
     }
 }
 
-MplsL2TransportInfo::MplsL2TransportInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+MplsL2TransportInfo::MplsL2TransportInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {
 }
 
 MplsL2TransportInfo::MplsL2TransportInfo(const MplsL2TransportInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_queryoption = other.m_queryoption;
     m_lstMplsL2Xconnects = other.m_lstMplsL2Xconnects;
     m_lstMplsL2VFIs = other.m_lstMplsL2VFIs;
 }
@@ -633,6 +632,7 @@ QDataStream& operator<<(QDataStream& out, const MplsL2TransportInfo& info)
 {
     out << info.m_lstMplsL2Xconnects;
     out << info.m_lstMplsL2VFIs;
+    out << info.m_queryoption;
     return out;
 }
 
@@ -640,21 +640,20 @@ QDataStream& operator>>(QDataStream& in, MplsL2TransportInfo& info)
 {
     in >> info.m_lstMplsL2Xconnects;
     in >> info.m_lstMplsL2VFIs;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const MplsL2TransportInfo* info)
 {
-    out << info->m_lstMplsL2Xconnects;
-    out << info->m_lstMplsL2VFIs;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, MplsL2TransportInfo*& info)
 {
     info = new MplsL2TransportInfo;
-    in >> info->m_lstMplsL2Xconnects;
-    in >> info->m_lstMplsL2VFIs;
+    in >> *info;
     return in;
 }
 

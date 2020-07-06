@@ -1,11 +1,11 @@
 #include "arpinfocisco.h"
 
-ArpInfoCisco::ArpInfoCisco(QRemoteShell *terminal, QObject *parent):
-    ArpInfo(terminal,parent)
+ArpInfoCisco::ArpInfoCisco(QRemoteShell *terminal, QueryOpcion option):
+    ArpInfo(terminal,option)
 {}
 
 ArpInfoCisco::ArpInfoCisco(const ArpInfoCisco &other):
-    ArpInfo(other.term,other.parent())
+    ArpInfo(other.term,other.m_queryoption)
 {}
 
 ArpInfoCisco::~ArpInfoCisco()
@@ -13,8 +13,8 @@ ArpInfoCisco::~ArpInfoCisco()
 
 void ArpInfoCisco::getArpInfo()
 {
-    m_vrfs = QueriesConfiguration::instance()->values("Arp_VRFs",m_ip,m_os);
-    m_macip = QueriesConfiguration::instance()->value("ARP_MacIP",m_ip,m_os);
+	m_vrfs = m_queriesConfiguration.values("Arp_VRFs",m_ip,m_os);
+	m_macip = m_queriesConfiguration.value("ARP_MacIP",m_ip,m_os);
 
     if ( m_vrfs.isEmpty() )
         m_vrfs.append(""); //para la global

@@ -79,21 +79,20 @@ void updateInfoList(QList<SIpRouteInfo> &lstDest, QList<SIpRouteInfo> &lstOrigin
     }
 }
 
-IPRouteInfo::IPRouteInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+IPRouteInfo::IPRouteInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {
     m_vrfsPos=-1;
     m_redPos=-1;
 }
 
 IPRouteInfo::IPRouteInfo(const IPRouteInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;    
-    m_queryoption = other.m_queryoption;
     m_lstRoutes = other.m_lstRoutes;
     m_protocol = other.m_protocol;
     m_vrfs = other.m_vrfs;
@@ -111,9 +110,9 @@ void IPRouteInfo::getIPRouteInfo()
         return;
     }
 
-    m_vrfs = QueriesConfiguration::instance()->values("IPRoutes_VRFs",m_ip,m_os);
-    m_protocol = QueriesConfiguration::instance()->value("IPRoutes_protocol",m_ip,m_os);
-    m_redes = QueriesConfiguration::instance()->values("IPRoutes_redes",m_ip,m_os);
+    m_vrfs = m_queriesConfiguration.values("IPRoutes_VRFs",m_ip,m_os);
+    m_protocol = m_queriesConfiguration.value("IPRoutes_protocol",m_ip,m_os);
+    m_redes = m_queriesConfiguration.values("IPRoutes_redes",m_ip,m_os);
 
     if ( m_vrfs.isEmpty() )
         m_vrfs.append(""); //para la global
@@ -366,25 +365,27 @@ void IPRouteInfo::on_term_receiveText_individual()
 QDataStream& operator<<(QDataStream& out, const IPRouteInfo& info)
 {
     out << info.m_lstRoutes;
+    out << info.m_queryoption;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, IPRouteInfo& info)
 {
     in >> info.m_lstRoutes;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const IPRouteInfo* info)
 {
-    out << info->m_lstRoutes;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, IPRouteInfo*& info)
 {
     info = new IPRouteInfo;
-    in >> info->m_lstRoutes;
+    in >> *info;
     return in;
 }
 

@@ -4,6 +4,7 @@
 #include <QObject>
 #include "queriesthread.h"
 #include "queries.h"
+#include "funcionbase.h"
 
 class QueriesConfigurationValue;
 
@@ -48,6 +49,7 @@ private:
     int m_interval,m_simultaneos,m_maxParalelos;
     QRemoteShell::ConnectionProtocol m_connectionprotocol;
     QString _error;
+    QueriesConfiguration m_queriesConfiguration;
 
 public:    
     explicit ConsultaEquipos(QObject *parent = nullptr);

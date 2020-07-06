@@ -68,18 +68,17 @@ void updateInfoList(QList<SPIMInfo> &lstDest, QList<SPIMInfo> &lstOrigin )
     }
 }
 
-PIMInfo::PIMInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+PIMInfo::PIMInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {}
 
 PIMInfo::PIMInfo(const PIMInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_queryoption = other.m_queryoption;
     m_lstPIMNeighbors = other.m_lstPIMNeighbors;
     m_lstPimInterfaces = other.m_lstPimInterfaces;
     m_lstRouterPim = other.m_lstRouterPim;
@@ -298,25 +297,27 @@ bool PIMInfo::interfaceStatus(QString interfaz, QString& txtStatusOut)
 QDataStream& operator<<(QDataStream& out, const PIMInfo& info)
 {
     out << info.m_lstPIMNeighbors;
+    out << info.m_queryoption;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, PIMInfo& info)
 {
     in >> info.m_lstPIMNeighbors;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const PIMInfo* info)
 {
-    out << info->m_lstPIMNeighbors;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, PIMInfo*& info)
 {
     info = new PIMInfo;
-    in >> info->m_lstPIMNeighbors;
+    in >> *info;
     return in;
 }
 

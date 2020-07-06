@@ -32,7 +32,7 @@ public:
     QMap<QString,QString> mapInterfazLocales;
 
     EquipmentNeighborsInfo() {}
-    EquipmentNeighborsInfo(QRemoteShell *terminal, QObject *parent=nullptr);
+    EquipmentNeighborsInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     EquipmentNeighborsInfo(const EquipmentNeighborsInfo &other);
     ~EquipmentNeighborsInfo();
     virtual void getEquipmentNeighborsInfo();

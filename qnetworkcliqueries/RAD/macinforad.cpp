@@ -1,15 +1,15 @@
 #include "macinforad.h"
 #include "funciones.h"
 
-MacInfoRAD::MacInfoRAD(QRemoteShell *terminal, QObject *parent):
-    MacInfo(terminal,parent)
+MacInfoRAD::MacInfoRAD(QRemoteShell *terminal, QueryOpcion option):
+    MacInfo(terminal,option)
 {
     etxTimer = nullptr;
     menuintentos=0;
 }
 
 MacInfoRAD::MacInfoRAD(const MacInfoRAD &other):
-    MacInfo(other.term,other.parent())
+    MacInfo(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
@@ -28,7 +28,7 @@ MacInfoRAD::~MacInfoRAD()
 
 void MacInfoRAD::getMacInfo()
 {
-    m_mac = QueriesConfiguration::instance()->value("MAC_MAC",m_ip,m_os);
+	m_mac = m_queriesConfiguration.value("MAC_MAC",m_ip,m_os);
     if ( m_platform == "ETX-1" )
     {
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextETX1()));
@@ -90,7 +90,7 @@ void MacInfoRAD::on_term_receiveTextETX1()
             m.vlan = expmac.cap(1);
 
             //verificando si la mac esta en la vlans permitidas, si se configuro
-            QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip,m_os);
+			QStringList vlanfilter = m_queriesConfiguration.values("MAC_vlansFilter",m_ip,m_os);
             if ( vlanfilter.isEmpty() )
                 m_lstMacs.append(m);
             else

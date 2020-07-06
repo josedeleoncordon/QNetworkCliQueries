@@ -88,20 +88,19 @@ void updateInfoList(QList<SIpInfo> &lstDest, QList<SIpInfo> &lstOrigin )
     }
 }
 
-ArpInfo::ArpInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+ArpInfo::ArpInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {
     m_vrfsPos=-1;
 }
 
 ArpInfo::ArpInfo(const ArpInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {   
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_queryoption = other.m_queryoption;
     m_lstArp = other.m_lstArp;
     m_vrfsPos=-1;
     m_vrfs = other.m_vrfs;
@@ -131,12 +130,14 @@ QString ArpInfo::macFromIP(QString ip)
 QDataStream& operator<<(QDataStream& out, const ArpInfo& info)
 {
     out << info.m_lstArp;
+    out << info.m_queryoption;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, ArpInfo& info)
 {
     in >> info.m_lstArp;
+    in >> info.m_queryoption;
     return in;
 }
 

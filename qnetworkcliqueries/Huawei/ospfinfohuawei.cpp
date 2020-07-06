@@ -1,13 +1,13 @@
 #include "ospfinfohuawei.h"
 
-OSPFInfoHuawei::OSPFInfoHuawei(QRemoteShell *terminal, QObject *parent):
-    OSPFInfo(terminal,parent)
+OSPFInfoHuawei::OSPFInfoHuawei(QRemoteShell *terminal, QueryOpcion option):
+    OSPFInfo(terminal,option)
 {
     //actualizar para neighbors, para que consulte los de las vrfs
 }
 
 OSPFInfoHuawei::OSPFInfoHuawei(const OSPFInfoHuawei &other):
-    OSPFInfo(other.term,other.parent())
+    OSPFInfo(other.term,other.m_queryoption)
 {}
 
 OSPFInfoHuawei::~OSPFInfoHuawei()

@@ -63,7 +63,7 @@ void ConsultaEquipos::addOpcionesConsulta(QList<QueryOpcion> lst)
 
 void ConsultaEquipos::addParametrosConsulta(const QList<QueriesConfigurationValue> &c)
 {
-    QueriesConfiguration::instance()->addQueryParameter(c);
+	m_queriesConfiguration.addQueryParameter(c);
 }
 
 void ConsultaEquipos::consultarEquiposSync()
@@ -165,18 +165,19 @@ void ConsultaEquipos::consultarEquipos()
     m_queriesThread->setUser2( m_user2 );
     m_queriesThread->setPassword2( m_pwd2 );
     m_queriesThread->setLinuxPrompt( m_linuxprompt );
-	m_queriesThread->addOpciones( opciones );
+	m_queriesThread->setOptions( opciones );
     m_queriesThread->setEquipmentNeighborsConsultarVecinos( m_consultaAgregarVecinos );
     m_queriesThread->setEquipmentNeighborsOSPFMismoDominio( m_consultaOSPFMismoDominio );
-    m_queriesThread->setEquipmentNeighborsOSPFArea( m_consultaOSPFArea );
+	m_queriesThread->setEquipmentNeighborsRegExpOSPFArea( m_consultaOSPFArea );
     m_queriesThread->setConsultaAgregarVecinosLinksEnSegmentos( m_lstLinksEnSegmentos );
     m_queriesThread->setConsultaAgregarVecinosLoopbacksEnSegmentos( m_lstLoopbacksEnSegmentos );
     m_queriesThread->setInterval( m_interval );
     m_queriesThread->setSimultaneos( m_simultaneos );
     m_queriesThread->setMaxParalelos( m_maxParalelos );
+	m_queriesThread->setQueriesConfiguration( m_queriesConfiguration );
 
     //paramentros de consulta
-    QueriesConfiguration::instance()->addQueryParameter(lstQueriesParameters);
+	m_queriesConfiguration.addQueryParameter(lstQueriesParameters);
 
     //iniciando consulta
     m_queriesThread->iniciar();
@@ -226,7 +227,7 @@ void ConsultaEquipos::on_queriesThread_finished(bool ok)
     _lstQN.opcionesConsulta = opciones;
     _lstQN.lstQueries = lstQueries;
     _lstQN.errorMap = errormapaintegrado;
-    _lstQN.lstQueriesParameters = QueriesConfiguration::instance()->lstQueryParameters();
+	_lstQN.lstQueriesParameters = m_queriesConfiguration.lstQueryParameters();
     _lstQN.tipoconsulta = m_lstTipo;
     _lstQN.lstIPsAconsultadas = lstIP;
     _lstQN.dateTime = QDateTime::currentDateTime();

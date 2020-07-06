@@ -46,6 +46,7 @@ Queries::~Queries()
 void Queries::iniciar()
 {    
     term = nullptr;
+
     pi = nullptr;
     equipmentNeighborsInfoQuery = nullptr;
     interfacesInfoQuery = nullptr;
@@ -71,6 +72,7 @@ void Queries::iniciar()
     configQuery = nullptr;
     exitQuery = nullptr;
     funcionQuery = nullptr;
+
     m_connectionprotol = QRemoteShell::SSHTelnet;
     m_opcionActual = QueryOpcion::Null;
     m_connected=false;
@@ -115,72 +117,147 @@ void Queries::clone(const Queries& other)
     {
         switch (f->queryOption()) {
         case (QueryOpcion::EquipmentNeighbors): {
-            m_lstFunciones.append( new EquipmentNeighborsInfo(*dynamic_cast<EquipmentNeighborsInfo*>(f)) );
+            EquipmentNeighborsInfo *ff = new EquipmentNeighborsInfo(*dynamic_cast<EquipmentNeighborsInfo*>(f));
+            m_lstFunciones.append( ff );
+            if ( !equipmentNeighborsInfoQuery ) equipmentNeighborsInfoQuery=ff;
             break;
         }
         case (QueryOpcion::MacAddress): {
-            m_lstFunciones.append( new MacInfo(*dynamic_cast<MacInfo*>(f)) );
+            MacInfo *ff = new MacInfo(*dynamic_cast<MacInfo*>(f));
+            m_lstFunciones.append( ff );
+            if ( !macsQuery ) macsQuery=ff;
             break;
         }
         case (QueryOpcion::InterfaceInformation):
-        case (QueryOpcion::InterfacePermitedVlans):
-        case (QueryOpcion::InterfaceDescription):
-        case (QueryOpcion::InterfaceIpAddresses):
         {
-            m_lstFunciones.append( new InterfaceInfo(*dynamic_cast<InterfaceInfo*>(f)) );
+            InterfaceInfo *ff =  new InterfaceInfo(*dynamic_cast<InterfaceInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !interfacesInfoQuery ) interfacesInfoQuery=ff;
             break;
         }
-        case (QueryOpcion::Ospf): {
-            m_lstFunciones.append( new OSPFInfo(*dynamic_cast<OSPFInfo*>(f)) );
+        case (QueryOpcion::InterfacePermitedVlans):
+        {
+            InterfaceInfo *ff =  new InterfaceInfo(*dynamic_cast<InterfaceInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !interfacesPermitedVlansQuery ) interfacesPermitedVlansQuery=ff;
+            break;
+        }
+        case (QueryOpcion::InterfaceDescription):
+        {
+            InterfaceInfo *ff =  new InterfaceInfo(*dynamic_cast<InterfaceInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !interfacesDescriptionsQuery ) interfacesDescriptionsQuery=ff;
+            break;
+        }
+        case (QueryOpcion::InterfaceIpAddresses):
+        {
+            InterfaceInfo *ff =  new InterfaceInfo(*dynamic_cast<InterfaceInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !interfacesIpAddressesQuery ) interfacesIpAddressesQuery=ff;
+            break;
+        }
+        case (QueryOpcion::Ospf): {            
+            OSPFInfo *ff =  new OSPFInfo(*dynamic_cast<OSPFInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !ospfQuery ) ospfQuery=ff;
             break;
         }
         case (QueryOpcion::MplsTEtunnels): {
-            m_lstFunciones.append( new MplsTEtunnelsInfo(*dynamic_cast<MplsTEtunnelsInfo*>(f)) );
+            MplsTEtunnelsInfo *ff = new MplsTEtunnelsInfo(*dynamic_cast<MplsTEtunnelsInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !mplsTEtunnelsQuery ) mplsTEtunnelsQuery=ff;
             break;
         }
         case (QueryOpcion::MplsLdpDiscovery):
+        {
+            MplsLdpInfo *ff = new MplsLdpInfo(*dynamic_cast<MplsLdpInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !mplsLdpDiscoveryQuery ) mplsLdpDiscoveryQuery=ff;
+            break;
+        }
         case (QueryOpcion::MplsLdpNeighbors):
+        {
+            MplsLdpInfo *ff = new MplsLdpInfo(*dynamic_cast<MplsLdpInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !mplsLdpNeighborsQuery ) mplsLdpNeighborsQuery=ff;
+            break;
+        }
         case (QueryOpcion::MplsLdpInterfaces):
         {
-            m_lstFunciones.append( new MplsLdpInfo(*dynamic_cast<MplsLdpInfo*>(f)) );
+            MplsLdpInfo *ff = new MplsLdpInfo(*dynamic_cast<MplsLdpInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !mplsLdpInterfacesQuery ) mplsLdpInterfacesQuery=ff;
             break;
         }
         case (QueryOpcion::PimInterfaces): {
-            m_lstFunciones.append( new PIMInfo(*dynamic_cast<PIMInfo*>(f)) );
+            PIMInfo *ff = new PIMInfo(*dynamic_cast<PIMInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !pimInteracesQuery ) pimInteracesQuery=ff;
             break;
         }
         case (QueryOpcion::PortChannel): {
-            m_lstFunciones.append( new PortChannelsInfo(*dynamic_cast<PortChannelsInfo*>(f)) );
+            PortChannelsInfo *ff = new PortChannelsInfo(*dynamic_cast<PortChannelsInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !portChannelInfoQuery ) portChannelInfoQuery=ff;
             break;
         }
         case (QueryOpcion::VRFfVlans):
+        {
+            VrfInfo *ff = new VrfInfo(*dynamic_cast<VrfInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !vrfsFromVlansQuery ) vrfsFromVlansQuery=ff;
+            break;
+        }
         case (QueryOpcion::VRFfRT):
+        {
+            VrfInfo *ff = new VrfInfo(*dynamic_cast<VrfInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !vrfFromRTQuery ) vrfFromRTQuery=ff;
+            break;
+        }
         case (QueryOpcion::VRFs):
         {
-            m_lstFunciones.append( new VrfInfo(*dynamic_cast<VrfInfo*>(f)) );
+            VrfInfo *ff = new VrfInfo(*dynamic_cast<VrfInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !vrfsQuery ) vrfsQuery=ff;
             break;
         }
         case (QueryOpcion::Arp): {
-            m_lstFunciones.append( new ArpInfo(*dynamic_cast<ArpInfo*>(f)) );
+            ArpInfo *ff = new ArpInfo(*dynamic_cast<ArpInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !arpsQuery ) arpsQuery=ff;
             break;
         }
         case (QueryOpcion::BGPNeig):
-
+        {
+            BGPInfo *ff = new BGPInfo(*dynamic_cast<BGPInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !bgpNeighborsQuery ) bgpNeighborsQuery=ff;
+            break;
+        }
         case (QueryOpcion::BGPNetworks):
         {
-            m_lstFunciones.append( new BGPInfo(*dynamic_cast<BGPInfo*>(f)) );
+            BGPInfo *ff = new BGPInfo(*dynamic_cast<BGPInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !bgpNetworksQuery ) bgpNetworksQuery=ff;
             break;
         }
         case (QueryOpcion::IpRoutes): {
-            m_lstFunciones.append( new IPRouteInfo(*dynamic_cast<IPRouteInfo*>(f)) );
+            IPRouteInfo *ff = new IPRouteInfo(*dynamic_cast<IPRouteInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !ipRoutesQuery ) ipRoutesQuery=ff;
             break;
         }
         case (QueryOpcion::Mplsl2Transport): {
-            m_lstFunciones.append( new MplsL2TransportInfo(*dynamic_cast<MplsL2TransportInfo*>(f)) );
+            MplsL2TransportInfo *ff = new MplsL2TransportInfo(*dynamic_cast<MplsL2TransportInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !mplsL2TransportQuery ) mplsL2TransportQuery=ff;
             break;
         }
         case (QueryOpcion::Funcion): {
-            m_lstFunciones.append( new FuncionInfo(*dynamic_cast<FuncionInfo*>(f)) );
+            FuncionInfo *ff = new FuncionInfo(*dynamic_cast<FuncionInfo*>(f)) ;
+            m_lstFunciones.append( ff );
+            if ( !funcionQuery ) funcionQuery=ff;
             break;
         }
         default: {}
@@ -193,38 +270,44 @@ FuncionBase *Queries::createQuerie(QueryOpcion option)
      qCDebug(queries) << m_ip  << "Queries::createQuerie" << option;
 
     switch (option) {    
-    case (QueryOpcion::EquipmentNeighbors): { return factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::MacAddress): { return factoryNewMacInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::InterfaceInformation):
-    case (QueryOpcion::InterfacePermitedVlans):
-    case (QueryOpcion::InterfaceDescription):
-    case (QueryOpcion::InterfaceIpAddresses): { return factoryNewInterfaceInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::Ospf): { return factoryNewOSPFInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::MplsTEtunnels): { return factoryNewMplsTEtunnelsInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::MplsLdpDiscovery):
-    case (QueryOpcion::MplsLdpNeighbors):
-    case (QueryOpcion::MplsLdpInterfaces): { return factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::PimInterfaces): { return factoryNewPIMInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::PortChannel): { return factoryNewPortChannelsInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::VRFfVlans):
-    case (QueryOpcion::VRFfRT):
-    case (QueryOpcion::VRFs): { return factoryNewVrfInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::Arp): { return factoryNewArpInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::BGPNeig): { return factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::BGPNetworks): { return factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::IpRoutes): { return factoryNewIPRouteInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::Configuration): { return factoryNewConfig(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::Mplsl2Transport): { return factoryNewMplsL2TransportInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::Funcion): { return factoryNewFuncionInfo(m_brand,m_equipmenttype,term); }
-    case (QueryOpcion::Exit): { return factoryNewExit(m_brand,m_equipmenttype,term); }
+    case (QueryOpcion::Platform):
+    {
+        FuncionBase *f=new PlatformInfo(term);
+        f->setQueryOption( QueryOpcion::Platform );
+        return f;
+    }
+    case (QueryOpcion::EquipmentNeighbors): { return factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term,QueryOpcion::EquipmentNeighbors); }
+    case (QueryOpcion::MacAddress): { return factoryNewMacInfo(m_brand,m_equipmenttype,term,QueryOpcion::MacAddress); }
+    case (QueryOpcion::InterfaceInformation): { return factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,QueryOpcion::InterfaceInformation); }
+    case (QueryOpcion::InterfacePermitedVlans): { return factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,QueryOpcion::InterfacePermitedVlans); }
+    case (QueryOpcion::InterfaceDescription): { return factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,QueryOpcion::InterfaceDescription); }
+    case (QueryOpcion::InterfaceIpAddresses): { return factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,QueryOpcion::InterfaceIpAddresses); }
+    case (QueryOpcion::Ospf): { return factoryNewOSPFInfo(m_brand,m_equipmenttype,term,QueryOpcion::Ospf); }
+    case (QueryOpcion::MplsTEtunnels): { return factoryNewMplsTEtunnelsInfo(m_brand,m_equipmenttype,term,QueryOpcion::MplsTEtunnels); }
+    case (QueryOpcion::MplsLdpDiscovery): { return factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,QueryOpcion::MplsLdpDiscovery); }
+    case (QueryOpcion::MplsLdpNeighbors): { return factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,QueryOpcion::MplsLdpNeighbors); }
+    case (QueryOpcion::MplsLdpInterfaces): { return factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,QueryOpcion::MplsLdpInterfaces); }
+    case (QueryOpcion::PimInterfaces): { return factoryNewPIMInfo(m_brand,m_equipmenttype,term,QueryOpcion::PimInterfaces); }
+    case (QueryOpcion::PortChannel): { return factoryNewPortChannelsInfo(m_brand,m_equipmenttype,term,QueryOpcion::PortChannel); }
+    case (QueryOpcion::VRFfVlans): { return factoryNewVrfInfo(m_brand,m_equipmenttype,term,QueryOpcion::VRFfVlans); }
+    case (QueryOpcion::VRFfRT): { return factoryNewVrfInfo(m_brand,m_equipmenttype,term,QueryOpcion::VRFfRT); }
+    case (QueryOpcion::VRFs): { return factoryNewVrfInfo(m_brand,m_equipmenttype,term,QueryOpcion::VRFs); }
+    case (QueryOpcion::Arp): { return factoryNewArpInfo(m_brand,m_equipmenttype,term,QueryOpcion::Arp); }
+    case (QueryOpcion::BGPNeig): { return factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term,QueryOpcion::BGPNeig); }
+    case (QueryOpcion::BGPNetworks): { return factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term,QueryOpcion::BGPNetworks); }
+    case (QueryOpcion::IpRoutes): { return factoryNewIPRouteInfo(m_brand,m_equipmenttype,term,QueryOpcion::IpRoutes); }
+    case (QueryOpcion::Configuration): { return factoryNewConfig(m_brand,m_equipmenttype,term,QueryOpcion::Configuration); }
+    case (QueryOpcion::Mplsl2Transport): { return factoryNewMplsL2TransportInfo(m_brand,m_equipmenttype,term,QueryOpcion::Mplsl2Transport); }
+    case (QueryOpcion::Funcion): { return factoryNewFuncionInfo(m_brand,m_equipmenttype,term,QueryOpcion::Funcion); }
+    case (QueryOpcion::Exit): { return factoryNewExit(m_brand,m_equipmenttype,term,QueryOpcion::Exit); }
     default: { return nullptr; }
     }
 }
 
-void Queries::addOption( QList<QueryOpcion> lst )
+void Queries::setOptions( QList<QueryOpcion> lst )
 {
     lst.removeAll( QueryOpcion::Null ); //unicamente opciones validas
-    m_lstOpciones.append( lst );
+    m_lstOpciones = lst;
 }
 
 void Queries::setGW(QString GW)
@@ -455,6 +538,7 @@ QString Queries::funcionTxtInfo(int i)
 void Queries::nextProcess()
 {
     qCDebug(queries) << m_ip  << "Queries::nextProcess()";
+    qDebug() << "Queries::nextProcess() thr" << thread();
 
     if ( !m_reintentandoConsulta )
     {
@@ -476,9 +560,7 @@ void Queries::nextProcess()
                     }
                 }
 
-            emit finished(this);
-            disconnect();
-
+            _finalizar();
             return;
         }
 
@@ -501,6 +583,7 @@ void Queries::nextProcess()
             nextProcess();
             return;
         }
+        m_lstFunciones.append( m_currentFuncion );
     }
 
     queryTimer->setInterval( 20000 );
@@ -508,7 +591,7 @@ void Queries::nextProcess()
 
     //consultas CLI    
 
-    if ( m_opcionActual & Connect )
+    if ( m_opcionActual == Connect )
     {        
         qCDebug(queries) << m_ip  << "creando term";
         conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
@@ -518,7 +601,7 @@ void Queries::nextProcess()
     if ( !m_connected )
         return;
 
-    if ( m_opcionActual & Platform )
+    if ( m_opcionActual == Platform )
     {                
         if ( m_platform.isEmpty() )
         {
@@ -540,7 +623,7 @@ void Queries::nextProcess()
         }
         return;
     }
-    else if ( m_opcionActual & EquipmentNeighbors )
+    else if ( m_opcionActual == EquipmentNeighbors )
     {        
         EquipmentNeighborsInfo *f=dynamic_cast<EquipmentNeighborsInfo*>(m_currentFuncion);
         if ( !equipmentNeighborsInfoQuery ) equipmentNeighborsInfoQuery = f;
@@ -556,7 +639,7 @@ void Queries::nextProcess()
         f->getEquipmentNeighborsInfo();
         return;
     }
-    else if ( m_opcionActual & InterfaceInformation )
+    else if ( m_opcionActual == InterfaceInformation )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
@@ -577,7 +660,7 @@ void Queries::nextProcess()
         f->getInterfacesInfo();
         return;
     }
-    else if ( m_opcionActual & InterfaceDescription )
+    else if ( m_opcionActual == InterfaceDescription )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
@@ -598,7 +681,7 @@ void Queries::nextProcess()
         f->getInterfacesDescriptions();
         return;
     }
-    else if ( m_opcionActual & InterfaceIpAddresses )
+    else if ( m_opcionActual == InterfaceIpAddresses )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
@@ -619,7 +702,7 @@ void Queries::nextProcess()
         f->getInterfacesIpAddresses();
         return;
     }
-    else if ( m_opcionActual & InterfacePermitedVlans )
+    else if ( m_opcionActual == InterfacePermitedVlans )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
@@ -640,7 +723,7 @@ void Queries::nextProcess()
         f->getInterfacesPermitedVlans();
         return;
     }
-    else if (  m_opcionActual & Ospf )
+    else if (  m_opcionActual == Ospf )
     {
         OSPFInfo *f = dynamic_cast<OSPFInfo*>(m_currentFuncion);
         if (!ospfQuery) ospfQuery=f;
@@ -656,7 +739,7 @@ void Queries::nextProcess()
         f->getOSPFInfo();
         return;
     }    
-    else if (  m_opcionActual & MplsTEtunnels )
+    else if (  m_opcionActual == MplsTEtunnels )
     {
         MplsTEtunnelsInfo *f = dynamic_cast<MplsTEtunnelsInfo*>(m_currentFuncion);
         if (!mplsTEtunnelsQuery) mplsTEtunnelsQuery=f;
@@ -672,7 +755,7 @@ void Queries::nextProcess()
         f->getMplsTETunnels();
         return;
     }
-    else if (  m_opcionActual & Mplsl2Transport )
+    else if (  m_opcionActual == Mplsl2Transport )
     {
         MplsL2TransportInfo *f = dynamic_cast<MplsL2TransportInfo*>(m_currentFuncion);
         if (!mplsL2TransportQuery) mplsL2TransportQuery=f;
@@ -688,7 +771,7 @@ void Queries::nextProcess()
         f->getMplsL2Transport();
         return;
     }
-    else if (  m_opcionActual & MplsLdpDiscovery )
+    else if (  m_opcionActual == MplsLdpDiscovery )
     {
         MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
         if (!mplsLdpDiscoveryQuery) mplsLdpDiscoveryQuery=f;
@@ -704,7 +787,7 @@ void Queries::nextProcess()
         f->getMplsLdpDiscovery();
         return;
     }
-    else if (  m_opcionActual & MplsLdpNeighbors )
+    else if (  m_opcionActual == MplsLdpNeighbors )
     {
         MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
         if (!mplsLdpNeighborsQuery) mplsLdpNeighborsQuery=f;
@@ -720,7 +803,7 @@ void Queries::nextProcess()
         f->getMplsLdpNeighbors();
         return;
     }
-    else if (  m_opcionActual & MplsLdpInterfaces )
+    else if (  m_opcionActual == MplsLdpInterfaces )
     {
         MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
         if (!mplsLdpInterfacesQuery) mplsLdpInterfacesQuery=f;
@@ -742,7 +825,7 @@ void Queries::nextProcess()
 //        pimNeighborsQuery->getPIMNeighbors();
 //        return;
 //    }
-    else if (  m_opcionActual & PimInterfaces )
+    else if (  m_opcionActual == PimInterfaces )
     {
         PIMInfo *f = dynamic_cast<PIMInfo*>(m_currentFuncion);
         if (!pimInteracesQuery) pimInteracesQuery=f;
@@ -758,7 +841,7 @@ void Queries::nextProcess()
         f->getPIMInterfaces();
         return;
     }
-    else if ( m_opcionActual & MacAddress )
+    else if ( m_opcionActual == MacAddress )
     {
         if ( m_platform.contains("ASR9K") ||
              m_platform.contains("CRS")  ||
@@ -782,7 +865,7 @@ void Queries::nextProcess()
         f->getMacInfo();
         return;
     }
-    else if ( m_opcionActual & PortChannel )
+    else if ( m_opcionActual == PortChannel )
     {
         PortChannelsInfo *f = dynamic_cast<PortChannelsInfo*>(m_currentFuncion);
         if (!portChannelInfoQuery) portChannelInfoQuery=f;
@@ -798,7 +881,7 @@ void Queries::nextProcess()
         f->getPortChannelsInfo();
         return;
     }
-    else if ( m_opcionActual & VRFfVlans )
+    else if ( m_opcionActual == VRFfVlans )
     {        
         VrfInfo *f = dynamic_cast<VrfInfo*>(m_currentFuncion);
         if (!vrfsFromVlansQuery) vrfsFromVlansQuery=f;
@@ -814,7 +897,7 @@ void Queries::nextProcess()
         f->getVRFsFromVLans();
         return;
     }
-    else if ( m_opcionActual & VRFfRT )
+    else if ( m_opcionActual == VRFfRT )
     {
         VrfInfo *f = dynamic_cast<VrfInfo*>(m_currentFuncion);
         if (!vrfFromRTQuery) vrfFromRTQuery=f;
@@ -830,7 +913,7 @@ void Queries::nextProcess()
         f->getVRFfromRT();
         return;
     }
-    else if ( m_opcionActual & VRFs )
+    else if ( m_opcionActual == VRFs )
     {
         VrfInfo *f = dynamic_cast<VrfInfo*>(m_currentFuncion);
         if (!vrfsQuery) vrfsQuery=f;
@@ -846,7 +929,7 @@ void Queries::nextProcess()
         f->getVRFs();
         return;
     }
-    else if ( m_opcionActual & Arp )
+    else if ( m_opcionActual == Arp )
     {
         qCDebug(queries) << m_ip  << "empezando ARP";
 
@@ -864,7 +947,7 @@ void Queries::nextProcess()
         f->getArpInfo();
         return;
     }
-    else if ( m_opcionActual & BGPNeig )
+    else if ( m_opcionActual == BGPNeig )
     {
         BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
         if (!bgpNeighborsQuery) bgpNeighborsQuery=f;
@@ -880,7 +963,7 @@ void Queries::nextProcess()
         f->getBGPNeighbors();
         return;
     }
-    else if ( m_opcionActual & BGPNetworks )
+    else if ( m_opcionActual == BGPNetworks )
     {
         BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
         if (!bgpNetworksQuery) bgpNetworksQuery=f;
@@ -896,7 +979,7 @@ void Queries::nextProcess()
         f->getNetworks();
         return;
     }
-    else if ( m_opcionActual & IpRoutes )
+    else if ( m_opcionActual == IpRoutes )
     {
         IPRouteInfo *f = dynamic_cast<IPRouteInfo*>(m_currentFuncion);
         if (!ipRoutesQuery) ipRoutesQuery=f;
@@ -912,7 +995,7 @@ void Queries::nextProcess()
         f->getIPRouteInfo();
         return;
     }
-    else if ( m_opcionActual & Configuration )
+    else if ( m_opcionActual == Configuration )
     {
         Config *f = dynamic_cast<Config*>(m_currentFuncion);
         if (!configQuery) configQuery=f;
@@ -928,7 +1011,7 @@ void Queries::nextProcess()
         f->configApply();
         return;
     }
-    else if ( m_opcionActual & Funcion )
+    else if ( m_opcionActual == Funcion )
     {
         FuncionInfo *f = dynamic_cast<FuncionInfo*>(m_currentFuncion);
         if (!funcionQuery) funcionQuery=f;
@@ -944,7 +1027,7 @@ void Queries::nextProcess()
         f->getTXT();
         return;
     }
-    else if ( m_opcionActual & Exit )
+    else if ( m_opcionActual == Exit )
     {
         queryTimer->setInterval( 3000 );
 
@@ -975,6 +1058,15 @@ void Queries::startSync() //Sync
 
 void Queries::start() //ASync
 {
+    qDebug() << "Queries::start() thr" << thread();
+
+    if ( m_lstOpciones.isEmpty() )
+    {
+        qCDebug(queries) << m_ip  << "Queries::start()" << m_ip << "No se configuraron funciones a consultar";
+        _finalizar();
+        return;
+    }
+
     nextProcess();
 }
 
@@ -1004,7 +1096,7 @@ void Queries::processConnectToHostDisconnected()
         {
             qCDebug(queries) << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
             m_error=true;
-            emit finished(this);
+            _finalizar();
         }
     }
     else
@@ -1022,7 +1114,7 @@ void Queries::processConnectToHostDisconnected()
             {
                 qCDebug(queries) << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
                 m_error=true;
-                emit finished(this);
+                _finalizar();
             }
         }
         else
@@ -1037,7 +1129,7 @@ void Queries::processConnectToHostDisconnected()
             //        if ( !m_platform.isEmpty() )
             //            createQueries();
 
-            emit finished(this);
+            _finalizar();
             qCDebug(queries) << m_ip << "Queries_finished"; //No eliminar. Cierra el archivo de log
         }
     }
@@ -1157,6 +1249,13 @@ void Queries::on_queryTimer_timeout()
 
     //timeout consultas normales
     processConnectToHostDisconnected();
+}
+
+void Queries::_finalizar()
+{
+    emit finished(this);
+    m_queriesconfiguration.clear();
+    disconnect();
 }
 
 QMap<QString,QString> Queries::queriesArgumentosAceptados()
@@ -1410,7 +1509,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     out << query.m_ip;
 
     if ( query.equipmentNeighborsInfoQuery )
-    {
+    {        
         out << true;
         out << query.equipmentNeighborsInfoQuery;
     }
@@ -1486,13 +1585,6 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     }
     else
         out << false;
-//    if ( query.pimNeighborsQuery )
-//    {
-//        out << true;
-//        out << query.pimNeighborsQuery;
-//    }
-//    else
-//        out << false;
     if ( query.pimInteracesQuery )
     {
         out << true;
@@ -1593,75 +1685,138 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries& quer
 
     in >> a;
     if ( a )
+    {
         in >> query.equipmentNeighborsInfoQuery;
+        query.m_lstFunciones.append(query.equipmentNeighborsInfoQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.interfacesInfoQuery;
+        query.m_lstFunciones.append(query.interfacesInfoQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.interfacesDescriptionsQuery;
+        query.m_lstFunciones.append(query.interfacesDescriptionsQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.interfacesIpAddressesQuery;
-    in >> a;    
+        query.m_lstFunciones.append(query.interfacesIpAddressesQuery);
+    }
+    in >> a;
     if ( a )
+    {
         in >> query.interfacesPermitedVlansQuery;
+        query.m_lstFunciones.append(query.interfacesPermitedVlansQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.ospfQuery;
+        query.m_lstFunciones.append(query.ospfQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.mplsTEtunnelsQuery;
+        query.m_lstFunciones.append(query.mplsTEtunnelsQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.mplsL2TransportQuery;
+        query.m_lstFunciones.append(query.mplsL2TransportQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.mplsLdpDiscoveryQuery;
+        query.m_lstFunciones.append(query.mplsLdpDiscoveryQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.mplsLdpNeighborsQuery;
+        query.m_lstFunciones.append(query.mplsLdpNeighborsQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.mplsLdpInterfacesQuery;
-//    in >> a;
-//    if ( a )
-//    {
-//        in >> query.pimNeighborsQuery;
-//    }
+        query.m_lstFunciones.append(query.mplsLdpInterfacesQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.pimInteracesQuery;
+        query.m_lstFunciones.append(query.pimInteracesQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.macsQuery;
+        query.m_lstFunciones.append(query.macsQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.portChannelInfoQuery;
+        query.m_lstFunciones.append(query.portChannelInfoQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.vrfsFromVlansQuery;
+        query.m_lstFunciones.append(query.vrfsFromVlansQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.vrfFromRTQuery;
+        query.m_lstFunciones.append(query.vrfFromRTQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.vrfsQuery;
+        query.m_lstFunciones.append(query.vrfsQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.arpsQuery;
+        query.m_lstFunciones.append(query.arpsQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.bgpNeighborsQuery;
+        query.m_lstFunciones.append(query.bgpNeighborsQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.bgpNetworksQuery;
+        query.m_lstFunciones.append(query.bgpNetworksQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.ipRoutesQuery;
+        query.m_lstFunciones.append(query.ipRoutesQuery);
+    }
     in >> a;
     if ( a )
+    {
         in >> query.funcionQuery;
+        query.m_lstFunciones.append(query.funcionQuery);
+    }
+
+    qCDebug(queries) << query.m_ip << "abrir: queries.m_lstFunciones size " << query.m_lstFunciones.size();
 
     return in;
 }
@@ -1813,7 +1968,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const LstQue
 {
     //guardar
     out << lstquery.grupo;
-    out << lstquery.opcionesConsulta;
+    out << lstquery.opcionesConsulta;    
     out << lstquery.lstQueries;
     out << lstquery.errorMap;
     out << lstquery.dateTime;

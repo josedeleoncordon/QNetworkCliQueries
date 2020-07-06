@@ -28,7 +28,7 @@ protected:
 
 public:
     PIMInfo() {}
-    PIMInfo(QRemoteShell *terminal, QObject *parent=0);
+    PIMInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     PIMInfo(const PIMInfo &other);
     ~PIMInfo();
 //    void getPIMNeighbors();

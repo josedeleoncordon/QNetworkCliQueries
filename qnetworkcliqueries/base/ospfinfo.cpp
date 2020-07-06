@@ -88,8 +88,8 @@ void updateInfoList(QList<SOSPFInfo> &lstDest, QList<SOSPFInfo> &lstOrigin )
     }
 }
 
-OSPFInfo::OSPFInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+OSPFInfo::OSPFInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {
     m_process = 0;    
     m_abr = false;
@@ -99,13 +99,12 @@ OSPFInfo::OSPFInfo(QRemoteShell *terminal, QObject *parent):
 }
 
 OSPFInfo::OSPFInfo(const OSPFInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_queryoption = other.m_queryoption;
     m_abr = other.m_abr;
     m_asbr = other.m_asbr;
     m_lstOSPFInfo = other.m_lstOSPFInfo;
@@ -144,6 +143,7 @@ QDataStream& operator<<(QDataStream& out, const OSPFInfo& info)
     out << info.m_lstOSPFInfo;
     out << info.m_abr;
     out << info.m_asbr;
+    out << info.m_queryoption;
     return out;
 }
 
@@ -152,23 +152,20 @@ QDataStream& operator>>(QDataStream& in, OSPFInfo& info)
     in >> info.m_lstOSPFInfo;
     in >> info.m_abr;
     in >> info.m_asbr;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const OSPFInfo* info)
 {
-    out << info->m_lstOSPFInfo;
-    out << info->m_abr;
-    out << info->m_asbr;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, OSPFInfo*& info)
 {
     info = new OSPFInfo;
-    in >> info->m_lstOSPFInfo;
-    in >> info->m_abr;
-    in >> info->m_asbr;
+    in >> *info;
     return in;
 }
 

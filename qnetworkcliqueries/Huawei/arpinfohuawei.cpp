@@ -1,11 +1,11 @@
 #include "arpinfohuawei.h"
 
-ArpInfoHuawei::ArpInfoHuawei(QRemoteShell *terminal, QObject *parent):
-    ArpInfo(terminal,parent)
+ArpInfoHuawei::ArpInfoHuawei(QRemoteShell *terminal, QueryOpcion option):
+    ArpInfo(terminal,option)
 {}
 
 ArpInfoHuawei::ArpInfoHuawei(const ArpInfoHuawei &other):
-    ArpInfo(other.term,other.parent())
+    ArpInfo(other.term,other.m_queryoption)
 {}
 
 ArpInfoHuawei::~ArpInfoHuawei()
@@ -13,8 +13,8 @@ ArpInfoHuawei::~ArpInfoHuawei()
 
 void ArpInfoHuawei::getArpInfo()
 {
-    m_vrfs = QueriesConfiguration::instance()->values("Arp_VRFs",m_ip,m_os);
-    m_macip = QueriesConfiguration::instance()->value("ARP_MacIP",m_ip,m_os);
+	m_vrfs = m_queriesConfiguration.values("Arp_VRFs",m_ip,m_os);
+	m_macip = m_queriesConfiguration.value("ARP_MacIP",m_ip,m_os);
 
     qDebug() << "ArpInfoHuawei::getArpInfo()" << m_vrfs  << m_macip;
 

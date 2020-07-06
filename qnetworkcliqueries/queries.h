@@ -81,6 +81,7 @@ public:
     bool& operativo() { return m_operativo; }
     QString& ip() { return m_ip; }
     QString& ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; }
+    QueriesConfiguration queriesConfiguration() { return m_queriesconfiguration; }
 
     bool existsQueryInformation(QueryOpcion option,int i=1);
     FuncionBase *getQuery(QueryOpcion option,int i=1);
@@ -115,13 +116,14 @@ public:
     void updateDate() { m_datetime = QDateTime::currentDateTime(); }
     void setKeepAlive(bool enable);
     void setRemoteShell(QRemoteShell *remoteShell) { term = remoteShell; }
-    void addOption( QList<QueryOpcion> lst );
+    void setOptions( QList<QueryOpcion> lst );
     void setOperativo(bool OPERATIVO) { m_operativo = OPERATIVO; }
     void setCountry(QString COUNTRY) { m_country = COUNTRY; }
     void setIP(QString IP) { m_ip = IP; }
     void setHostName(QString NAME) { m_name = NAME; }
-    void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }    
+    void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }        
     void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; }
+    void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
 
     void setUser2(QString user) { m_user2=user; }
     void setPassword2(QString pwd) { m_pwd2=pwd; }
@@ -195,6 +197,7 @@ protected:
     QString m_pwd2;
     QString m_linuxprompt;
     bool m_conectionSecondTriedOtherUserPassword;
+    QueriesConfiguration m_queriesconfiguration;
 
     QString m_ipOinterfazMismoDominioOSPFdondeSeViene;
 
@@ -226,6 +229,7 @@ protected:
 
 private:
     void clone(const Queries& other);
+    void _finalizar();
 };
 
 class QNETWORKCLIQUERIES_EXPORT LstQueries

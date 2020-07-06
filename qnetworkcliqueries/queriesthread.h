@@ -32,10 +32,11 @@ public:
     void setInterval(int interval) { m_interval = interval; }
     void setSimultaneos(int simultaneos) { m_simultaneos = simultaneos; }
     void setMaxParalelos(int max) { m_maxparalelos = max; }
-    void addOpciones(QList<QueryOpcion> opciones);
+    void setOptions(QList<QueryOpcion> opciones);
     void setEquipmentNeighborsConsultarVecinos(bool consultar) { m_equipmentNeighborsConsultarVecinos=consultar; }
     void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
-    void setEquipmentNeighborsOSPFArea(QString area) { m_consultaOSPFArea=area; }
+    void setEquipmentNeighborsRegExpOSPFArea(QString area) { m_consultaOSPFArea=area; }
+    void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
 
     void iniciar();
     void iniciarSync();
@@ -63,7 +64,7 @@ private slots:
     void on_timerActivity_timeOut();
 
 protected slots:
-    virtual void equipoConsultado(Queries *qry);
+    void equipoConsultado(Queries *qry);
 
 protected:
    QString m_grupo;
@@ -108,9 +109,13 @@ protected:
    int m_equiposConsultados;
    QMutex m_mutex;
    QMap<QString,QString> m_mapOSPFVecinosInterfazDondeVienen;
+   QMap<Queries*,QThread*> m_mapQueriesQThread;
+   QueriesConfiguration m_queriesconfiguration;
 
    void _clear();
-   void conectarOtroEquipo(QString ip, bool gw=false);
+   void siguienteEquipo(QString ip, bool gw=false);
+   virtual void iniciarQueryThread(Queries *qry,QThread *thr);
+
    void validarYagregarVecinoAconsulta(Queries *qry,
                                        QString ip,
                                        QString ipOinterfazDondeSeViene,

@@ -249,8 +249,8 @@ void updateInfoList(QList<SInterfaceIOSServiceInstanceInfo> &lstDest, QList<SInt
     }
 }
 
-InterfaceInfo::InterfaceInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+InterfaceInfo::InterfaceInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {
     m_InterfacesInfo_onlyPhysicalInterfaces=true;
     m_continueShowVlan=false;
@@ -259,13 +259,12 @@ InterfaceInfo::InterfaceInfo(QRemoteShell *terminal, QObject *parent):
 }
 
 InterfaceInfo::InterfaceInfo(const InterfaceInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_queryoption = other.m_queryoption;
     m_InterfacesInfo_onlyPhysicalInterfaces = other.m_InterfacesInfo_onlyPhysicalInterfaces;
     m_lstInterfacesIPAddresses = other.m_lstInterfacesIPAddresses;
     m_lstInterfacesInfo = other.m_lstInterfacesInfo;
@@ -284,8 +283,8 @@ InterfaceInfo::~InterfaceInfo()
 void InterfaceInfo::getInterfacesInfo()
 {
     m_interfacesPos=-1;
-    m_interfaces = QueriesConfiguration::instance()->values("InterfaceInfo_Interfaces",m_ip,m_os);
-    m_onlyphysicalinterfaces = QueriesConfiguration::instance()->state("InterfaceInfo_XRonlyPhisical",m_ip,m_os);
+    m_interfaces = m_queriesConfiguration.values("InterfaceInfo_Interfaces",m_ip,m_os);
+    m_onlyphysicalinterfaces = m_queriesConfiguration.state("InterfaceInfo_XRonlyPhisical",m_ip,m_os);
 
     _getInterfacesInfoNextInteface();
 }
@@ -609,6 +608,11 @@ void InterfaceInfo::on_term_receiveText_Info()
     {
         //consultamos potencia optica ya que se especifo la interfaz
         txt.clear();
+
+        //TODO agregar opcion configurable para esta consulta
+        _getInterfacesInfoNextInteface();
+        return;
+
         term->disconnectReceiveTextSignalConnections();
         if ( m_brand == "Cisco" )
         {
@@ -1125,6 +1129,7 @@ QDataStream& operator<<(QDataStream& out, const InterfaceInfo& ii)
     out << ii.m_lstInterfacesIPAddresses;
     out << ii.m_lstInterfacesInfo;
     out << ii.m_lstInterfacesPermitedVlans;
+    out << ii.m_queryoption;
     return out;
 }
 
@@ -1133,23 +1138,20 @@ QDataStream& operator>>(QDataStream& in, InterfaceInfo& ii)
     in >> ii.m_lstInterfacesIPAddresses;
     in >> ii.m_lstInterfacesInfo;
     in >> ii.m_lstInterfacesPermitedVlans;
+    in >> ii.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const InterfaceInfo* ii)
 {
-    out << ii->m_lstInterfacesIPAddresses;
-    out << ii->m_lstInterfacesInfo;
-    out << ii->m_lstInterfacesPermitedVlans;
+    out << *ii;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, InterfaceInfo*& ii)
 {
     ii = new InterfaceInfo;
-    in >> ii->m_lstInterfacesIPAddresses;
-    in >> ii->m_lstInterfacesInfo;
-    in >> ii->m_lstInterfacesPermitedVlans;
+    in >> *ii;
     return in;
 }
 

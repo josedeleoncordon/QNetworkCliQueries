@@ -89,18 +89,17 @@ void updateInfoList(QList<SEquipmentNeighborsInfo> &lstDest, QList<SEquipmentNei
     }
 }
 
-EquipmentNeighborsInfo::EquipmentNeighborsInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+EquipmentNeighborsInfo::EquipmentNeighborsInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {}
 
 EquipmentNeighborsInfo::EquipmentNeighborsInfo(const EquipmentNeighborsInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_queryoption = other.m_queryoption;
     m_lstEquipos = other.m_lstEquipos;    
 }
 
@@ -478,25 +477,27 @@ QList<SEquipmentNeighborsInfo*> EquipmentNeighborsInfo::equipmentNeighborsInfoFr
 QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo& info)
 {
     out << info.m_lstEquipos;
+    out << info.m_queryoption;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo& info)
 {
     in >> info.m_lstEquipos;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo* info)
 {
-    out << info->m_lstEquipos;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo*& info)
 {
     info = new EquipmentNeighborsInfo;
-    in >> info->m_lstEquipos;
+    in >> *info;
     return in;
 }
 

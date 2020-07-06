@@ -1,18 +1,18 @@
 #include "platforminfo.h"
 #include "properties.h"
 
-PlatformInfo::PlatformInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
-{}
+PlatformInfo::PlatformInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
+{
+}
 
 PlatformInfo::PlatformInfo(const PlatformInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_queryoption = other.m_queryoption;
 }
 
 void PlatformInfo::getPlatformInfo()

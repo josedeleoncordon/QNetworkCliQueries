@@ -89,18 +89,17 @@ void updateInfoList(QList<SMacInfo> &lstDest, QList<SMacInfo> &lstOrigin )
     }
 }
 
-MacInfo::MacInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+MacInfo::MacInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {}
 
 MacInfo::MacInfo(const MacInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_queryoption = other.m_queryoption;
     m_mac = other.m_mac;
     m_vlan = other.m_vlan;
     m_lstMacs = other.m_lstMacs;
@@ -127,25 +126,27 @@ QString MacInfo::macInterfaceLearnedFrom(QString mac)
 QDataStream& operator<<(QDataStream& out, const MacInfo& info)
 {
     out << info.m_lstMacs;
+    out << info.m_queryoption;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, MacInfo& info)
 {
     in >> info.m_lstMacs;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const MacInfo* info)
 {
-    out << info->m_lstMacs;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, MacInfo*& info)
 {
     info = new MacInfo;
-    in >> info->m_lstMacs;
+    in >> *info;
     return in;
 }
 
