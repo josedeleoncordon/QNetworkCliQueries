@@ -304,6 +304,63 @@ FuncionBase *Queries::createQuerie(QueryOpcion option)
     }
 }
 
+void Queries::createEmptyQueries()
+{
+    crearFuncionesFaltantes();
+}
+
+void Queries::crearFuncionesFaltantes()
+{
+    //TODO no se crean al principio en CreateQueries por el crash de QSocketNotifier, :V investigar
+
+    if (!equipmentNeighborsInfoQuery)
+        createQuerie(QueryOpcion::EquipmentNeighbors);
+    if (!interfacesInfoQuery)
+        createQuerie(QueryOpcion::InterfaceInformation);
+    if (!interfacesPermitedVlansQuery)
+        createQuerie(QueryOpcion::InterfacePermitedVlans);
+    if (!interfacesDescriptionsQuery)
+        createQuerie(QueryOpcion::InterfaceDescription);
+    if (!interfacesIpAddressesQuery)
+        createQuerie(QueryOpcion::InterfaceIpAddresses);
+    if (!ospfQuery)
+        createQuerie(QueryOpcion::Ospf);
+    if (!mplsTEtunnelsQuery)
+        createQuerie(QueryOpcion::MplsTEtunnels);
+    if (!mplsL2TransportQuery)
+        createQuerie(QueryOpcion::Mplsl2Transport);
+    if (!mplsLdpDiscoveryQuery)
+        createQuerie(QueryOpcion::MplsLdpDiscovery);
+    if (!mplsLdpNeighborsQuery)
+        createQuerie(QueryOpcion::MplsLdpNeighbors);
+    if (!mplsLdpInterfacesQuery)
+        createQuerie(QueryOpcion::MplsLdpInterfaces);
+    if (!pimInteracesQuery)
+        createQuerie(QueryOpcion::PimInterfaces);
+    if (!macsQuery)
+        createQuerie(QueryOpcion::MacAddress);
+    if (!portChannelInfoQuery)
+        createQuerie(QueryOpcion::PortChannel);
+    if (!vrfsFromVlansQuery)
+        createQuerie(QueryOpcion::VRFfVlans);
+    if (!vrfFromRTQuery)
+        createQuerie(QueryOpcion::VRFfRT);
+    if (!vrfsQuery)
+        createQuerie(QueryOpcion::VRFs);
+    if (!arpsQuery)
+        createQuerie(QueryOpcion::Arp);
+    if (!bgpNeighborsQuery)
+        createQuerie(QueryOpcion::BGPNeig);
+    if (!bgpNetworksQuery)
+        createQuerie(QueryOpcion::BGPNetworks);
+    if (!ipRoutesQuery)
+        createQuerie(QueryOpcion::IpRoutes);
+    if (!configQuery)
+        createQuerie(QueryOpcion::Configuration);
+    if (!funcionQuery)
+        createQuerie(QueryOpcion::Funcion);
+}
+
 void Queries::setOptions( QList<QueryOpcion> lst )
 {
     lst.removeAll( QueryOpcion::Null ); //unicamente opciones validas
@@ -560,6 +617,7 @@ void Queries::nextProcess()
                     }
                 }
 
+            crearFuncionesFaltantes();
             _finalizar();
             return;
         }

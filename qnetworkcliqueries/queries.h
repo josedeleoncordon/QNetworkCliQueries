@@ -129,6 +129,8 @@ public:
     void setPassword2(QString pwd) { m_pwd2=pwd; }
     void startSync();
 
+    void createEmptyQueries();
+
     static QMap<QString,QString> queriesArgumentosAceptados();
     static void updateInfoQueries( QList<Queries> &lstDest, QList<Queries> &lstOrigin, QStringList lstIPsConsulta );
 
@@ -226,6 +228,7 @@ protected:
     void conectarAequipo(QString ip, QString user, QString pwd, QString platform, QString linuxprompt);
     void nextProcess();    
     void borrarTerminal();
+    void crearFuncionesFaltantes();
 
 private:
     void clone(const Queries& other);
