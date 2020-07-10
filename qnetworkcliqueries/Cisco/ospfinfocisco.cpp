@@ -1,14 +1,14 @@
 #include "ospfinfocisco.h"
 
-OSPFInfoCisco::OSPFInfoCisco(QRemoteShell *terminal, QObject *parent):
-    OSPFInfo(terminal,parent)
+OSPFInfoCisco::OSPFInfoCisco(QRemoteShell *terminal, QueryOpcion option):
+    OSPFInfo(terminal,option)
 {
     m_XRconsultaVRFs=false;
     //actualizar para neighbors, para que consulte los de las vrfs
 }
 
 OSPFInfoCisco::OSPFInfoCisco(const OSPFInfoCisco &other):
-    OSPFInfo(other.term,other.parent())
+    OSPFInfo(other.term,other.m_queryoption)
 {
     m_XRconsultaVRFs = other.m_XRconsultaVRFs;
 }

@@ -11,7 +11,7 @@ protected:
 
 public:
     ExitInfo() {}
-    ExitInfo(QRemoteShell *terminal, QObject *parent=nullptr);
+    ExitInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     void setConnectedByGW(bool enable) { m_gw = enable; }
     void exit();
 

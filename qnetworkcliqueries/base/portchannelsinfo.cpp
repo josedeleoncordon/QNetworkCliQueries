@@ -68,12 +68,12 @@ void updateInfoList(QList<SPortChannel> &lstDest, QList<SPortChannel> &lstOrigin
     }
 }
 
-PortChannelsInfo::PortChannelsInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+PortChannelsInfo::PortChannelsInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {}
 
 PortChannelsInfo::PortChannelsInfo(const PortChannelsInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
@@ -249,25 +249,27 @@ QString PortChannelsInfo::interfaceToPortChannel(QString interface)
 QDataStream& operator<<(QDataStream& out, const PortChannelsInfo& info)
 {
     out << info.lstInfo;
+    out << info.m_queryoption;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, PortChannelsInfo& info)
 {
     in >> info.lstInfo;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const PortChannelsInfo* info)
 {
-    out << info->lstInfo;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, PortChannelsInfo*& info)
 {
     info = new PortChannelsInfo;
-    in >> info->lstInfo;
+    in >> *info;
     return in;
 }
 

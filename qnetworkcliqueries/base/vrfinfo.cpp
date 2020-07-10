@@ -68,12 +68,12 @@ void updateInfoList(QList<SVrfInfo> &lstDest, QList<SVrfInfo> &lstOrigin )
     }
 }
 
-VrfInfo::VrfInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+VrfInfo::VrfInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {}
 
 VrfInfo::VrfInfo(const VrfInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
@@ -91,7 +91,7 @@ VrfInfo::~VrfInfo()
 
 void VrfInfo::getVRFsFromVLans()
 {
-    m_vlans = QueriesConfiguration::instance()->values("VRFfVlans_Vlans",m_ip,m_os);
+    m_vlans = m_queriesConfiguration.values("VRFfVlans_Vlans",m_ip,m_os);
 
     if ( m_vlans.size() == 0 )
     {
@@ -119,7 +119,7 @@ void VrfInfo::getVRFfromRT()
         return;
     }
 
-    m_rt = QueriesConfiguration::instance()->value("VRFfRT_RT",m_ip,m_os);
+    m_rt = m_queriesConfiguration.value("VRFfRT_RT",m_ip,m_os);
 
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextFromRT()));
     if ( m_os == "IOS XR" )
@@ -454,6 +454,7 @@ QDataStream& operator<<(QDataStream& out, const VrfInfo& info)
     out << info.m_lstVrf;
     out << info.m_vrf;
     out << info.m_lstVrfInfo;
+    out << info.m_queryoption;
     return out;
 }
 
@@ -462,23 +463,20 @@ QDataStream& operator>>(QDataStream& in, VrfInfo& info)
     in >> info.m_lstVrf;
     in >> info.m_vrf;
     in >> info.m_lstVrfInfo;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const VrfInfo* info)
 {
-    out << info->m_lstVrf;
-    out << info->m_vrf;
-    out << info->m_lstVrfInfo;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, VrfInfo*& info)
 {
     info = new VrfInfo;
-    in >> info->m_lstVrf;
-    in >> info->m_vrf;
-    in >> info->m_lstVrfInfo;
+    in >> *info;
     return in;
 }
 

@@ -30,7 +30,7 @@ protected:
 
 public:
     VrfInfo() {}
-    VrfInfo(QRemoteShell *terminal, QObject *parent=nullptr);
+    VrfInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     VrfInfo(const VrfInfo &other);
     ~VrfInfo();
     virtual void getVRFsFromVLans();

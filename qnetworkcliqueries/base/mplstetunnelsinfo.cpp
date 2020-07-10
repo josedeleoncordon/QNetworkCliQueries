@@ -57,13 +57,13 @@ void updateInfoList(QList<SMplsTETunnelInfo> &lstDest, QList<SMplsTETunnelInfo> 
     lstDest = lstOrigin;
 }
 
-MplsTEtunnelsInfo::MplsTEtunnelsInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+MplsTEtunnelsInfo::MplsTEtunnelsInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {
 }
 
 MplsTEtunnelsInfo::MplsTEtunnelsInfo(const MplsTEtunnelsInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
@@ -360,25 +360,27 @@ SMplsTETunnelInfo *MplsTEtunnelsInfo::mplsTEsFromTunnel(QString interfaz)
 QDataStream& operator<<(QDataStream& out, const MplsTEtunnelsInfo& info)
 {
     out << info.m_lstMplsTEtunnels;
+    out << info.m_queryoption;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, MplsTEtunnelsInfo& info)
 {
     in >> info.m_lstMplsTEtunnels;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const MplsTEtunnelsInfo* info)
 {
-    out << info->m_lstMplsTEtunnels;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, MplsTEtunnelsInfo*& info)
 {
     info = new MplsTEtunnelsInfo;
-    in >> info->m_lstMplsTEtunnels;
+    in >> *info;
     return in;
 }
 

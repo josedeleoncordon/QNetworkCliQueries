@@ -68,12 +68,12 @@ void updateInfoList(QList<SMplsLdpInfo> &lstDest, QList<SMplsLdpInfo> &lstOrigin
     }
 }
 
-MplsLdpInfo::MplsLdpInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+MplsLdpInfo::MplsLdpInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {}
 
 MplsLdpInfo::MplsLdpInfo(const MplsLdpInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
@@ -248,6 +248,7 @@ QDataStream& operator<<(QDataStream& out, const MplsLdpInfo& info)
 {
     out << info.m_localID;
     out << info.m_lstMplsLdpInfo;
+    out << info.m_queryoption;
     return out;
 }
 
@@ -255,21 +256,20 @@ QDataStream& operator>>(QDataStream& in, MplsLdpInfo& info)
 {
     in >> info.m_localID;
     in >> info.m_lstMplsLdpInfo;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const MplsLdpInfo* info)
 {
-    out << info->m_localID;
-    out << info->m_lstMplsLdpInfo;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, MplsLdpInfo*& info)
 {
     info = new MplsLdpInfo;
-    in >> info->m_localID;
-    in >> info->m_lstMplsLdpInfo;
+    in >> *info;
     return in;
 }
 

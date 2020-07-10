@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include "queriesthread.h"
+#include "queries.h"
+#include "funcionbase.h"
 
 class QueriesConfigurationValue;
 
@@ -25,7 +27,7 @@ private:
 
     LstQueries _lstQ; //origen
     LstQueries _lstQN; //destino
-    int opciones;
+    QList<QueryOpcion> opciones;
     QString m_lstQfilepath;
     QList<Queries> lstQueries;
     QList<Queries> lstQueriesConsultados;
@@ -47,6 +49,7 @@ private:
     int m_interval,m_simultaneos,m_maxParalelos;
     QRemoteShell::ConnectionProtocol m_connectionprotocol;
     QString _error;
+    QueriesConfiguration m_queriesConfiguration;
 
 public:    
     explicit ConsultaEquipos(QObject *parent = nullptr);
@@ -79,7 +82,7 @@ public:
     void setUser2(QString user) { m_user2=user; }
     void setPassword2(QString pwd) { m_pwd2=pwd; }
 
-    void addOpcionesConsulta(QList<Queries::Opcion> lst);
+    void addOpcionesConsulta(QList<QueryOpcion> lst);
     void addParametrosConsulta(const QList<QueriesConfigurationValue>&);
 
     void consultarEquiposSync();

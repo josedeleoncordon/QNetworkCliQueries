@@ -45,18 +45,8 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const QueriesConfigurati
      return dbg;
 }
 
-QueriesConfiguration* QueriesConfiguration::m_instance = nullptr;
-
 QueriesConfiguration::QueriesConfiguration()
 {}
-
-QueriesConfiguration *QueriesConfiguration::instance()
-{
-    if ( ! m_instance )
-        m_instance = new QueriesConfiguration;
-
-    return m_instance;
-}
 
 void QueriesConfiguration::addQueryParameter(const QList<QueriesConfigurationValue>& c)
 {
@@ -158,10 +148,10 @@ FuncionBase::FuncionBase()
     init();
 }
 
-FuncionBase::FuncionBase(QRemoteShell *terminal,QObject *parent)/*:
-    QObject(parent) */
+FuncionBase::FuncionBase(QRemoteShell *terminal, QueryOpcion option)
 {
     init();
+    m_queryoption=option;
     term=terminal;
 }
 
@@ -173,6 +163,7 @@ void FuncionBase::init()
     term=nullptr;
     lastCommandFailed=false;
     m_brand="Cisco";
+    m_queryoption=QueryOpcion::Null;
     exp.setMinimal(true);
     exp2.setMinimal(true);
     m_parentQuery=nullptr;
@@ -182,6 +173,12 @@ void FuncionBase::setPlatform(QString platform)
 {
     m_platform=platform;
     m_os=equipmentOSFromPlatform(m_platform);
+}
+
+void FuncionBase::setParentQuery(Queries *qry)
+{
+    m_parentQuery = qry;
+    m_queriesConfiguration = qry->queriesConfiguration();
 }
 
 void FuncionBase::termSendText(QString str) //Async

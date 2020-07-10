@@ -85,7 +85,7 @@ protected:
 
 public:
     InterfaceInfo() {}
-    InterfaceInfo(QRemoteShell *terminal, QObject *parent=0);
+    InterfaceInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     InterfaceInfo(const InterfaceInfo &other);
     ~InterfaceInfo();
     void setInterfaces(QStringList interfaces) { m_interfaces = interfaces; }

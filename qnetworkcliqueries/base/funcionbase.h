@@ -30,6 +30,36 @@ struct InfoBase
     QString id;
 };
 
+enum QueryOpcion {
+    Null,
+    Connect,
+    Platform,
+    EquipmentNeighbors,
+    MacAddress,
+    InterfaceInformation,
+    InterfacePermitedVlans,
+    InterfaceDescription,
+    InterfaceIpAddresses,
+    Ospf,
+    MplsTEtunnels,
+    MplsLdpDiscovery,
+    MplsLdpNeighbors,
+    MplsLdpInterfaces,
+    PimInterfaces,
+    PortChannel,
+    VRFfVlans,
+    VRFfRT,
+    VRFs,
+    Arp,
+    BGPNeig,
+    IpRoutes,
+    Configuration,
+    Mplsl2Transport,
+    Funcion,
+    BGPNetworks,
+    Exit
+};
+
 class QNETWORKCLIQUERIES_EXPORT QueriesConfigurationValue
 {
 
@@ -52,7 +82,6 @@ public:
 class QNETWORKCLIQUERIES_EXPORT QueriesConfiguration
 {
 private:
-    static QueriesConfiguration* m_instance;
     QList<QueriesConfigurationValue> m_lstQueryParameters;
     QList<QueriesConfigurationValue> m_lstConfiguration;
 
@@ -60,7 +89,6 @@ private:
 
 public:
     QueriesConfiguration();
-    static QueriesConfiguration *instance();
 
     void addQueryParameter(const QList<QueriesConfigurationValue>&);
     void addConfiguration(const QList<QueriesConfigurationValue>&);
@@ -79,6 +107,7 @@ public:
 class QNETWORKCLIQUERIES_EXPORT FuncionBase : public QObject
 {
     Q_OBJECT
+    friend class Queries;
 private:
     void init();
 
@@ -94,6 +123,8 @@ protected:
     QString m_name;
     QString m_ip;
     Queries* m_parentQuery;
+    QueryOpcion m_queryoption;
+    QueriesConfiguration m_queriesConfiguration;
 
     QString m_lastCommand;
 
@@ -105,15 +136,18 @@ protected:
 
 public:
     FuncionBase();
-    FuncionBase(QRemoteShell *terminal, QObject *parent = nullptr);
+    FuncionBase(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     ~FuncionBase();
+
+    QueryOpcion queryOption() { return m_queryoption; };
 
     void setBrand(QString brand) { m_brand = brand; }
     void setPlatform(QString platform);
     void setXRLocation(QString location) { m_xr_location=location; }
     void setHostName(QString name) { m_name=name; }
     void setIp(QString ip) { m_ip = ip; }
-    void setParentQuery(Queries *qry) { m_parentQuery = qry; }
+    void setParentQuery(Queries *qry);
+    void setQueryOption(QueryOpcion option) { m_queryoption=option; }
 
 private slots:
     void m_on_term_receiveText();

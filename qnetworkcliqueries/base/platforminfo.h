@@ -8,7 +8,7 @@ class QNETWORKCLIQUERIES_EXPORT PlatformInfo : public FuncionBase
     Q_OBJECT
 public:
     PlatformInfo() {}
-    PlatformInfo(QRemoteShell *terminal, QObject *parent=0);
+    PlatformInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     PlatformInfo(const PlatformInfo &other);
     void getPlatformInfo();
 

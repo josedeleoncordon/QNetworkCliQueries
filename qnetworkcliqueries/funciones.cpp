@@ -794,6 +794,9 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
     if ( interfazOipDondeViene.isEmpty() ) //primer equipo
         return true;
 
+    qDebug() << "continuarPorsiguienteInterfazMismoDominioOSPF" << interfazOipDondeViene << interfazSiguienteEquipo;
+
+
     QString ospfProceso;
     QString interfazDeDondeSeViene;
     QRegExp expIP("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
@@ -813,7 +816,10 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
         }
 
         if ( interfazDeDondeSeViene.isEmpty() )
+        {
+            qDebug() << "continuarPorsiguienteInterfazMismoDominioOSPF: No se encontro la interfaz de donde se viene";
             return false;
+        }
     }
 
     //buscamos el proceso de la interfaz de donde se viene
@@ -831,7 +837,10 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
     }
 
     if ( ospfProceso.isEmpty() )
+    {
+        qDebug() << "continuarPorsiguienteInterfazMismoDominioOSPF: no se encuentra proceso de la interfaz de donde se viene";
         return false;
+    }
 
     //verificamos si la interfaz siguiente pertenece al mismo proceso que la interfaz donde se viene
     interfazSiguienteEquipo = interfaceToPortChannelInterface(q.portChannelInfo(),
@@ -842,7 +851,14 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
     {
         if ( oi.interfaz == interfazSiguienteEquipo )
         {
-            if ( ospfProceso == oi.process ) return true; else return false;
+            if ( ospfProceso == oi.process )
+                return true;
+            else
+            {
+                qDebug() << "continuarPorsiguienteInterfazMismoDominioOSPF: proceso no es igual del de entrada y salida"
+                         << interfazDeDondeSeViene << interfazSiguienteEquipo;
+                return false;
+            }
         }
     }
 

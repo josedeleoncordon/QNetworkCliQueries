@@ -34,7 +34,7 @@ protected:
 
 public:
     MplsTEtunnelsInfo() {}
-    MplsTEtunnelsInfo(QRemoteShell *terminal, QObject *parent);
+    MplsTEtunnelsInfo(QRemoteShell *terminal,QueryOpcion option=QueryOpcion::Null);
     MplsTEtunnelsInfo(const MplsTEtunnelsInfo &other);
     ~MplsTEtunnelsInfo();
     void getMplsTETunnels();

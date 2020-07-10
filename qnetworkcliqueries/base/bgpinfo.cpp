@@ -103,12 +103,13 @@ QNETWORKCLIQUERIES_EXPORT const QDBusArgument& operator>>(const QDBusArgument& a
     return argument;
 }
 
-BGPInfo::BGPInfo(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
-{}
+BGPInfo::BGPInfo(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
+{
+}
 
 BGPInfo::BGPInfo(const BGPInfo &other):
-    FuncionBase(other.term,other.parent())
+    FuncionBase(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
@@ -129,7 +130,7 @@ void BGPInfo::getBGPNeighbors()
     }    
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_BGPNeighbors()));
 
-    m_type = QueriesConfiguration::instance()->value("BGPNeig_Type",m_ip,m_os);
+    m_type = m_queriesConfiguration.value("BGPNeig_Type",m_ip,m_os);
 
     if ( m_type.isEmpty() )
         m_type = "IPV4";
@@ -188,10 +189,10 @@ void BGPInfo::getNetworks()
     }
 
     m_neighborsPos=-1;
-    m_neighborIPs = QueriesConfiguration::instance()->values("BGPNetworks_NeighborIP",m_ip,m_os);
-    m_vrf = QueriesConfiguration::instance()->value("BGPNetworks_VRF",m_ip,m_os);
-    m_community = QueriesConfiguration::instance()->value("BGPNetworks_Community",m_ip,m_os);
-    m_neighbor_int_out = QueriesConfiguration::instance()->value("BGPNetworks_NeighborIn_Out",m_ip,m_os);
+    m_neighborIPs = m_queriesConfiguration.values("BGPNetworks_NeighborIP",m_ip,m_os);
+    m_vrf = m_queriesConfiguration.value("BGPNetworks_VRF",m_ip,m_os);
+    m_community = m_queriesConfiguration.value("BGPNetworks_Community",m_ip,m_os);
+    m_neighbor_int_out = m_queriesConfiguration.value("BGPNetworks_NeighborIn_Out",m_ip,m_os);
 
     qDebug() << "\n BGP getNetworks";
     qDebug() << m_vrf << m_neighborIPs;
@@ -338,6 +339,7 @@ QDataStream& operator<<(QDataStream& out, const BGPInfo& info)
 {
     out << info.m_lstNeigbors;
     out << info.m_lstNetworks;
+    out << info.m_queryoption;
     return out;
 }
 
@@ -345,21 +347,20 @@ QDataStream& operator>>(QDataStream& in, BGPInfo& info)
 {
     in >> info.m_lstNeigbors;
     in >> info.m_lstNetworks;
+    in >> info.m_queryoption;
     return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const BGPInfo* info)
 {
-    out << info->m_lstNeigbors;
-    out << info->m_lstNetworks;
+    out << *info;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, BGPInfo*& info)
 {
-    info =new BGPInfo(nullptr,nullptr);
-    in >> info->m_lstNeigbors;
-    in >> info->m_lstNetworks;
+    info =new BGPInfo;
+    in >> *info;
     return in;
 }
 

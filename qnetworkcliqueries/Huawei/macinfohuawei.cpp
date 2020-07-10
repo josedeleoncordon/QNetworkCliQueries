@@ -1,13 +1,13 @@
 #include "macinfohuawei.h"
 #include "funciones.h"
 
-MacInfoHuawei::MacInfoHuawei(QRemoteShell *terminal, QObject *parent):
-    MacInfo(terminal,parent)
+MacInfoHuawei::MacInfoHuawei(QRemoteShell *terminal, QueryOpcion option):
+    MacInfo(terminal,option)
 {
 }
 
 MacInfoHuawei::MacInfoHuawei(const MacInfoHuawei &other):
-    MacInfo(other.term,other.parent())
+    MacInfo(other.term,other.m_queryoption)
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
@@ -23,7 +23,7 @@ MacInfoHuawei::~MacInfoHuawei()
 
 void MacInfoHuawei::getMacInfo()
 {
-    m_mac = QueriesConfiguration::instance()->value("MAC_MAC",m_ip,m_os);
+	m_mac = m_queriesConfiguration.value("MAC_MAC",m_ip,m_os);
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
     termSendText("display mac-address");
 }
@@ -65,7 +65,7 @@ void MacInfoHuawei::on_term_receiveText()
         }
 
         //verificando si la mac esta en la vlans permitidas, si se configuro
-        QStringList vlanfilter = QueriesConfiguration::instance()->values("MAC_vlansFilter",m_ip,m_os);
+		QStringList vlanfilter = m_queriesConfiguration.values("MAC_vlansFilter",m_ip,m_os);
         if ( vlanfilter.isEmpty() )
             m_lstMacs.append(mac);
         else

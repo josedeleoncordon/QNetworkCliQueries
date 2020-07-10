@@ -10,7 +10,6 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_interval=0;
     m_simultaneos=0;
     m_maxparalelos=0;
-    m_opciones=0;
     m_connectionprotocol = QRemoteShell::SSHTelnet;
     m_principaluserfirst=true;
     m_soloequiposnuevos=false;
@@ -60,8 +59,9 @@ void QueriesThread::_clear()
     }
 }
 
-void QueriesThread::setOpciones(uint opciones)
+void QueriesThread::setOptions(QList<QueryOpcion> opciones)
 {
+    opciones.removeAll( QueryOpcion::Null ); //unicamente opciones validas
     m_opciones = opciones;
     _clear();
 }
@@ -71,7 +71,6 @@ void QueriesThread::iniciar()
     if ( m_interval==0 ||
          m_simultaneos==0 ||
          m_maxparalelos==0 ||
-         m_opciones==0 ||
          m_lstIP.isEmpty() ||
          m_equiposConsultados > 0 )
     {
@@ -135,7 +134,6 @@ void QueriesThread::on_timerActivity_timeOut()
 
 void QueriesThread::on_timer_timeOut()
 {
-
     int paralelos;
     paralelos = m_maxparalelos ;
 
@@ -159,47 +157,24 @@ void QueriesThread::on_timer_timeOut()
     for ( int c=0; c<equiposAconectar; c++ )
     {
         m_lstIpPos = pos+c;
-        conectarOtroEquipo( m_lstIP.at( m_lstIpPos ) );
+        siguienteEquipo( m_lstIP.at( m_lstIpPos ) );
     }
 }
 
-void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
+void QueriesThread::siguienteEquipo(QString ip, bool gw)
 {
-    qCDebug(queriesthread) << ip << "QueriesThread::conectarOtroEquipo()" << "GW" << gw;
+    qCDebug(queriesthread) << ip << "QueriesThread::siguienteEquipo()" << "GW" << gw;
 
-    //buscando si ya exite el query, por si fuera una consulta despues de haberse echo la conexion
-//    for ( Queries *qry : m_lstQueries )
-//        if ( qry->ip() == ip )
-//        {
-//            qCDebug(queriesthread) << "continuando consulta en equipo" << ip;
-//            qDebug() << "query thr" << qry->thread();
-//            qry->setOptions( m_opciones );
-//            qry->thread()->start();
-
-//            return;
-//        }
-
-    Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);
-
+    Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);    
     query->setCountry( m_grupo );
     if ( gw )
         query->setGW( m_gw );
     if ( m_consultarVecinosOSPFMismoDominio )
         query->setIpOInterfazMismoDominioOSPFDondeSeViene( m_mapOSPFVecinosInterfazDondeVienen.value( ip ) );
-    query->setOptions( m_opciones );
     query->setConnectionProtocol( m_connectionprotocol );
     query->setUser2( m_user2 );
     query->setPassword2( m_pwd2 );
-
-    QThread *thr = new QThread(this);
-    query->moveToThread( thr );
-
-    qDebug() << "query thr" << query->thread();
-
-    connect(thr,SIGNAL(started()),query,SLOT( start()) );
-    connect(query,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);
-    connect(query,SIGNAL(finished(Queries*)),thr,SLOT(quit()));
-    connect(thr,SIGNAL(finished()),thr,SLOT(deleteLater()));
+    query->setQueriesConfiguration( m_queriesconfiguration );
 
     m_consultaSimultaneos++;
     emit newInformation();
@@ -207,9 +182,32 @@ void QueriesThread::conectarOtroEquipo(QString ip, bool gw)
     m_equiposenconsulta.append( ip );
     m_queriesenconsulta.append( query );
 
+    QThread *thr = new QThread(this);
+    query->moveToThread( thr );
+
+    connect(thr,SIGNAL(started()),query,SLOT( start()) );
+    //este se realiza equipoConsultado o en el objeto heredado
+    //connect(query,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);
+    //
+    //este se realiza en equipoConsultado para dar chance a los objetos heredados de continuar trabajando despues del primer
+    //finished de un Queries
+    //connect(query,SIGNAL(finished(Queries*)),thr,SLOT(quit()));
+    connect(thr,SIGNAL(finished()),thr,SLOT(deleteLater()));
+
+    m_mapQueriesQThread.insert(query,thr);
+
+    iniciarQueryThread(query,thr);
+}
+
+void QueriesThread::iniciarQueryThread(Queries *query, QThread *thr)
+{
+    query->setOptions( m_opciones );
+
+    connect(query,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);
+
     thr->start();
 
-    qCDebug(queriesthread) << "Iniciando conexion equipo" << ip;
+    qCDebug(queriesthread) << "QueriesThread Iniciando conexion equipo" << query->ip();
 }
 
 void QueriesThread::equipoConsultado(Queries *qry)
@@ -218,6 +216,9 @@ void QueriesThread::equipoConsultado(Queries *qry)
 
     if ( m_cancelar )
         return;
+
+    m_mapQueriesQThread.value(qry)->quit();
+    m_mapQueriesQThread.remove(qry);
 
     m_timerActivity->stop();
     m_timerActivity->start();
@@ -344,10 +345,22 @@ void QueriesThread::equipoConsultado(Queries *qry)
     if ( !m_detener )
     {
         //Si se termino de consultar los equipos se finaliza
+
+        qCDebug(queriesthread) << "Analizando si se termina: m_equiposConsultados" << m_equiposConsultados
+                               << "m_lstIPsAintentarPorGW" << m_lstIPsAintentarPorGW
+                               << "m_equiposPorGWenConsulta" << m_equiposPorGWenConsulta
+                               << "m_lstIpPos" << m_lstIpPos
+                               << "m_lstIP.size()" << m_lstIP.size()
+                               << "m_equiposenconsulta" << m_equiposenconsulta;
+                                  ;
+
         if ( m_equiposConsultados >= m_lstIP.size() &&
              m_lstIPsAintentarPorGW.isEmpty() &&
              !m_equiposPorGWenConsulta )
+        {
+            qCDebug(queriesthread) << "se termino de consultar los equipos se finaliza";
             emit finished(true);
+        }
         else
         {
             //conectar al siguiente equipo
@@ -361,7 +374,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
 
                 //tratamos de conectar a un equipo q fallo por medio del gw
                 m_equiposPorGWenConsulta++;
-                conectarOtroEquipo( IP, true );
+                siguienteEquipo( IP, true );
             }
             else
                 if ( m_lstIpPos < m_lstIP.size()-1 )
@@ -370,7 +383,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
                     m_lstIpPos++;
                     QString ip = m_lstIP.at( m_lstIpPos );
                     qCDebug(queriesthread) << ip << "siguiente conexion normal";
-                    conectarOtroEquipo( ip );
+                    siguienteEquipo( ip );
                 }
         }
     }
@@ -422,16 +435,31 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
         //ospf area
         if ( !m_consultaOSPFArea.isEmpty() )
         {
+            QRegExp exp(m_consultaOSPFArea);
             for ( SOSPFInfo &oi : qry->ospfInfo() )
                 if ( oi.interfaz == interfazEsteEquipoSalida &&
-                     oi.area != m_consultaOSPFArea )
+                     !exp.exactMatch(oi.area) )
                     return;
         }
 
         //ospf mismo dominio
         if ( m_consultarVecinosOSPFMismoDominio )
         {
-            if ( !continuarPorsiguienteInterfazMismoDominioOSPF( *qry,
+            if ( ipOinterfazDondeSeViene.isEmpty() && !m_consultarVecinosOSPFEquipoRaizProceso.isEmpty() )
+            {
+                //equipo raiz y se establecio proceso de ospf. Solo las interfaces que pertenecen a ese proceso se recoreran
+
+                QString interfazHaciaSiguienteEquipo = interfaceToPortChannelInterface(qry->portChannelInfo(),
+                                                                                       interfazEsteEquipoSalida,
+                                                                                       qry->platform());
+                for ( SOSPFInfo &oi : qry->ospfInfo() )
+                {
+                    if ( oi.interfaz == interfazHaciaSiguienteEquipo )
+                        if ( oi.process != m_consultarVecinosOSPFEquipoRaizProceso )
+                            return;
+                }
+            }
+            else if ( !continuarPorsiguienteInterfazMismoDominioOSPF( *qry,
                                                                  ipOinterfazDondeSeViene,
                                                                  interfazEsteEquipoSalida ) )
                 return;

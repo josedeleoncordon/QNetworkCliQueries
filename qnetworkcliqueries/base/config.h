@@ -21,7 +21,7 @@ class QNETWORKCLIQUERIES_EXPORT Config : public FuncionBase
 
 public:
     Config() {}
-    Config(QRemoteShell *terminal, QObject *parent=nullptr);
+    Config(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     ~Config();
     void configApply();
 

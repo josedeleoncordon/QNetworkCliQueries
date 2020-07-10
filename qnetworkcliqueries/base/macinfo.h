@@ -30,7 +30,7 @@ protected:
     QList<SMacInfo> m_lstMacs;
 public:
     MacInfo() {}
-    MacInfo(QRemoteShell *terminal, QObject *parent=0);
+    MacInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     MacInfo(const MacInfo &other);
     ~MacInfo();
     void setMac(QString m) { m_mac = m; }

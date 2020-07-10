@@ -9,114 +9,114 @@
 #include "RAD/macinforad.h"
 #include "funciones.h"
 
-ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
     Q_UNUSED( type )
 
     if ( brandName == "Cisco" )
-        return new ArpInfoCisco(term,parent);
+        return new ArpInfoCisco(term,option);
     else if ( brandName == "Huawei" )
-        return new ArpInfoHuawei(term,parent);
+        return new ArpInfoHuawei(term,option);
     else
-        return new ArpInfo(term,parent);
+        return new ArpInfo(term,option);
 }
 
-BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new BGPInfo(term,parent);
+    return new BGPInfo(term,option);
 }
 
-BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new BGPInfo(term,parent);
+    return new BGPInfo(term,option);
 }
 
-EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new EquipmentNeighborsInfo(term,parent);
+    return new EquipmentNeighborsInfo(term,option);
 }
 
-InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {  
-    return new InterfaceInfo(term,parent);
+    return new InterfaceInfo(term,option);
 }
 
-IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new IPRouteInfo(term,parent);
+    return new IPRouteInfo(term,option);
 }
 
-MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
     Q_UNUSED( type )
 
     if ( brandName == "Cisco" )           
-        return new MacInfoCisco(term,parent);
+        return new MacInfoCisco(term,option);
     else if ( brandName == "Huawei" )
-        return new MacInfoHuawei(term,parent);
+        return new MacInfoHuawei(term,option);
     else if ( brandName == "RAD" )
-        return new MacInfoRAD(term,parent);
+        return new MacInfoRAD(term,option);
     else
-        return new MacInfo(term,parent);
+        return new MacInfo(term,option);
 }
 
-MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
     Q_UNUSED( type )
 
-    return new MplsTEtunnelsInfo(term,parent);
+    return new MplsTEtunnelsInfo(term,option);
 }
 
-MplsL2TransportInfo *factoryNewMplsL2TransportInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+MplsL2TransportInfo *factoryNewMplsL2TransportInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
     Q_UNUSED( type )
 
-    return new MplsL2TransportInfo(term,parent);
+    return new MplsL2TransportInfo(term,option);
 }
 
-MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new MplsLdpInfo(term,parent);
+    return new MplsLdpInfo(term,option);
 }
 
-OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
     Q_UNUSED( type )
 
     if ( brandName == "Cisco" )
-        return new OSPFInfoCisco(term,parent);
+        return new OSPFInfoCisco(term,option);
     else if ( brandName == "Huawei" )
-        return new OSPFInfoHuawei(term,parent);
+        return new OSPFInfoHuawei(term,option);
     else
-        return new OSPFInfo(term,parent);
+        return new OSPFInfo(term,option);
 }
 
-PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new PIMInfo(term,parent);
+    return new PIMInfo(term,option);
 }
 
-PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new PortChannelsInfo(term,parent);
+    return new PortChannelsInfo(term,option);
 }
 
-VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new VrfInfo(term,parent);
+    return new VrfInfo(term,option);
 }
 
-Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new Config(term,parent);
+    return new Config(term,option);
 }
 
-FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new FuncionInfo(term,parent);
+    return new FuncionInfo(term,option);
 }
 
-ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, QObject *parent)
+ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
 {
-    return new ExitInfo(term,parent);
+    return new ExitInfo(term,option);
 }

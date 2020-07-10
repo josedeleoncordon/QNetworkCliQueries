@@ -15,7 +15,7 @@ protected:
 
 public:
     FuncionInfo() {}
-    FuncionInfo(QRemoteShell *terminal, QObject *parent);
+    FuncionInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
     FuncionInfo(const FuncionInfo &other);
     ~FuncionInfo();
     void getTXT();

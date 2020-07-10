@@ -1,8 +1,8 @@
 #include "config.h"
 #include "queries.h"
 
-Config::Config(QRemoteShell *terminal, QObject *parent):
-    FuncionBase(terminal,parent)
+Config::Config(QRemoteShell *terminal, QueryOpcion option):
+    FuncionBase(terminal,option)
 {
     m_error=false;
     m_guardado=false;

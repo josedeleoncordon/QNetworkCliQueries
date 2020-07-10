@@ -18,22 +18,22 @@
 #include "funcioninfo.h"
 #include "exitinfo.h"
 
-ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-MplsL2TransportInfo *factoryNewMplsL2TransportInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
-ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, QObject *parent=nullptr);
+ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+MplsL2TransportInfo *factoryNewMplsL2TransportInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
+ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, QueryOpcion option);
 
 #endif // MACINFOFACTORY_H
