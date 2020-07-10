@@ -314,51 +314,120 @@ void Queries::crearFuncionesFaltantes()
     //TODO no se crean al principio en CreateQueries por el crash de QSocketNotifier, :V investigar
 
     if (!equipmentNeighborsInfoQuery)
-        createQuerie(QueryOpcion::EquipmentNeighbors);
+    {
+        equipmentNeighborsInfoQuery = factoryNewEquipmentNeighborsInfo(m_brand,m_equipmenttype,term,QueryOpcion::EquipmentNeighbors);
+        m_lstFunciones.append(equipmentNeighborsInfoQuery);
+    }
     if (!interfacesInfoQuery)
-        createQuerie(QueryOpcion::InterfaceInformation);
+    {
+        interfacesInfoQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,QueryOpcion::InterfaceInformation);
+        m_lstFunciones.append(interfacesInfoQuery);
+    }
     if (!interfacesPermitedVlansQuery)
-        createQuerie(QueryOpcion::InterfacePermitedVlans);
+    {
+        interfacesPermitedVlansQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,QueryOpcion::InterfacePermitedVlans);
+        m_lstFunciones.append(interfacesPermitedVlansQuery);
+    }
     if (!interfacesDescriptionsQuery)
-        createQuerie(QueryOpcion::InterfaceDescription);
+    {
+        interfacesDescriptionsQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,QueryOpcion::InterfaceDescription);
+        m_lstFunciones.append(interfacesDescriptionsQuery);
+    }
     if (!interfacesIpAddressesQuery)
-        createQuerie(QueryOpcion::InterfaceIpAddresses);
+    {
+        interfacesIpAddressesQuery = factoryNewInterfaceInfo(m_brand,m_equipmenttype,term,QueryOpcion::InterfaceIpAddresses);
+        m_lstFunciones.append(interfacesIpAddressesQuery);
+    }
     if (!ospfQuery)
-        createQuerie(QueryOpcion::Ospf);
+    {
+        ospfQuery = factoryNewOSPFInfo(m_brand,m_equipmenttype,term,QueryOpcion::Ospf);
+        m_lstFunciones.append(ospfQuery);
+    }
     if (!mplsTEtunnelsQuery)
-        createQuerie(QueryOpcion::MplsTEtunnels);
+    {
+        mplsTEtunnelsQuery = factoryNewMplsTEtunnelsInfo(m_brand,m_equipmenttype,term,QueryOpcion::MplsTEtunnels);
+        m_lstFunciones.append(mplsTEtunnelsQuery);
+    }
     if (!mplsL2TransportQuery)
-        createQuerie(QueryOpcion::Mplsl2Transport);
+    {
+        mplsL2TransportQuery = factoryNewMplsL2TransportInfo(m_brand,m_equipmenttype,term,QueryOpcion::Mplsl2Transport);
+        m_lstFunciones.append(mplsL2TransportQuery);
+    }
     if (!mplsLdpDiscoveryQuery)
-        createQuerie(QueryOpcion::MplsLdpDiscovery);
+    {
+        mplsLdpDiscoveryQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,QueryOpcion::MplsLdpDiscovery);
+        m_lstFunciones.append(mplsLdpDiscoveryQuery);
+    }
     if (!mplsLdpNeighborsQuery)
-        createQuerie(QueryOpcion::MplsLdpNeighbors);
+    {
+        mplsLdpNeighborsQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,QueryOpcion::MplsLdpNeighbors);
+        m_lstFunciones.append(mplsLdpNeighborsQuery);
+    }
     if (!mplsLdpInterfacesQuery)
-        createQuerie(QueryOpcion::MplsLdpInterfaces);
+    {
+        mplsLdpInterfacesQuery = factoryNewMplsLdpInfo(m_brand,m_equipmenttype,term,QueryOpcion::MplsLdpInterfaces);
+        m_lstFunciones.append(mplsLdpInterfacesQuery);
+    }
     if (!pimInteracesQuery)
-        createQuerie(QueryOpcion::PimInterfaces);
+    {
+        pimInteracesQuery = factoryNewPIMInfo(m_brand,m_equipmenttype,term,QueryOpcion::PimInterfaces);
+        m_lstFunciones.append(pimInteracesQuery);
+    }
     if (!macsQuery)
-        createQuerie(QueryOpcion::MacAddress);
+    {
+        macsQuery = factoryNewMacInfo(m_brand,m_equipmenttype,term,QueryOpcion::MacAddress);
+        m_lstFunciones.append(macsQuery);
+    }
     if (!portChannelInfoQuery)
-        createQuerie(QueryOpcion::PortChannel);
+    {
+        portChannelInfoQuery = factoryNewPortChannelsInfo(m_brand,m_equipmenttype,term,QueryOpcion::PortChannel);
+        m_lstFunciones.append(portChannelInfoQuery);
+    }
     if (!vrfsFromVlansQuery)
-        createQuerie(QueryOpcion::VRFfVlans);
+    {
+        vrfsFromVlansQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,QueryOpcion::VRFfVlans);
+        m_lstFunciones.append(vrfsFromVlansQuery);
+    }
     if (!vrfFromRTQuery)
-        createQuerie(QueryOpcion::VRFfRT);
+    {
+        vrfFromRTQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,QueryOpcion::VRFfRT);
+        m_lstFunciones.append(vrfFromRTQuery);
+    }
     if (!vrfsQuery)
-        createQuerie(QueryOpcion::VRFs);
+    {
+        vrfsQuery = factoryNewVrfInfo(m_brand,m_equipmenttype,term,QueryOpcion::VRFs);
+        m_lstFunciones.append(vrfsQuery);
+    }
     if (!arpsQuery)
-        createQuerie(QueryOpcion::Arp);
+    {
+        arpsQuery = factoryNewArpInfo(m_brand,m_equipmenttype,term,QueryOpcion::Arp);
+        m_lstFunciones.append(arpsQuery);
+    }
     if (!bgpNeighborsQuery)
-        createQuerie(QueryOpcion::BGPNeig);
+    {
+        bgpNeighborsQuery = factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term,QueryOpcion::BGPNeig);
+        m_lstFunciones.append(bgpNeighborsQuery);
+    }
     if (!bgpNetworksQuery)
-        createQuerie(QueryOpcion::BGPNetworks);
+    {
+        bgpNetworksQuery = factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term,QueryOpcion::BGPNetworks);
+        m_lstFunciones.append(bgpNetworksQuery);
+    }
     if (!ipRoutesQuery)
-        createQuerie(QueryOpcion::IpRoutes);
+    {
+        ipRoutesQuery = factoryNewIPRouteInfo(m_brand,m_equipmenttype,term,QueryOpcion::IpRoutes);
+        m_lstFunciones.append(ipRoutesQuery);
+    }
     if (!configQuery)
-        createQuerie(QueryOpcion::Configuration);
+    {
+        configQuery = factoryNewConfig(m_brand,m_equipmenttype,term,QueryOpcion::Configuration);
+        m_lstFunciones.append(configQuery);
+    }
     if (!funcionQuery)
-        createQuerie(QueryOpcion::Funcion);
+    {
+        funcionQuery = factoryNewFuncionInfo(m_brand,m_equipmenttype,term,QueryOpcion::Funcion);
+        m_lstFunciones.append(funcionQuery);
+    }
 }
 
 void Queries::setOptions( QList<QueryOpcion> lst )
@@ -617,7 +686,6 @@ void Queries::nextProcess()
                     }
                 }
 
-            crearFuncionesFaltantes();
             _finalizar();
             return;
         }
@@ -1101,6 +1169,11 @@ void Queries::nextProcess()
         connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
         f->exit();
+
+        //se crean las funciones restantes hasta que se sale del equipo por si el usuario esta haciendo consultas
+        //por partes
+        crearFuncionesFaltantes();
+
         return;
     }
 }

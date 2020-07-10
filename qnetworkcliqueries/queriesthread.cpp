@@ -345,6 +345,15 @@ void QueriesThread::equipoConsultado(Queries *qry)
     if ( !m_detener )
     {
         //Si se termino de consultar los equipos se finaliza
+
+        qCDebug(queriesthread) << "Analizando si se termina: m_equiposConsultados" << m_equiposConsultados
+                               << "m_lstIPsAintentarPorGW" << m_lstIPsAintentarPorGW
+                               << "m_equiposPorGWenConsulta" << m_equiposPorGWenConsulta
+                               << "m_lstIpPos" << m_lstIpPos
+                               << "m_lstIP.size()" << m_lstIP.size()
+                               << "m_equiposenconsulta" << m_equiposenconsulta;
+                                  ;
+
         if ( m_equiposConsultados >= m_lstIP.size() &&
              m_lstIPsAintentarPorGW.isEmpty() &&
              !m_equiposPorGWenConsulta )
@@ -436,7 +445,21 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
         //ospf mismo dominio
         if ( m_consultarVecinosOSPFMismoDominio )
         {
-            if ( !continuarPorsiguienteInterfazMismoDominioOSPF( *qry,
+            if ( ipOinterfazDondeSeViene.isEmpty() && !m_consultarVecinosOSPFEquipoRaizProceso.isEmpty() )
+            {
+                //equipo raiz y se establecio proceso de ospf. Solo las interfaces que pertenecen a ese proceso se recoreran
+
+                QString interfazHaciaSiguienteEquipo = interfaceToPortChannelInterface(qry->portChannelInfo(),
+                                                                                       interfazEsteEquipoSalida,
+                                                                                       qry->platform());
+                for ( SOSPFInfo &oi : qry->ospfInfo() )
+                {
+                    if ( oi.interfaz == interfazHaciaSiguienteEquipo )
+                        if ( oi.process != m_consultarVecinosOSPFEquipoRaizProceso )
+                            return;
+                }
+            }
+            else if ( !continuarPorsiguienteInterfazMismoDominioOSPF( *qry,
                                                                  ipOinterfazDondeSeViene,
                                                                  interfazEsteEquipoSalida ) )
                 return;

@@ -35,6 +35,7 @@ public:
     void setOptions(QList<QueryOpcion> opciones);
     void setEquipmentNeighborsConsultarVecinos(bool consultar) { m_equipmentNeighborsConsultarVecinos=consultar; }
     void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
+    void setEquipmentNeighborsOSPFEquipoRaizProceso(QString proceso) { m_consultarVecinosOSPFEquipoRaizProceso=proceso; }
     void setEquipmentNeighborsRegExpOSPFArea(QString area) { m_consultaOSPFArea=area; }
     void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
 
@@ -98,7 +99,11 @@ protected:
    bool m_detener;
    bool m_cancelar;
    bool m_equipmentNeighborsConsultarVecinos;
+
+   //si el equipo por donde se empieza la consulta tiene mas de un proceso recorrera todos. ASBR UMPLS
    bool m_consultarVecinosOSPFMismoDominio;
+   QString m_consultarVecinosOSPFEquipoRaizProceso; //con este especificamos si deseamos solo recorrer uno
+
    bool m_soloequiposnuevos;
    bool m_principaluserfirst;
    QList<Queries*> m_lstQueries;

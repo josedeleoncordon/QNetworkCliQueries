@@ -337,8 +337,11 @@ void InterfaceInfo::getInterfacesIpAddresses()
     }
 
     term->disconnectReceiveTextSignalConnections();
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IpAddresses()));    
-    termSendText("show ip interface brief");
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IpAddresses()));
+    if ( m_os == "IOS XR" )
+        termSendText("show ipv4 interface brief");
+    else
+        termSendText("show ip interface brief");
 }
 
 void InterfaceInfo::getInterfacesPermitedVlans()
