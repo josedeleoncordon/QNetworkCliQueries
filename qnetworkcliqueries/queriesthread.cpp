@@ -182,6 +182,7 @@ void QueriesThread::siguienteEquipo(QString ip, bool gw)
     query->setUser2( m_user2 );
     query->setPassword2( m_pwd2 );
     query->setQueriesConfiguration( m_queriesconfiguration );
+    query->setOptions(m_opciones);
 
     m_consultaSimultaneos++;
     emit newInformation();
@@ -190,31 +191,15 @@ void QueriesThread::siguienteEquipo(QString ip, bool gw)
     m_queriesenconsulta.append( query );
 
     QThread *thr = new QThread(this);
-    query->moveToThread( thr );
+    QueriesThreadWorker *worker = new QueriesThreadWorker( query );
+    worker->moveToThread( thr );
 
-    connect(thr,SIGNAL(started()),query,SLOT( start()) );
-    //este se realiza equipoConsultado o en el objeto heredado
-    //connect(query,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);
-    //
-    //este se realiza en equipoConsultado para dar chance a los objetos heredados de continuar trabajando despues del primer
-    //finished de un Queries
-    //connect(query,SIGNAL(finished(Queries*)),thr,SLOT(quit()));
+    connect(thr,SIGNAL(started()),worker,SLOT( start()) );
+    connect(worker,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);
+    connect(worker,SIGNAL(finished(Queries*)),thr,SLOT(quit()));
     connect(thr,SIGNAL(finished()),thr,SLOT(deleteLater()));
 
-    m_mapQueriesQThread.insert(query,thr);
-
-    iniciarQueryThread(query,thr);
-}
-
-void QueriesThread::iniciarQueryThread(Queries *query, QThread *thr)
-{
-    query->setOptions( m_opciones );
-
-    connect(query,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);
-
     thr->start();
-
-    qCDebug(queriesthread) << "QueriesThread Iniciando conexion equipo" << query->ip();
 }
 
 void QueriesThread::equipoConsultado(Queries *qry)
@@ -234,9 +219,6 @@ void QueriesThread::equipoConsultado(Queries *qry)
 
     if ( m_cancelar )
         return;
-
-    m_mapQueriesQThread.value(qry)->quit();
-    m_mapQueriesQThread.remove(qry);
 
     m_timerActivity->stop();
     m_timerActivity->start();

@@ -14,7 +14,7 @@ public slots:
     void start();
 
 signals:
-    void finished();
+    void finished(Queries*);
 
 private:
     Queries *_qry;

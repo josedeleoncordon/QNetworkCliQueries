@@ -3,11 +3,10 @@
 QueriesThreadWorker::QueriesThreadWorker(Queries *qry) : QObject(qry)
 {
     _qry=qry;
-    _qry->setParent(this);
 }
 
 void QueriesThreadWorker::start()
 {
-    _qry->startSync();
-    emit finished();
+    _qry->startSync();	
+	emit finished(_qry);
 }

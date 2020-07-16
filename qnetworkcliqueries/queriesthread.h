@@ -114,12 +114,10 @@ protected:
    int m_equiposConsultados;
    QMutex m_mutex;
    QMap<QString,QString> m_mapOSPFVecinosInterfazDondeVienen;
-   QMap<Queries*,QThread*> m_mapQueriesQThread;
    QueriesConfiguration m_queriesconfiguration;
 
    void _clear();
    void siguienteEquipo(QString ip, bool gw=false);
-   virtual void iniciarQueryThread(Queries *qry,QThread *thr);
 
    void validarYagregarVecinoAconsulta(Queries *qry,
                                        QString ip,
