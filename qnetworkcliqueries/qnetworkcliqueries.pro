@@ -46,7 +46,8 @@ HEADERS += \
     Huawei/macinfohuawei.h \
     Huawei/ospfinfohuawei.h \
     RAD/macinforad.h \
-    base/config.h \    
+	base/config.h \
+	queriesthreadworker.h \
     Cisco/arpinfocisco.h \
     Huawei/arpinfohuawei.h \
     qnetworkcliqueries_global.h
@@ -83,7 +84,8 @@ SOURCES += \
     Huawei/macinfohuawei.cpp \
     Huawei/ospfinfohuawei.cpp \
     RAD/macinforad.cpp \
-    base/config.cpp \    
+	base/config.cpp \
+	queriesthreadworker.cpp \
     Cisco/arpinfocisco.cpp \
     Huawei/arpinfohuawei.cpp
 

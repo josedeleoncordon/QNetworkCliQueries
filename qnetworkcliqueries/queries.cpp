@@ -2,6 +2,7 @@
 
 #include <QThread>
 #include <QEventLoop>
+#include <QMetaMethod>
 
 #include "funciones.h"
 #include "factory.h"
@@ -46,6 +47,7 @@ Queries::~Queries()
 void Queries::iniciar()
 {    
     term = nullptr;
+    m_disconnectWhenFinished=true;
 
     pi = nullptr;
     equipmentNeighborsInfoQuery = nullptr;
@@ -1180,6 +1182,8 @@ void Queries::nextProcess()
 
 void Queries::startSync() //Sync
 {
+    qDebug() << m_ip << "Queries::startSync() thr" << thread();
+
     disconnect(); //desconectamos todas las señales antes configuradas
     QEventLoop loop;
     connect(this, SIGNAL(finished(Queries*)), &loop, SLOT(quit()));
@@ -1189,7 +1193,7 @@ void Queries::startSync() //Sync
 
 void Queries::start() //ASync
 {
-    qDebug() << "Queries::start() thr" << thread();
+    qDebug() << m_ip << "Queries::start() thr" << thread();
 
     if ( m_lstOpciones.isEmpty() )
     {
@@ -1383,10 +1387,19 @@ void Queries::on_queryTimer_timeout()
 }
 
 void Queries::_finalizar()
-{
-    emit finished(this);
+{   
+    static const QMetaMethod finishedSignal = QMetaMethod::fromSignal(&Queries::finished);
+
+    qCDebug(queries) << m_ip  << "Queries::_finalizar()" << m_ip
+                     << "signal isconnected" << isSignalConnected( finishedSignal );
+
+    qDebug() << "dumpObjectInfo" << m_ip;
+    dumpObjectInfo();
+
     m_queriesconfiguration.clear();
-    disconnect();
+    emit finished(this);    
+    if ( m_disconnectWhenFinished )
+        disconnect();
 }
 
 QMap<QString,QString> Queries::queriesArgumentosAceptados()
@@ -1622,6 +1635,22 @@ void Queries::updateInfoQueries(QList<Queries> &lstDest, QList<Queries> &lstOrig
         if ( !encontrado )
             lstDest.append( origin );
     }
+}
+
+void Queries::connectNotify(const QMetaMethod &signal)
+{
+    qCDebug(queries) << m_ip << "Queries::connectNotify"
+                     << signal.typeName()
+                     << signal.isValid()
+                     << signal.name();
+}
+
+void Queries::disconnectNotify(const QMetaMethod &signal)
+{
+    qCDebug(queries) << m_ip << "Queries::disconnectNotify"
+                     << signal.typeName()
+                     << signal.isValid()
+                     << signal.name();
 }
 
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Queries& query)

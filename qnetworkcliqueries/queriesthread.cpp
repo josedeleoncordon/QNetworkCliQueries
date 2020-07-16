@@ -2,6 +2,7 @@
 #include "funciones.h"
 #include "properties.h"
 #include "qnetworkquerieslogging.h"
+#include "queriesthreadworker.h"
 
 #include <QEventLoop>
 
@@ -163,14 +164,20 @@ void QueriesThread::on_timer_timeOut()
 
 void QueriesThread::siguienteEquipo(QString ip, bool gw)
 {
-    qCDebug(queriesthread) << ip << "QueriesThread::siguienteEquipo()" << "GW" << gw;
+    qCDebug(queriesthread) << ip << "QueriesThread::siguienteEquipo()"
+                           << "GW" << gw
+                           << "m_consultarVecinosOSPFMismoDominio" << m_consultarVecinosOSPFMismoDominio;
 
     Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);    
     query->setCountry( m_grupo );
     if ( gw )
         query->setGW( m_gw );
     if ( m_consultarVecinosOSPFMismoDominio )
+    {
+        qCDebug(queriesthreadNeighbors) << ip << "Nuevo Query, agregando ip o interfaz donde viene:"
+                                        << m_mapOSPFVecinosInterfazDondeVienen.value( ip );
         query->setIpOInterfazMismoDominioOSPFDondeSeViene( m_mapOSPFVecinosInterfazDondeVienen.value( ip ) );
+    }
     query->setConnectionProtocol( m_connectionprotocol );
     query->setUser2( m_user2 );
     query->setPassword2( m_pwd2 );
@@ -212,7 +219,18 @@ void QueriesThread::iniciarQueryThread(Queries *query, QThread *thr)
 
 void QueriesThread::equipoConsultado(Queries *qry)
 {
+    //para que esten en el log del equipo y el general
+    qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado equipo finalizado"
+             << qry->hostName();
+    qCDebug(queriesthread) << "QueriesThread::equipoConsultado Equipo consultado exitosamente"
+             << qry->ip() << qry->hostName();
+
     QMutexLocker locker(&m_mutex);
+
+    qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado equipo finalizado 22222"
+             << qry->hostName();
+    qCDebug(queriesthread) << "QueriesThread::equipoConsultado Equipo consultado exitosamente 22222"
+             << qry->ip() << qry->hostName();
 
     if ( m_cancelar )
         return;
@@ -400,33 +418,50 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                                                    QString interfazEsteEquipoSalida,
                                                    QString interfazSiguienteEquipoEntrada)
 {
+    qCDebug(queriesthreadNeighbors) << qry->ip() << "QueriesThread::validarYagregarVecinoAconsulta"
+                                    << "ip" << ip
+                                    << "ipOinterfazDondeSeViene" << ipOinterfazDondeSeViene
+                                    << "interfazEsteEquipoSalida" << interfazEsteEquipoSalida
+                                    << "interfazSiguienteEquipoEntrada" << interfazSiguienteEquipoEntrada
+                                    << "ospf area" << m_consultaOSPFArea
+                                    << "m_consultarVecinosOSPFMismoDominio" << m_consultarVecinosOSPFMismoDominio
+                                    << "m_soloequiposnuevos" << m_soloequiposnuevos
+                                    << "\n";
+
     //que no este en el listado actual a consultar
     //no pasa si solo equipos nuevos y ya esta en el listado de anteriores
     if ( !m_lstIP.contains(ip) &&
          !( m_soloequiposnuevos && lstIPsConsultaAnterior.contains( ip ) ) )
     {
         //que este en el listado de segmentos de links
-        for ( QString segmento : m_lstLinksEnSegmentos )
+        if ( !m_lstLinksEnSegmentos.isEmpty() )
         {
             bool encontrado=false;
-            if ( validarIPperteneceAsegmento( qry->interfacesIpAddressesQuery->ipFromInterfaz( interfazEsteEquipoSalida ),
-                                              segmento) )
+            for ( QString segmento : m_lstLinksEnSegmentos )
             {
-                encontrado=true;
-                break;
+                bool encontrado=false;
+                if ( validarIPperteneceAsegmento( qry->interfacesIpAddressesQuery->ipFromInterfaz( interfazEsteEquipoSalida ),
+                                                  segmento) )
+                {
+                    encontrado=true;
+                    break;
+                }
             }
             if ( !encontrado )
                 return;
         }
 
         //que este en el listado de segmentos de loopbacks
-        for ( QString segmento : m_lstLoopbacksEnSegmentos )
+        if ( !m_lstLoopbacksEnSegmentos.isEmpty() )
         {
             bool encontrado=false;
-            if ( validarIPperteneceAsegmento( ip,segmento) )
+            for ( QString segmento : m_lstLoopbacksEnSegmentos )
             {
-                encontrado=true;
-                break;
+                if ( validarIPperteneceAsegmento( ip,segmento) )
+                {
+                    encontrado=true;
+                    break;
+                }
             }
             if ( !encontrado )
                 return;
@@ -442,12 +477,22 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                     return;
         }
 
-        //ospf mismo dominio
+        //ospf mismo dominio        
         if ( m_consultarVecinosOSPFMismoDominio )
         {
-            if ( ipOinterfazDondeSeViene.isEmpty() && !m_consultarVecinosOSPFEquipoRaizProceso.isEmpty() )
+            if ( interfazSiguienteEquipoEntrada.isEmpty() )
             {
+                qCDebug(queriesthreadNeighbors) << qry->ip()
+                                                << "Activada consulta OSPF mismo dominio pero no se tiene interfazSiguienteEquipoEntrada. Si viene de OSPF hay que agregar a la consulta las IPs de las interfaces";
+                return;
+            }
+
+            if ( ipOinterfazDondeSeViene.isEmpty() && !m_consultarVecinosOSPFEquipoRaizProceso.isEmpty() )
+            {                
                 //equipo raiz y se establecio proceso de ospf. Solo las interfaces que pertenecen a ese proceso se recoreran
+
+                qCDebug(queriesthreadNeighbors) << qry->ip()
+                                                << "m_consultarVecinosOSPFMismoDominio. Se establecio Proceso inicial y es primer equipo";
 
                 QString interfazHaciaSiguienteEquipo = interfaceToPortChannelInterface(qry->portChannelInfo(),
                                                                                        interfazEsteEquipoSalida,
@@ -459,19 +504,25 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                             return;
                 }
             }
-            else if ( !continuarPorsiguienteInterfazMismoDominioOSPF( *qry,
+            else
+            {
+                qCDebug(queriesthreadNeighbors) << qry->ip()
+                                                << "m_consultarVecinosOSPFMismoDominio. Verificando si interfaces entrada y salida pertenecen al mismo proceso" << ipOinterfazDondeSeViene << interfazEsteEquipoSalida;
+
+                if ( !continuarPorsiguienteInterfazMismoDominioOSPF( *qry,
                                                                  ipOinterfazDondeSeViene,
                                                                  interfazEsteEquipoSalida ) )
                 return;
+            }
         }
 
         //se agrega al listado de equipos a consultar
         qCDebug(queriesthreadNeighbors) << qry->ip()
-                                        << "Agregando vecino a la consulta" << ip;
+                                        << "Agregando vecino a la consulta" << ip << "interfaz siguiente equipo entrada"
+                                        << interfazSiguienteEquipoEntrada;
         m_lstIP.append( ip );
         m_mapOSPFVecinosInterfazDondeVienen.insert( ip, interfazSiguienteEquipoEntrada );
     }
-    return;
 }
 
 QList<Queries> QueriesThread::lstQueries()

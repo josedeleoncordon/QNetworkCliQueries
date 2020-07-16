@@ -50,13 +50,14 @@ Terminal::Terminal(QString debugIP, QString linuxprompt, QObject *parent) : QObj
     if (result < 0)
     {
         qCDebug(terminal) << _debugIP << "SHELL CRASHED! result: " << result;
+        _shellProcess->deleteLater();
         return;
     }
     _shellProcess->setWriteable(false);  // We are reachable via kwrited.
 }
 
 Terminal::~Terminal()
-{
+{    
     qCDebug(terminal) << _debugIP << "Terminal::~Terminal()";
     delete _timer;
 }
@@ -109,6 +110,7 @@ void Terminal::shellProcess_finished()
 
 void Terminal::close()
 {            
+    qCDebug(terminal) << _debugIP << "Terminal::close()";
     //_shellProcess emitira finished y se ejecutara shellProcess_finished()
 
     _shellProcess->close();

@@ -9,6 +9,8 @@
 #include <QDir>
 #include <QDirIterator>
 
+#include "qnetworkquerieslogging.h"
+
 QStringList lstGrupos()
 {
     QStringList lstGrupos;
@@ -792,10 +794,12 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
                                                    QString interfazSiguienteEquipo )
 {
     if ( interfazOipDondeViene.isEmpty() ) //primer equipo
+    {
+        qCDebug(queriesthreadNeighbors) << q.ip() << "Primer equipo. Se agrega";
         return true;
+    }
 
-    qDebug() << "continuarPorsiguienteInterfazMismoDominioOSPF" << interfazOipDondeViene << interfazSiguienteEquipo;
-
+    qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF" << interfazOipDondeViene << interfazSiguienteEquipo;
 
     QString ospfProceso;
     QString interfazDeDondeSeViene;
@@ -817,7 +821,8 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
 
         if ( interfazDeDondeSeViene.isEmpty() )
         {
-            qDebug() << "continuarPorsiguienteInterfazMismoDominioOSPF: No se encontro la interfaz de donde se viene";
+            //no se encontro la interfaz por medio de la ip
+            qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF: No se encontro la interfaz de donde se viene";
             return false;
         }
     }
@@ -825,7 +830,7 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
     //buscamos el proceso de la interfaz de donde se viene
     interfazDeDondeSeViene = interfaceToPortChannelInterface(q.portChannelInfo(),
                                                              interfazDeDondeSeViene,
-                                                             q.platform());
+                                                             q.platform());       
 
     for ( SOSPFInfo &oi : q.ospfInfo() )
     {
@@ -838,7 +843,7 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
 
     if ( ospfProceso.isEmpty() )
     {
-        qDebug() << "continuarPorsiguienteInterfazMismoDominioOSPF: no se encuentra proceso de la interfaz de donde se viene";
+        qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF: no se encuentra proceso de la interfaz de donde se viene";
         return false;
     }
 
@@ -847,20 +852,24 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
                                                               interfazSiguienteEquipo,
                                                               q.platform());
 
+    qCDebug(queriesthreadNeighbors) << q.ip() << "interfazdedondeseviene" << interfazDeDondeSeViene
+                                    << "interfazSiguienteEquipo" << interfazSiguienteEquipo;
+
     for ( SOSPFInfo &oi : q.ospfInfo() )
     {
         if ( oi.interfaz == interfazSiguienteEquipo )
-        {
+        {            
             if ( ospfProceso == oi.process )
                 return true;
             else
             {
-                qDebug() << "continuarPorsiguienteInterfazMismoDominioOSPF: proceso no es igual del de entrada y salida"
+                qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF: proceso no es igual del de entrada y salida"
                          << interfazDeDondeSeViene << interfazSiguienteEquipo;
                 return false;
             }
         }
     }
 
+    qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF ERROR";
     return false;
 }
