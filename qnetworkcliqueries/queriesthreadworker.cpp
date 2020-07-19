@@ -1,12 +1,17 @@
 #include "queriesthreadworker.h"
 
-QueriesThreadWorker::QueriesThreadWorker(Queries *qry) : QObject(qry)
+QueriesThreadWorker::QueriesThreadWorker()
 {
-    _qry=qry;
+    qry=nullptr;
 }
 
 void QueriesThreadWorker::start()
 {
-    _qry->startSync();	
-	emit finished(_qry);
+    qry->startSync();
+    emit finished(qry);
+}
+
+QueriesThreadWorker *newQueriesThreadWorker()
+{
+    return new QueriesThreadWorker;
 }

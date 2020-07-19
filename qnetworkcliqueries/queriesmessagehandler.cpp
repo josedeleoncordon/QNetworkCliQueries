@@ -2,6 +2,7 @@
 #include <QMutex>
 #include <QDebug>
 #include <QDir>
+#include <QDateTime>
 
 QueriesMessageHandler *QueriesMessageHandler::m_instance = nullptr;
 
@@ -22,6 +23,7 @@ QueriesMessageHandler::QueriesMessageHandler(QString path)
 {
     _path = path;
     _expIP.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+    _expIP.setMinimal(false);
 
     init();
 
@@ -84,7 +86,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
         QStringList data = msg.split(" ",QString::SkipEmptyParts);
         if ( !data.isEmpty() )
         {
-            if ( data.first().contains( _expIP ) )
+            if ( _expIP.exactMatch(data.first().replace("\"","")) )
             {
                 QString ip = data.takeFirst().replace("\"","");
 
@@ -125,7 +127,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
                     _lstLogs.append(ll);
                     l=ll;
                 }
-                *l->ts << data.join(" ") << endl;
+                *l->ts << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") << " " << data.join(" ") << endl;
                 l->ts->flush();
 
                 //cerrando archivo si finalizo la consulta en el equipo

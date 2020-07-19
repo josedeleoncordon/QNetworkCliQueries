@@ -41,16 +41,15 @@ Terminal::Terminal(QString debugIP, QString linuxprompt, QObject *parent) : QObj
 
     _timer->start();
 
-    int result = _shellProcess->start(exec,
+    shellStartResult = _shellProcess->start(exec,
                                       QStringList() << exec,
                                       QStringList() << QLatin1String("COLORFGBG=15;0"),
                                       0,
                                       false);
 
-    if (result < 0)
+    if (shellStartResult < 0)
     {
-        qCDebug(terminal) << _debugIP << "SHELL CRASHED! result: " << result;
-        _shellProcess->deleteLater();
+        qCDebug(terminal) << _debugIP << "SHELL CRASHED! result: " << shellStartResult;
         return;
     }
     _shellProcess->setWriteable(false);  // We are reachable via kwrited.
@@ -111,9 +110,13 @@ void Terminal::shellProcess_finished()
 void Terminal::close()
 {            
     qCDebug(terminal) << _debugIP << "Terminal::close()";
-    //_shellProcess emitira finished y se ejecutara shellProcess_finished()
 
-    _shellProcess->close();
+    if ( shellStartResult < 0 )
+        shellProcess_finished();
+    else
+        //_shellProcess emitira finished y se ejecutara shellProcess_finished()
+        _shellProcess->close();
+
 //    int result = ::kill(_shellProcess->pid(),SIGHUP);
 //    qDebug() << _debugIP << "Terminal::close()";
 }

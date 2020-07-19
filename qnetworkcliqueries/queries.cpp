@@ -47,7 +47,6 @@ Queries::~Queries()
 void Queries::iniciar()
 {    
     term = nullptr;
-    m_disconnectWhenFinished=true;
 
     pi = nullptr;
     equipmentNeighborsInfoQuery = nullptr;
@@ -1393,13 +1392,12 @@ void Queries::_finalizar()
     qCDebug(queries) << m_ip  << "Queries::_finalizar()" << m_ip
                      << "signal isconnected" << isSignalConnected( finishedSignal );
 
-    qDebug() << "dumpObjectInfo" << m_ip;
-    dumpObjectInfo();
+//    qDebug() << "dumpObjectInfo" << m_ip;
+//    dumpObjectInfo();
 
     m_queriesconfiguration.clear();
     emit finished(this);    
-    if ( m_disconnectWhenFinished )
-        disconnect();
+    disconnect();
 }
 
 QMap<QString,QString> Queries::queriesArgumentosAceptados()
@@ -1637,21 +1635,21 @@ void Queries::updateInfoQueries(QList<Queries> &lstDest, QList<Queries> &lstOrig
     }
 }
 
-void Queries::connectNotify(const QMetaMethod &signal)
-{
-    qCDebug(queries) << m_ip << "Queries::connectNotify"
-                     << signal.typeName()
-                     << signal.isValid()
-                     << signal.name();
-}
+//void Queries::connectNotify(const QMetaMethod &signal)
+//{
+//    qCDebug(queries) << m_ip << "Queries::connectNotify"
+//                     << signal.typeName()
+//                     << signal.isValid()
+//                     << signal.name();
+//}
 
-void Queries::disconnectNotify(const QMetaMethod &signal)
-{
-    qCDebug(queries) << m_ip << "Queries::disconnectNotify"
-                     << signal.typeName()
-                     << signal.isValid()
-                     << signal.name();
-}
+//void Queries::disconnectNotify(const QMetaMethod &signal)
+//{
+//    qCDebug(queries) << m_ip << "Queries::disconnectNotify"
+//                     << signal.typeName()
+//                     << signal.isValid()
+//                     << signal.name();
+//}
 
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Queries& query)
 {

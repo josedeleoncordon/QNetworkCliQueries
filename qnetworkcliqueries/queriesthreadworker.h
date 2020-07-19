@@ -8,17 +8,20 @@ class QueriesThreadWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit QueriesThreadWorker(Queries *qry);
+    explicit QueriesThreadWorker();
+    void setQueries(Queries *query) { qry=query; }
 
 public slots:
-    void start();
+    virtual void start();
 
 signals:
     void finished(Queries*);
 
-private:
-    Queries *_qry;
+protected:
+    Queries *qry;
 
 };
+
+QueriesThreadWorker *newQueriesThreadWorker();
 
 #endif // QUERIESTHREADWORKER_H

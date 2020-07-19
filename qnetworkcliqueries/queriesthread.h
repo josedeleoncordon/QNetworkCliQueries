@@ -6,6 +6,7 @@
 #include <QMutex>
 
 #include "queries.h"
+#include "queriesthreadworker.h"
 
 class Host;
 
@@ -38,6 +39,8 @@ public:
     void setEquipmentNeighborsOSPFEquipoRaizProceso(QString proceso) { m_consultarVecinosOSPFEquipoRaizProceso=proceso; }
     void setEquipmentNeighborsRegExpOSPFArea(QString area) { m_consultaOSPFArea=area; }
     void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
+
+    void setNewThreadWorker(QueriesThreadWorker*(*ThreadWorker)(void));
 
     void iniciar();
     void iniciarSync();
@@ -116,8 +119,11 @@ protected:
    QMap<QString,QString> m_mapOSPFVecinosInterfazDondeVienen;
    QueriesConfiguration m_queriesconfiguration;
 
+   QueriesThreadWorker*(*ThreadWorker)(void) = nullptr;
+
    void _clear();
-   void siguienteEquipo(QString ip, bool gw=false);
+//   QueriesThreadWorker *newThreadWorker();
+   void siguienteEquipo(QString ip, bool gw=false);   
 
    void validarYagregarVecinoAconsulta(Queries *qry,
                                        QString ip,

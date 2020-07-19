@@ -2,7 +2,6 @@
 #include "funciones.h"
 #include "properties.h"
 #include "qnetworkquerieslogging.h"
-#include "queriesthreadworker.h"
 
 #include <QEventLoop>
 
@@ -48,6 +47,7 @@ void QueriesThread::_clear()
     m_errorMap.clear();
     m_mapOSPFVecinosInterfazDondeVienen.clear();
     m_lstIPsAintentarPorGW.clear();
+    ThreadWorker = &newQueriesThreadWorker;
     if ( m_timer )
     {
         delete m_timer;
@@ -65,6 +65,11 @@ void QueriesThread::setOptions(QList<QueryOpcion> opciones)
     opciones.removeAll( QueryOpcion::Null ); //unicamente opciones validas
     m_opciones = opciones;
     _clear();
+}
+
+void QueriesThread::setNewThreadWorker(QueriesThreadWorker*(*threadworker)(void))
+{
+    ThreadWorker = threadworker;
 }
 
 void QueriesThread::iniciar()
@@ -162,6 +167,11 @@ void QueriesThread::on_timer_timeOut()
     }
 }
 
+//QueriesThreadWorker *QueriesThread::newThreadWorker()
+//{
+//    return new QueriesThreadWorker;
+//}
+
 void QueriesThread::siguienteEquipo(QString ip, bool gw)
 {
     qCDebug(queriesthread) << ip << "QueriesThread::siguienteEquipo()"
@@ -190,32 +200,25 @@ void QueriesThread::siguienteEquipo(QString ip, bool gw)
     m_equiposenconsulta.append( ip );
     m_queriesenconsulta.append( query );
 
-    QThread *thr = new QThread(this);
-    QueriesThreadWorker *worker = new QueriesThreadWorker( query );
+    QThread *thr = new QThread;
+    QueriesThreadWorker *worker = (*ThreadWorker)();
+    worker->setQueries(query);
+
     worker->moveToThread( thr );
+    query->moveToThread( thr );
 
     connect(thr,SIGNAL(started()),worker,SLOT( start()) );
     connect(worker,SIGNAL(finished(Queries*)),SLOT(equipoConsultado(Queries*)),Qt::QueuedConnection);
     connect(worker,SIGNAL(finished(Queries*)),thr,SLOT(quit()));
     connect(thr,SIGNAL(finished()),thr,SLOT(deleteLater()));
+    connect(thr,SIGNAL(finished()),worker,SLOT(deleteLater()));
 
     thr->start();
 }
 
 void QueriesThread::equipoConsultado(Queries *qry)
 {
-    //para que esten en el log del equipo y el general
-    qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado equipo finalizado"
-             << qry->hostName();
-    qCDebug(queriesthread) << "QueriesThread::equipoConsultado Equipo consultado exitosamente"
-             << qry->ip() << qry->hostName();
-
     QMutexLocker locker(&m_mutex);
-
-    qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado equipo finalizado 22222"
-             << qry->hostName();
-    qCDebug(queriesthread) << "QueriesThread::equipoConsultado Equipo consultado exitosamente 22222"
-             << qry->ip() << qry->hostName();
 
     if ( m_cancelar )
         return;
@@ -504,6 +507,9 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                                         << interfazSiguienteEquipoEntrada;
         m_lstIP.append( ip );
         m_mapOSPFVecinosInterfazDondeVienen.insert( ip, interfazSiguienteEquipoEntrada );
+
+        qCDebug(queriesthreadNeighbors) << qry->ip()
+                                        << "Se agrego al listado. Queda asi" << m_lstIP;
     }
 }
 

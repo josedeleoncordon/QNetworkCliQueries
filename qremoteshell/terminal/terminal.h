@@ -17,6 +17,7 @@ private:
     bool _ready;
     QTimer *_timer;   
     QString m_linuxprompt;
+    int shellStartResult;
 
     QString _debugIP; //unicamente para separar el debug por IP
 

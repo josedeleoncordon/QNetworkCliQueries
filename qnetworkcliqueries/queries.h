@@ -121,7 +121,6 @@ public:
     void setCountry(QString COUNTRY) { m_country = COUNTRY; }
     void setIP(QString IP) { m_ip = IP; }
     void setHostName(QString NAME) { m_name = NAME; }
-    void setDisconnectSingalSlotsWhenFinished(bool enabled) { m_disconnectWhenFinished=enabled; }
     void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }        
     void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; }
     void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
@@ -233,8 +232,8 @@ protected:
     void borrarTerminal();
     void crearFuncionesFaltantes();
 
-    void connectNotify(const QMetaMethod &signal);
-    void disconnectNotify(const QMetaMethod &signal);
+//    void connectNotify(const QMetaMethod &signal);
+//    void disconnectNotify(const QMetaMethod &signal);
 
 private:
     void clone(const Queries& other);
