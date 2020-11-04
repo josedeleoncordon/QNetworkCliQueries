@@ -68,7 +68,7 @@ void updateInfoList(QList<SPIMInfo> &lstDest, QList<SPIMInfo> &lstOrigin )
     }
 }
 
-PIMInfo::PIMInfo(QRemoteShell *terminal, QueryOpcion option):
+PIMInfo::PIMInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {}
 

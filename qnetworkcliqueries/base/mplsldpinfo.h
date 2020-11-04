@@ -26,7 +26,7 @@ protected:
 
 public:
     MplsLdpInfo() {}
-    MplsLdpInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    MplsLdpInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     MplsLdpInfo(const MplsLdpInfo &other);
     ~MplsLdpInfo();
     virtual void getMplsLdpDiscovery();

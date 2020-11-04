@@ -7,7 +7,7 @@ class QNETWORKCLIQUERIES_EXPORT MacInfoCisco : public MacInfo
 {
     Q_OBJECT
 public:
-    MacInfoCisco(QRemoteShell *terminal,QueryOpcion option=QueryOpcion::Null);
+    MacInfoCisco(QRemoteShell *terminal,int option=QueryOpcion::Null);
     MacInfoCisco(const MacInfoCisco &other);
     ~MacInfoCisco();
     void getMacInfo();

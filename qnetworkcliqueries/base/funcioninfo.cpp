@@ -1,6 +1,6 @@
 #include "funcioninfo.h"
 
-FuncionInfo::FuncionInfo(QRemoteShell *terminal, QueryOpcion option):
+FuncionInfo::FuncionInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {}
 

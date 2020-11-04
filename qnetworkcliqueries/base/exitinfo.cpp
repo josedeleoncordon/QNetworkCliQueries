@@ -1,7 +1,7 @@
 #include "exitinfo.h"
 #include "properties.h"
 
-ExitInfo::ExitInfo(QRemoteShell *terminal, QueryOpcion option):
+ExitInfo::ExitInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
     m_gw = false;

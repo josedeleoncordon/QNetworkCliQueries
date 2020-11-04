@@ -216,7 +216,7 @@ void updateInfoList(QList<SMplsL2VFIInfo> &lstDest, QList<SMplsL2VFIInfo> &lstOr
     }
 }
 
-MplsL2TransportInfo::MplsL2TransportInfo(QRemoteShell *terminal, QueryOpcion option):
+MplsL2TransportInfo::MplsL2TransportInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
 }

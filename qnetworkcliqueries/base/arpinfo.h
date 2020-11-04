@@ -30,7 +30,7 @@ protected:
 
 public:
     ArpInfo() {}
-    ArpInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    ArpInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     ArpInfo(const ArpInfo &other);
     ~ArpInfo();    
     virtual void getArpInfo();

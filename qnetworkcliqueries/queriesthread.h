@@ -33,7 +33,7 @@ public:
     void setInterval(int interval) { m_interval = interval; }
     void setSimultaneos(int simultaneos) { m_simultaneos = simultaneos; }
     void setMaxParalelos(int max) { m_maxparalelos = max; }
-    void setOptions(QList<QueryOpcion> opciones);
+    void setOptions(QList<int> opciones);
     void setEquipmentNeighborsConsultarVecinos(bool consultar) { m_equipmentNeighborsConsultarVecinos=consultar; }
     void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
     void setEquipmentNeighborsOSPFEquipoRaizProceso(QString proceso) { m_consultarVecinosOSPFEquipoRaizProceso=proceso; }
@@ -85,7 +85,7 @@ protected:
    QStringList lstIPsConsultaAnterior;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;
    int m_lstIpPos;
-   QList<QueryOpcion> m_opciones;
+   QList<int> m_opciones;
    int m_simultaneos; //cantidad de equipos se suman al mismo tiempo al grupo,
    QStringList m_equiposenconsulta;
    QStringList m_lstLinksEnSegmentos;

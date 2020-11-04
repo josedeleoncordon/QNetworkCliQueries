@@ -55,7 +55,7 @@ void ConsultaEquipos::setLstQ(LstQueries &lQ)
         lstIPAnteriores.append( q.ip() );
 }
 
-void ConsultaEquipos::addOpcionesConsulta(QList<QueryOpcion> lst)
+void ConsultaEquipos::addOpcionesConsulta(QList<int> lst)
 {
 	lst.removeAll( QueryOpcion::Null ); //unicamente opciones validas
 	opciones.append( lst );

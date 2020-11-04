@@ -88,7 +88,7 @@ void updateInfoList(QList<SOSPFInfo> &lstDest, QList<SOSPFInfo> &lstOrigin )
     }
 }
 
-OSPFInfo::OSPFInfo(QRemoteShell *terminal, QueryOpcion option):
+OSPFInfo::OSPFInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
     m_process = 0;    

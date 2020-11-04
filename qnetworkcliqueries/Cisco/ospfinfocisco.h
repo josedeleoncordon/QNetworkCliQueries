@@ -9,7 +9,7 @@ class QNETWORKCLIQUERIES_EXPORT OSPFInfoCisco : public OSPFInfo
 private:
     bool m_XRconsultaVRFs;
 public:
-    OSPFInfoCisco(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    OSPFInfoCisco(QRemoteShell *terminal, int option=QueryOpcion::Null);
     OSPFInfoCisco(const OSPFInfoCisco &other);
     ~OSPFInfoCisco();
     void getOSPFInfo();

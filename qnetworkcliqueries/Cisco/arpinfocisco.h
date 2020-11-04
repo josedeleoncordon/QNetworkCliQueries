@@ -11,7 +11,7 @@ private:
     void m_siguienteVRF();
 
 public:
-    ArpInfoCisco(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    ArpInfoCisco(QRemoteShell *terminal, int option=QueryOpcion::Null);
     ArpInfoCisco(const ArpInfoCisco &other);
     ~ArpInfoCisco();
     virtual void getArpInfo();      

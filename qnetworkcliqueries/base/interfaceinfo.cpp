@@ -249,7 +249,7 @@ void updateInfoList(QList<SInterfaceIOSServiceInstanceInfo> &lstDest, QList<SInt
     }
 }
 
-InterfaceInfo::InterfaceInfo(QRemoteShell *terminal, QueryOpcion option):
+InterfaceInfo::InterfaceInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
     m_InterfacesInfo_onlyPhysicalInterfaces=true;

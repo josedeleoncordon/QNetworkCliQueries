@@ -79,7 +79,7 @@ void updateInfoList(QList<SIpRouteInfo> &lstDest, QList<SIpRouteInfo> &lstOrigin
     }
 }
 
-IPRouteInfo::IPRouteInfo(QRemoteShell *terminal, QueryOpcion option):
+IPRouteInfo::IPRouteInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
     m_vrfsPos=-1;

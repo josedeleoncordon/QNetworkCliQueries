@@ -1,6 +1,6 @@
 #include "arpinfohuawei.h"
 
-ArpInfoHuawei::ArpInfoHuawei(QRemoteShell *terminal, QueryOpcion option):
+ArpInfoHuawei::ArpInfoHuawei(QRemoteShell *terminal, int option):
     ArpInfo(terminal,option)
 {}
 

@@ -68,7 +68,7 @@ void updateInfoList(QList<SVrfInfo> &lstDest, QList<SVrfInfo> &lstOrigin )
     }
 }
 
-VrfInfo::VrfInfo(QRemoteShell *terminal, QueryOpcion option):
+VrfInfo::VrfInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {}
 

@@ -24,7 +24,7 @@ protected:
     QList<SPortChannel> lstInfo;
 public:
     PortChannelsInfo() {}
-    PortChannelsInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    PortChannelsInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     PortChannelsInfo(const PortChannelsInfo &other);
     ~PortChannelsInfo();
     virtual void getPortChannelsInfo();

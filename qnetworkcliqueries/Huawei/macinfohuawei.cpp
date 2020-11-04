@@ -1,7 +1,7 @@
 #include "macinfohuawei.h"
 #include "funciones.h"
 
-MacInfoHuawei::MacInfoHuawei(QRemoteShell *terminal, QueryOpcion option):
+MacInfoHuawei::MacInfoHuawei(QRemoteShell *terminal, int option):
     MacInfo(terminal,option)
 {
 }

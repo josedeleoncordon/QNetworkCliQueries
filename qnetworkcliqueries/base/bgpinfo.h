@@ -54,7 +54,7 @@ protected:
 
 public:
     BGPInfo() {}
-    BGPInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    BGPInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     BGPInfo(const BGPInfo &other);
 
     virtual void getBGPNeighbors();

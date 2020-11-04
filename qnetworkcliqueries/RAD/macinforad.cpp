@@ -1,7 +1,7 @@
 #include "macinforad.h"
 #include "funciones.h"
 
-MacInfoRAD::MacInfoRAD(QRemoteShell *terminal, QueryOpcion option):
+MacInfoRAD::MacInfoRAD(QRemoteShell *terminal, int option):
     MacInfo(terminal,option)
 {
     etxTimer = nullptr;

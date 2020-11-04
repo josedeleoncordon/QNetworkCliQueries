@@ -68,7 +68,7 @@ void updateInfoList(QList<SPortChannel> &lstDest, QList<SPortChannel> &lstOrigin
     }
 }
 
-PortChannelsInfo::PortChannelsInfo(QRemoteShell *terminal, QueryOpcion option):
+PortChannelsInfo::PortChannelsInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {}
 

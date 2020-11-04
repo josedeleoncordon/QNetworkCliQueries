@@ -1,7 +1,7 @@
 #include "macinfocisco.h"
 #include "funciones.h"
 
-MacInfoCisco::MacInfoCisco(QRemoteShell *terminal, QueryOpcion option):
+MacInfoCisco::MacInfoCisco(QRemoteShell *terminal, int option):
     MacInfo(terminal,option)
 {
     m_consultarXconnect=false;    

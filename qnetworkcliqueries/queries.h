@@ -83,8 +83,8 @@ public:
     QString& ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; }
     QueriesConfiguration queriesConfiguration() { return m_queriesconfiguration; }
 
-    bool existsQueryInformation(QueryOpcion option,int i=1);
-    FuncionBase *getQuery(QueryOpcion option,int i=1);
+    bool existsQueryInformation(int option,int i=1);
+    FuncionBase *getQuery(int option,int i=1);
 
     QList<SEquipmentNeighborsInfo>& equipmentNeighborsInfo(int i=1);
     QList<SInterfaceInfo>& interfacesInfo(int i=1);
@@ -116,7 +116,7 @@ public:
     void updateDate() { m_datetime = QDateTime::currentDateTime(); }
     void setKeepAlive(bool enable);
     void setRemoteShell(QRemoteShell *remoteShell) { term = remoteShell; }
-    void setOptions( QList<QueryOpcion> lst );
+    void setOptions( QList<int> lst );
     void setOperativo(bool OPERATIVO) { m_operativo = OPERATIVO; }
     void setCountry(QString COUNTRY) { m_country = COUNTRY; }
     void setIP(QString IP) { m_ip = IP; }
@@ -164,8 +164,8 @@ signals:
 
 protected:
     QRemoteShell *term;
-    QList<QueryOpcion> m_lstOpciones;
-    QueryOpcion m_opcionActual;
+    QList<int> m_lstOpciones;
+    int m_opcionActual;
     QList<FuncionBase*> m_lstFunciones;
     FuncionBase *m_currentFuncion;
 
@@ -226,7 +226,7 @@ protected:
     QList<SIpRouteInfo> _lstSIpRouteInfo;
 
     void iniciar();
-    FuncionBase* createQuerie(QueryOpcion option);
+    FuncionBase* createQuerie(int option);
     void conectarAequipo(QString ip, QString user, QString pwd, QString platform, QString linuxprompt);
     void nextProcess();    
     void borrarTerminal();
@@ -249,7 +249,7 @@ public:
     bool isEmpty();
 
     QString grupo;
-    QList<QueryOpcion> opcionesConsulta;
+    QList<int> opcionesConsulta;
     QString gw;
     QList<Queries> lstQueries;
     QStringList lstIPsAconsultadas;

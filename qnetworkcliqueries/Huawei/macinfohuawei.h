@@ -7,7 +7,7 @@ class MacInfoHuawei : public MacInfo
 {
     Q_OBJECT
 public:
-    MacInfoHuawei(QRemoteShell *terminal,QueryOpcion option=QueryOpcion::Null);
+    MacInfoHuawei(QRemoteShell *terminal,int option=QueryOpcion::Null);
     MacInfoHuawei(const MacInfoHuawei &other);
     ~MacInfoHuawei();
     void getMacInfo();

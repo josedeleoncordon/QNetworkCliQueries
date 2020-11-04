@@ -103,7 +103,7 @@ QNETWORKCLIQUERIES_EXPORT const QDBusArgument& operator>>(const QDBusArgument& a
     return argument;
 }
 
-BGPInfo::BGPInfo(QRemoteShell *terminal, QueryOpcion option):
+BGPInfo::BGPInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
 }

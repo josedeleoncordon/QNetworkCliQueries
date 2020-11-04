@@ -148,7 +148,7 @@ FuncionBase::FuncionBase()
     init();
 }
 
-FuncionBase::FuncionBase(QRemoteShell *terminal, QueryOpcion option)
+FuncionBase::FuncionBase(QRemoteShell *terminal, int option)
 {
     init();
     m_queryoption=option;

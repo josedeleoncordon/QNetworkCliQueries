@@ -60,7 +60,7 @@ void QueriesThread::_clear()
     }
 }
 
-void QueriesThread::setOptions(QList<QueryOpcion> opciones)
+void QueriesThread::setOptions(QList<int> opciones)
 {
     opciones.removeAll( QueryOpcion::Null ); //unicamente opciones validas
     m_opciones = opciones;

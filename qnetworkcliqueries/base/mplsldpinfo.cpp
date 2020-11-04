@@ -68,7 +68,7 @@ void updateInfoList(QList<SMplsLdpInfo> &lstDest, QList<SMplsLdpInfo> &lstOrigin
     }
 }
 
-MplsLdpInfo::MplsLdpInfo(QRemoteShell *terminal, QueryOpcion option):
+MplsLdpInfo::MplsLdpInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {}
 

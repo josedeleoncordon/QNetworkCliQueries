@@ -1,6 +1,6 @@
 #include "arpinfocisco.h"
 
-ArpInfoCisco::ArpInfoCisco(QRemoteShell *terminal, QueryOpcion option):
+ArpInfoCisco::ArpInfoCisco(QRemoteShell *terminal, int option):
     ArpInfo(terminal,option)
 {}
 

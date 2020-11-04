@@ -9,7 +9,7 @@
 #include "RAD/macinforad.h"
 #include "funciones.h"
 
-ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     Q_UNUSED( type )
 
@@ -21,32 +21,32 @@ ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, 
         return new ArpInfo(term,option);
 }
 
-BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new BGPInfo(term,option);
 }
 
-BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new BGPInfo(term,option);
 }
 
-EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new EquipmentNeighborsInfo(term,option);
 }
 
-InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {  
     return new InterfaceInfo(term,option);
 }
 
-IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new IPRouteInfo(term,option);
 }
 
-MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     Q_UNUSED( type )
 
@@ -60,26 +60,26 @@ MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, 
         return new MacInfo(term,option);
 }
 
-MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     Q_UNUSED( type )
 
     return new MplsTEtunnelsInfo(term,option);
 }
 
-MplsL2TransportInfo *factoryNewMplsL2TransportInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+MplsL2TransportInfo *factoryNewMplsL2TransportInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     Q_UNUSED( type )
 
     return new MplsL2TransportInfo(term,option);
 }
 
-MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new MplsLdpInfo(term,option);
 }
 
-OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     Q_UNUSED( type )
 
@@ -91,32 +91,32 @@ OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term
         return new OSPFInfo(term,option);
 }
 
-PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new PIMInfo(term,option);
 }
 
-PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new PortChannelsInfo(term,option);
 }
 
-VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new VrfInfo(term,option);
 }
 
-Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new Config(term,option);
 }
 
-FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new FuncionInfo(term,option);
 }
 
-ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, QueryOpcion option)
+ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new ExitInfo(term,option);
 }

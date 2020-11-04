@@ -1,6 +1,6 @@
 #include "ospfinfocisco.h"
 
-OSPFInfoCisco::OSPFInfoCisco(QRemoteShell *terminal, QueryOpcion option):
+OSPFInfoCisco::OSPFInfoCisco(QRemoteShell *terminal, int option):
     OSPFInfo(terminal,option)
 {
     m_XRconsultaVRFs=false;

@@ -7,7 +7,7 @@ class QNETWORKCLIQUERIES_EXPORT OSPFInfoHuawei : public OSPFInfo
 {
     Q_OBJECT
 public:
-    OSPFInfoHuawei(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    OSPFInfoHuawei(QRemoteShell *terminal, int option=QueryOpcion::Null);
     OSPFInfoHuawei(const OSPFInfoHuawei &other);
     ~OSPFInfoHuawei();
     void getOSPFInfo();

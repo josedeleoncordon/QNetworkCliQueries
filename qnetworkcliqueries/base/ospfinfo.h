@@ -36,7 +36,7 @@ protected:
 
 public:
     OSPFInfo() {}
-    OSPFInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    OSPFInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     OSPFInfo(const OSPFInfo &other);
     ~OSPFInfo();
     void setProcess(int p) { m_process = p; }

@@ -89,7 +89,7 @@ void updateInfoList(QList<SMacInfo> &lstDest, QList<SMacInfo> &lstOrigin )
     }
 }
 
-MacInfo::MacInfo(QRemoteShell *terminal, QueryOpcion option):
+MacInfo::MacInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {}
 

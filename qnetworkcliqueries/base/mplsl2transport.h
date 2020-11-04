@@ -64,7 +64,7 @@ protected:
 
 public:
     MplsL2TransportInfo() {}
-    MplsL2TransportInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    MplsL2TransportInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     MplsL2TransportInfo(const MplsL2TransportInfo &other);
     ~MplsL2TransportInfo();
     void getMplsL2Transport();

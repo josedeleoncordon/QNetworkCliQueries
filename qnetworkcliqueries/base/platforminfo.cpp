@@ -1,7 +1,7 @@
 #include "platforminfo.h"
 #include "properties.h"
 
-PlatformInfo::PlatformInfo(QRemoteShell *terminal, QueryOpcion option):
+PlatformInfo::PlatformInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
 }

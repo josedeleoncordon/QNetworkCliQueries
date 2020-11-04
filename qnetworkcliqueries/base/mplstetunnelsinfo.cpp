@@ -57,7 +57,7 @@ void updateInfoList(QList<SMplsTETunnelInfo> &lstDest, QList<SMplsTETunnelInfo> 
     lstDest = lstOrigin;
 }
 
-MplsTEtunnelsInfo::MplsTEtunnelsInfo(QRemoteShell *terminal, QueryOpcion option):
+MplsTEtunnelsInfo::MplsTEtunnelsInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
 }

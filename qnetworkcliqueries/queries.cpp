@@ -266,7 +266,7 @@ void Queries::clone(const Queries& other)
     }
 }
 
-FuncionBase *Queries::createQuerie(QueryOpcion option)
+FuncionBase *Queries::createQuerie(int option)
 {
      qCDebug(queries) << m_ip  << "Queries::createQuerie" << option;
 
@@ -431,7 +431,7 @@ void Queries::crearFuncionesFaltantes()
     }
 }
 
-void Queries::setOptions( QList<QueryOpcion> lst )
+void Queries::setOptions(QList<int> lst )
 {
     lst.removeAll( QueryOpcion::Null ); //unicamente opciones validas
     m_lstOpciones = lst;
@@ -473,12 +473,12 @@ void Queries::borrarTerminal()
     }
 }
 
-bool Queries::existsQueryInformation(QueryOpcion option, int i)
+bool Queries::existsQueryInformation(int option, int i)
 {
     return getQuery(option,i);
 }
 
-FuncionBase *Queries::getQuery(QueryOpcion option,int i)
+FuncionBase *Queries::getQuery(int option,int i)
 {
     int c=1;
     for ( FuncionBase *f : m_lstFunciones )

@@ -11,7 +11,7 @@ protected:
     void m_siguienteVRF();
 
 public:
-    ArpInfoHuawei(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    ArpInfoHuawei(QRemoteShell *terminal, int option=QueryOpcion::Null);
     ArpInfoHuawei(const ArpInfoHuawei &other);
     ~ArpInfoHuawei();
     virtual void getArpInfo();

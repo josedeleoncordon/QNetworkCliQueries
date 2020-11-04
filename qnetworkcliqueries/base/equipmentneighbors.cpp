@@ -89,7 +89,7 @@ void updateInfoList(QList<SEquipmentNeighborsInfo> &lstDest, QList<SEquipmentNei
     }
 }
 
-EquipmentNeighborsInfo::EquipmentNeighborsInfo(QRemoteShell *terminal, QueryOpcion option):
+EquipmentNeighborsInfo::EquipmentNeighborsInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {}
 

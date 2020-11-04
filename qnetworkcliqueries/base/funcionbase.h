@@ -30,6 +30,7 @@ struct InfoBase
     QString id;
 };
 
+//En toda la aplicacion se utilizara como int por el problema de conversion en QDataStream
 enum QueryOpcion {
     Null,
     Connect,
@@ -123,7 +124,7 @@ protected:
     QString m_name;
     QString m_ip;
     Queries* m_parentQuery;
-    QueryOpcion m_queryoption;
+    int m_queryoption;
     QueriesConfiguration m_queriesConfiguration;
 
     QString m_lastCommand;
@@ -136,10 +137,10 @@ protected:
 
 public:
     FuncionBase();
-    FuncionBase(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    FuncionBase(QRemoteShell *terminal, int option=QueryOpcion::Null);
     ~FuncionBase();
 
-    QueryOpcion queryOption() { return m_queryoption; };
+    int queryOption() { return m_queryoption; };
 
     void setBrand(QString brand) { m_brand = brand; }
     void setPlatform(QString platform);
@@ -147,7 +148,7 @@ public:
     void setHostName(QString name) { m_name=name; }
     void setIp(QString ip) { m_ip = ip; }
     void setParentQuery(Queries *qry);
-    void setQueryOption(QueryOpcion option) { m_queryoption=option; }
+    void setQueryOption(int option) { m_queryoption=option; }
 
 private slots:
     void m_on_term_receiveText();

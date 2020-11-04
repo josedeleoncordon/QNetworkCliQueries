@@ -15,7 +15,7 @@ private:
     short int menuintentos;
 
 public:
-    MacInfoRAD(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    MacInfoRAD(QRemoteShell *terminal, int option=QueryOpcion::Null);
     MacInfoRAD(const MacInfoRAD &other);
     ~MacInfoRAD();
     void getMacInfo();

@@ -1,7 +1,7 @@
 #include "config.h"
 #include "queries.h"
 
-Config::Config(QRemoteShell *terminal, QueryOpcion option):
+Config::Config(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
     m_error=false;

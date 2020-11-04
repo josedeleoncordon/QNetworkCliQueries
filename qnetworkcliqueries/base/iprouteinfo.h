@@ -39,7 +39,7 @@ protected:
 
 public:
     IPRouteInfo() {}
-    IPRouteInfo(QRemoteShell *terminal, QueryOpcion option=QueryOpcion::Null);
+    IPRouteInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     IPRouteInfo(const IPRouteInfo &other);
     ~IPRouteInfo();
 

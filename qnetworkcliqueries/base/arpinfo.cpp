@@ -88,7 +88,7 @@ void updateInfoList(QList<SIpInfo> &lstDest, QList<SIpInfo> &lstOrigin )
     }
 }
 
-ArpInfo::ArpInfo(QRemoteShell *terminal, QueryOpcion option):
+ArpInfo::ArpInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
     m_vrfsPos=-1;
