@@ -522,6 +522,20 @@ QString IP2Binario(QString ip)
     return salida;
 }
 
+QString binario2IP(QString ip)
+{
+    if ( ip.size() != 32 )
+        return "";
+
+    bool ok;
+    QString octeto1 = QString::number( ip.mid( 0,8 ).toUInt(&ok,2));
+    QString octeto2 = QString::number( ip.mid( 8,8 ).toUInt(&ok,2));
+    QString octeto3 = QString::number( ip.mid( 16,8 ).toUInt(&ok,2));
+    QString octeto4 = QString::number( ip.mid( 24,8 ).toUInt(&ok,2));
+
+    return octeto1+"."+octeto2+"."+octeto3+"."+octeto4;
+}
+
 bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos)
 {
     QRegExp exp("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2})");
@@ -872,4 +886,14 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
 
     qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF ERROR";
     return false;
+}
+
+QString convertirMascaraMayorAmenor(QString red, int mascara)
+{
+    QRegExp exp("/\\d+");
+    red.replace(exp,"");
+    red = IP2Binario( red );
+    red = red.left(mascara);
+    red.resize(32,'0');
+    return binario2IP( red )+"/"+QString::number(mascara);
 }

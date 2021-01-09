@@ -14,13 +14,14 @@ struct SBGPNeighbor : InfoBase
 };
 
 struct SBGPNetwork : InfoBase
-{
+{    
     QString neighborip;
     QString network;
     QString RD;
     QString nexthop;
     QString from;
     QString path;
+    QString as;
 
     SBGPNetwork() {}
     SBGPNetwork(const SBGPNetwork &other);

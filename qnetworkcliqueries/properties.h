@@ -23,6 +23,11 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString topologiaconfpath;
         QString topologiaiconpath;
 
+        QString bduser;
+        QString bdpassword;
+        QString bd;
+        QString bdhost;
+
         QMap<QString,QString> mapFuncionesArgumentos;
 
         QMap<QString,QVariant> mapGrupoRaizIP;

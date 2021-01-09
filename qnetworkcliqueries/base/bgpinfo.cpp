@@ -13,6 +13,7 @@ SBGPNetwork::SBGPNetwork(const SBGPNetwork &other)
     datetime = other.datetime;
     operativo = other.operativo;
     equipo = other.equipo;
+    as = other.as;
 }
 
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNetwork& data)
@@ -27,6 +28,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNe
     out << data.datetime;
     out << data.operativo;
     out << data.equipo;
+    out << data.as;
     return out;
 }
 
@@ -42,6 +44,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNetwork& 
     in >> data.datetime;
     in >> data.operativo;
     in >> data.equipo;
+    in >> data.as;
     return in;
 }
 
@@ -83,6 +86,7 @@ QNETWORKCLIQUERIES_EXPORT QDBusArgument& operator<<(QDBusArgument &argument, con
     argument << data.datetime;
     argument << data.operativo;
     argument << data.equipo;
+    argument << data.as;
     argument.endStructure();
     return argument;
 }
@@ -99,6 +103,7 @@ QNETWORKCLIQUERIES_EXPORT const QDBusArgument& operator>>(const QDBusArgument& a
     argument >> data.datetime;
     argument >> data.operativo;
     argument >> data.equipo;
+    argument >> data.as;
     argument.endStructure();
     return argument;
 }

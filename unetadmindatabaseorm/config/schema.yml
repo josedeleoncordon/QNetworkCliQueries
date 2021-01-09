@@ -1,0 +1,430 @@
+---
+equipo:
+  columns:
+    id:
+      type: integer
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    area_id:
+      type: tinyint
+      unsigned: true
+    nombre:
+      type: string(45)
+      notnull: true
+    ip:
+      type: string(15)
+      notnull: true
+    estado:
+      type: boolean
+      notnull: true
+  relations:
+    area_1:
+      foreignType: many
+      foreignAlias: equipos
+      local: area_id
+      foreign: id
+      class: area
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+interfaz:
+  columns:
+    id:
+      type: integer
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    equipo_id:
+      type: integer
+      unsigned: true
+      notnull: true
+    interfaz_tipo_id:
+      type: tinyint
+      unsigned: true
+      notnull: true
+    proveedor_id:
+      type: string(3)
+    interfaz:
+      type: string(45)
+      notnull: true
+    bandwidth:
+      type: bigint
+      notnull: true
+    descripcion:
+      type: string(300)
+    ospfcosto:
+      type: integer
+    estado:
+      type: boolean
+  relations:
+    equipo_1:
+      foreignType: many
+      foreignAlias: interfazs
+      local: equipo_id
+      foreign: id
+      class: equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+    interfaz_tipo_2:
+      foreignType: many
+      foreignAlias: interfazs
+      local: interfaz_tipo_id
+      foreign: id
+      class: interfaz_tipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+    proveedor_3:
+      foreignType: many
+      foreignAlias: interfazs
+      local: proveedor_id
+      foreign: id
+      class: proveedor
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+enlace:
+  columns:
+    id:
+      type: bigint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    origen_interfaz_id:
+      type: integer
+      unsigned: true
+      notnull: true
+    destino_interfaz_id:
+      type: integer
+      unsigned: true
+      notnull: true
+    etiqueta:
+      type: string(45)
+    estado:
+      type: boolean
+  relations:
+    interfaz_1:
+      foreignType: many
+      foreignAlias: enlaces
+      local: origen_interfaz_id
+      foreign: id
+      class: interfaz
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+    interfaz_2:
+      foreignType: many
+      foreignAlias: enlaces
+      local: destino_interfaz_id
+      foreign: id
+      class: interfaz
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+grupo:
+  columns:
+    id:
+      type: tinyint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    grupo:
+      type: string(45)
+      notnull: true
+
+interfaz_tipo:
+  columns:
+    id:
+      type: tinyint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    tipo:
+      type: string(45)
+      notnull: true
+
+interfaz_estado:
+  columns:
+    id:
+      type: bigint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    interfaz_id:
+      type: integer
+      unsigned: true
+      notnull: true
+    fecha_hora:
+      type: datetime
+      notnull: true
+    estado:
+      type: boolean
+      notnull: true
+    ratein:
+      type: bigint
+      notnull: true
+    rateout:
+      type: bigint
+      notnull: true
+  relations:
+    interfaz_1:
+      foreignType: many
+      foreignAlias: interfaz_estados
+      local: interfaz_id
+      foreign: id
+      class: interfaz
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+area:
+  columns:
+    id:
+      type: tinyint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    pais_id:
+      type: tinyint
+      unsigned: true
+      notnull: true
+    area:
+      type: string(45)
+      notnull: true
+  relations:
+    pais_1:
+      foreignType: many
+      foreignAlias: areas
+      local: pais_id
+      foreign: id
+      class: pais
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+pais:
+  columns:
+    id:
+      type: tinyint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    pais:
+      type: string(45)
+      notnull: true
+
+proveedor:
+  columns:
+    id:
+      type: string(3)
+      primary: true
+      notnull: true
+    proveedor:
+      type: string(45)
+      notnull: true
+
+grupo_equipo:
+  columns:
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    grupo_id:
+      type: tinyint
+      unsigned: true
+      notnull: true
+    equipo_id:
+      type: integer
+      unsigned: true
+      notnull: true
+    posicion_x:
+      type: float
+    posicion_y:
+      type: float
+  relations:
+    grupo_1:
+      foreignType: many
+      foreignAlias: grupo_equipos
+      local: grupo_id
+      foreign: id
+      class: grupo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+    equipo_2:
+      foreignType: many
+      foreignAlias: grupo_equipos
+      local: equipo_id
+      foreign: id
+      class: equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+pcp_peer:
+  columns:
+    id:
+      type: integer
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    pcp_pais_id:
+      type: tinyint
+      unsigned: true
+      notnull: true
+    pcp_peer_tipo_id:
+      type: tinyint
+      unsigned: true
+      notnull: true
+    pcp_proveedor_id:
+      type: integer
+      unsigned: true
+      notnull: true
+    ip_pe:
+      type: string(200)
+      notnull: true
+    vrf:
+      type: string(100)
+      notnull: true
+    ip_peer:
+      type: string(200)
+      notnull: true
+    comunidad_base:
+      type: string(50)
+      notnull: true
+    estado:
+      type: boolean
+      notnull: true
+  relations:
+    pcp_pais_1:
+      foreignType: many
+      foreignAlias: pcp_peers
+      local: pcp_pais_id
+      foreign: id
+      class: pcp_pais
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+    pcp_proveedor_2:
+      foreignType: many
+      foreignAlias: pcp_peers
+      local: pcp_proveedor_id
+      foreign: id
+      class: pcp_proveedor
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+    pcp_peer_tipo_3:
+      foreignType: many
+      foreignAlias: pcp_peers
+      local: pcp_peer_tipo_id
+      foreign: id
+      class: pcp_peer_tipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+pcp_peer_tipo:
+  columns:
+    id:
+      type: tinyint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    tipo:
+      type: string(15)
+      notnull: true
+
+pcp_pais:
+  columns:
+    id:
+      type: tinyint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    pais:
+      type: string(45)
+      notnull: true
+
+pcp_proveedor:
+  columns:
+    id:
+      type: integer
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    proveedor:
+      type: string(45)
+      notnull: true
+    logo_path:
+      type: string(300)
+
+pcp_pe:
+  columns:
+    id:
+      type: integer
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    nombre:
+      type: string(45)
+    ip:
+      type: string(15)
+
+pcp_pe_peer:
+  columns:
+    id:
+      type: integer
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    pcp_pe_id:
+      type: integer
+      unsigned: true
+      notnull: true
+    pcp_peer_id:
+      type: integer
+      unsigned: true
+      notnull: true
+    prepend:
+      type: smallint
+  relations:
+    pcp_pe_1:
+      foreignType: many
+      foreignAlias: pcp_pe_peers
+      local: pcp_pe_id
+      foreign: id
+      class: pcp_pe
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+    pcp_peer_2:
+      foreignType: many
+      foreignAlias: pcp_pe_peers
+      local: pcp_peer_id
+      foreign: id
+      class: pcp_peer
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+

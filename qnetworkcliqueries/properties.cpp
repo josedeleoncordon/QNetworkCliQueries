@@ -34,6 +34,13 @@ void Properties::loadSettings()
     password = settings.value("ConnectionPassword").toString();
     settings.endGroup();
 
+    settings.beginGroup("BDConnection");
+    bduser = settings.value("BDConnectionUser").toString();
+    bdpassword = settings.value("BDConnectionPassword").toString();
+    bd = settings.value("BD").toString();
+    bdhost = settings.value("BDHost").toString();
+    settings.endGroup();
+
     settings.beginGroup("Queries");
     queriespath = settings.value("QueriesPath").toString();
     logspath = settings.value("LogsPath").toString();
@@ -62,6 +69,13 @@ void Properties::saveSettings()
     settings.beginGroup("Connection");
     settings.setValue("ConnectionUser",user);
     settings.setValue("ConnectionPassword",password);
+    settings.endGroup();
+
+    settings.beginGroup("BDConnection");
+    settings.setValue("BDConnectionUser",bduser);
+    settings.setValue("BDConnectionPassword",bdpassword);
+    settings.setValue("BD",bd);
+    settings.setValue("BDHost",bdhost);
     settings.endGroup();
 
     settings.beginGroup("Queries");

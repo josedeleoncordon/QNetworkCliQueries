@@ -82,6 +82,7 @@ protected:
     int m_interfacesPos;
 
     void _getInterfacesInfoNextInteface();
+    void _getInterfacesDescriptionNextInteface();
 
 public:
     InterfaceInfo() {}

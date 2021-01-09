@@ -373,16 +373,44 @@ void InterfaceInfo::getInterfacesPermitedVlans()
 
 void InterfaceInfo::getInterfacesDescriptions()
 {
-    term->disconnectReceiveTextSignalConnections();   
+    m_interfacesPos=-1;
+    m_interfaces = m_queriesConfiguration.values("InterfaceDescription_Interfaces",m_ip,m_os);
 
+    _getInterfacesDescriptionNextInteface();
+}
+
+void InterfaceInfo::_getInterfacesDescriptionNextInteface()
+{
+    term->disconnectReceiveTextSignalConnections();
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Descriptions()));
 
-    if ( m_brand == "Cisco" )
-        termSendText("show interface description " );
-    else if ( m_brand == "Huawei" )
-        termSendText("display interface description");
+    if ( m_interfaces.isEmpty() )
+    {
+        //se consultan todas las interfaces
+        if ( m_brand == "Cisco" )
+            termSendText("show interface description " );
+        else if ( m_brand == "Huawei" )
+            termSendText("display interface description");
+        else
+            finished();
+    }
     else
-        finished();
+    {
+        //se consultan las interfaces configuradas
+        if ( m_interfacesPos < m_interfaces.size()-1 )
+        {
+            m_interfaceCurrent = m_interfaces.at( ++m_interfacesPos );
+            if ( m_brand == "Cisco" )
+                termSendText("show interface "+m_interfaceCurrent+" description");
+            else if ( m_brand == "Huawei" )
+                termSendText("display interface "+m_interfaceCurrent+" description");
+            else
+                finished();
+        }
+        else
+            //ya no hay mas interfaces que buscar, se finaliza
+            finished();
+    }
 }
 
 void InterfaceInfo::getInterfacesServiceInstancesInfo()
@@ -1035,7 +1063,7 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
         }        
     }    
 
-    finished();
+    _getInterfacesDescriptionNextInteface();
 }
 
 void InterfaceInfo::on_term_receiveText_ServiceInstances()

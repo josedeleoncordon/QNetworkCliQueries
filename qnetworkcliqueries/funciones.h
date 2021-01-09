@@ -103,6 +103,9 @@ bool sonIPsParejaMascara30_31( QString ip1, QString ip2 );
 //convierte una IP (192.168.1.1) a su forma binaria
 QString IP2Binario(QString ip);
 
+//convierte una IP (11000000101010000000000100000000) a octetos
+QString binario2IP(QString ip);
+
 //verifica si una IP pertenece a un segmento
 bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos);  //segmentoIP_mascara2digitos ej: 192.168.1.0/24
 
@@ -149,5 +152,8 @@ QString estandarizarProtocoloEnrutamiento(QString proto);
 bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
                                                    QString interfazOipDondeViene,
                                                    QString interfazSiguienteEquipo );
+
+//convierte mascara
+QString convertirMascaraMayorAmenor(QString red, int mascara);
 
 #endif // FUNCIONES_H
