@@ -91,7 +91,7 @@ VrfInfo::~VrfInfo()
 
 void VrfInfo::getVRFsFromVLans()
 {
-    m_vlans = m_queriesConfiguration.values("VRFfVlans_Vlans",m_ip,m_os);
+    m_vlans = m_queriesConfiguration.values("VRFfVlans_Vlans",m_ip,m_os,m_conexionID);
 
     if ( m_vlans.size() == 0 )
     {
@@ -119,7 +119,7 @@ void VrfInfo::getVRFfromRT()
         return;
     }
 
-    m_rt = m_queriesConfiguration.value("VRFfRT_RT",m_ip,m_os);
+    m_rt = m_queriesConfiguration.value("VRFfRT_RT",m_ip,m_os,m_conexionID);
 
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextFromRT()));
     if ( m_os == "IOS XR" )

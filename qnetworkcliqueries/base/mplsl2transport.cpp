@@ -245,17 +245,17 @@ void MplsL2TransportInfo::getMplsL2Transport()
     }
     else if ( m_os == "IOS XR" )
     {
-        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_MplsTETunnels_XR_BD()));
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_XR_BD()));
         termSendText("sh l2vpn bridge-domain detail | i \"Bridge group|Description|AC:|PWs:|VFI|PW: neighbor|Interface|Preferred\"");
     }
     else
     {
-        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_MplsTETunnels_IOS_VFI()));
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_VFI()));
         termSendText("show vfi");
     }
 }
 
-void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_VFI()
+void MplsL2TransportInfo::on_term_receiveText_IOS_VFI()
 {
     txt.append(term->dataReceived());
     if ( !allTextReceived() )
@@ -279,9 +279,9 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_VFI()
         if ( line.contains(exp) )
         {
             SMplsL2VFIInfo i;
-            i.vfi = exp.cap( 1 );
+            i.vfi = exp.cap( 1 );            
             m_lstMplsL2VFIs.append( i );
-            mvi = &m_lstMplsL2VFIs.last();
+            mvi = &m_lstMplsL2VFIs[m_lstMplsL2VFIs.size()-1];
         }
 
         if ( !mvi )
@@ -306,11 +306,11 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_VFI()
     }
 
     term->disconnectReceiveTextSignalConnections();
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_MplsTETunnels_IOS_L2Transport()));
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_L2Transport()));
     termSendText("sh mpls l2transport vc detail | i Local interface|Destination|Preferred|Remote interface");
 }
 
-void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_L2Transport()
+void MplsL2TransportInfo::on_term_receiveText_IOS_L2Transport()
 {
     txt.append(term->dataReceived());
     if ( !allTextReceived() )
@@ -348,6 +348,9 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_L2Transport()
             i.AC = exp.cap(1);
             m_lstMplsL2Xconnects.append(i);
             mxi = &m_lstMplsL2Xconnects.last();
+
+            if ( !lstIosInterfaces.contains(i.AC) )
+                lstIosInterfaces.append(i.AC);
         }
 
         if ( !mxi && lastVFI.isEmpty() )
@@ -411,11 +414,11 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_L2Transport()
     }
 
     term->disconnectReceiveTextSignalConnections();
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_MplsTETunnels_IOS_Xconnect()));
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_Xconnect()));
     termSendText("sh xconnect all");
 }
 
-void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_Xconnect()
+void MplsL2TransportInfo::on_term_receiveText_IOS_Xconnect()
 {
     txt.append(term->dataReceived());
     if ( !allTextReceived() )
@@ -427,14 +430,14 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_Xconnect()
         line = line.simplified();
 
         //UP pri ac Te0/0/4:307(Eth VLAN) UP mpls 172.17.22.79:502307 UP
-        QRegExp exp("(UP|DN) \\S+ ac (\\S+):(\\d+)\\(Eth VLAN\\) (UP|DN) mpls (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d+) (UP|DN)");
+        QRegExp exp("\\w{2} \\S+ ac (\\S+):(\\d+)\\(.+\\) \\w{2} mpls (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d+) \\w{2}");
         if ( line.contains(exp) )
         {
             for ( SMplsL2XconnectInfo &i : m_lstMplsL2Xconnects )
             {
-                if ( i.AC == exp.cap(2) && i.VCID == exp.cap(6) && i.destino == exp.cap(5) )
+                if ( i.AC == exp.cap(1) && i.VCID == exp.cap(4) && i.destino == exp.cap(3) )
                 {
-                    i.AC.append( ":"+exp.cap(3) );
+                    i.AC.append( ":"+exp.cap(2) );
                     break;
                 }
             }
@@ -442,9 +445,47 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_IOS_Xconnect()
     }
 
     finished();
+
+    //terminar on_term_receiveText_IOS_runInterfaces()
+//    term->disconnectReceiveTextSignalConnections();
+//    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_runInterfaces()));
+//    nextIOSrunInterfaces();
 }
 
-void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_BD()
+void MplsL2TransportInfo::nextIOSrunInterfaces()
+{
+    if ( !lstIosInterfaces.isEmpty() )
+    {
+        QString interface = lstIosInterfaces.takeFirst();
+        termSendText("sh run interface "+interface);
+    }
+    else
+        finished();
+}
+
+void MplsL2TransportInfo::on_term_receiveText_IOS_runInterfaces()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QString lastInterface;
+    QString lastServiceInstance;
+
+    QStringList lines = txt.split("\n");
+    foreach (QString line, lines)
+    {
+        line = line.simplified();
+
+        QRegExp exp("^interface (.+)$");
+        if ( exp.exactMatch(line) )
+            lastInterface = estandarizarInterfaz(exp.cap(1));
+    }
+
+    nextIOSrunInterfaces();
+}
+
+void MplsL2TransportInfo::on_term_receiveText_XR_BD()
 {
     txt.append(term->dataReceived());
     if ( !allTextReceived() )
@@ -534,11 +575,11 @@ void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_BD()
     }
 
     term->disconnectReceiveTextSignalConnections();
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_MplsTETunnels_XR_Xconnect()));
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_XR_Xconnect()));
     termSendText("sh l2vpn xconnect detail | i \"Group|AC:|PW:|Interface\"");
 }
 
-void MplsL2TransportInfo::on_term_receiveText_MplsTETunnels_XR_Xconnect()
+void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
 {
     txt.append(term->dataReceived());
     if ( !allTextReceived() )

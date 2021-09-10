@@ -283,8 +283,8 @@ InterfaceInfo::~InterfaceInfo()
 void InterfaceInfo::getInterfacesInfo()
 {
     m_interfacesPos=-1;
-    m_interfaces = m_queriesConfiguration.values("InterfaceInfo_Interfaces",m_ip,m_os);
-    m_onlyphysicalinterfaces = m_queriesConfiguration.state("InterfaceInfo_XRonlyPhisical",m_ip,m_os);
+    m_interfaces = m_queriesConfiguration.values("InterfaceInfo_Interfaces",m_ip,m_os,m_conexionID);
+    m_onlyphysicalinterfaces = m_queriesConfiguration.state("InterfaceInfo_XRonlyPhisical",m_ip,m_os,m_conexionID);
 
     _getInterfacesInfoNextInteface();
 }
@@ -374,7 +374,7 @@ void InterfaceInfo::getInterfacesPermitedVlans()
 void InterfaceInfo::getInterfacesDescriptions()
 {
     m_interfacesPos=-1;
-    m_interfaces = m_queriesConfiguration.values("InterfaceDescription_Interfaces",m_ip,m_os);
+    m_interfaces = m_queriesConfiguration.values("InterfaceDescription_Interfaces",m_ip,m_os,m_conexionID);
 
     _getInterfacesDescriptionNextInteface();
 }
@@ -1063,7 +1063,10 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
         }        
     }    
 
-    _getInterfacesDescriptionNextInteface();
+    if ( m_interfaces.isEmpty() )
+        finished();
+    else
+        _getInterfacesDescriptionNextInteface();
 }
 
 void InterfaceInfo::on_term_receiveText_ServiceInstances()

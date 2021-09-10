@@ -73,6 +73,7 @@ public:
     QString& hostName() { return m_name; }
     QString& country() { return m_country; }
     QString& platform() { return m_platform; }
+    QString& os() { return m_equipmenttype; }
     QString& location() { return m_location; }
     QString& brand() { return m_brand; }
     QString& gw() { return m_gw; }
@@ -82,34 +83,35 @@ public:
     QString& ip() { return m_ip; }
     QString& ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; }
     QueriesConfiguration queriesConfiguration() { return m_queriesconfiguration; }
+    QString conexionID() { return m_conexionID; }
 
-    bool existsQueryInformation(int option,int i=1);
-    FuncionBase *getQuery(int option,int i=1);
+    bool existsQueryInformation(int option,int i=0);
+    FuncionBase *getQuery(int option,int i=0);
 
-    QList<SEquipmentNeighborsInfo>& equipmentNeighborsInfo(int i=1);
-    QList<SInterfaceInfo>& interfacesInfo(int i=1);
-    QList<SInterfaceVlans>& interfacesPermitedVlansInfo(int i=1);
-    QList<SInterfaceInfo>& interfacesDescriptionsInfo(int i=1);
-    QList<SIpInfo>& interfacesIpAddressesInfo(int i=1);
-    QList<SOSPFInfo>& ospfInfo(int i=1);
-    QString& mplsLdpLocalIDInfo(int i=1);
-    QList<SMplsTETunnelInfo>& mplsTETunnelsInfo(int i=1);
-    QList<SMplsL2XconnectInfo>& mplsL2TransportXconnectsInfo(int i=1);
-    QList<SMplsL2VFIInfo>& mplsL2TransportVFIsInfo(int i=1);
-    QList<SMplsLdpInfo>& mplsLdpDiscoveryInfo(int i=1);
-    QList<SMplsLdpInfo>& mplsLdpNeighborsInfo(int i=1);
-    QList<SMplsLdpInfo>& mplsLdpInterfacesInfo(int i=1);
-    QList<SPIMInfo>& pimInterfacesInfo(int i=1);
-    QList<SMacInfo>& macInfo(int i=1);
-    QList<SPortChannel>& portChannelInfo(int i=1);
-    QStringList& vrfsFromVlansInfo(int i=1);
-    QString& vrfFromRTInfo(int i=1);
-    QList<SVrfInfo>& vrfsInfo(int i=1);
-    QList<SIpInfo>& arpsInfo(int i=1);
-    QList<SBGPNeighbor>& bgpNeighborsInfo(int i=1);
-    QList<SBGPNetwork>& bgpNetworksInfo(int i=1);
-    QList<SIpRouteInfo>& ipRoutesInfo(int i=1);
-    QString funcionTxtInfo(int i=1);
+    QList<SEquipmentNeighborsInfo>& equipmentNeighborsInfo(int i=0);
+    QList<SInterfaceInfo>& interfacesInfo(int i=0);
+    QList<SInterfaceVlans>& interfacesPermitedVlansInfo(int i=0);
+    QList<SInterfaceInfo>& interfacesDescriptionsInfo(int i=0);
+    QList<SIpInfo>& interfacesIpAddressesInfo(int i=0);
+    QList<SOSPFInfo>& ospfInfo(int i=0);
+    QString& mplsLdpLocalIDInfo(int i=0);
+    QList<SMplsTETunnelInfo>& mplsTETunnelsInfo(int i=0);
+    QList<SMplsL2XconnectInfo>& mplsL2TransportXconnectsInfo(int i=0);
+    QList<SMplsL2VFIInfo>& mplsL2TransportVFIsInfo(int i=0);
+    QList<SMplsLdpInfo>& mplsLdpDiscoveryInfo(int i=0);
+    QList<SMplsLdpInfo>& mplsLdpNeighborsInfo(int i=0);
+    QList<SMplsLdpInfo>& mplsLdpInterfacesInfo(int i=0);
+    QList<SPIMInfo>& pimInterfacesInfo(int i=0);
+    QList<SMacInfo>& macInfo(int i=0);
+    QList<SPortChannel>& portChannelInfo(int i=0);
+    QStringList& vrfsFromVlansInfo(int i=0);
+    QString& vrfFromRTInfo(int i=0);
+    QList<SVrfInfo>& vrfsInfo(int i=0);
+    QList<SIpInfo>& arpsInfo(int i=0);
+    QList<SBGPNeighbor>& bgpNeighborsInfo(int i=0);
+    QList<SBGPNetwork>& bgpNetworksInfo(int i=0);
+    QList<SIpRouteInfo>& ipRoutesInfo(int i=0);
+    QString funcionTxtInfo(int i=0);
 
     void setId(QString id) { m_id = id; }
     void setGW(QString GW);
@@ -124,6 +126,7 @@ public:
     void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }        
     void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; }
     void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
+    void setConexionID(QString ID) { m_conexionID=ID; }
 
     void setUser2(QString user) { m_user2=user; }
     void setPassword2(QString pwd) { m_pwd2=pwd; }
@@ -193,6 +196,7 @@ protected:
     QRemoteShell::ConnectionProtocol m_connectionprotol;
     bool m_operativo;
     QString m_ip;
+    QString m_conexionID; //ID de conexion, para que las funciones puedan ubicar los parapemtros en m_queriesConfiguration
 
     QString m_gw;
     QString m_user;

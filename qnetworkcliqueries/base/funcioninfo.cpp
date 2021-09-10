@@ -20,7 +20,7 @@ FuncionInfo::~FuncionInfo()
 void FuncionInfo::getTXT()
 {
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
-    _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,m_os );
+    _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,m_os,m_conexionID );
     _siguienteFuncion();
 }
 

@@ -10,6 +10,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_interval=0;
     m_simultaneos=0;
     m_maxparalelos=0;
+    m_maxparalelosmismoequipo=5;
     m_connectionprotocol = QRemoteShell::SSHTelnet;
     m_principaluserfirst=true;
     m_soloequiposnuevos=false;
@@ -60,6 +61,43 @@ void QueriesThread::_clear()
     }
 }
 
+void QueriesThread::setLstIP(QStringList lst)
+{
+    m_lstIP = lst;
+    verificarLstIPsQueriesConfiguration();
+}
+
+void QueriesThread::setQueriesConfiguration(QueriesConfiguration configuration)
+{
+    m_queriesconfiguration=configuration;
+    verificarLstIPsQueriesConfiguration();
+}
+
+void QueriesThread::verificarLstIPsQueriesConfiguration()
+{
+    if ( m_lstIP.isEmpty() || m_queriesconfiguration.lstQueryParameters().isEmpty() )
+        return;
+
+    m_lstIPsMismoEquipo.clear();
+    //verificamos los IDs para las configuraciones y agregamos las IPs con el ID
+    //172.16.30.253 -> 172.16.30.253_1, 172.16.30.253_2, 172.16.30.253_3
+    for ( QueriesConfigurationValue value : m_queriesconfiguration.lstQueryParameters() )
+    {
+        if ( !value._IDConexion.isEmpty() )
+        {
+            QRegExp exp("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+            if ( exp.exactMatch( value._IPoPlatform ) )
+            {
+                m_lstIPsMismoEquipo.append(value._IPoPlatform+"_"+value._IDConexion);
+                m_lstIP.removeOne(value._IPoPlatform);
+            }
+        }
+    }
+
+    qCDebug(queriesthread) << "QueriesThread::verificarLstIPsQueriesConfiguration. m_lstIPs" << m_lstIP <<
+                              "m_lstIPsMismoEquipo" << m_lstIPsMismoEquipo;
+}
+
 void QueriesThread::setOptions(QList<int> opciones)
 {
     opciones.removeAll( QueryOpcion::Null ); //unicamente opciones validas
@@ -77,10 +115,16 @@ void QueriesThread::iniciar()
     if ( m_interval==0 ||
          m_simultaneos==0 ||
          m_maxparalelos==0 ||
-         m_lstIP.isEmpty() ||
+         (m_lstIP.isEmpty() && m_lstIPsMismoEquipo.isEmpty() ) ||
          m_equiposConsultados > 0 )
     {
-        qCDebug(queriesthread) << "QueriesThread::iniciar() emit finished ";
+        qCDebug(queriesthread) << "QueriesThread::iniciar() ed " <<
+                                  m_interval <<
+                                  m_simultaneos <<
+                                  m_maxparalelos <<
+                                  m_maxparalelos <<
+                                  m_lstIPsMismoEquipo <<
+                                  m_equiposConsultados ;
 
         emit finished(false);
         return;
@@ -146,25 +190,48 @@ void QueriesThread::on_timer_timeOut()
     if ( m_consultaSimultaneos >= paralelos )
         return;
 
-    if ( m_lstIpPos >= m_lstIP.size()-1 )
+    qCDebug(queriesthread) << "m_lstIP.size()" << m_lstIP.size()
+                           << "m_lstIpPos" << m_lstIpPos << "m_lstIPsMismoEquipo.size()" << m_lstIPsMismoEquipo.size();
+
+    if ( m_lstIpPos >= m_lstIP.size()-1 && m_lstIPsMismoEquipo.isEmpty() )
     {
         //ya se llego al final
+        qCDebug(queriesthread) << "QueriesThread::on_timer_timeOut() ya se llego al final";
         m_timer->stop();
         return;
     }
 
-    int equiposAconectar;
-    if ( m_lstIP.size() - ( m_lstIpPos+1 ) > m_simultaneos )
-        equiposAconectar = m_simultaneos;
-    else
-        equiposAconectar = m_lstIP.size() - ( m_lstIpPos+1 );
-
-    int pos = m_lstIpPos+1;
-    for ( int c=0; c<equiposAconectar; c++ )
+    bool mismoequipo=false;
+    if ( !m_lstIPsMismoEquipo.isEmpty() )
     {
-        m_lstIpPos = pos+c;
-        siguienteEquipo( m_lstIP.at( m_lstIpPos ) );
+        //tratamos de conectar un equipo con diferentes consultas en direferentes conexiones
+        QString ip = m_lstIPsMismoEquipo.first();
+        if ( conectarSiguienteMismoEquipo(ip) )
+        {
+            qCDebug(queriesthread) << ip << "siguiente mismo equipo";
+            mismoequipo=true;
+            m_lstIPsMismoEquipo.takeFirst();
+            siguienteEquipo( ip );
+        }
     }
+    if ( !mismoequipo )
+        if ( m_lstIpPos < m_lstIP.size()-1 )
+        {
+            //continuamos con la consulta normal
+            qCDebug(queriesthread) << "QueriesThread::on_timer_timeOut() continuamos con la consulta normal";
+            int equiposAconectar;
+            if ( m_lstIP.size() - ( m_lstIpPos+1 ) > m_simultaneos )
+                equiposAconectar = m_simultaneos;
+            else
+                equiposAconectar = m_lstIP.size() - ( m_lstIpPos+1 );
+
+            int pos = m_lstIpPos+1;
+            for ( int c=0; c<equiposAconectar; c++ )
+            {
+                m_lstIpPos = pos+c;
+                siguienteEquipo( m_lstIP.at( m_lstIpPos ) );
+            }
+        }
 }
 
 //QueriesThreadWorker *QueriesThread::newThreadWorker()
@@ -172,11 +239,44 @@ void QueriesThread::on_timer_timeOut()
 //    return new QueriesThreadWorker;
 //}
 
-void QueriesThread::siguienteEquipo(QString ip, bool gw)
+bool QueriesThread::conectarSiguienteMismoEquipo(QString IP)
 {
-    qCDebug(queriesthread) << ip << "QueriesThread::siguienteEquipo()"
+    QString IDConexion;
+    QString ip;
+    if ( IP.contains("_") )
+    {
+        ip = IP.split("_").first();
+        IDConexion = IP.split("_").last();
+    }
+    else
+        return false;
+
+    int c=0;
+    for ( QString ipequipo : m_equiposenconsulta )
+        if ( ip == ipequipo )
+            c++;
+
+    if ( c < m_maxparalelosmismoequipo )
+        return true;
+    else
+        return false;
+}
+
+void QueriesThread::siguienteEquipo(QString IP, bool gw)
+{
+    qCDebug(queriesthread) << IP << "QueriesThread::siguienteEquipo()"
                            << "GW" << gw
                            << "m_consultarVecinosOSPFMismoDominio" << m_consultarVecinosOSPFMismoDominio;
+
+    QString IDConexion;
+    QString ip;
+    if ( IP.contains("_") )
+    {
+        ip = IP.split("_").first();
+        IDConexion = IP.split("_").last();
+    }
+    else
+        ip = IP;
 
     Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);    
     query->setCountry( m_grupo );
@@ -188,6 +288,7 @@ void QueriesThread::siguienteEquipo(QString ip, bool gw)
                                         << m_mapOSPFVecinosInterfazDondeVienen.value( ip );
         query->setIpOInterfazMismoDominioOSPFDondeSeViene( m_mapOSPFVecinosInterfazDondeVienen.value( ip ) );
     }
+    query->setConexionID(IDConexion);
     query->setConnectionProtocol( m_connectionprotocol );
     query->setUser2( m_user2 );
     query->setPassword2( m_pwd2 );
@@ -283,7 +384,8 @@ void QueriesThread::equipoConsultado(Queries *qry)
             for (Queries *q : m_lstQueries)
             {
                 if ( qry->hostName() == q->hostName() &&
-                     !qry->hostName().isEmpty() )
+                     !qry->hostName().isEmpty() &&
+                     qry->conexionID() == q->conexionID() )
                 {                    
                     encontrado=true;
                     qry->deleteLater();
@@ -354,16 +456,23 @@ void QueriesThread::equipoConsultado(Queries *qry)
                                << "m_equiposPorGWenConsulta" << m_equiposPorGWenConsulta
                                << "m_lstIpPos" << m_lstIpPos
                                << "m_lstIP.size()" << m_lstIP.size()
-                               << "m_equiposenconsulta" << m_equiposenconsulta;
-                                  ;
+                               << "m_equiposenconsulta" << m_equiposenconsulta;                                  
 
         if ( m_equiposConsultados >= m_lstIP.size() &&
              m_lstIPsAintentarPorGW.isEmpty() &&
-             !m_equiposPorGWenConsulta )
+             m_lstIPsMismoEquipo.isEmpty() &&
+             !m_equiposPorGWenConsulta &&
+             m_equiposenconsulta.isEmpty() )
         {
-            qCDebug(queriesthread) << "se termino de consultar los equipos se finaliza";
+            qCDebug(queriesthread) << "queriesthread se termino de consultar los equipos se finaliza" <<
+                                      m_equiposConsultados <<
+                                      m_lstIP.size() <<
+                                      m_lstIPsAintentarPorGW <<
+                                      m_lstIPsMismoEquipo <<
+                                      m_equiposPorGWenConsulta <<
+                                      m_equiposenconsulta;
             emit finished(true);
-        }
+        }        
         else
         {
             //conectar al siguiente equipo
@@ -380,20 +489,39 @@ void QueriesThread::equipoConsultado(Queries *qry)
                 siguienteEquipo( IP, true );
             }
             else
-                if ( m_lstIpPos < m_lstIP.size()-1 )
+            {
+                bool mismoequipo=false;
+                if ( !m_lstIPsMismoEquipo.isEmpty() )
                 {
-                    //continuamos con la consulta normal
-                    m_lstIpPos++;
-                    QString ip = m_lstIP.at( m_lstIpPos );
-                    qCDebug(queriesthread) << ip << "siguiente conexion normal";
-                    siguienteEquipo( ip );
+                    //tratamos de conectar un equipo con diferentes consultas en direferentes conexiones
+                    QString ip = m_lstIPsMismoEquipo.first();
+                    if ( !conectarSiguienteMismoEquipo(ip) )
+                    {
+                        qCDebug(queriesthread) << ip << "siguiente mismo equipo";
+                        mismoequipo=true;
+                        m_lstIPsMismoEquipo.takeFirst();
+                        siguienteEquipo( ip );
+                    }
                 }
+                if ( !mismoequipo )
+                    if ( m_lstIpPos < m_lstIP.size()-1 )
+                    {
+                        //continuamos con la consulta normal
+                        m_lstIpPos++;
+                        QString ip = m_lstIP.at( m_lstIpPos );
+                        qCDebug(queriesthread) << ip << "siguiente conexion normal";
+                        siguienteEquipo( ip );
+                    }
+            }
         }
     }
     else
     {
         if ( m_consultaSimultaneos == 0 )
+        {
+            qCDebug(queriesthread) << "equipoConsultado m_consultaSimultaneos==0";
             emit finished(true);
+        }
     }
 }
 
@@ -424,7 +552,6 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
             bool encontrado=false;
             for ( QString segmento : m_lstLinksEnSegmentos )
             {
-                bool encontrado=false;
                 if ( validarIPperteneceAsegmento( qry->interfacesIpAddressesQuery->ipFromInterfaz( interfazEsteEquipoSalida ),
                                                   segmento) )
                 {

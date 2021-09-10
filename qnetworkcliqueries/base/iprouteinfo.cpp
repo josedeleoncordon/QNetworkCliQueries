@@ -110,9 +110,9 @@ void IPRouteInfo::getIPRouteInfo()
         return;
     }
 
-    m_vrfs = m_queriesConfiguration.values("IPRoutes_VRFs",m_ip,m_os);
-    m_protocol = m_queriesConfiguration.value("IPRoutes_protocol",m_ip,m_os);
-    m_redes = m_queriesConfiguration.values("IPRoutes_redes",m_ip,m_os);
+    m_vrfs = m_queriesConfiguration.values("IPRoutes_VRFs",m_ip,m_os,m_conexionID);
+    m_protocol = m_queriesConfiguration.value("IPRoutes_protocol",m_ip,m_os,m_conexionID);
+    m_redes = m_queriesConfiguration.values("IPRoutes_redes",m_ip,m_os,m_conexionID);
 
     if ( m_vrfs.isEmpty() )
         m_vrfs.append(""); //para la global

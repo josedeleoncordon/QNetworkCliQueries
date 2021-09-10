@@ -69,9 +69,10 @@ public:
     QString _key;
     QString _value;
     QString _IPoPlatform;
+    QString _IDConexion;
     bool _appendValue;
 
-    QueriesConfigurationValue(QString key, QString value, QString IPoPlataforma, bool appendValue=true);
+    QueriesConfigurationValue(QString key, QString value, QString IPoPlataforma, QString IDConexion, bool appendValue=true);
     QueriesConfigurationValue(const QueriesConfigurationValue &other);
     QueriesConfigurationValue() {}
 
@@ -86,7 +87,7 @@ private:
     QList<QueriesConfigurationValue> m_lstQueryParameters;
     QList<QueriesConfigurationValue> m_lstConfiguration;
 
-    QVariant m_find(QString parameter, QString IP, QString platform);
+    QVariant m_find(QString parameter, QString IP, QString platform, QString IDconexion);
 
 public:
     QueriesConfiguration();
@@ -94,11 +95,11 @@ public:
     void addQueryParameter(const QList<QueriesConfigurationValue>&);
     void addConfiguration(const QList<QueriesConfigurationValue>&);
 
-    bool state(QString parameter, QString IP, QString platform);
-    QString value(QString parameter, QString IP, QString platform);
-    QStringList values(QString parameter, QString IP, QString platform);
+    bool state(QString parameter, QString IP, QString platform, QString IDconexion);
+    QString value(QString parameter, QString IP, QString platform, QString IDconexion);
+    QStringList values(QString parameter, QString IP, QString platform, QString IDconexion);
 
-    QString configuration(QString platform, QString os, QString IP);
+//    QString configuration(QString platform, QString os, QString IP);
 
     QList<QueriesConfigurationValue> lstQueryParameters() { return m_lstQueryParameters; }
 
@@ -126,6 +127,7 @@ protected:
     Queries* m_parentQuery;
     int m_queryoption;
     QueriesConfiguration m_queriesConfiguration;
+    QString m_conexionID;
 
     QString m_lastCommand;
 

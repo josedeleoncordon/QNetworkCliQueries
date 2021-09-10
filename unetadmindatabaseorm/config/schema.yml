@@ -362,6 +362,19 @@ pcp_pais:
     pais:
       type: string(45)
       notnull: true
+    pcp_region_id:
+      type: integer
+      notnull: true
+  relations:
+    pcp_region_1:
+      foreignType: many
+      foreignAlias: pcp_paiss
+      local: pcp_region_id
+      foreign: id
+      class: pcp_region
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
 
 pcp_proveedor:
   columns:
@@ -389,6 +402,20 @@ pcp_pe:
       type: string(45)
     ip:
       type: string(15)
+    pcp_pais_id:
+      type: tinyint
+      unsigned: true
+      notnull: true
+  relations:
+    pcp_pais_1:
+      foreignType: many
+      foreignAlias: pcp_pes
+      local: pcp_pais_id
+      foreign: id
+      class: pcp_pais
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
 
 pcp_pe_peer:
   columns:
@@ -427,4 +454,14 @@ pcp_pe_peer:
       owningSide: true
       onDelete: NO ACTION
       onUpdate: NO ACTION
+
+pcp_region:
+  columns:
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    region:
+      type: string(45)
 

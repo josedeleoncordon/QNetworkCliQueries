@@ -3,12 +3,17 @@
 
 #include <QEventLoop>
 
-QueriesConfigurationValue::QueriesConfigurationValue(QString key, QString value, QString IPoPlataforma, bool appendValue)
+QueriesConfigurationValue::QueriesConfigurationValue(QString key,
+                                                     QString value,
+                                                     QString IPoPlataforma,
+                                                     QString IDConexion,
+                                                     bool appendValue)
 {
     _key = key;
     _value = value;
     _IPoPlatform = IPoPlataforma;
     _appendValue = appendValue;
+    _IDConexion = IDConexion;
 }
 
 QueriesConfigurationValue::QueriesConfigurationValue(const QueriesConfigurationValue &other)
@@ -17,6 +22,7 @@ QueriesConfigurationValue::QueriesConfigurationValue(const QueriesConfigurationV
     _value = other._value;
     _IPoPlatform = other._IPoPlatform;
     _appendValue = other._appendValue;
+    _IDConexion = other._IDConexion;
 }
 
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const QueriesConfigurationValue& qcv)
@@ -26,6 +32,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     out << qcv._key;
     out << qcv._value;
     out << qcv._appendValue;
+    out << qcv._IDConexion;
     return out;
 }
 
@@ -36,12 +43,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, QueriesConfig
     in >> qcv._key;
     in >> qcv._value;
     in >> qcv._appendValue;
+    in >> qcv._IDConexion;
     return in;
 }
 
 QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const QueriesConfigurationValue &info)
 {
-     dbg.space() << info._key << info._value << info._IPoPlatform << info._appendValue;
+     dbg.space() << info._key << info._value << info._IPoPlatform << info._appendValue << info._IDConexion;
      return dbg;
 }
 
@@ -57,7 +65,8 @@ void QueriesConfiguration::addQueryParameter(const QList<QueriesConfigurationVal
         for ( QueriesConfigurationValue &e : m_lstQueryParameters )
         {
             if ( n._IPoPlatform == e._IPoPlatform &&
-                 n._key == e._key )
+                 n._key == e._key &&
+                 n._IDConexion == e._IDConexion )
             {
                 encontrado=true;
                 if ( n._appendValue ) e._value.append(","+n._value); else e._value = n._value;
@@ -74,68 +83,68 @@ void QueriesConfiguration::addConfiguration(const QList<QueriesConfigurationValu
     m_lstConfiguration.append(c);
 }
 
-QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString platform)
+QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString platform, QString IDconexion)
 {
     //por IP especifica
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
     {
-        if ( v._key == parameter && v._IPoPlatform == IP  )
+        if ( v._key == parameter && v._IPoPlatform == IP && v._IDConexion == IDconexion  )
             return v._value;
     }
 
     //plataforma
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
     {
-        if ( v._key == parameter && v._IPoPlatform == platform  )
+        if ( v._key == parameter && v._IPoPlatform == platform && v._IDConexion == IDconexion  )
             return v._value;
     }
 
     //no hay para una ip o plataforma, regresamos el general
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
     {
-        if ( v._key == parameter && v._IPoPlatform == QString("*") )
+        if ( v._key == parameter && v._IPoPlatform == QString("*") && v._IDConexion == IDconexion )
             return v._value;
     }
 
     return QVariant();
 }
 
-bool QueriesConfiguration::state(QString parameter, QString IP, QString platform)
+bool QueriesConfiguration::state(QString parameter, QString IP, QString platform, QString IDconexion)
 {
-    return m_find(parameter,IP,platform).toBool();
+    return m_find(parameter,IP,platform,IDconexion).toBool();
 }
 
-QString QueriesConfiguration::value(QString parameter, QString IP, QString platform)
+QString QueriesConfiguration::value(QString parameter, QString IP, QString platform, QString IDconexion)
 {
-    return m_find(parameter,IP,platform).toString();
+    return m_find(parameter,IP,platform,IDconexion).toString();
 }
 
-QStringList QueriesConfiguration::values(QString parameter, QString IP, QString platform)
+QStringList QueriesConfiguration::values(QString parameter, QString IP, QString platform, QString IDconexion)
 {
-    return value(parameter,IP,platform).split(",",QString::SkipEmptyParts);
+    return value(parameter,IP,platform,IDconexion).split(",",QString::SkipEmptyParts);
 }
 
-QString QueriesConfiguration::configuration(QString platform, QString os, QString IP)
-{
-    return "";   // TODO Modificar ya no usando QueriesConfigurationValue o adaptar
+//QString QueriesConfiguration::configuration(QString platform, QString os, QString IP)
+//{
+//    return "";   // TODO Modificar ya no usando QueriesConfigurationValue o adaptar
 
 
-    //por IP especifica
-    for ( QueriesConfigurationValue v : m_lstConfiguration )
-    {
-        if ( (v._key == platform || v._key == os ) && v._IPoPlatform == IP  )
-            return v._value;
-    }
+//    //por IP especifica
+//    for ( QueriesConfigurationValue v : m_lstConfiguration )
+//    {
+//        if ( (v._key == platform || v._key == os ) && v._IPoPlatform == IP  )
+//            return v._value;
+//    }
 
-    //no hay para un equipo especifico, regresamos el general
-    for ( QueriesConfigurationValue v : m_lstConfiguration )
-    {
-        if ( (v._key == platform || v._key == os ) && v._IPoPlatform == QString("*") )
-            return v._value;
-    }
+//    //no hay para un equipo especifico, regresamos el general
+//    for ( QueriesConfigurationValue v : m_lstConfiguration )
+//    {
+//        if ( (v._key == platform || v._key == os ) && v._IPoPlatform == QString("*") )
+//            return v._value;
+//    }
 
-    return "";
-}
+//    return "";
+//}
 
 void QueriesConfiguration::clear()
 {
@@ -179,6 +188,7 @@ void FuncionBase::setParentQuery(Queries *qry)
 {
     m_parentQuery = qry;
     m_queriesConfiguration = qry->queriesConfiguration();
+    m_conexionID = qry->conexionID();
 }
 
 void FuncionBase::termSendText(QString str) //Async

@@ -25,6 +25,11 @@ void pcp_paisRecord::set_pais(QString pais)
 	setProperty("pais",pais);
 }
 
+void pcp_paisRecord::set_pcp_region_id(int pcp_region_id)
+{
+	setProperty("pcp_region_id",pcp_region_id);
+}
+
 int pcp_paisRecord::id()
 {
 	return property("id").toInt();
@@ -33,6 +38,16 @@ int pcp_paisRecord::id()
 QString pcp_paisRecord::pais()
 {
 	return property("pais").toString();
+}
+
+int pcp_paisRecord::pcp_region_id()
+{
+	return property("pcp_region_id").toInt();
+}
+
+pcp_regionRecord *pcp_paisRecord::r_pcp_region_id()
+{
+	return dynamic_cast<pcp_regionRecord*>( property("r_pcp_region_id").value<RecordBase*>() );
 }
 
 pcp_paisRecord &pcp_paisRecord::operator=(const pcp_paisRecord &other)

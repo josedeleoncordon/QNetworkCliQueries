@@ -135,7 +135,7 @@ void BGPInfo::getBGPNeighbors()
     }    
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_BGPNeighbors()));
 
-    m_type = m_queriesConfiguration.value("BGPNeig_Type",m_ip,m_os);
+    m_type = m_queriesConfiguration.value("BGPNeig_Type",m_ip,m_os,m_conexionID);
 
     if ( m_type.isEmpty() )
         m_type = "IPV4";
@@ -194,10 +194,10 @@ void BGPInfo::getNetworks()
     }
 
     m_neighborsPos=-1;
-    m_neighborIPs = m_queriesConfiguration.values("BGPNetworks_NeighborIP",m_ip,m_os);
-    m_vrf = m_queriesConfiguration.value("BGPNetworks_VRF",m_ip,m_os);
-    m_community = m_queriesConfiguration.value("BGPNetworks_Community",m_ip,m_os);
-    m_neighbor_int_out = m_queriesConfiguration.value("BGPNetworks_NeighborIn_Out",m_ip,m_os);
+    m_neighborIPs = m_queriesConfiguration.values("BGPNetworks_NeighborIP",m_ip,m_os,m_conexionID);
+    m_vrf = m_queriesConfiguration.value("BGPNetworks_VRF",m_ip,m_os,m_conexionID);
+    m_community = m_queriesConfiguration.value("BGPNetworks_Community",m_ip,m_os,m_conexionID);
+    m_neighbor_int_out = m_queriesConfiguration.value("BGPNetworks_NeighborIn_Out",m_ip,m_os,m_conexionID);
 
     qDebug() << "\n BGP getNetworks";
     qDebug() << m_vrf << m_neighborIPs;

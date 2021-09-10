@@ -1,5 +1,6 @@
 #include "funciones.h"
 #include "queries.h"
+#include "queriesthread.h"
 #include "equipmentneighbors.h"
 #include "interfaceinfo.h"
 #include "portchannelsinfo.h"
@@ -42,7 +43,8 @@ QString equipmentOSFromPlatform(QString platform)
               platform.contains("3560") ||
               platform.contains("3550") ||
               platform.contains("360") ||
-              platform.contains("380") )
+              platform.contains("380") ||
+              platform.contains("ASR1002"))
         return "IOS";
     else if ( platform.contains("N5K") ||
               platform.contains("N7K") )
@@ -789,6 +791,7 @@ QString estandarizarInterfaz(QString interfaz)
     interfaz.replace("Ethernet","Eth");
     interfaz.replace("Vlanif","Vlan");
     interfaz.replace("VLAN","Vlan");
+    interfaz.replace("BVI","BV");
     interfaz.replace("Po0/0/","Po");
     if ( !interfaz.contains("100GE") ) interfaz.replace("GE","Gi",Qt::CaseSensitive);
 
@@ -896,4 +899,559 @@ QString convertirMascaraMayorAmenor(QString red, int mascara)
     red = red.left(mascara);
     red.resize(32,'0');
     return binario2IP( red )+"/"+QString::number(mascara);
+}
+
+QString convertirMascaraOctetosAdos(QString mascara)
+{
+    QString mascarabinario = IP2Binario(mascara);
+    return QString::number( mascarabinario.count("1") );
+}
+
+QList<QStringList> tableMultiRow2Table(QString &txt,
+                                       QMap<int,QRegExp> &mapPosicionesExpCampos)
+{
+    QList<QStringList> lstSalida;
+    if ( mapPosicionesExpCampos.isEmpty() )
+        return lstSalida;
+
+    qDebug() << "\n\n\n tableMultiRow2Table ************************************* ";
+
+    QStringList *lstFilaActual=nullptr;
+    QMapIterator<int,QRegExp> imap(mapPosicionesExpCampos);
+    uint c=0;
+    for ( QString line : txt.split("\n",QString::SkipEmptyParts) )
+    {
+        //cada inicio de linea se empieza a analizar los campos desde la primera posicion
+        //a medida de que se vaya avanzando con las fila se van a gregando los campos
+        //se inicia una nueva fila cuando se encuentre nuevamente un campo en la primera posicion
+
+//        qDebug() << "line ***" << line;
+//        qDebug() << "line size" << line.size();
+
+        imap.toFront();
+        imap.next();
+        bool imapOnFirst=true;
+
+        uint d=0;
+        forever
+        {
+            int pos = imap.key();
+            QRegExp exp = imap.value();
+            d++;
+
+//            qDebug() << "c" << c << "d" << d << "pos" << pos << "exp" << exp.pattern() << "imapOnFirst" << imapOnFirst;
+
+            if ( pos >= line.size() )
+            {
+//                qDebug() << "no queda info pos:" << pos << "line.size" << line.size();
+                break;
+            }
+
+            int posmatch = exp.indexIn( line, pos );
+
+//            qDebug() << "pos" << pos << "posmatch" << posmatch;
+
+            if ( posmatch == pos )
+            {
+                if ( imapOnFirst )
+                {
+//                    qDebug() << "Nueva fila **********************************";
+                    QStringList lst;
+                    lstSalida.append(lst);
+                    lstFilaActual = &lstSalida[lstSalida.size()-1];
+                    c=1;
+                }
+                else
+                    c++;
+
+//                qDebug() << "agregando campo" << exp.cap(0);
+                lstFilaActual->append( exp.cap(0).simplified() );
+            }
+            else
+            {
+//                qDebug() << "no se encuentra";
+            }
+
+            //Si no se encontro el campo se agrega uno vacio
+            if ( (c+1) == d && c > 1 )
+            {
+                c++;
+                lstFilaActual->append("");
+//                qDebug() << "2222";
+            }
+
+            if ( lstFilaActual )
+            {
+                if ( imap.hasNext() )
+                {
+//                    qDebug() << "1111";
+                    imap.next();
+                    imapOnFirst=false;
+                }
+                else
+                {
+//                    qDebug() << "3333";
+                    lstFilaActual=nullptr;
+                    c=0;
+                    break;
+                }
+            }
+            else
+            {
+//                qDebug() << "4444";
+                break;
+            }
+        }
+    }
+
+    return lstSalida;
+}
+
+QString filasIndentadasSubirAanterior(QString txt)
+{
+    QStringList lstSalida;
+
+    QRegExp exp("^ +");
+    for ( QString line : txt.split("\n") )
+    {
+        if ( lstSalida.isEmpty() )
+        {
+            //se agrega la primera linea para empezar
+            lstSalida.append(line);
+            continue;
+        }
+
+        if ( line.contains(exp) )
+
+            //empieza con espacio por lo que esta indentado
+            lstSalida[lstSalida.size()-1].append(line);
+        else
+            lstSalida.append(line);
+    }
+
+    return lstSalida.join("\n");
+}
+
+QList<SBGPNeighborASPath> bgpNeighborASPathFromEquipos(QStringList lstIPs, bool agregarRedesMayoresMascara24)
+{
+    if ( lstIPs.isEmpty() )
+    {
+        QList<SBGPNeighborASPath> list;
+        return list;
+    }
+
+    QueriesConfiguration qc;
+
+    QueriesThread *qt = new QueriesThread;
+    qt->setLstIP( lstIPs );
+    qt->setConnectionProtocol( QRemoteShell::SSHTelnet );
+    qt->setInterval( 1000 );
+    qt->setSimultaneos( 3 );
+    qt->setMaxParalelos( 40 );
+
+    qc.clear();
+    qc.addQueryParameter({
+                             {"FuncionInfo_txt",
+                              "sh rpl route-policy","*",""},
+                             {"FuncionInfo_txt",
+                              "sh run formal | i \"router bgp 52468 vrf INTERNET .+ route-policy .+ in\"","*",""},
+                             {"FuncionInfo_txt",
+                              "sh bgp vrf INTERNET ipv6 unicast summary","*",""},
+                             {"FuncionInfo_txt",
+                              "sh bgp vrf INTERNET summary","*",""},
+                         });
+    qt->setQueriesConfiguration( qc );
+
+    qt->setOptions({QueryOpcion::Connect, QueryOpcion::Funcion, QueryOpcion::Exit });
+    qt->iniciarSync();
+
+    QMap<QString,QString> mapIPASN;  //para guardar el ASN de un vecino
+    QMap<QString,QString> mapPEsVecinosAConsultar;
+    QMap<QString,QString> _mapRoutePolicies;
+
+    QStringList _lstPeNeighborRPIn;
+
+    for ( Queries &qry : qt->lstQueries() )
+    {
+        QStringList lstRoutePoliciesIxpIpt;
+        QStringList lstNeighbors;
+
+        QStringList lstTXT = qry.funcionQuery->lstTxtReceived();
+        if ( lstTXT.size() < 4 )
+            continue;
+
+        //route policies
+        _mapRoutePolicies.insert( qry.ip(), lstTXT.at(0));
+        QString lastRP;
+        for ( QString line : lstTXT.at(0).split("\n") )
+        {
+            line = line.simplified();
+            QRegExp exp("route-policy (\\S+)$");
+            if ( line.contains(exp) )
+            {
+                lastRP = exp.cap(1);
+                continue;
+            }
+
+            exp.setPattern("set community.+(52468:3[1-3]0|no-advertise)");
+            if ( line.contains(exp) )
+            {
+                qDebug() << "***" << qry.ip() << "agregando policy de ixp ipt" << lastRP;
+                lstRoutePoliciesIxpIpt.append( lastRP );
+            }
+        }
+
+        //neighbor RP
+        for ( QString line : lstTXT.at(1).split("\n") )
+        {
+            line = line.simplified();
+            QRegExp exp(".+ neighbor (.+) address-family .+ route-policy (\\S+) in");
+            if ( line.contains(exp) )
+            {
+                _lstPeNeighborRPIn.append(qry.ip()+"*"+exp.cap(1)+"*"+exp.cap(2));
+                if ( !lstRoutePoliciesIxpIpt.contains(exp.cap(2)) && !lstNeighbors.contains(exp.cap(1)) )
+                {
+                    qDebug() << "***" << qry.ip() << "neighbor" << exp.cap(1) <<
+                                "con RP aceptado, se agrega a validacion de prefijos aprendidos y de ASN";
+                    lstNeighbors.append( exp.cap(1) );
+                }
+            }
+        }
+
+        //bgp neigh ipv6 unicast summary, vemos si se permite el vecino segun la politica y si se aprenden menos de 300 rutas
+        QString ips;
+        for ( QString line : filasIndentadasSubirAanterior(lstTXT.at(2)).split("\n") )
+        {
+            line = line.simplified();
+
+            qDebug() << "Summary IPV6. IPs de bgp a agregar" << qry.ip() << line;
+
+            if ( line.contains("52468") )
+            {
+                qDebug() << "No se agrega vecino bgp a la consulta de redes" << line;
+                continue;
+            }
+
+            QRegExp exp("^(([a-f]|\\d+|\\:)+) +\\d+ +(\\d+) .+ +(\\d+)\\S*$");
+            if ( line.contains(exp) )
+            {
+                if ( lstNeighbors.contains(exp.cap(1)) && exp.cap(4).toInt() > 0 && exp.cap(4).toInt() < 300 )
+                {
+                    qDebug() << "IP de bgp a agregar a consulta" << qry.ip() << exp.cap(1) << exp.cap(3) << exp.cap(4);
+                    ips.append( (!ips.isEmpty()?",":"")+exp.cap(1) ); //se agrega ese vecino a la consulta
+
+                    mapIPASN.insert(qry.ip()+"_"+exp.cap(1),exp.cap(3));
+                }
+            }
+        }
+
+        //bgp neighbor summary, vemos si se permite el vecino segun la politica y si se aprenden menos de 15000 rutas
+        for ( QString line : lstTXT.at(3).split("\n") )
+        {
+            line = line.simplified();
+
+            qDebug() << "Summary. IPs de bgp a agregar" << qry.ip() << line;
+
+            if ( line.contains("52468") )
+            {
+                qDebug() << "No se agrega vecino bgp a la consulta de redes" << line;
+                continue;
+            }
+
+            QRegExp exp("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) +\\d+ +(\\d+) .+ +(\\d+)\\S*$");
+            if ( line.contains(exp) )
+                if ( lstNeighbors.contains(exp.cap(1)) && exp.cap(3).toInt() > 0 && exp.cap(3).toInt() < 15000 )
+                {
+                    qDebug() << "IP de bgp a agregar a consulta" << qry.ip() << exp.cap(1) << exp.cap(2) << exp.cap(3);
+                    ips.append( (!ips.isEmpty()?",":"")+exp.cap(1) ); //se agrega ese vecino a la consulta
+
+                    mapIPASN.insert(qry.ip()+"_"+exp.cap(1),exp.cap(2));
+                }
+        }
+
+        mapPEsVecinosAConsultar.insert( qry.ip(),ips ); //  key: 172.16.30.253 value: 192.168.1.1,192.168.1.2,192.168.1.3
+    }
+
+    qc.clear();
+    qt->deleteLater();
+
+    //***********************  Entrando a todos los PEs origenes y se consultan las redes de los vecinos bgp en la vrf
+
+    qDebug() << "Entrando a todos los PEs origenes y se consultan las redes de los vecinos bgp en la vrf";
+
+    qt = new QueriesThread;
+    qt->setLstIP( lstIPs );
+    qt->setConnectionProtocol( QRemoteShell::SSHTelnet );
+    qt->setInterval( 1000 );
+    qt->setSimultaneos( 3 );
+    qt->setMaxParalelos( 40 );
+
+    QMapIterator<QString,QString> imapPEsVecinosAConsultar(mapPEsVecinosAConsultar);
+    //agregando la consulta de rutas por los vecinos de bgp
+    while (imapPEsVecinosAConsultar.hasNext()) {
+        imapPEsVecinosAConsultar.next();
+        for ( QString neighbor : imapPEsVecinosAConsultar.value().split(",",QString::SkipEmptyParts) )
+        {
+            if (neighbor.contains(":"))
+                //IPV6
+                qc.addQueryParameter({
+                                         {"FuncionInfo_txt",
+                                          "sh bgp vrf INTERNET ipv6 unicast neighbors "+
+                                          neighbor+" routes",imapPEsVecinosAConsultar.key(),""}
+                                     });
+            else
+                //IPV4
+                qc.addQueryParameter({
+                                         {"FuncionInfo_txt",
+                                          "sh bgp vrf INTERNET neighbors "+
+                                          neighbor+" routes",imapPEsVecinosAConsultar.key(),""}
+                                     });
+        }
+
+        //agregando la consulta de network a distribuir por bgp IPv6
+        qc.addQueryParameter({
+                                 {"FuncionInfo_txt",
+                                  "sh run router bgp 52468 vrf INTERNET address-family ipv6 unicast",imapPEsVecinosAConsultar.key(),""}
+                             });
+
+        //agregando la consulta de network a distribuir por bgp IPv4
+        qc.addQueryParameter({
+                                 {"FuncionInfo_txt",
+                                  "sh run router bgp 52468 vrf INTERNET address-family ipv4 unicast",imapPEsVecinosAConsultar.key(),""}
+                             });
+    }
+    qt->setQueriesConfiguration( qc );
+
+    qt->setOptions({QueryOpcion::Connect, QueryOpcion::Funcion, QueryOpcion::Exit });
+    qt->iniciarSync();
+
+    //agregando
+
+    QList<SBGPNeighborASPath> lstSalidaIPv4;
+    QList<SBGPNeighborASPath> lstSalidaIPv6;
+
+    for ( Queries &qry : qt->lstQueries() )
+    {
+        int posInicioASPath=63;
+        QString lastIPv6;
+
+        for ( QString txt : qry.funcionQuery->lstTxtReceived() )
+        {
+            QStringList lines = txt.split("\n",QString::SkipEmptyParts);
+            if ( lines.isEmpty() )
+                continue;
+            QString line1 = lines.at(0);
+
+            bool neighboripv6=false;
+            bool neighboripv4=false;
+            bool network=false;
+
+            if ( line1.contains("INTERNET ipv6 unicast neighbors") )
+                neighboripv6=true;
+            if ( line1.contains("INTERNET neighbors") )
+                neighboripv4=true;
+            if ( line1.contains("sh run router bgp") )
+                network=true;
+
+            if ( neighboripv6 )
+            {
+                //IPV6
+
+                QMap<int,QRegExp> map;
+                map.insert( 3,QRegExp("([0-9a-f]{1,4}:\\S+/\\d{1,3})"));
+                map.insert(22,QRegExp("([0-9a-f]{1,4}:\\S+)"));
+                map.insert(63,QRegExp(".+$"));
+
+                QList<QStringList> lstCampos = tableMultiRow2Table(txt,map);
+
+                for ( QStringList lst : lstCampos )
+                {
+                    if ( lst.size() != 3 )
+                        continue;
+
+                     QString red = lst.at(0);
+                     QString peer = lst.at(1);
+                     QString aspath = lst.at(2);
+                     aspath.replace(" i","");
+                     aspath.replace(" ?","");
+
+                     if ( red.split("/").at(1).toInt() > 48 )
+                         continue;
+
+                     QString ASN = mapIPASN.value( qry.ip()+"_"+peer );
+
+                     //buscamos el Route Policy del neighbor
+                     QString rp;
+                     for ( QString PeNeighborRPIn : _lstPeNeighborRPIn )
+                     {
+                         QStringList data = PeNeighborRPIn.split("*");
+                         if ( data.size() != 3 )
+                             continue;
+
+                         if ( data.at(0) == qry.ip() && data.at(1) == peer )
+                         {
+                             rp =  data.at(2);
+                             break;
+                         }
+                     }
+
+                     SBGPNeighborASPath i;
+                     i.peip = qry.ip();
+                     i.peerip = peer;
+                     i.peerasn = ASN;
+                     i.red = red;
+                     i.asnorigen = aspath.split(" ",QString::SkipEmptyParts).last().simplified();
+                     i.aspath = "52468 "+aspath.simplified();
+                     i.routepolicy = rp;
+
+                     lstSalidaIPv6.append(i);
+                }
+            }
+            else if ( neighboripv4 )
+            {
+                //IPV4
+
+                for ( QString line : lines )
+                {
+                    if (line.contains("Network") && line.contains("Metric") && line.contains("Weight") && line.contains("Path"))
+                    {
+                        posInicioASPath=line.indexOf("Path");
+                        qDebug() << "Nuevo posInicioASPath" << posInicioASPath;
+                        continue;
+                    }
+
+                    QRegExp exp(" *(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d+) +(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) ");
+                    if ( line.contains(exp) )
+                    {
+                        if ( exp.cap(1) == "0.0.0.0/0" )
+                            continue;
+
+                        qDebug() << "Por vecino:" << qry.ip() << "agregando red y su verdadero origen" << exp.cap(1) << qry.ip()
+                                 << "desde" << exp.cap(2) << posInicioASPath;
+
+                        if ( exp.cap(1).split("/").at(1).toInt() > 24 && !agregarRedesMayoresMascara24 )
+                            continue;
+
+                        QString ASN = mapIPASN.value( qry.ip()+"_"+exp.cap(2) );
+                        if ( ASN.isEmpty() ) ASN="52468";
+
+                        //buscamos el Route Policy del neighbor
+                        QString rp;
+                        for ( QString PeNeighborRPIn : _lstPeNeighborRPIn )
+                        {
+                            QStringList data = PeNeighborRPIn.split("*");
+                            if ( data.size() != 3 )
+                                continue;
+
+                            if ( data.at(0) == qry.ip() && data.at(1) == exp.cap(2) )
+                            {
+                                rp =  data.at(2);
+                                break;
+                            }
+                        }
+
+                        QString aspath = "52468 "+line.mid(posInicioASPath);
+                        aspath.replace(" i","");
+                        aspath.replace(" ?","");
+
+                        SBGPNeighborASPath i;
+                        i.peip = qry.ip();
+                        i.peerip = exp.cap(2);
+                        i.peerasn = ASN;
+                        i.red = exp.cap(1);
+                        i.asnorigen = aspath.split(" ",QString::SkipEmptyParts).last().simplified();
+                        i.aspath = "52468 "+aspath.simplified();
+                        i.routepolicy = rp;
+
+                        lstSalidaIPv4.append(i);
+                    }
+                }
+            }
+            else if ( network )
+            {
+                //NETWORK
+
+                for ( QString line : lines )
+                {
+                    if (line.contains("Network") && line.contains("Metric") && line.contains("Weight") && line.contains("Path"))
+                    {
+                        posInicioASPath=line.indexOf("Path");
+                        qDebug() << "Nuevo posInicioASPath" << posInicioASPath;
+                        continue;
+                    }
+
+                    QRegExp exp2("network (.+) route-policy (.+)");
+                    if ( line.contains(exp2) )
+                    {
+                        qDebug() << "Por network:" << qry.ip() << "agregando red y su verdadero origen" << exp2.cap(1) << qry.ip();
+
+                        QString red = exp2.cap(1);
+                        if ( red.contains(".") )
+                        {
+                            if ( red.split("/").at(1).toInt() > 24 )
+                                continue;
+
+                            SBGPNeighborASPath i;
+                            i.peip = qry.ip();
+                            i.peerasn = "52468";
+                            i.red = exp2.cap(1);
+                            i.asnorigen = "52468";
+                            i.routepolicy = exp2.cap(2);
+
+                            lstSalidaIPv4.append(i);
+                        }
+                        else if ( red.contains(":") )
+                        {
+                            if ( red.split("/").at(1).toInt() > 48 )
+                                continue;
+
+                            SBGPNeighborASPath i;
+                            i.peip = qry.ip();
+                            i.peerasn = "52468";
+                            i.red = red;
+                            i.asnorigen = "52468";
+                            i.routepolicy = exp2.cap(2);
+
+                            lstSalidaIPv6.append(i);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    qc.clear();
+    qt->deleteLater();
+
+    QList<SBGPNeighborASPath> lstSalida;
+
+    lstSalida.append( lstSalidaIPv4 );
+    lstSalida.append( lstSalidaIPv6 );
+
+    return lstSalida;
+}
+
+QString buscarServicioID(QString txt)
+{
+    QRegExp exp("([A-Z]|&){7}\\d{8}(I|C)");
+    if ( txt.contains(exp) )
+        return exp.cap(0);
+
+    exp.setPattern("[A-Z]{6}\\,\\d{8}(I|C)");
+    if ( txt.contains(exp) )
+        return exp.cap(0);
+
+    exp.setPattern("[A-Z]{4}(\\d{8}|\\d{7})");
+    if ( txt.contains(exp) )
+        return exp.cap(0);
+
+    exp.setPattern("[A-Z]{2}(\\d{8}|\\d{7})");
+    if ( txt.contains(exp) )
+        return exp.cap(0);
+
+    exp.setPattern("IDU:(\\S+)-(CLI|DE)");
+    if ( txt.contains(exp) )
+        return exp.cap(0);
+
+    return "";
 }

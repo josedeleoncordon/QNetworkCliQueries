@@ -62,6 +62,9 @@ protected:
 
     SMplsL2PWInfo *buscarVFI_PW(QString vfi, QString destino, QString vcid);
 
+    QStringList lstIosInterfaces;
+    void nextIOSrunInterfaces();
+
 public:
     MplsL2TransportInfo() {}
     MplsL2TransportInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
@@ -85,12 +88,13 @@ public:
 
 private slots:
 
-    void on_term_receiveText_MplsTETunnels_IOS_VFI();
-    void on_term_receiveText_MplsTETunnels_IOS_L2Transport();
-    void on_term_receiveText_MplsTETunnels_IOS_Xconnect();
+    void on_term_receiveText_IOS_VFI();
+    void on_term_receiveText_IOS_L2Transport();
+    void on_term_receiveText_IOS_Xconnect();
+    void on_term_receiveText_IOS_runInterfaces();
 
-    void on_term_receiveText_MplsTETunnels_XR_BD();
-    void on_term_receiveText_MplsTETunnels_XR_Xconnect();
+    void on_term_receiveText_XR_BD();
+    void on_term_receiveText_XR_Xconnect();
 };
 
 Q_DECLARE_METATYPE(SMplsL2PWInfo)

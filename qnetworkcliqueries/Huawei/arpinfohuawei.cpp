@@ -13,8 +13,8 @@ ArpInfoHuawei::~ArpInfoHuawei()
 
 void ArpInfoHuawei::getArpInfo()
 {
-	m_vrfs = m_queriesConfiguration.values("Arp_VRFs",m_ip,m_os);
-	m_macip = m_queriesConfiguration.value("ARP_MacIP",m_ip,m_os);
+    m_vrfs = m_queriesConfiguration.values("Arp_VRFs",m_ip,m_os,m_conexionID);
+    m_macip = m_queriesConfiguration.value("ARP_MacIP",m_ip,m_os,m_conexionID);
 
     qDebug() << "ArpInfoHuawei::getArpInfo()" << m_vrfs  << m_macip;
 

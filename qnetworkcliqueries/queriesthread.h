@@ -25,7 +25,8 @@ public:
     void setPrincipalUserFirst(bool principalfirst) { m_principaluserfirst=principalfirst; }
     void setLinuxPrompt(QString prompt) { m_linuxprompt = prompt; }
     void setConnectionProtocol( QRemoteShell::ConnectionProtocol cp ) { m_connectionprotocol = cp; }
-    void setLstIP(QStringList lst) { m_lstIP = lst; }
+    void setLstIP(QStringList lst);
+    void setQueriesConfiguration(QueriesConfiguration configuration);
     void setLstIPsConsultaAnterior(QStringList lst) { lstIPsConsultaAnterior=lst; }
     void setConsultaSoloEquiposNuevos(bool enable) { m_soloequiposnuevos = enable; }
     void setConsultaAgregarVecinosLinksEnSegmentos(QStringList lstSegmentos) { m_lstLinksEnSegmentos=lstSegmentos; }
@@ -38,7 +39,6 @@ public:
     void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
     void setEquipmentNeighborsOSPFEquipoRaizProceso(QString proceso) { m_consultarVecinosOSPFEquipoRaizProceso=proceso; }
     void setEquipmentNeighborsRegExpOSPFArea(QString area) { m_consultaOSPFArea=area; }
-    void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
 
     void setNewThreadWorker(QueriesThreadWorker*(*ThreadWorker)(void));
 
@@ -80,7 +80,8 @@ protected:
    QString m_linuxprompt;
    QString m_consultaOSPFArea;
    QStringList m_lstIP;
-   QStringList m_lstIPsAintentarPorGW;
+   QStringList m_lstIPsMismoEquipo; //Para varias consultas de un equipo en varias conexiones: 172.16.30.253_1,172.16.30.253_2
+   QStringList m_lstIPsAintentarPorGW;   
    QStringList m_lstIPsConectadosPorGW;
    QStringList lstIPsConsultaAnterior;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;
@@ -92,6 +93,7 @@ protected:
    QStringList m_lstLoopbacksEnSegmentos;
    QList<Queries*> m_queriesenconsulta;
    int m_maxparalelos; //cantidad de equipos que se estan trabajando
+   int m_maxparalelosmismoequipo; //para consultas divididas en varias conexiones
    int m_equiposExitosos;
    int m_interval;
    int m_conerrores;
@@ -123,13 +125,18 @@ protected:
 
    void _clear();
 //   QueriesThreadWorker *newThreadWorker();
-   void siguienteEquipo(QString ip, bool gw=false);   
+   bool conectarSiguienteMismoEquipo(QString IP);
+   void siguienteEquipo(QString IP, bool gw=false);
 
    void validarYagregarVecinoAconsulta(Queries *qry,
                                        QString ip,
                                        QString ipOinterfazDondeSeViene,
                                        QString interfazEsteEquipoSalida,
                                        QString interfazSiguienteEquipoEntrada);
+
+   //verifica si las configuraciones de parametros trae equipos con consultas en diferentes conexiones para actualizar
+   //la lista de IPs
+   void verificarLstIPsQueriesConfiguration();
 };
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,

@@ -25,7 +25,8 @@ HEADERS += $$PWD/record/arearecord.h \
 		$$PWD/record/pcp_proveedorrecord.h \
 		$$PWD/record/proveedorrecord.h \
 		$$PWD/qant3_global.h \
-		$$PWD/recordfactory.h
+		$$PWD/recordfactory.h \
+		$$PWD/record/pcp_regionrecord.h
 
 SOURCES += $$PWD/record/arearecord.cpp \
 		$$PWD/record/enlacerecord.cpp \
@@ -43,7 +44,8 @@ SOURCES += $$PWD/record/arearecord.cpp \
 		$$PWD/record/pcp_perecord.cpp \
 		$$PWD/record/pcp_proveedorrecord.cpp \
 		$$PWD/record/proveedorrecord.cpp \
-		$$PWD/recordfactory.cpp
+		$$PWD/recordfactory.cpp \
+		$$PWD/record/pcp_regionrecord.cpp
 
 RESOURCES += schema.qrc
 

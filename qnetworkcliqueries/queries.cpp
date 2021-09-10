@@ -40,7 +40,7 @@ Queries::Queries(const Queries &other) : QObject(other.parent())
 
 Queries::~Queries()
 {
-    qCDebug(queries) << m_ip << "Queries::~Queries()";
+    qCDebug(queries) << m_ip << "Queries::~Queries()" << this;
     qDeleteAll(m_lstFunciones);
 }
 
@@ -480,7 +480,7 @@ bool Queries::existsQueryInformation(int option, int i)
 
 FuncionBase *Queries::getQuery(int option,int i)
 {
-    int c=1;
+    int c=0;
     for ( FuncionBase *f : m_lstFunciones )
     {
         if ( f->queryOption() == option )
@@ -753,13 +753,13 @@ void Queries::nextProcess()
     else if ( m_opcionActual == EquipmentNeighbors )
     {        
         EquipmentNeighborsInfo *f=dynamic_cast<EquipmentNeighborsInfo*>(m_currentFuncion);
-        if ( !equipmentNeighborsInfoQuery ) equipmentNeighborsInfoQuery = f;
+        if ( !equipmentNeighborsInfoQuery ) equipmentNeighborsInfoQuery = f;   //la primera consulta tiene acceso rapido por este puntero
         f->setBrand(m_brand);
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
-        f->setParentQuery(this);
+        f->setParentQuery(this);  //para que las funciones tengas acceso al query y a la configuracion de parametros de funciones
         connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
         connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));

@@ -15,6 +15,7 @@
 #include "record/pcp_peerrecord.h"
 #include "record/pcp_peer_tiporecord.h"
 #include "record/pcp_proveedorrecord.h"
+#include "record/pcp_regionrecord.h"
 #include "record/proveedorrecord.h"
 
 using namespace QAnt;
@@ -52,6 +53,8 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new pcp_peer_tipoRecord;
 	if ( table == "pcp_proveedor" )
 		return new pcp_proveedorRecord;
+	if ( table == "pcp_region" )
+		return new pcp_regionRecord;
 	if ( table == "proveedor" )
 		return new proveedorRecord;
 	return nullptr;

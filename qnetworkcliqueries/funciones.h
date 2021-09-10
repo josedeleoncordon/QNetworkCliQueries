@@ -156,4 +156,42 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
 //convierte mascara
 QString convertirMascaraMayorAmenor(QString red, int mascara);
 
+//convierte mascara octetos a dos numeros    255.255.255.0 -> 24
+QString convertirMascaraOctetosAdos(QString mascara);
+
+//Extrae datos en tabla por posiciones X y en diferentes lineas si un campo es muy largo
+//*  2a00:86c0:2008::/47
+//                      2001:504:40:108::1:10
+//                                                      0 2906 40027 i
+//
+// lista de posiciones debe venir ordenada en forma ascendente
+QList<QStringList> tableMultiRow2Table(QString &txt,
+                                       QMap<int, QRegExp> &mapPosicionesExpCampos);
+
+//Una fila que este indentada la sube al finalizar la linea anterior
+//*  2a00:86c0:2008::/47
+//                      2001:504:40:108::1:10
+//
+//  lo convierte a:
+//
+//*  2a00:86c0:2008::/47 2001:504:40:108::1:10
+QString filasIndentadasSubirAanterior(QString txt);
+
+//Devuelve las redes propias y las que se aprenden por BGP que no sean IPT, IXP o PNI   (TERMINAR DE ESTANDARIZAR)
+//Columnas: PE origen, IP peer, ASN Peer, Red, ASN final, AS-Path, Route policy
+struct SBGPNeighborASPath
+{
+    QString peip;
+    QString peerip;
+    QString peerasn;
+    QString red;
+    QString asnorigen;
+    QString aspath;
+    QString routepolicy;
+};
+QList<SBGPNeighborASPath> bgpNeighborASPathFromEquipos(QStringList lstIPs, bool agregarRedesMayoresMascara24=false);
+
+//Busca los IDs de un servicio en un texto
+QString buscarServicioID(QString txt);
+
 #endif // FUNCIONES_H
