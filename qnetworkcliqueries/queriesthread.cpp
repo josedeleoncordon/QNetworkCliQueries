@@ -10,7 +10,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_interval=0;
     m_simultaneos=0;
     m_maxparalelos=0;
-    m_maxparalelosmismoequipo=5;
+    m_maxparalelosmismoequipo=4;
     m_connectionprotocol = QRemoteShell::SSHTelnet;
     m_principaluserfirst=true;
     m_soloequiposnuevos=false;
@@ -86,10 +86,10 @@ void QueriesThread::verificarLstIPsQueriesConfiguration()
         if ( !value._IDConexion.isEmpty() )
         {
             QRegExp exp("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
-            if ( exp.exactMatch( value._IPoPlatform ) )
+            if ( exp.exactMatch( value._IP ) )
             {
-                m_lstIPsMismoEquipo.append(value._IPoPlatform+"_"+value._IDConexion);
-                m_lstIP.removeOne(value._IPoPlatform);
+                m_lstIPsMismoEquipo.append(value._IP+"_"+value._IDConexion);
+                m_lstIP.removeOne(value._IP);
             }
         }
     }
@@ -205,14 +205,16 @@ void QueriesThread::on_timer_timeOut()
     if ( !m_lstIPsMismoEquipo.isEmpty() )
     {
         //tratamos de conectar un equipo con diferentes consultas en direferentes conexiones
-        QString ip = m_lstIPsMismoEquipo.first();
-        if ( conectarSiguienteMismoEquipo(ip) )
-        {
-            qCDebug(queriesthread) << ip << "siguiente mismo equipo";
-            mismoequipo=true;
-            m_lstIPsMismoEquipo.takeFirst();
-            siguienteEquipo( ip );
-        }
+        for ( QString ip_idconexion : m_lstIPsMismoEquipo )
+            if ( conectarSiguienteMismoEquipo(ip_idconexion) )
+            {
+                //se puede conectar a otro del mismo equipo
+                qCDebug(queriesthread) << ip_idconexion << "siguiente mismo equipo";
+                mismoequipo=true;
+                m_lstIPsMismoEquipo.removeOne( ip_idconexion );
+                siguienteEquipo( ip_idconexion );
+                break;
+            }
     }
     if ( !mismoequipo )
         if ( m_lstIpPos < m_lstIP.size()-1 )
@@ -254,12 +256,20 @@ bool QueriesThread::conectarSiguienteMismoEquipo(QString IP)
     int c=0;
     for ( QString ipequipo : m_equiposenconsulta )
         if ( ip == ipequipo )
-            c++;
+            c++;    
 
     if ( c < m_maxparalelosmismoequipo )
+    {
+        qCDebug(queriesthread) << "QueriesThread::conectarSiguienteMismoEquipo" << ip <<
+                                  "Consultas actuales" << c << "m_maxparalelosmismoequipo" << m_maxparalelosmismoequipo << "TRUE";
         return true;
+    }
     else
+    {
+        qCDebug(queriesthread) << "QueriesThread::conectarSiguienteMismoEquipo" << ip <<
+                                  "Consultas actuales" << c << "m_maxparalelosmismoequipo" << m_maxparalelosmismoequipo << "FALSE";
         return false;
+    }
 }
 
 void QueriesThread::siguienteEquipo(QString IP, bool gw)
@@ -320,6 +330,11 @@ void QueriesThread::siguienteEquipo(QString IP, bool gw)
 void QueriesThread::equipoConsultado(Queries *qry)
 {
     QMutexLocker locker(&m_mutex);
+
+//    qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado 1111"
+//             << qry->hostName() << "conexionID" << qry->conexionID();
+    qCDebug(queriesthread) << "QueriesThread::equipoConsultado 1111"
+             << qry->ip() << qry->hostName() << "conexionID" << qry->conexionID();
 
     if ( m_cancelar )
         return;
@@ -387,6 +402,9 @@ void QueriesThread::equipoConsultado(Queries *qry)
                      !qry->hostName().isEmpty() &&
                      qry->conexionID() == q->conexionID() )
                 {                    
+                    qCDebug(queriesthread) << qry->ip() <<
+                                              "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
+                    qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
                     encontrado=true;
                     qry->deleteLater();
                     break;
@@ -394,6 +412,9 @@ void QueriesThread::equipoConsultado(Queries *qry)
             }
             if ( !encontrado )
             {
+                qCDebug(queriesthread) << qry->ip() <<
+                                          "QueriesThread::equipoConsultado -- Se agrega a listado de lstQueries";
+                qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- Se agrega a listado de lstQueries";
                 m_lstIPsConectadosPorGW.append( qry->ip() );
                 m_lstQueries.append( qry );
             }
@@ -443,7 +464,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
 //            qry->deleteLater();
 //        else
 //            m_lstQueries.append( qry );
-    }
+    }        
 
     emit newInformation();
 
@@ -494,13 +515,13 @@ void QueriesThread::equipoConsultado(Queries *qry)
                 if ( !m_lstIPsMismoEquipo.isEmpty() )
                 {
                     //tratamos de conectar un equipo con diferentes consultas en direferentes conexiones
-                    QString ip = m_lstIPsMismoEquipo.first();
-                    if ( !conectarSiguienteMismoEquipo(ip) )
+                    QString ip_idconexion = m_lstIPsMismoEquipo.first();
+                    if ( conectarSiguienteMismoEquipo(ip_idconexion) )
                     {
-                        qCDebug(queriesthread) << ip << "siguiente mismo equipo";
+                        qCDebug(queriesthread) << ip_idconexion << "siguiente mismo equipo";
                         mismoequipo=true;
                         m_lstIPsMismoEquipo.takeFirst();
-                        siguienteEquipo( ip );
+                        siguienteEquipo( ip_idconexion );
                     }
                 }
                 if ( !mismoequipo )
@@ -523,6 +544,8 @@ void QueriesThread::equipoConsultado(Queries *qry)
             emit finished(true);
         }
     }
+
+    qDebug() << qry->ip() << "QueriesThread::equipoConsultado FIN";//no con qCDebug ya que para cerrar el archivo debug del equipo es necesario est en QueriesMessageHandler. No Borrar. No usar con qCDebug ya que podria ser deshabilitado.
 }
 
 void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
@@ -645,9 +668,30 @@ QList<Queries> QueriesThread::lstQueries()
     QList<Queries> lst;
 
     for ( Queries *qry : m_lstQueries )
+    {
+        qDebug() << "QueriesThread::lstQueries()" << qry->ip() << "listo para clonar";
         lst.append(*qry);
+    }
 
     return lst;
+}
+
+QList<Queries*> QueriesThread::lstQueriesPointers()
+{
+    return m_lstQueries;
+}
+
+Queries QueriesThread::queriesFromIP(QString ip)
+{
+    Queries qrysalida;
+    for ( Queries *qry : m_lstQueries )
+        if ( qry->ip() == ip )
+        {
+            qrysalida = *qry;
+            return qrysalida;
+        }
+
+    return qrysalida;
 }
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,

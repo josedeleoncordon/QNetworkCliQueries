@@ -6,12 +6,12 @@
 
 QueriesMessageHandler *QueriesMessageHandler::m_instance = nullptr;
 
-void QueriesMessageHandler::initHandler(QString path)
+void QueriesMessageHandler::initHandler(QString path, bool savelogs)
 {
     if ( m_instance )
         delete m_instance;
 
-    m_instance = new QueriesMessageHandler(path);
+    m_instance = new QueriesMessageHandler(path,savelogs);
 }
 
 QueriesMessageHandler* QueriesMessageHandler::instance()
@@ -19,9 +19,10 @@ QueriesMessageHandler* QueriesMessageHandler::instance()
     return m_instance;
 }
 
-QueriesMessageHandler::QueriesMessageHandler(QString path)
+QueriesMessageHandler::QueriesMessageHandler(QString path,bool savelogs)
 {
     _path = path;
+    _savelogs = savelogs;
     _expIP.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
     _expIP.setMinimal(false);
 
@@ -65,6 +66,9 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
 {
     Q_UNUSED(context)
 
+    if ( !_savelogs )
+        return;
+
     _mutex.lock();
 
     switch (type) {
@@ -86,6 +90,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
         QStringList data = msg.split(" ",QString::SkipEmptyParts);
         if ( !data.isEmpty() )
         {
+//            if ( false )
             if ( _expIP.exactMatch(data.first().replace("\"","")) )
             {
                 QString ip = data.takeFirst().replace("\"","");
@@ -131,14 +136,15 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
                 l->ts->flush();
 
                 //cerrando archivo si finalizo la consulta en el equipo
-                if ( msg.contains("QRemoteShell::~QRemoteShell()") )
+                if ( msg.contains("QueriesThread::equipoConsultado FIN") )
                 {
                     l->file->close();
 //                    l->file->remove();
                     l->file->deleteLater();
                     _lstLogs.removeOne( l );
-//                    lstIPsfinalizadas.append(ip);
+//                    lstIPsfinalizadas.append(ip);                    
 
+                    _dbgS << "Cerrando archivo log " << l->ip << endl;
                     _dbgS << "lstLogs size" << _lstLogs.size() << endl;
                     _dbgS.flush();
                 }

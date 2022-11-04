@@ -31,6 +31,11 @@ BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell
     return new BGPInfo(term,option);
 }
 
+BGPInfo *factoryNewBGPNetworksBGPAttrInfo(QString brandName, QString type, QRemoteShell *term, int option)
+{
+    return new BGPInfo(term,option);
+}
+
 EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new EquipmentNeighborsInfo(term,option);

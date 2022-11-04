@@ -59,6 +59,10 @@ void Properties::loadSettings()
     settings.beginGroup("GroupRoots");
     mapGrupoRaizIP = settings.value("mapGrupoRaizIP").toMap();
     settings.endGroup();
+
+    settings.beginGroup("Mie");
+    mapRedesNoPublicadas = settings.value("mapRedesNoPublicadas").toMap();
+    settings.endGroup();
 }
 
 void Properties::saveSettings()
@@ -93,6 +97,10 @@ void Properties::saveSettings()
 
     settings.beginGroup("GroupRoots");
     settings.setValue("mapGrupoRaizIP",mapGrupoRaizIP);
+    settings.endGroup();
+
+    settings.beginGroup("Mie");
+    settings.setValue("mapRedesNoPublicadas",mapRedesNoPublicadas);
     settings.endGroup();
 }
 

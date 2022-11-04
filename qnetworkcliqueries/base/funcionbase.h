@@ -58,6 +58,7 @@ enum QueryOpcion {
     Mplsl2Transport,
     Funcion,
     BGPNetworks,
+    BGPNetworksBGPAttr,
     Exit
 };
 
@@ -68,11 +69,17 @@ public:
 
     QString _key;
     QString _value;
-    QString _IPoPlatform;
+    QString _IP;
+    QString _Platform;
     QString _IDConexion;
     bool _appendValue;
 
-    QueriesConfigurationValue(QString key, QString value, QString IPoPlataforma, QString IDConexion, bool appendValue=true);
+    QueriesConfigurationValue(QString key,
+                              QString value,
+                              QString IP,
+                              QString plataforma,
+                              QString IDConexion,
+                              bool appendValue=true);
     QueriesConfigurationValue(const QueriesConfigurationValue &other);
     QueriesConfigurationValue() {}
 

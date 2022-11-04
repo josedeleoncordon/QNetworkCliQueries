@@ -106,8 +106,14 @@ QString IP2Binario(QString ip);
 //convierte una IP (11000000101010000000000100000000) a octetos
 QString binario2IP(QString ip);
 
+//indica si la IP1 es mayor que IP2
+bool esIP1MayorQueIP2(QString ip1, QString ip2);
+
 //verifica si una IP pertenece a un segmento
 bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos);  //segmentoIP_mascara2digitos ej: 192.168.1.0/24
+
+//indica si una red pertenece a una red privada
+bool isRedPrivada(QString);
 
 //buscar la pareja de la interfaz que pertenezca al mismo segmento /30
 Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries> &lst,
@@ -188,8 +194,16 @@ struct SBGPNeighborASPath
     QString asnorigen;
     QString aspath;
     QString routepolicy;
+    QString vrf;
 };
-QList<SBGPNeighborASPath> bgpNeighborASPathFromEquipos(QStringList lstIPs, bool agregarRedesMayoresMascara24=false);
+//QList<SBGPNeighborASPath> bgpNeighborASPathFromEquiposUfinet(QStringList lstIPs, bool agregarRedesMayoresMascara24=false);
+//QList<SBGPNeighborASPath> bgpNeighborASPathFromEquiposNedetel(QStringList lstIPs, bool agregarRedesMayoresMascara24=false);
+QList<SBGPNeighborASPath> bgpNeighborASPathFromEquipos(QStringList lstIPs,
+                                                       QStringList lstVRFs,
+                                                       QString ASN,
+                                                       QString comunidadesProveedor,
+                                                       QStringList lstNeighborEnRedFiltro,
+                                                       bool agregarRedesMayoresMascara24=false);
 
 //Busca los IDs de un servicio en un texto
 QString buscarServicioID(QString txt);

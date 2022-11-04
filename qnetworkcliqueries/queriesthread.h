@@ -56,6 +56,8 @@ public:
     int equiposConexionConErrores() { return m_conexionerrores; }
     QStringList equiposEnConsulta() { return m_equiposenconsulta; }
     QList<Queries> lstQueries();
+    QList<Queries*> lstQueriesPointers();
+    Queries queriesFromIP(QString ip);
     QMap<QString, QString> errorMap() { return m_errorMap; }
     QStringList lstIPsConectadosPorGW() { return m_lstIPsConectadosPorGW; }
 

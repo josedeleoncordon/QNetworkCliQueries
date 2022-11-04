@@ -29,8 +29,9 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString bdhost;
 
         QMap<QString,QString> mapFuncionesArgumentos;
-
         QMap<QString,QVariant> mapGrupoRaizIP;
+
+        QMap<QString,QVariant> mapRedesNoPublicadas;
 
     private:
         static Properties *m_instance;

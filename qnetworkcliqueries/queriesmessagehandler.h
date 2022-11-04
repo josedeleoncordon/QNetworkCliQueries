@@ -10,14 +10,14 @@
 class QueriesMessageHandler
 {
 public:
-    static void initHandler(QString path);
+    static void initHandler(QString path, bool savelogs = true);
     static QueriesMessageHandler* instance();
     void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
     void close(); //para cerrar todos los archivos al finalizar
     void init(); //para limpiar todos los archivos de una sesion anterior
 
 private:
-    QueriesMessageHandler(QString path);
+    QueriesMessageHandler(QString path,bool savelogs);
     ~QueriesMessageHandler();
     static QueriesMessageHandler *m_instance;
     struct log
@@ -27,6 +27,7 @@ private:
         QTextStream *ts;
     };
 
+    bool _savelogs;
     QFile _dbgFie;
     QTextStream _dbgS;
     QFile _otherFie;
@@ -37,7 +38,7 @@ private:
     QString _path;
     QMap<QString,QString> _mapIPnumero;
     int _c;
-    QMutex _mutex;
+    QMutex _mutex;   
 };
 
 void queriesMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);

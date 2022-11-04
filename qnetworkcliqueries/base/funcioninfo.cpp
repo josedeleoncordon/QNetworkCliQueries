@@ -9,6 +9,7 @@ FuncionInfo::FuncionInfo(const FuncionInfo &other):
 {
     m_brand = other.m_brand;
     m_platform = other.m_platform;
+    m_os = other.m_os;
     m_name = other.m_name;
     m_ip = other.m_ip;
     _lstTxt = other._lstTxt;
@@ -19,6 +20,10 @@ FuncionInfo::~FuncionInfo()
 
 void FuncionInfo::getTXT()
 {
+
+
+    qDebug() << "FuncionInfo::getTXT()" << m_ip << m_os << m_conexionID;
+
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
     _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,m_os,m_conexionID );
     _siguienteFuncion();

@@ -69,6 +69,7 @@ void Queries::iniciar()
     arpsQuery = nullptr;
     bgpNeighborsQuery = nullptr;
     bgpNetworksQuery = nullptr;
+    bgpNetworksBGPAttrQuery = nullptr;
     ipRoutesQuery = nullptr;
     configQuery = nullptr;
     exitQuery = nullptr;
@@ -94,7 +95,7 @@ void Queries::iniciar()
 }
 
 void Queries::clone(const Queries& other)
-{
+{       
     m_connected = other.m_connected;
     m_name = other.m_name;
     m_fullName = other.m_fullName;
@@ -114,8 +115,12 @@ void Queries::clone(const Queries& other)
     m_pwd = other.m_pwd;
     m_lstOpciones = other.m_lstOpciones;
 
+    qDebug() << "Queries::clone" << m_ip << m_name;
+
     for ( FuncionBase *f : other.m_lstFunciones )
     {
+        qDebug() << "Queries::clone funcion" << m_ip << m_name << f->queryOption();
+
         switch (f->queryOption()) {
         case (QueryOpcion::EquipmentNeighbors): {
             EquipmentNeighborsInfo *ff = new EquipmentNeighborsInfo(*dynamic_cast<EquipmentNeighborsInfo*>(f));
@@ -243,6 +248,19 @@ void Queries::clone(const Queries& other)
             if ( !bgpNetworksQuery ) bgpNetworksQuery=ff;
             break;
         }
+        case (QueryOpcion::BGPNetworksBGPAttr):
+        {
+            BGPInfo *mie = dynamic_cast<BGPInfo*>(f);
+            if ( !mie )
+                qDebug() << "Queries::clone dynamic_cast<BGPInfo*>(f) null";
+
+
+
+            BGPInfo *ff = new BGPInfo(*mie) ;
+            m_lstFunciones.append( ff );
+            if ( !bgpNetworksBGPAttrQuery ) bgpNetworksBGPAttrQuery=ff;
+            break;
+        }
         case (QueryOpcion::IpRoutes): {
             IPRouteInfo *ff = new IPRouteInfo(*dynamic_cast<IPRouteInfo*>(f)) ;
             m_lstFunciones.append( ff );
@@ -256,7 +274,14 @@ void Queries::clone(const Queries& other)
             break;
         }
         case (QueryOpcion::Funcion): {
-            FuncionInfo *ff = new FuncionInfo(*dynamic_cast<FuncionInfo*>(f)) ;
+
+            FuncionInfo *mie = dynamic_cast<FuncionInfo*>(f);
+            if ( !mie )
+                qDebug() << "Queries::clone dynamic_cast<FuncionInfo*>(f) null";
+
+
+            FuncionInfo *ff = new FuncionInfo(*mie) ;
+
             m_lstFunciones.append( ff );
             if ( !funcionQuery ) funcionQuery=ff;
             break;
@@ -296,6 +321,8 @@ FuncionBase *Queries::createQuerie(int option)
     case (QueryOpcion::Arp): { return factoryNewArpInfo(m_brand,m_equipmenttype,term,QueryOpcion::Arp); }
     case (QueryOpcion::BGPNeig): { return factoryNewBGPNeighborInfo(m_brand,m_equipmenttype,term,QueryOpcion::BGPNeig); }
     case (QueryOpcion::BGPNetworks): { return factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term,QueryOpcion::BGPNetworks); }
+    case (QueryOpcion::BGPNetworksBGPAttr): { return factoryNewBGPNetworksBGPAttrInfo(m_brand,m_equipmenttype,
+                                                                                      term,QueryOpcion::BGPNetworksBGPAttr); }
     case (QueryOpcion::IpRoutes): { return factoryNewIPRouteInfo(m_brand,m_equipmenttype,term,QueryOpcion::IpRoutes); }
     case (QueryOpcion::Configuration): { return factoryNewConfig(m_brand,m_equipmenttype,term,QueryOpcion::Configuration); }
     case (QueryOpcion::Mplsl2Transport): { return factoryNewMplsL2TransportInfo(m_brand,m_equipmenttype,term,QueryOpcion::Mplsl2Transport); }
@@ -413,6 +440,11 @@ void Queries::crearFuncionesFaltantes()
     {
         bgpNetworksQuery = factoryNewBGPNetworksInfo(m_brand,m_equipmenttype,term,QueryOpcion::BGPNetworks);
         m_lstFunciones.append(bgpNetworksQuery);
+    }
+    if (!bgpNetworksBGPAttrQuery)
+    {
+        bgpNetworksBGPAttrQuery = factoryNewBGPNetworksBGPAttrInfo(m_brand,m_equipmenttype,term,QueryOpcion::BGPNetworksBGPAttr);
+        m_lstFunciones.append(bgpNetworksBGPAttrQuery);
     }
     if (!ipRoutesQuery)
     {
@@ -648,6 +680,20 @@ QList<SBGPNetwork>& Queries::bgpNetworksInfo(int i)
     return dynamic_cast<BGPInfo*>(getQuery(BGPNetworks,i))->bgpNetworksInfo();
 }
 
+QMap<QString, QList<SBGPNetwork>> &Queries::bgpMapNetworksInfo(int i)
+{
+    FuncionBase *f = getQuery(BGPNetworks,i);
+    if ( !f ) return _mapNetworksInfo;
+    return dynamic_cast<BGPInfo*>(getQuery(BGPNetworks,i))->bgpMapNetworksInfo();
+}
+
+QList<SBGPNetwork>& Queries::bgpNetworksBGPAttrInfo(int i)
+{
+    FuncionBase *f = getQuery(BGPNetworksBGPAttr,i);
+    if ( !f ) return _lstSBGPNetworkBGPAttr;
+    return dynamic_cast<BGPInfo*>(getQuery(BGPNetworksBGPAttr,i))->bgpNetworksInfo();
+}
+
 QList<SIpRouteInfo>& Queries::ipRoutesInfo(int i)
 {
     FuncionBase *f = getQuery(IpRoutes,i);
@@ -666,6 +712,8 @@ void Queries::nextProcess()
 {
     qCDebug(queries) << m_ip  << "Queries::nextProcess()";
     qDebug() << "Queries::nextProcess() thr" << thread();
+
+    bool reemplazarFuncionPrimerPuntero = false;
 
     if ( !m_reintentandoConsulta )
     {
@@ -694,9 +742,14 @@ void Queries::nextProcess()
         m_opcionActual = m_lstOpciones.takeFirst();
     }
     else
-    {
-        if ( m_currentFuncion ) delete m_currentFuncion;
-        m_reintentandoConsulta = false;
+    {        
+        if ( m_currentFuncion )
+        {
+            m_lstFunciones.removeOne(m_currentFuncion);
+            delete m_currentFuncion;
+        }
+        m_reintentandoConsulta=false;
+        reemplazarFuncionPrimerPuntero=true;
     }
 
     qCDebug(queries) << m_ip  << "NextProcess:" << m_opcionActual;
@@ -753,7 +806,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == EquipmentNeighbors )
     {        
         EquipmentNeighborsInfo *f=dynamic_cast<EquipmentNeighborsInfo*>(m_currentFuncion);
-        if ( !equipmentNeighborsInfoQuery ) equipmentNeighborsInfoQuery = f;   //la primera consulta tiene acceso rapido por este puntero
+        if ( !equipmentNeighborsInfoQuery || reemplazarFuncionPrimerPuntero ) equipmentNeighborsInfoQuery = f;   //la primera consulta tiene acceso rapido por este puntero
         f->setBrand(m_brand);
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
@@ -774,7 +827,7 @@ void Queries::nextProcess()
             queryTimer->setInterval( 200000 );
 
         InterfaceInfo *f = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
-        if ( !interfacesInfoQuery ) interfacesInfoQuery = f;
+        if ( !interfacesInfoQuery || reemplazarFuncionPrimerPuntero) interfacesInfoQuery = f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
@@ -795,7 +848,7 @@ void Queries::nextProcess()
             queryTimer->setInterval( 200000 );
 
         InterfaceInfo *f = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
-        if ( !interfacesDescriptionsQuery ) interfacesDescriptionsQuery = f;
+        if ( !interfacesDescriptionsQuery || reemplazarFuncionPrimerPuntero ) interfacesDescriptionsQuery = f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
@@ -816,7 +869,7 @@ void Queries::nextProcess()
             queryTimer->setInterval( 200000 );
 
         InterfaceInfo *f = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
-        if ( !interfacesIpAddressesQuery ) interfacesIpAddressesQuery = f;
+        if ( !interfacesIpAddressesQuery || reemplazarFuncionPrimerPuntero ) interfacesIpAddressesQuery = f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
@@ -837,7 +890,7 @@ void Queries::nextProcess()
             queryTimer->setInterval( 200000 );
 
         InterfaceInfo *f = dynamic_cast<InterfaceInfo*>(m_currentFuncion);
-        if (!interfacesPermitedVlansQuery) interfacesPermitedVlansQuery=f;
+        if (!interfacesPermitedVlansQuery || reemplazarFuncionPrimerPuntero) interfacesPermitedVlansQuery=f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
@@ -853,7 +906,7 @@ void Queries::nextProcess()
     else if (  m_opcionActual == Ospf )
     {
         OSPFInfo *f = dynamic_cast<OSPFInfo*>(m_currentFuncion);
-        if (!ospfQuery) ospfQuery=f;
+        if (!ospfQuery || reemplazarFuncionPrimerPuntero) ospfQuery=f;
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -869,7 +922,7 @@ void Queries::nextProcess()
     else if (  m_opcionActual == MplsTEtunnels )
     {
         MplsTEtunnelsInfo *f = dynamic_cast<MplsTEtunnelsInfo*>(m_currentFuncion);
-        if (!mplsTEtunnelsQuery) mplsTEtunnelsQuery=f;
+        if (!mplsTEtunnelsQuery || reemplazarFuncionPrimerPuntero) mplsTEtunnelsQuery=f;
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -885,7 +938,7 @@ void Queries::nextProcess()
     else if (  m_opcionActual == Mplsl2Transport )
     {
         MplsL2TransportInfo *f = dynamic_cast<MplsL2TransportInfo*>(m_currentFuncion);
-        if (!mplsL2TransportQuery) mplsL2TransportQuery=f;
+        if (!mplsL2TransportQuery || reemplazarFuncionPrimerPuntero) mplsL2TransportQuery=f;
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -901,7 +954,7 @@ void Queries::nextProcess()
     else if (  m_opcionActual == MplsLdpDiscovery )
     {
         MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
-        if (!mplsLdpDiscoveryQuery) mplsLdpDiscoveryQuery=f;
+        if (!mplsLdpDiscoveryQuery || reemplazarFuncionPrimerPuntero) mplsLdpDiscoveryQuery=f;
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -917,7 +970,7 @@ void Queries::nextProcess()
     else if (  m_opcionActual == MplsLdpNeighbors )
     {
         MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
-        if (!mplsLdpNeighborsQuery) mplsLdpNeighborsQuery=f;
+        if (!mplsLdpNeighborsQuery || reemplazarFuncionPrimerPuntero) mplsLdpNeighborsQuery=f;
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -933,7 +986,7 @@ void Queries::nextProcess()
     else if (  m_opcionActual == MplsLdpInterfaces )
     {
         MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
-        if (!mplsLdpInterfacesQuery) mplsLdpInterfacesQuery=f;
+        if (!mplsLdpInterfacesQuery || reemplazarFuncionPrimerPuntero) mplsLdpInterfacesQuery=f;
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -955,7 +1008,7 @@ void Queries::nextProcess()
     else if (  m_opcionActual == PimInterfaces )
     {
         PIMInfo *f = dynamic_cast<PIMInfo*>(m_currentFuncion);
-        if (!pimInteracesQuery) pimInteracesQuery=f;
+        if (!pimInteracesQuery || reemplazarFuncionPrimerPuntero) pimInteracesQuery=f;
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -979,7 +1032,7 @@ void Queries::nextProcess()
         qCDebug(queries) << m_ip  << "Next: MacAddress";
 
         MacInfo *f = dynamic_cast<MacInfo*>(m_currentFuncion);
-        if (!macsQuery) macsQuery=f;
+        if (!macsQuery || reemplazarFuncionPrimerPuntero) macsQuery=f;
         f->setBrand( m_brand );
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
@@ -995,7 +1048,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == PortChannel )
     {
         PortChannelsInfo *f = dynamic_cast<PortChannelsInfo*>(m_currentFuncion);
-        if (!portChannelInfoQuery) portChannelInfoQuery=f;
+        if (!portChannelInfoQuery || reemplazarFuncionPrimerPuntero) portChannelInfoQuery=f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
@@ -1011,7 +1064,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == VRFfVlans )
     {        
         VrfInfo *f = dynamic_cast<VrfInfo*>(m_currentFuncion);
-        if (!vrfsFromVlansQuery) vrfsFromVlansQuery=f;
+        if (!vrfsFromVlansQuery || reemplazarFuncionPrimerPuntero) vrfsFromVlansQuery=f;
         f->setBrand( m_brand );
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
@@ -1027,7 +1080,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == VRFfRT )
     {
         VrfInfo *f = dynamic_cast<VrfInfo*>(m_currentFuncion);
-        if (!vrfFromRTQuery) vrfFromRTQuery=f;
+        if (!vrfFromRTQuery || reemplazarFuncionPrimerPuntero) vrfFromRTQuery=f;
         f->setBrand( m_brand );
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
@@ -1043,7 +1096,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == VRFs )
     {
         VrfInfo *f = dynamic_cast<VrfInfo*>(m_currentFuncion);
-        if (!vrfsQuery) vrfsQuery=f;
+        if (!vrfsQuery || reemplazarFuncionPrimerPuntero) vrfsQuery=f;
         f->setBrand( m_brand );
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
@@ -1061,7 +1114,7 @@ void Queries::nextProcess()
         qCDebug(queries) << m_ip  << "empezando ARP";
 
         ArpInfo *f = dynamic_cast<ArpInfo*>(m_currentFuncion);
-        if (!arpsQuery) arpsQuery=f;
+        if (!arpsQuery || reemplazarFuncionPrimerPuntero) arpsQuery=f;
         f->setBrand(m_brand);
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
@@ -1077,7 +1130,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == BGPNeig )
     {
         BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
-        if (!bgpNeighborsQuery) bgpNeighborsQuery=f;
+        if (!bgpNeighborsQuery || reemplazarFuncionPrimerPuntero) bgpNeighborsQuery=f;
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -1093,7 +1146,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == BGPNetworks )
     {
         BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
-        if (!bgpNetworksQuery) bgpNetworksQuery=f;
+        if (!bgpNetworksQuery || reemplazarFuncionPrimerPuntero) bgpNetworksQuery=f;
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -1106,10 +1159,26 @@ void Queries::nextProcess()
         f->getNetworks();
         return;
     }
+    else if ( m_opcionActual == BGPNetworksBGPAttr )
+    {
+        BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
+        if (!bgpNetworksBGPAttrQuery || reemplazarFuncionPrimerPuntero) bgpNetworksBGPAttrQuery=f;
+        f->setPlatform( m_platform );
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getNetworksBGPAttr();
+        return;
+    }
     else if ( m_opcionActual == IpRoutes )
     {
         IPRouteInfo *f = dynamic_cast<IPRouteInfo*>(m_currentFuncion);
-        if (!ipRoutesQuery) ipRoutesQuery=f;
+        if (!ipRoutesQuery || reemplazarFuncionPrimerPuntero) ipRoutesQuery=f;
         f->setPlatform( m_platform );
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -1125,7 +1194,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == Configuration )
     {
         Config *f = dynamic_cast<Config*>(m_currentFuncion);
-        if (!configQuery) configQuery=f;
+        if (!configQuery || reemplazarFuncionPrimerPuntero) configQuery=f;
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -1141,7 +1210,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == Funcion )
     {
         FuncionInfo *f = dynamic_cast<FuncionInfo*>(m_currentFuncion);
-        if (!funcionQuery) funcionQuery=f;
+        if (!funcionQuery || reemplazarFuncionPrimerPuntero) funcionQuery=f;
         f->setPlatform(m_platform);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
@@ -1159,7 +1228,7 @@ void Queries::nextProcess()
         queryTimer->setInterval( 3000 );
 
         ExitInfo *f = dynamic_cast<ExitInfo*>(m_currentFuncion);
-        if (!exitQuery) exitQuery=f;
+        if (!exitQuery || reemplazarFuncionPrimerPuntero) exitQuery=f;
         f->setPlatform(m_platform);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -1402,6 +1471,8 @@ void Queries::_finalizar()
 
 QMap<QString,QString> Queries::queriesArgumentosAceptados()
 {
+    //Actualizar
+
     QMap<QString,QString> map;
     map.insert("ARP_MacIP","Indicar la MAC o IP en una consulta de ARP: 192.168.1.1 o 044e.0676.12bc");
     map.insert("Arp_VRFs","Indicar las VRFs en una consulta de ARP, VRFs separadas por comas: VRF1,VRF2,VRF3");
@@ -1415,7 +1486,8 @@ QMap<QString,QString> Queries::queriesArgumentosAceptados()
     map.insert("MAC_MAC","Indicar la MAC en una consulta de tabla de MAC: 044e.0676.12bc");
     map.insert("VRFfRT_RT","Indicar la RT para una consulta donde se quiere saber la VRF desde la RT: 6458:17350");
     map.insert("VRFfVlans_Vlans","Indicar las Vlans para una consulta donde se quiere saber las VRFs a las que pertenecen: 136,3019,456,122");
-    map.insert("Funcion_txt","Indicar el comando a ejecutar. Se devuelve el texto obtenido del equipo");
+    map.insert("Funcion_txt","Indicar el comando a ejecutar. Se devuelve el texto obtenido del equipo");        
+
     return map;
 }
 
@@ -1610,6 +1682,13 @@ void Queries::updateInfoQueries(QList<Queries> &lstDest, QList<Queries> &lstOrig
                         dest.bgpNetworksInfo() = origin.bgpNetworksInfo();
                     else
                         dest.bgpNetworksQuery = origin.bgpNetworksQuery;
+                }
+                if ( origin.bgpNetworksBGPAttrQuery )
+                {
+                    if ( dest.bgpNetworksBGPAttrQuery )
+                        dest.bgpNetworksBGPAttrInfo() = origin.bgpNetworksBGPAttrInfo();
+                    else
+                        dest.bgpNetworksBGPAttrQuery = origin.bgpNetworksBGPAttrQuery;
                 }
                 if ( origin.ipRoutesQuery )
                 {
@@ -1806,6 +1885,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     }
     else
         out << false;
+    if ( query.bgpNetworksBGPAttrQuery )
+    {
+        out << true;
+        out << query.bgpNetworksBGPAttrQuery;
+    }
+    else
+        out << false;
     if ( query.ipRoutesQuery )
     {
         out << true;
@@ -1964,6 +2050,12 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries& quer
     in >> a;
     if ( a )
     {
+        in >> query.bgpNetworksBGPAttrQuery;
+        query.m_lstFunciones.append(query.bgpNetworksBGPAttrQuery);
+    }
+    in >> a;
+    if ( a )
+    {
         in >> query.ipRoutesQuery;
         query.m_lstFunciones.append(query.ipRoutesQuery);
     }
@@ -1995,7 +2087,11 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries* quer
 QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
 {
     dbg.space() << "QueryInfo Thread: " << QThread::currentThread() << "\n";
-    dbg.space() << "QueryInfo: " << info.m_name << info.m_ip << info.m_brand << info.m_platform;
+    dbg.space() << "QueryInfo: " << info.m_name
+                << info.m_ip
+                << info.m_brand
+                << info.m_platform
+                << equipmentOSFromPlatform(info.m_platform );
     dbg.space() << "Location: " << info.m_location;
     dbg.space() << "XR Active RP location: " << info.m_xr_location;
     dbg.space() << "\nQueryDate: " << info.m_datetime.toString("yyyy-MM-dd_hh:mm:ss");
@@ -2062,6 +2158,9 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
 
     if ( info.bgpNetworksQuery )
         dbg.space() << "bgpNetworksQuery" << *info.bgpNetworksQuery;
+
+    if ( info.bgpNetworksQuery )
+        dbg.space() << "bgpNetworksBGPAttrQuery" << *info.bgpNetworksBGPAttrQuery;
 
     if ( info.ipRoutesQuery )
         dbg.space() << "ipRoutesQuery" << *info.ipRoutesQuery;

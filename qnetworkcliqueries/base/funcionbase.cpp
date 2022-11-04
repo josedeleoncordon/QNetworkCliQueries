@@ -5,13 +5,15 @@
 
 QueriesConfigurationValue::QueriesConfigurationValue(QString key,
                                                      QString value,
-                                                     QString IPoPlataforma,
+                                                     QString IP,
+                                                     QString plataforma,
                                                      QString IDConexion,
                                                      bool appendValue)
 {
     _key = key;
     _value = value;
-    _IPoPlatform = IPoPlataforma;
+    _IP = IP;
+    _Platform = plataforma;
     _appendValue = appendValue;
     _IDConexion = IDConexion;
 }
@@ -20,7 +22,8 @@ QueriesConfigurationValue::QueriesConfigurationValue(const QueriesConfigurationV
 {
     _key = other._key;
     _value = other._value;
-    _IPoPlatform = other._IPoPlatform;
+    _IP = other._IP;
+    _Platform = other._Platform;
     _appendValue = other._appendValue;
     _IDConexion = other._IDConexion;
 }
@@ -28,7 +31,8 @@ QueriesConfigurationValue::QueriesConfigurationValue(const QueriesConfigurationV
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const QueriesConfigurationValue& qcv)
 {
     //guardar
-    out << qcv._IPoPlatform;
+    out << qcv._IP;
+    out << qcv._Platform;
     out << qcv._key;
     out << qcv._value;
     out << qcv._appendValue;
@@ -39,7 +43,8 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, QueriesConfigurationValue& qcv)
 {
     //abrir
-    in >> qcv._IPoPlatform;
+    in >> qcv._IP;
+    in >> qcv._Platform;
     in >> qcv._key;
     in >> qcv._value;
     in >> qcv._appendValue;
@@ -49,7 +54,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, QueriesConfig
 
 QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const QueriesConfigurationValue &info)
 {
-     dbg.space() << info._key << info._value << info._IPoPlatform << info._appendValue << info._IDConexion;
+     dbg.space() << info._key << info._value << info._IP << info._Platform << info._appendValue << info._IDConexion;
      return dbg;
 }
 
@@ -64,7 +69,8 @@ void QueriesConfiguration::addQueryParameter(const QList<QueriesConfigurationVal
         bool encontrado=false;
         for ( QueriesConfigurationValue &e : m_lstQueryParameters )
         {
-            if ( n._IPoPlatform == e._IPoPlatform &&
+            if ( n._IP == e._IP &&
+                 n._Platform == e._Platform &&
                  n._key == e._key &&
                  n._IDConexion == e._IDConexion )
             {
@@ -84,27 +90,46 @@ void QueriesConfiguration::addConfiguration(const QList<QueriesConfigurationValu
 }
 
 QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString platform, QString IDconexion)
-{
-    //por IP especifica
+{        
+    //Por IP, Plataforma especifica, ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
-    {
-        if ( v._key == parameter && v._IPoPlatform == IP && v._IDConexion == IDconexion  )
+        if ( v._key == parameter && v._IP == IP && v._Platform == platform && v._IDConexion == IDconexion  )
             return v._value;
-    }
 
-    //plataforma
-    for ( QueriesConfigurationValue v : m_lstQueryParameters )
-    {
-        if ( v._key == parameter && v._IPoPlatform == platform && v._IDConexion == IDconexion  )
+    //por IP especifica e ID
+    for ( QueriesConfigurationValue v : m_lstQueryParameters )     
+        if ( v._key == parameter && v._IP == IP && v._Platform.isEmpty() && v._IDConexion == IDconexion  )
             return v._value;
-    }
 
-    //no hay para una ip o plataforma, regresamos el general
+    //plataforma e ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
-    {
-        if ( v._key == parameter && v._IPoPlatform == QString("*") && v._IDConexion == IDconexion )
+        if ( v._key == parameter && v._IP.isEmpty() && v._Platform == platform && v._IDConexion == IDconexion  )
             return v._value;
-    }
+
+    //no hay para una ip o plataforma, regresamos el general con ID
+    for ( QueriesConfigurationValue v : m_lstQueryParameters )
+        if ( v._key == parameter && v._IP.isEmpty() && v._Platform.isEmpty() && v._IDConexion == IDconexion )
+            return v._value;
+
+    //Por IP, Plataforma especifica, Sin ID
+    for ( QueriesConfigurationValue v : m_lstQueryParameters )
+        if ( v._key == parameter && v._IP == IP && v._Platform == platform && v._IDConexion.isEmpty()  )
+            return v._value;
+
+    //por IP especifica sin ID
+    for ( QueriesConfigurationValue v : m_lstQueryParameters )
+        if ( v._key == parameter && v._IP == IP && v._Platform.isEmpty() && v._IDConexion.isEmpty()  )
+            return v._value;
+
+    //plataforma sin ID
+    for ( QueriesConfigurationValue v : m_lstQueryParameters )
+        if ( v._key == parameter && v._IP.isEmpty() && v._Platform == platform && v._IDConexion.isEmpty()  )
+            return v._value;
+
+    //no hay para una ip o plataforma, regresamos el general sin ID
+    for ( QueriesConfigurationValue v : m_lstQueryParameters )
+        if ( v._key == parameter && v._IP.isEmpty() && v._Platform.isEmpty() && v._IDConexion.isEmpty() )
+            return v._value;
 
     return QVariant();
 }
@@ -181,7 +206,8 @@ void FuncionBase::init()
 void FuncionBase::setPlatform(QString platform)
 {
     m_platform=platform;
-    m_os=equipmentOSFromPlatform(m_platform);
+    m_os=equipmentOSFromPlatform(m_platform);        
+    qDebug() << "FuncionBase::setPlatform platform os" << platform << m_os;
 }
 
 void FuncionBase::setParentQuery(Queries *qry)
@@ -246,9 +272,12 @@ bool FuncionBase::allTextReceived()
     //hasta que miremos el prompt del equipo sabremos que se finalizo de recibir texto
 
     QStringList data = txt.split("\n");
+
     exp.setPattern("^\\S+#\\s*$");
     exp2.setPattern("^<\\S+>");
-    if ( (!data.last().contains(exp) && !data.last().contains(exp2)) || data.contains("Description: ") )
+    if ( (!data.last().simplified().contains(exp) &&
+          !data.last().simplified().contains(exp2))
+         || data.contains("Description: ") )
         return false;
 
     txt.replace("---- More ----","");

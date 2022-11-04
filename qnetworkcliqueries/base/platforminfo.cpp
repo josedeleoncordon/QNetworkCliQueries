@@ -57,13 +57,14 @@ void PlatformInfo::on_term_receiveText()
         }
 
         exp.setPattern("^(c|C)isco .+ processor .+ memory");
-        exp2.setPattern(" *(c|C)isco .+ Chassis .+");
+        exp2.setPattern(" *(c|C)isco .+ (c|C)hassis");
         QRegExp exp3("(c|C)isco .+ processor$");
         foreach (QString line, lines)
         {
             line = line.simplified();
+
             if ( ! line.contains(exp) && !line.contains(exp2) && !line.contains(exp3) )
-                continue;
+                continue;                        
 
             QStringList data = line.split(" ",QString::SkipEmptyParts);
             m_platform = data.at(1).simplified();

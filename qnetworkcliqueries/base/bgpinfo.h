@@ -11,17 +11,21 @@ struct SBGPNeighbor : InfoBase
     QString as;
     QString upDownTime;
     QString prfxRcd;
+    QString vrf;
+    QString addressfamily;
 };
 
 struct SBGPNetwork : InfoBase
 {    
-    QString neighborip;
+    QString neighborip; //cambiar a nexthop
     QString network;
     QString RD;
     QString nexthop;
     QString from;
     QString path;
     QString as;
+
+    QStringList communityList;
 
     SBGPNetwork() {}
     SBGPNetwork(const SBGPNetwork &other);
@@ -41,29 +45,41 @@ class QNETWORKCLIQUERIES_EXPORT BGPInfo : public FuncionBase
     Q_OBJECT
 protected:
     QStringList m_neighborIPs;
+    QStringList m_neighborIPsVRFs;
+    QStringList m_networks;
     QString m_type;
+    QStringList m_vrf_vrfs;
+    QString m_vrf_currentVRF;
     QString m_neighbor_int_out;
     QString m_community;
     QList<SBGPNeighbor> m_lstNeigbors;
     QString m_vrf;
-    QList<SBGPNetwork> m_lstNetworks;
+    QStringList m_vrfs;
+    QList<SBGPNetwork> m_lstNetworks;        
+    QMap<QString,QList<SBGPNetwork>> m_mapNeighborLstNetworks;
 
     int m_neighborsPos;
-    QString m_currentNeighbor;
+    QString m_currentNeighbor;    
+    SBGPNetwork* m_currentNetwork;
 
     void networksNextNeighbor();
+    void bgpNextNetwork();
+    void bgpNextNetworkVRPCommunityList();
 
 public:
     BGPInfo() {}
     BGPInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     BGPInfo(const BGPInfo &other);
+    ~BGPInfo();
 
-    virtual void getBGPNeighbors();
-    virtual void getNetworks();
+    virtual void getBGPNeighbors(); //listado summary de los vecinos de BGP
+    virtual void getNetworks();  //consulta las redes que se reciben o envian a un vecino de BGP
+    virtual void getNetworksBGPAttr(); //consulta los atributos de BGP de una red
 
     //
     QList<SBGPNeighbor>& bgpNeighborInfo() { return m_lstNeigbors; }
     QList<SBGPNetwork>& bgpNetworksInfo() { return m_lstNetworks; }
+    QMap<QString,QList<SBGPNetwork>>& bgpMapNetworksInfo() { return m_mapNeighborLstNetworks; }
 
     //
 
@@ -77,6 +93,11 @@ public:
 private slots:
     void on_term_receiveText_BGPNeighbors();
     void on_term_receiveText_networks();
+    void on_term_receiveText_networksAttr();
+    void on_term_receiveText_networksAttrVRPCommunityList();
+
+private:
+    void getBGPNeighbors_VRF_nextVRF();
 };
 
 Q_DECLARE_METATYPE(SBGPNetwork)

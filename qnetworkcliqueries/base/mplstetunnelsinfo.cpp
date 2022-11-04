@@ -183,7 +183,7 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
             }
 
             //Outgoing Interface: TenGigE0/1/0
-            exp.setPattern("Outgoing Interface: (.+) $");
+            exp.setPattern("Outgoing Interface: (.+)( |,|$)");
             if ( line.contains(exp) )
             {
                 tunel->InterfaceOut = estandarizarInterfaz( exp.cap(1).simplified() );

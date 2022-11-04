@@ -61,6 +61,7 @@ public:
     ArpInfo *arpsQuery;
     BGPInfo *bgpNeighborsQuery;
     BGPInfo *bgpNetworksQuery;
+    BGPInfo *bgpNetworksBGPAttrQuery;
     IPRouteInfo *ipRoutesQuery;
     Config *configQuery;
     FuncionInfo *funcionQuery;
@@ -110,6 +111,8 @@ public:
     QList<SIpInfo>& arpsInfo(int i=0);
     QList<SBGPNeighbor>& bgpNeighborsInfo(int i=0);
     QList<SBGPNetwork>& bgpNetworksInfo(int i=0);
+    QMap<QString,QList<SBGPNetwork>>& bgpMapNetworksInfo(int i=0);
+    QList<SBGPNetwork>& bgpNetworksBGPAttrInfo(int i=0);
     QList<SIpRouteInfo>& ipRoutesInfo(int i=0);
     QString funcionTxtInfo(int i=0);
 
@@ -227,6 +230,8 @@ protected:
     QList<SVrfInfo> _lstSVrfInfo;
     QList<SBGPNeighbor> _lstSBGPNeighbor;
     QList<SBGPNetwork> _lstSBGPNetwork;
+    QMap<QString,QList<SBGPNetwork>> _mapNetworksInfo;
+    QList<SBGPNetwork> _lstSBGPNetworkBGPAttr;
     QList<SIpRouteInfo> _lstSIpRouteInfo;
 
     void iniciar();

@@ -21,6 +21,7 @@
 ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, int option);
 BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, int option);
 BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, int option);
+BGPInfo *factoryNewBGPNetworksBGPAttrInfo(QString brandName, QString type, QRemoteShell *term, int option);
 EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, int option);
 InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteShell *term, int option);
 IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, int option);
