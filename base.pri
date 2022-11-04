@@ -1,3 +1,5 @@
+PHPINSTALL = REMI
+
 CONFIG(release, debug|release) {
 APP_BUILD_TREE = $$PWD/build/release
 }

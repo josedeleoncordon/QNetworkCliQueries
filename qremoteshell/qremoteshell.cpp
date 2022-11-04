@@ -25,7 +25,7 @@ QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platfo
     m_localprompt.setPattern(linuxprompt);
 
     m_timerNoResponse = new QTimer;
-    m_timerNoResponse->setInterval(10000);
+    m_timerNoResponse->setInterval(15000);
     m_timerNoResponse->setSingleShot(true);
     connect(m_timerNoResponse,SIGNAL(timeout()),SLOT(m_timeroutNoResponse()));
 }
@@ -37,7 +37,7 @@ QRemoteShell::~QRemoteShell()
     if ( m_socket )
         delete m_socket;
     delete m_timerNoResponse;
-    qDebug() << m_ip << "QRemoteShell::~QRemoteShell()"; //no con qCDebug ya que para cerrar el archivo debug del equipo es necesario est en QueriesMessageHandler. No Borrar. No usar con qCDebug ya que podria ser deshabilitado.
+    qDebug() << m_ip << "QRemoteShell::~QRemoteShell()";
 }
 
 void QRemoteShell::setConnectionProtocol( ConnectionProtocol cp )
@@ -305,7 +305,7 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
             }
         }
 
-        //HUAWEI ATN
+        //HUAWEI
         exp.setPattern("^<.+> *$");
         if ( line.contains(exp) )
         {

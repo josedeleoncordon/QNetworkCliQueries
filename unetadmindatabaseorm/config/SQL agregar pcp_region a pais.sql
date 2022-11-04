@@ -95,3 +95,35 @@ INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_
 INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '4', '1', '4', '74.125.147.152', '172.17.28.219', 'INTERNET', '52468:2290', '1'); 
 INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '4', '1', '4', '142.250.166.246', '172.17.28.219', 'INTERNET', '52468:2292', '1'); 
 
+
+
+UPDATE `pcp_peer` SET `comunidad_base` = '52468:4011' WHERE `pcp_peer`.`id` = 17; 
+UPDATE `pcp_peer` SET `comunidad_base` = '52468:4001' WHERE `pcp_peer`.`id` = 28; 
+
+
+
+INSERT INTO `pcp_pais` (`id`, `pais`, `pcp_region_id`) VALUES (NULL, 'Brasil', '3'), (NULL, 'Chile', '3'), (NULL, 'Paraguay', '3'); 
+
+
+INSERT INTO `pcp_proveedor` (`id`, `proveedor`, `logo_path`) VALUES (NULL, 'Telefonia', NULL); 
+INSERT INTO `pcp_proveedor` (`id`, `proveedor`, `logo_path`) VALUES (NULL, 'PCCW', NULL); 
+INSERT INTO `pcp_proveedor` (`id`, `proveedor`, `logo_path`) VALUES (NULL, 'Durand', NULL); 
+INSERT INTO `pcp_proveedor` (`id`, `proveedor`, `logo_path`) VALUES (NULL, 'IXBR', NULL); 
+INSERT INTO `pcp_proveedor` (`id`, `proveedor`, `logo_path`) VALUES (NULL, 'Cloudflare', NULL); 
+INSERT INTO `pcp_proveedor` (`id`, `proveedor`, `logo_path`) VALUES (NULL, 'Netell', NULL); 
+INSERT INTO `pcp_proveedor` (`id`, `proveedor`, `logo_path`) VALUES (NULL, 'PIT', NULL); 
+INSERT INTO `pcp_proveedor` (`id`, `proveedor`, `logo_path`) VALUES (NULL, 'Giganet', NULL); 
+
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '9', '1', '12', '138.0.43.26', '172.16.30.129', 'INTERNET', '52468:2157', '1'); 
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '9', '1', '1', '45.177.183.253', '172.16.30.129', 'INTERNET', '52468:4025', '1'); 
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '11', '1', '4', '72.14.219.181', '172.16.31.129', 'INTERNET', '52468:2017', '1'); 
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '11', '1', '1', '157.240.75.210', '172.16.31.129', 'INTERNET', '52468:2026', '1');
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '11', '1', '5', '66.197.162.235', '172.16.31.129', 'INTERNET', '52468:2093', '1');
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '11', '1', '16', '63.218.223.110', '172.16.31.129', 'INTERNET', '52468:2173', '1'); 
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '11', '1', '17', '200.170.86.66', '172.16.31.129', 'INTERNET', '52468:2231', '1'); 
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '11', '1', '18', '187.16.216.252', '172.16.31.129', 'INTERNET', '52468:2241', '1'); 
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '11', '1', '9', '104.44.37.205', '172.16.31.129', 'INTERNET', '52468:4065', '1'); 
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '11', '1', '12', '45.238.99.48', '172.16.31.129', 'INTERNET', '52468:2154', '1');
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '12', '1', '21', '200.23.206.1', '172.16.30.234', 'INTERNET', '52468:4031', '1'); 
+INSERT INTO `pcp_peer` (`id`, `pcp_pais_id`, `pcp_peer_tipo_id`, `pcp_proveedor_id`, `ip_peer`, `ip_pe`, `vrf`, `comunidad_base`, `estado`) VALUES (NULL, '13', '1', '22', '45.170.131.153', '172.17.34.1', 'INTERNET', '52468:2130', '1'); 
+
