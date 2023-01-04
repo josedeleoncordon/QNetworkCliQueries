@@ -24,7 +24,7 @@ QueriesMessageHandler::QueriesMessageHandler(QString path,bool savelogs)
     _path = path;
     _savelogs = savelogs;
     _expIP.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
-    _expIP.setMinimal(false);
+    _expIP.setMinimal(false);    
 
     init();
 
@@ -36,7 +36,7 @@ QueriesMessageHandler::~QueriesMessageHandler()
     for( log *l : _lstLogs )
         l->file->close();
     _dbgFie.close();
-    _otherFie.close();
+    _otherFie.close();    
 
     qDeleteAll( _lstLogs );
 }
@@ -58,6 +58,8 @@ void QueriesMessageHandler::init()
     _otherFie.setFileName( _path+"/ConsultaEquipos_other.log" );
     _otherFie.open(QIODevice::WriteOnly | QIODevice::Append);
     _otherS.setDevice( &_otherFie );
+
+    _time = QTime::currentTime();
 
     _c=0;
 }
@@ -87,9 +89,18 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
     }
     case QtDebugMsg:
     {
-        QStringList data = msg.split(" ",QString::SkipEmptyParts);
+        QString dt = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+        QStringList data = msg.split(" ",QString::SkipEmptyParts);                
+
         if ( !data.isEmpty() )
         {
+            short int min;
+            short int seg;
+            QTime current = QTime::currentTime();
+            short int secto = _time.secsTo( current );
+            min = secto/60;
+            seg = secto%60;
+
 //            if ( false )
             if ( _expIP.exactMatch(data.first().replace("\"","")) )
             {
@@ -131,8 +142,12 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
                     ll->ts = s;
                     _lstLogs.append(ll);
                     l=ll;
-                }
-                *l->ts << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") << " " << data.join(" ") << endl;
+                }               
+
+                *l->ts << QDateTime::currentDateTime().toString("hh:mm:ss") <<
+                          " Time min: " << QString::number(min)+" seg: " << QString::number(seg) << " " <<
+                          data.join(" ") << endl;
+
                 l->ts->flush();
 
                 //cerrando archivo si finalizo la consulta en el equipo
@@ -151,7 +166,9 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
             }
             else
             {
-                _dbgS << msg << endl;
+                _dbgS << QDateTime::currentDateTime().toString("hh:mm:ss") <<
+                         " Time min: " << QString::number(min)+" seg: " << QString::number(seg) << " " <<
+                         msg << endl;                
                 _dbgS.flush();
             }
         }

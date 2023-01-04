@@ -1399,14 +1399,15 @@ void Queries::processPlatform()
 
 void Queries::processConfigFinished()
 {
-    Config *configQuery=dynamic_cast<Config*>(m_currentFuncion);
-    if ( configQuery->error() )
-    {
-        m_error = true;
-        finished(this);
-        return;
-    }
+//    Config *configQuery=dynamic_cast<Config*>(m_currentFuncion);
+//    if ( configQuery->error() )
+//    {
+//        m_error = true;
+//        finished(this);
+//        return;
+//    }
 
+    m_contieneconsultas=true;
     queryTimer->stop();
     nextProcess();
 }

@@ -183,28 +183,6 @@ QList<QStringList> tableMultiRow2Table(QString &txt,
 //*  2a00:86c0:2008::/47 2001:504:40:108::1:10
 QString filasIndentadasSubirAanterior(QString txt);
 
-//Devuelve las redes propias y las que se aprenden por BGP que no sean IPT, IXP o PNI   (TERMINAR DE ESTANDARIZAR)
-//Columnas: PE origen, IP peer, ASN Peer, Red, ASN final, AS-Path, Route policy
-struct SBGPNeighborASPath
-{
-    QString peip;
-    QString peerip;
-    QString peerasn;
-    QString red;
-    QString asnorigen;
-    QString aspath;
-    QString routepolicy;
-    QString vrf;
-};
-//QList<SBGPNeighborASPath> bgpNeighborASPathFromEquiposUfinet(QStringList lstIPs, bool agregarRedesMayoresMascara24=false);
-//QList<SBGPNeighborASPath> bgpNeighborASPathFromEquiposNedetel(QStringList lstIPs, bool agregarRedesMayoresMascara24=false);
-QList<SBGPNeighborASPath> bgpNeighborASPathFromEquipos(QStringList lstIPs,
-                                                       QStringList lstVRFs,
-                                                       QString ASN,
-                                                       QString comunidadesProveedor,
-                                                       QStringList lstNeighborEnRedFiltro,
-                                                       bool agregarRedesMayoresMascara24=false);
-
 //Busca los IDs de un servicio en un texto
 QString buscarServicioID(QString txt);
 

@@ -99,14 +99,11 @@ private:
 public:
     QueriesConfiguration();
 
-    void addQueryParameter(const QList<QueriesConfigurationValue>&);
-    void addConfiguration(const QList<QueriesConfigurationValue>&);
+    void addQueryParameter(const QList<QueriesConfigurationValue>&);    
 
     bool state(QString parameter, QString IP, QString platform, QString IDconexion);
     QString value(QString parameter, QString IP, QString platform, QString IDconexion);
     QStringList values(QString parameter, QString IP, QString platform, QString IDconexion);
-
-//    QString configuration(QString platform, QString os, QString IP);
 
     QList<QueriesConfigurationValue> lstQueryParameters() { return m_lstQueryParameters; }
 

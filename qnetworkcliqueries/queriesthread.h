@@ -39,17 +39,17 @@ public:
     void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
     void setEquipmentNeighborsOSPFEquipoRaizProceso(QString proceso) { m_consultarVecinosOSPFEquipoRaizProceso=proceso; }
     void setEquipmentNeighborsRegExpOSPFArea(QString area) { m_consultaOSPFArea=area; }
-
-    void setNewThreadWorker(QueriesThreadWorker*(*ThreadWorker)(void));
+    void setNewThreadWorker(QueriesThreadWorker*(*ThreadWorker)(void));    
+    void setUUID(QString uuid) { m_uuid = uuid; }
 
     void iniciar();
     void iniciarSync();
     void detener(); //no se consultan nuevos equipos y espera a que se terminen las consultas ya en ejeucución.
     void cancelar(); //elimina las consultas en ejecución y se finaliza.
 
-    int equiposTotal() { return m_lstIP.size(); }
+    int equiposTotal() { return m_lstIPsMismoEquipoCounter + m_lstIPsCounter; }
     int equiposSimultaneos() { return m_consultaSimultaneos; }
-    int equiposConsultados() { return m_equiposConsultados; }
+    int equiposConsultados() { return m_equiposConsultados.size(); }
     int equiposExitosos() { return m_equiposExitosos; }
     int equiposConErrores() { return m_conerrores; }
     int equiposSinConexion() { return m_sinconexion; }
@@ -63,6 +63,7 @@ public:
 
 signals:
     void newInformation();
+    void status(QString);
     void finished(bool);
 
 private slots:
@@ -83,11 +84,12 @@ protected:
    QString m_consultaOSPFArea;
    QStringList m_lstIP;
    QStringList m_lstIPsMismoEquipo; //Para varias consultas de un equipo en varias conexiones: 172.16.30.253_1,172.16.30.253_2
+   short int m_lstIPsMismoEquipoCounter;
+   short int m_lstIPsCounter;
    QStringList m_lstIPsAintentarPorGW;   
    QStringList m_lstIPsConectadosPorGW;
    QStringList lstIPsConsultaAnterior;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;
-   int m_lstIpPos;
    QList<int> m_opciones;
    int m_simultaneos; //cantidad de equipos se suman al mismo tiempo al grupo,
    QStringList m_equiposenconsulta;
@@ -106,6 +108,7 @@ protected:
    bool m_detener;
    bool m_cancelar;
    bool m_equipmentNeighborsConsultarVecinos;
+   QString m_uuid;
 
    //si el equipo por donde se empieza la consulta tiene mas de un proceso recorrera todos. ASBR UMPLS
    bool m_consultarVecinosOSPFMismoDominio;
@@ -117,13 +120,16 @@ protected:
    QMap<QString, QString> m_errorMap;
    QTimer *m_timer;
    QTimer *m_timerActivity;
-   int m_consultaSimultaneos;
-   int m_equiposConsultados;
+   int m_consultaSimultaneos;   
+   QStringList m_equiposConsultados;
    QMutex m_mutex;
    QMap<QString,QString> m_mapOSPFVecinosInterfazDondeVienen;
    QueriesConfiguration m_queriesconfiguration;
 
    QueriesThreadWorker*(*ThreadWorker)(void) = nullptr;
+
+   void _emitNewInformation();
+   void _emitFinished(bool);
 
    void _clear();
 //   QueriesThreadWorker *newThreadWorker();

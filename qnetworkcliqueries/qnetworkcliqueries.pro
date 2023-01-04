@@ -47,10 +47,12 @@ HEADERS += \
     Huawei/ospfinfohuawei.h \
     RAD/macinforad.h \
 	base/config.h \
+    queriesthreadcontroller.h \
 	queriesthreadworker.h \
     Cisco/arpinfocisco.h \
     Huawei/arpinfohuawei.h \
-    qnetworkcliqueries_global.h
+    qnetworkcliqueries_global.h \
+    wcuuids.h
 
 SOURCES += \
     base/exitinfo.cpp \
@@ -85,9 +87,11 @@ SOURCES += \
     Huawei/ospfinfohuawei.cpp \
     RAD/macinforad.cpp \
 	base/config.cpp \
+    queriesthreadcontroller.cpp \
 	queriesthreadworker.cpp \
     Cisco/arpinfocisco.cpp \
-    Huawei/arpinfohuawei.cpp
+    Huawei/arpinfohuawei.cpp \
+    wcuuids.cpp
 
 unix {
     target.path = /usr/lib64

@@ -84,11 +84,6 @@ void QueriesConfiguration::addQueryParameter(const QList<QueriesConfigurationVal
     }
 }
 
-void QueriesConfiguration::addConfiguration(const QList<QueriesConfigurationValue>& c)
-{
-    m_lstConfiguration.append(c);
-}
-
 QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString platform, QString IDconexion)
 {        
     //Por IP, Plataforma especifica, ID
@@ -148,28 +143,6 @@ QStringList QueriesConfiguration::values(QString parameter, QString IP, QString 
 {
     return value(parameter,IP,platform,IDconexion).split(",",QString::SkipEmptyParts);
 }
-
-//QString QueriesConfiguration::configuration(QString platform, QString os, QString IP)
-//{
-//    return "";   // TODO Modificar ya no usando QueriesConfigurationValue o adaptar
-
-
-//    //por IP especifica
-//    for ( QueriesConfigurationValue v : m_lstConfiguration )
-//    {
-//        if ( (v._key == platform || v._key == os ) && v._IPoPlatform == IP  )
-//            return v._value;
-//    }
-
-//    //no hay para un equipo especifico, regresamos el general
-//    for ( QueriesConfigurationValue v : m_lstConfiguration )
-//    {
-//        if ( (v._key == platform || v._key == os ) && v._IPoPlatform == QString("*") )
-//            return v._value;
-//    }
-
-//    return "";
-//}
 
 void QueriesConfiguration::clear()
 {

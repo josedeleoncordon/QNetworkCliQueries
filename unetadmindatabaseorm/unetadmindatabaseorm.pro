@@ -50,3 +50,9 @@ SOURCES += $$PWD/record/arearecord.cpp \
 RESOURCES += schema.qrc
 
 unix:LIBS += -lqant3
+
+# Default rules for deployment.
+unix {
+    target.path = /usr/lib64
+}
+!isEmpty(target.path): INSTALLS += target

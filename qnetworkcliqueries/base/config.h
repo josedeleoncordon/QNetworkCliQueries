@@ -9,13 +9,11 @@ class Queries;
 class QNETWORKCLIQUERIES_EXPORT Config : public FuncionBase
 {
     Q_OBJECT
-    bool m_error;
-    QString m_config;
+    bool m_error;    
     bool m_guardado;
     QStringList m_lstComandos;
     int m_lstComandosPos;
     QStringList m_lstComandosConErrores;
-    QTimer *timerSiguienteComando;
 
     void siguienteComando();
 
@@ -27,6 +25,7 @@ public:
 
     //
     bool error() { return m_error; }
+    QStringList lstComandosConErrores() { return m_lstComandosConErrores; }
 
     //
 
@@ -34,7 +33,6 @@ public:
     friend QDebug operator<<(QDebug dbg, const Config &info);
 
 private slots:
-    void on_timerSiguienteComando_timeOut();
     void on_term_receiveText_configMode();
     void on_term_receiveText_finished();
     void on_term_receiveText_exited();

@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMutex>
+#include <QTime>
 #include <QLoggingCategory>
 
 class QueriesMessageHandler
@@ -26,6 +27,8 @@ private:
         QFile *file;
         QTextStream *ts;
     };
+
+    QTime _time;
 
     bool _savelogs;
     QFile _dbgFie;

@@ -8,20 +8,13 @@ Config::Config(QRemoteShell *terminal, int option):
     m_guardado=false;
     m_lstComandosPos=-1;
     m_parentQuery=nullptr;
-    timerSiguienteComando = new QTimer;
-    timerSiguienteComando->setInterval(500);
-    timerSiguienteComando->setSingleShot(true);
-
-    connect(timerSiguienteComando,&QTimer::timeout,this,&Config::on_timerSiguienteComando_timeOut);
 }
 
 Config::~Config() {}
 
 void Config::configApply()
 {
-//	m_config = QueriesConfiguration::instance()->configuration( m_platform,m_os,m_ip );   modificar segun comentario dentro de QueriesConfiguration
-
-    m_lstComandos = m_config.split("\n",QString::SkipEmptyParts);
+    m_lstComandos = m_queriesConfiguration.value("ConfigTemplate",m_ip,m_os,m_conexionID).split("\n",QString::SkipEmptyParts);
 
     if ( !m_parentQuery )
     {
@@ -33,15 +26,7 @@ void Config::configApply()
                 finished();
                 return;
             }
-    }
-
-    if ( m_config.isEmpty() )
-    {
-        m_lstComandosConErrores.append("Sin configuración para este equipo");
-        m_error=true;
-        finished();
-        return;
-    }
+    }   
 
     //entrando al modo de configuracion
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_configMode()));
@@ -77,13 +62,9 @@ void Config::on_term_receiveText_configMode()
     }
 }
 
-void Config::on_timerSiguienteComando_timeOut()
-{
-    siguienteComando();
-}
-
 void Config::siguienteComando()
 {
+    txt.clear();
     if ( m_lstComandosPos < m_lstComandos.size()-1 )
     {
         m_lstComandosPos++;
@@ -99,12 +80,10 @@ void Config::siguienteComando()
                 comando.append( m_parentQuery->property(word.toLocal8Bit()).toString() );
             }
             else
-                comando.append(word);
-
-            m_error=true;
-            m_lstComandosConErrores.append( m_lastCommand );
+                comando.append(word);           
         }
         QString txt = comando.join(" ");
+        qDebug() << Q_FUNC_INFO << "enviando" << txt;
         termSendText( txt );
     }
     else
@@ -123,8 +102,11 @@ void Config::on_term_receiveText_finished()
 {
     emit working();
 
-    txt.append( term->dataReceived() );
+    txt.append( term->dataReceived() );    
     QString line = txt.split("\n").last();
+
+    qDebug() << Q_FUNC_INFO << "recibido" << txt;
+
     line.simplified();
 
     exp.setPattern("^.+\\(config(\\-\\w+)*\\)#\\s*$");
@@ -138,9 +120,9 @@ void Config::on_term_receiveText_finished()
         {
             m_error=true;            
             m_lstComandosConErrores.append( m_lastCommand );
+             qDebug() << Q_FUNC_INFO << "m_lstComandosConErrores.size" << m_lstComandosConErrores.size() << m_lastCommand;
         }
 
-//        timerSiguienteComando->start();
         siguienteComando();
     }
 }
@@ -157,7 +139,7 @@ void Config::on_term_receiveText_exited()
     if ( txt.contains("Uncommitted changes found, commit them befo") )
     {
         //Cisco XR, al salir pregunta si se aplica los cambios
-        termSendText("yes");
+        termSendText("no");   //cambiar a yes
         m_guardado=true;
     }
     else if ( line.contains(exp) || line.contains(exp2) )
@@ -171,7 +153,7 @@ void Config::on_term_receiveText_exited()
     else if ( line.contains("Are you sure to continue?[Y/N]") )
     {
         //se esta grabando en un equipo Huawei        
-        termSendText("Y");
+        termSendText("N");  //cambiar a Y
         m_guardado=true;
     }
     else if ( line.contains("Destination filename [startup-config]") )
@@ -182,18 +164,20 @@ void Config::on_term_receiveText_exited()
     }
     else if ( allTextReceived() )
     {
-        //se salio del modo de configuracion
-        if ( !m_guardado )
-        {
-            //se graba la configuración
-            if ( m_brand == "Cisco" )
-                termSendText("copy running-config startup-config");
-            else if ( m_brand == "Huawei" )
-                termSendText("save");
-        }
-        else
-            //se salvo la configuración, se termina
-            finished();
+        finished();
+
+//        //se salio del modo de configuracion
+//        if ( !m_guardado )
+//        {
+//            //se graba la configuración
+//            if ( m_brand == "Cisco" )
+//                termSendText("copy running-config startup-config");
+//            else if ( m_brand == "Huawei" )
+//                termSendText("save");
+//        }
+//        else
+//            //se salvo la configuración, se termina
+//            finished();
     }
 }
 
