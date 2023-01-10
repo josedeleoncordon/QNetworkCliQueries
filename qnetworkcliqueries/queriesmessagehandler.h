@@ -13,13 +13,15 @@ class QueriesMessageHandler
 public:
     static void initHandler(QString path, bool savelogs = true);
     static QueriesMessageHandler* instance();
-    void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-    void close(); //para cerrar todos los archivos al finalizar
-    void init(); //para limpiar todos los archivos de una sesion anterior
+    void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);    
 
 private:
     QueriesMessageHandler(QString path,bool savelogs);
     ~QueriesMessageHandler();
+
+    void close(); //para cerrar todos los archivos al finalizar
+    void init(); //para limpiar todos los archivos de una sesion anterior
+
     static QueriesMessageHandler *m_instance;
     struct log
     {

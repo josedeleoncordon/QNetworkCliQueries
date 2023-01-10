@@ -63,12 +63,14 @@ public:
 
 signals:
     void newInformation();
-    void status(QString);
+    void status(QString,QString);
     void finished(bool);
+    void canceled(QString);
 
 private slots:
     void on_timer_timeOut();
     void on_timerActivity_timeOut();
+    void on_uuidCanceled(QString);
 
 protected slots:
     void equipoConsultado(Queries *qry);

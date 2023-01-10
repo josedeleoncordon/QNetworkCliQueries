@@ -41,7 +41,7 @@ void QueriesThread::_emitNewInformation()
     qDebug() << Q_FUNC_INFO << "Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
                 " Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                 QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter );
-    emit status( "Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
+    emit status( m_uuid,"Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
                  " - Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                  QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter ) );
 }
@@ -49,7 +49,7 @@ void QueriesThread::_emitNewInformation()
 void QueriesThread::_emitFinished(bool ok)
 {
     QueriesThreadController::Instance()->unregisterQueriesThreadUUID( m_uuid );
-    emit status("");
+    emit status(m_uuid,"");
     emit finished(ok);
 }
 
@@ -155,7 +155,9 @@ void QueriesThread::iniciar()
     if ( m_equipmentNeighborsConsultarVecinos )
         QueriesThreadController::Instance()->registerQueriesThreadUUID( m_uuid );
     else
-        QueriesThreadController::Instance()->registerQueriesThreadUUID( m_uuid, m_lstIP.size() + m_lstIPsMismoEquipo.size() );
+        QueriesThreadController::Instance()->registerQueriesThreadUUID( m_uuid, m_lstIP.size() + m_lstIPsMismoEquipo.size() );        
+
+    connect(WCUUIDs::Instance(),SIGNAL(uuidCanceled(QString)),SLOT(on_uuidCanceled(QString)));
 
     m_timer = new QTimer(this);   
     m_timer->setInterval( m_interval );
@@ -198,6 +200,7 @@ void QueriesThread::cancelar()
     m_cancelar=true;
     foreach (Queries* qry, m_queriesenconsulta)
     {
+        QueriesThreadController::Instance()->consultaFinalizada(m_uuid,qry->ip());
         m_conerrores++;
         m_errorMap.insert( qry->ip(), "Error" );
         qry->disconnect();
@@ -207,12 +210,22 @@ void QueriesThread::cancelar()
     m_queriesenconsulta.clear();
     m_equiposenconsulta.clear();
 
+    disconnect(WCUUIDs::Instance(),SIGNAL(uuidCanceled(QString)),this,SLOT(on_uuidCanceled(QString)));
+
     _emitFinished(true);
+    emit canceled(m_uuid);
 }
 
 void QueriesThread::on_timerActivity_timeOut()
 {
     cancelar();
+}
+
+void QueriesThread::on_uuidCanceled(QString uuid)
+{
+    qCDebug(queriesthread) << uuid;
+    if ( m_uuid == uuid )
+        cancelar();
 }
 
 void QueriesThread::on_timer_timeOut()
