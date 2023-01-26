@@ -1115,7 +1115,8 @@ QString encode(QString txt)
     QCA::SecureArray u = cipher.process( txt.toLocal8Bit() );
 
     if (!cipher.ok()) {
-        qDebug() << "encode failed";
+        qDebug() << "encode failed" << txt;
+        return "";
     }
 
     return QCA::arrayToHex(u.toByteArray());
@@ -1146,7 +1147,8 @@ QString decode(QString txtHEX)
     QCA::SecureArray cipherText( QByteArray::fromHex( txtHEX.toLocal8Bit() ) );
     QCA::SecureArray plainText = cipher.process( cipherText );
     if (!cipher.ok()) {
-        qDebug() << "decode failed";
+        qDebug() << "decode failed" << txtHEX;
+        return "";
     }
     return QString(plainText.toByteArray());
 }
