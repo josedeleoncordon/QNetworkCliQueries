@@ -186,4 +186,10 @@ QString filasIndentadasSubirAanterior(QString txt);
 //Busca los IDs de un servicio en un texto
 QString buscarServicioID(QString txt);
 
+//Qt Cryptographic Architecture cipher encode
+QString encode(QString txt);
+
+//Qt Cryptographic Architecture cipher decode
+QString decode(QString txtHEX);
+
 #endif // FUNCIONES_H

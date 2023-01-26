@@ -3,7 +3,7 @@ include(../qremoteshell/qremoteshell.pri)
 
 DESTDIR = $$APP_BUILD_TREE
 
-INCLUDEPATH += base
+INCLUDEPATH += base /usr/include/qt5/QtCrypto/
 
 CONFIG += c++11
 
@@ -97,3 +97,8 @@ unix {
     target.path = /usr/lib64
     INSTALLS += target
 }
+
+RESOURCES += \
+    resources.qrc
+
+LIBS *= -lqca-qt5

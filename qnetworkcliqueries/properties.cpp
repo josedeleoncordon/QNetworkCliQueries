@@ -1,4 +1,5 @@
 #include "properties.h"
+#include "funciones.h"
 
 Properties * Properties::m_instance = nullptr;
 
@@ -15,11 +16,21 @@ Properties * Properties::Instance()
 Properties::Properties()
 {
     savelogs=false;
+
+    //https://www.digitalocean.com/community/tutorials/how-to-create-an-ssl-certificate-on-apache-for-centos-7
+    //openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ufinet.key -out /etc/ssl/certs/ufinet.crt
+
+    _skFile.setFileName(QStringLiteral(":/unet.key"));
+    _ivFile.setFileName(QStringLiteral(":/unet.cert"));
+    _skFile.open(QIODevice::ReadOnly);
+    _ivFile.open(QIODevice::ReadOnly);
 }
 
 Properties::~Properties()
 {
     saveSettings();
+    _skFile.close();
+    _ivFile.close();
     delete m_instance;
     m_instance = 0;
 }
@@ -30,38 +41,34 @@ void Properties::loadSettings()
     settings.setDefaultFormat(QSettings::NativeFormat);
 
     settings.beginGroup("Connection");
-    user = settings.value("ConnectionUser").toString();
-    password = settings.value("ConnectionPassword").toString();
+    user = decode(settings.value("ConnectionUser").toString());
+    password = decode(settings.value("ConnectionPassword").toString());
     settings.endGroup();
 
     settings.beginGroup("BDConnection");
-    bduser = settings.value("BDConnectionUser").toString();
-    bdpassword = settings.value("BDConnectionPassword").toString();
-    bd = settings.value("BD").toString();
-    bdhost = settings.value("BDHost").toString();
+    bduser = decode(settings.value("BDConnectionUser").toString());
+    bdpassword = decode(settings.value("BDConnectionPassword").toString());
+    bd = decode(settings.value("BD").toString());
+    bdhost = decode(settings.value("BDHost").toString());
     settings.endGroup();
 
     settings.beginGroup("Queries");
-    queriespath = settings.value("QueriesPath").toString();
-    logspath = settings.value("LogsPath").toString();
-    linuxpromt = settings.value("LinuxPropmt").toString();
+    queriespath = decode(settings.value("QueriesPath").toString());
+    logspath = decode(settings.value("LogsPath").toString());
+    linuxpromt = decode(settings.value("LinuxPropmt").toString());
 #ifdef QT_DEBUG
     savelogs = settings.value("savelogs").toBool();
 #endif
     settings.endGroup();
 
     settings.beginGroup("Topology");
-    mnemonicspath = settings.value("MnemonicsPath").toString();
-    topologiaconfpath = settings.value("topologiaconfpath").toString();
-    topologiaiconpath = settings.value("topologiaiconpath").toString();
+    mnemonicspath = decode(settings.value("MnemonicsPath").toString());
+    topologiaconfpath = decode(settings.value("topologiaconfpath").toString());
+    topologiaiconpath = decode(settings.value("topologiaiconpath").toString());
     settings.endGroup();
 
     settings.beginGroup("GroupRoots");
     mapGrupoRaizIP = settings.value("mapGrupoRaizIP").toMap();
-    settings.endGroup();
-
-    settings.beginGroup("Mie");
-    mapRedesNoPublicadas = settings.value("mapRedesNoPublicadas").toMap();
     settings.endGroup();
 }
 
@@ -71,36 +78,44 @@ void Properties::saveSettings()
     settings.setDefaultFormat(QSettings::NativeFormat);
 
     settings.beginGroup("Connection");
-    settings.setValue("ConnectionUser",user);
-    settings.setValue("ConnectionPassword",password);
+    settings.setValue("ConnectionUser",encode(user));
+    settings.setValue("ConnectionPassword",encode(password));
     settings.endGroup();
 
     settings.beginGroup("BDConnection");
-    settings.setValue("BDConnectionUser",bduser);
-    settings.setValue("BDConnectionPassword",bdpassword);
-    settings.setValue("BD",bd);
-    settings.setValue("BDHost",bdhost);
+    settings.setValue("BDConnectionUser",encode(bduser));
+    settings.setValue("BDConnectionPassword",encode(bdpassword));
+    settings.setValue("BD",encode(bd));
+    settings.setValue("BDHost",encode(bdhost));
     settings.endGroup();
 
     settings.beginGroup("Queries");
-    settings.setValue("QueriesPath",queriespath);
-    settings.setValue("LogsPath",logspath);
-    settings.setValue("LinuxPropmt",linuxpromt);
+    settings.setValue("QueriesPath",encode(queriespath));
+    settings.setValue("LogsPath",encode(logspath));
+    settings.setValue("LinuxPropmt",encode(linuxpromt));
     settings.setValue("savelogs",savelogs);
     settings.endGroup();
 
     settings.beginGroup("Topology");
-    settings.setValue("MnemonicsPath",mnemonicspath);
-    settings.setValue("topologiaconfpath",topologiaconfpath);
-    settings.setValue("topologiaiconpath",topologiaiconpath);
+    settings.setValue("MnemonicsPath",encode(mnemonicspath));
+    settings.setValue("topologiaconfpath",encode(topologiaconfpath));
+    settings.setValue("topologiaiconpath",encode(topologiaiconpath));
     settings.endGroup();
 
     settings.beginGroup("GroupRoots");
     settings.setValue("mapGrupoRaizIP",mapGrupoRaizIP);
     settings.endGroup();
+}
 
-    settings.beginGroup("Mie");
-    settings.setValue("mapRedesNoPublicadas",mapRedesNoPublicadas);
-    settings.endGroup();
+QFile &Properties::skFile()
+{
+    _skFile.reset();
+    return _skFile;
+}
+
+QFile &Properties::ivFile()
+{
+    _ivFile.reset();
+    return _ivFile;
 }
 

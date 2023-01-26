@@ -2,6 +2,7 @@
 #define PROPERTIES_H
 
 #include <QSettings>
+#include <QFile>
 
 #include "qnetworkcliqueries_global.h"
 
@@ -26,12 +27,13 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString bduser;
         QString bdpassword;
         QString bd;
-        QString bdhost;
+        QString bdhost;       
 
         QMap<QString,QString> mapFuncionesArgumentos;
         QMap<QString,QVariant> mapGrupoRaizIP;
 
-        QMap<QString,QVariant> mapRedesNoPublicadas;
+        QFile &skFile();
+        QFile &ivFile();
 
     private:
         static Properties *m_instance;
@@ -41,6 +43,9 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         ~Properties();
 
         void loadSettings();
+
+        QFile _skFile; //key
+        QFile _ivFile; //initialisation vector
 };
 
 #endif

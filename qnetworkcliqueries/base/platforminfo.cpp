@@ -68,6 +68,9 @@ void PlatformInfo::on_term_receiveText()
 
             QStringList data = line.split(" ",QString::SkipEmptyParts);
             m_platform = data.at(1).simplified();
+
+            qDebug() << Q_FUNC_INFO << m_platform;
+
             break;
         }
     }
@@ -80,6 +83,7 @@ void PlatformInfo::on_term_receiveText()
             if ( line.contains(exp) )
             {
                 m_platform = exp.cap( 2 );
+                qDebug() << Q_FUNC_INFO << m_platform;
                 break;
             }
         }
