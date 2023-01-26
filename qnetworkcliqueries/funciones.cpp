@@ -1093,7 +1093,6 @@ QString buscarServicioID(QString txt)
 //Qt Cryptographic Architecture cipher encode
 QString encode(QString txt)
 {
-    qDebug() << Q_FUNC_INFO << txt;
     QCA::Initializer init;
     if (!QCA::isSupported("aes128-cbc-pkcs7"))
     {
@@ -1116,8 +1115,7 @@ QString encode(QString txt)
     QCA::SecureArray u = cipher.process( txt.toLocal8Bit() );
 
     if (!cipher.ok()) {
-        qDebug() << "encode failed" << txt;
-        return "";
+        qDebug() << "encode failed";
     }
 
     return QCA::arrayToHex(u.toByteArray());
@@ -1126,7 +1124,6 @@ QString encode(QString txt)
 //Qt Cryptographic Architecture cipher decode
 QString decode(QString txtHEX)
 {
-    qDebug() << Q_FUNC_INFO << txtHEX;
     QCA::Initializer init;
     if (!QCA::isSupported("aes128-cbc-pkcs7"))
     {
@@ -1149,8 +1146,7 @@ QString decode(QString txtHEX)
     QCA::SecureArray cipherText( QByteArray::fromHex( txtHEX.toLocal8Bit() ) );
     QCA::SecureArray plainText = cipher.process( cipherText );
     if (!cipher.ok()) {
-        qDebug() << "decode failed" << txtHEX;
-        return "";
+        qDebug() << "decode failed";
     }
     return QString(plainText.toByteArray());
 }

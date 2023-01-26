@@ -47,6 +47,3 @@ CMakeLists.txt.user*
 apps/
 .directory
 *.o
-
-*.cert
-*.key
