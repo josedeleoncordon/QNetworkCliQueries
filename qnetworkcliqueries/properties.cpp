@@ -1,5 +1,6 @@
 #include "properties.h"
 #include "funciones.h"
+#include <QTextStream>
 
 Properties * Properties::m_instance = nullptr;
 
@@ -18,12 +19,28 @@ Properties::Properties()
     savelogs=false;
 
     //https://www.digitalocean.com/community/tutorials/how-to-create-an-ssl-certificate-on-apache-for-centos-7
-    //openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ufinet.key -out /etc/ssl/certs/ufinet.crt
+    //openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/unet.key -out /etc/ssl/certs/unet.crt
 
-    _skFile.setFileName(QStringLiteral(":/unet.key"));
-    _ivFile.setFileName(QStringLiteral(":/unet.cert"));
-    _skFile.open(QIODevice::ReadOnly);
-    _ivFile.open(QIODevice::ReadOnly);
+    QFile skFile(QStringLiteral(":/unet.key"));
+    QFile ivFile(QStringLiteral(":/unet.cert"));
+    skFile.open(QIODevice::ReadOnly);
+    ivFile.open(QIODevice::ReadOnly);
+
+    QTextStream in(&skFile);
+    sk = in.readAll();
+    QTextStream in2(&ivFile);
+    iv = in2.readAll();
+
+    sksettings = sk;
+    ivsettings = iv;
+
+    QRegExp exp("-----.+-----");
+    exp.setMinimal(true);
+    sksettings.remove(exp);
+    ivsettings.remove(exp);
+
+    skFile.close();
+    ivFile.close();
 }
 
 Properties::~Properties()
@@ -105,17 +122,5 @@ void Properties::saveSettings()
     settings.beginGroup("GroupRoots");
     settings.setValue("mapGrupoRaizIP",mapGrupoRaizIP);
     settings.endGroup();
-}
-
-QFile &Properties::skFile()
-{
-    _skFile.reset();
-    return _skFile;
-}
-
-QFile &Properties::ivFile()
-{
-    _ivFile.reset();
-    return _ivFile;
 }
 

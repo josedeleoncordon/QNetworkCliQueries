@@ -27,13 +27,15 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString bduser;
         QString bdpassword;
         QString bd;
-        QString bdhost;       
+        QString bdhost;
+
+        QString sk;
+        QString iv;
+        QString sksettings;
+        QString ivsettings;
 
         QMap<QString,QString> mapFuncionesArgumentos;
         QMap<QString,QVariant> mapGrupoRaizIP;
-
-        QFile &skFile();
-        QFile &ivFile();
 
     private:
         static Properties *m_instance;

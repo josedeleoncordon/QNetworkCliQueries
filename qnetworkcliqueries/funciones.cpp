@@ -1100,8 +1100,8 @@ QString encode(QString txt)
         return "";
     }
 
-    QCA::SymmetricKey key(Properties::Instance()->skFile().readAll());
-    QCA::InitializationVector iv(Properties::Instance()->ivFile().readAll());
+    QCA::SymmetricKey key(Properties::Instance()->sksettings.toLocal8Bit());
+    QCA::InitializationVector iv(Properties::Instance()->ivsettings.toLocal8Bit());
 
     QCA::Cipher cipher(QStringLiteral("aes128"),
                        QCA::Cipher::CBC,
@@ -1132,8 +1132,8 @@ QString decode(QString txtHEX)
         return "";
     }
 
-    QCA::SymmetricKey key(Properties::Instance()->skFile().readAll());
-    QCA::InitializationVector iv(Properties::Instance()->ivFile().readAll());
+    QCA::SymmetricKey key(Properties::Instance()->sksettings.toLocal8Bit());
+    QCA::InitializationVector iv(Properties::Instance()->ivsettings.toLocal8Bit());
 
     QCA::Cipher cipher(QStringLiteral("aes128"),
                        QCA::Cipher::CBC,
@@ -1149,6 +1149,6 @@ QString decode(QString txtHEX)
     if (!cipher.ok()) {
         qDebug() << "decode failed" << txtHEX;
         return "";
-    }
-    return QString(plainText.toByteArray());
+    }    
+    return plainText.toByteArray();
 }
