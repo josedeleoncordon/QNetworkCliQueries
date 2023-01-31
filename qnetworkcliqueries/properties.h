@@ -6,11 +6,21 @@
 
 #include "qnetworkcliqueries_global.h"
 
+class QNETWORKCLIQUERIES_EXPORT PropertiesEncoderDecoder
+{
+public:
+    virtual QString encode(QString);
+    virtual QString decode(QString);
+};
+
+PropertiesEncoderDecoder *newPropertiesEncoderDecoder();
+
 class QNETWORKCLIQUERIES_EXPORT Properties
 {
     public:
         static Properties *Instance();
         void saveSettings();
+        void loadSettings();
 
         bool savelogs;
         QString user;
@@ -29,13 +39,10 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString bd;
         QString bdhost;
 
-        QString sk;
-        QString iv;
-        QString sksettings;
-        QString ivsettings;
-
         QMap<QString,QString> mapFuncionesArgumentos;
         QMap<QString,QVariant> mapGrupoRaizIP;
+
+        void setNewEnconderDecoder(PropertiesEncoderDecoder*(*encoderdecoder)(void));
 
     private:
         static Properties *m_instance;
@@ -44,10 +51,7 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         Properties(const Properties &) {}
         ~Properties();
 
-        void loadSettings();
-
-        QFile _skFile; //key
-        QFile _ivFile; //initialisation vector
+        PropertiesEncoderDecoder*(*ed)(void) = nullptr;
 };
 
 #endif

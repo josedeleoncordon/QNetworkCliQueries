@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-	    <file compress-algo="zstd">unet.cert</file>
-		<file compress-algo="zstd">unet.key</file>
-    </qresource>
-</RCC>

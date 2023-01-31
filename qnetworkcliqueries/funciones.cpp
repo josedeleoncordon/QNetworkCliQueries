@@ -10,7 +10,6 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QTimer>
-#include <QtCrypto>
 
 #include "qnetworkquerieslogging.h"
 
@@ -1088,67 +1087,4 @@ QString buscarServicioID(QString txt)
         return exp.cap(0);
 
     return "";
-}
-
-//Qt Cryptographic Architecture cipher encode
-QString encode(QString txt)
-{
-    QCA::Initializer init;
-    if (!QCA::isSupported("aes128-cbc-pkcs7"))
-    {
-        qDebug() << "AES128-CBC not supported!";
-        return "";
-    }
-
-    QCA::SymmetricKey key(Properties::Instance()->sksettings.toLocal8Bit());
-    QCA::InitializationVector iv(Properties::Instance()->ivsettings.toLocal8Bit());
-
-    QCA::Cipher cipher(QStringLiteral("aes128"),
-                       QCA::Cipher::CBC,
-                       // use Default padding, which is equivalent to PKCS7 for CBC
-                       QCA::Cipher::DefaultPadding,
-                       // this object will encrypt
-                       QCA::Encode,
-                       key,
-                       iv);
-
-    QCA::SecureArray u = cipher.process( txt.toLocal8Bit() );
-
-    if (!cipher.ok()) {
-        qDebug() << "encode failed" << txt;
-        return "";
-    }
-
-    return QCA::arrayToHex(u.toByteArray());
-}
-
-//Qt Cryptographic Architecture cipher decode
-QString decode(QString txtHEX)
-{
-    QCA::Initializer init;
-    if (!QCA::isSupported("aes128-cbc-pkcs7"))
-    {
-        qDebug() << "AES128-CBC not supported!";
-        return "";
-    }
-
-    QCA::SymmetricKey key(Properties::Instance()->sksettings.toLocal8Bit());
-    QCA::InitializationVector iv(Properties::Instance()->ivsettings.toLocal8Bit());
-
-    QCA::Cipher cipher(QStringLiteral("aes128"),
-                       QCA::Cipher::CBC,
-                       // use Default padding, which is equivalent to PKCS7 for CBC
-                       QCA::Cipher::DefaultPadding,
-                       // this object will encrypt
-                       QCA::Decode,
-                       key,
-                       iv);
-
-    QCA::SecureArray cipherText( QByteArray::fromHex( txtHEX.toLocal8Bit() ) );
-    QCA::SecureArray plainText = cipher.process( cipherText );
-    if (!cipher.ok()) {
-        qDebug() << "decode failed" << txtHEX;
-        return "";
-    }    
-    return plainText.toByteArray();
 }

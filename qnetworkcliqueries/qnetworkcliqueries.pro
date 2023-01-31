@@ -3,13 +3,13 @@ include(../qremoteshell/qremoteshell.pri)
 
 DESTDIR = $$APP_BUILD_TREE
 
-INCLUDEPATH += base /usr/include/qt5/QtCrypto/
-
 CONFIG += c++11
 
 QT += dbus
 TARGET = qnetworkcliqueries
 TEMPLATE = lib
+
+INCLUDEPATH += base
 
 DEFINES += QNETWORKCLIQUERIES_LIBRARY
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
@@ -98,7 +98,4 @@ unix {
     INSTALLS += target
 }
 
-RESOURCES += \
-    resources.qrc
 
-LIBS *= -lqca-qt5

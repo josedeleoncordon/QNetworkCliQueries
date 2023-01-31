@@ -2,86 +2,81 @@
 #include "funciones.h"
 #include <QTextStream>
 
+QString PropertiesEncoderDecoder::encode(QString txt)
+{
+    return txt;
+}
+
+QString PropertiesEncoderDecoder::decode(QString txt)
+{
+    return txt;
+}
+
+PropertiesEncoderDecoder *newPropertiesEncoderDecoder()
+{
+    return new PropertiesEncoderDecoder;
+}
+
 Properties * Properties::m_instance = nullptr;
 
 Properties * Properties::Instance()
 {
-    if (!m_instance)
-    {
+    if (!m_instance)    
         m_instance = new Properties();
-        m_instance->loadSettings();
-    }
+
     return m_instance;
 }
 
 Properties::Properties()
 {
-    savelogs=false;
-
-    //https://www.digitalocean.com/community/tutorials/how-to-create-an-ssl-certificate-on-apache-for-centos-7
-    //openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/unet.key -out /etc/ssl/certs/unet.crt
-
-    QFile skFile(QStringLiteral(":/unet.key"));
-    QFile ivFile(QStringLiteral(":/unet.cert"));
-    skFile.open(QIODevice::ReadOnly);
-    ivFile.open(QIODevice::ReadOnly);
-
-    QTextStream in(&skFile);
-    sk = in.readAll();
-    QTextStream in2(&ivFile);
-    iv = in2.readAll();
-
-    sksettings = sk;
-    ivsettings = iv;
-
-    QRegExp exp("-----.+-----");
-    exp.setMinimal(true);
-    sksettings.remove(exp);
-    ivsettings.remove(exp);
-
-    skFile.close();
-    ivFile.close();
+    savelogs=false;   
+    ed = &newPropertiesEncoderDecoder;
 }
 
 Properties::~Properties()
 {
     saveSettings();
-    _skFile.close();
-    _ivFile.close();
     delete m_instance;
     m_instance = 0;
 }
 
+void Properties::setNewEnconderDecoder(PropertiesEncoderDecoder*(*encoderdecoder)(void))
+{
+    ed = encoderdecoder;
+}
+
 void Properties::loadSettings()
 {
+    PropertiesEncoderDecoder *ped = (*ed)();
+
     QSettings settings;
     settings.setDefaultFormat(QSettings::NativeFormat);
 
     settings.beginGroup("Connection");
-    user = decode(settings.value("ConnectionUser").toString());
-    password = decode(settings.value("ConnectionPassword").toString());
+    user = ped->decode(settings.value("ConnectionUser").toString());
+    password = ped->decode(settings.value("ConnectionPassword").toString());
     settings.endGroup();
 
     settings.beginGroup("BDConnection");
-    bduser = decode(settings.value("BDConnectionUser").toString());
-    bdpassword = decode(settings.value("BDConnectionPassword").toString());
-    bd = decode(settings.value("BD").toString());
-    bdhost = decode(settings.value("BDHost").toString());
+    bduser = ped->decode(settings.value("BDConnectionUser").toString());
+    bdpassword = ped->decode(settings.value("BDConnectionPassword").toString());
+    bd = ped->decode(settings.value("BD").toString());
+    bdhost = ped->decode(settings.value("BDHost").toString());
     settings.endGroup();
 
     settings.beginGroup("Queries");
-    queriespath = decode(settings.value("QueriesPath").toString());
-    logspath = decode(settings.value("LogsPath").toString());
-    linuxpromt = decode(settings.value("LinuxPropmt").toString());
+    queriespath = ped->decode(settings.value("QueriesPath").toString());
+    logspath = ped->decode(settings.value("LogsPath").toString());
+    linuxpromt = ped->decode(settings.value("LinuxPropmt").toString());
 #ifdef QT_DEBUG
     savelogs = settings.value("savelogs").toBool();
 #endif
     settings.endGroup();
 
     settings.beginGroup("Topology");
-    mnemonicspath = decode(settings.value("MnemonicsPath").toString());
-    topologiaconfpath = decode(settings.value("topologiaconfpath").toString());
-    topologiaiconpath = decode(settings.value("topologiaiconpath").toString());
+    mnemonicspath = ped->decode(settings.value("MnemonicsPath").toString());
+    topologiaconfpath = ped->decode(settings.value("topologiaconfpath").toString());
+    topologiaiconpath = ped->decode(settings.value("topologiaiconpath").toString());
     settings.endGroup();
 
     settings.beginGroup("GroupRoots");
@@ -91,32 +86,34 @@ void Properties::loadSettings()
 
 void Properties::saveSettings()
 {
+    PropertiesEncoderDecoder *ped = (*ed)();
+
     QSettings settings;
     settings.setDefaultFormat(QSettings::NativeFormat);
 
     settings.beginGroup("Connection");
-    settings.setValue("ConnectionUser",encode(user));
-    settings.setValue("ConnectionPassword",encode(password));
+    settings.setValue("ConnectionUser",ped->encode(user));
+    settings.setValue("ConnectionPassword",ped->encode(password));
     settings.endGroup();
 
     settings.beginGroup("BDConnection");
-    settings.setValue("BDConnectionUser",encode(bduser));
-    settings.setValue("BDConnectionPassword",encode(bdpassword));
-    settings.setValue("BD",encode(bd));
-    settings.setValue("BDHost",encode(bdhost));
+    settings.setValue("BDConnectionUser",ped->encode(bduser));
+    settings.setValue("BDConnectionPassword",ped->encode(bdpassword));
+    settings.setValue("BD",ped->encode(bd));
+    settings.setValue("BDHost",ped->encode(bdhost));
     settings.endGroup();
 
     settings.beginGroup("Queries");
-    settings.setValue("QueriesPath",encode(queriespath));
-    settings.setValue("LogsPath",encode(logspath));
-    settings.setValue("LinuxPropmt",encode(linuxpromt));
+    settings.setValue("QueriesPath",ped->encode(queriespath));
+    settings.setValue("LogsPath",ped->encode(logspath));
+    settings.setValue("LinuxPropmt",ped->encode(linuxpromt));
     settings.setValue("savelogs",savelogs);
     settings.endGroup();
 
     settings.beginGroup("Topology");
-    settings.setValue("MnemonicsPath",encode(mnemonicspath));
-    settings.setValue("topologiaconfpath",encode(topologiaconfpath));
-    settings.setValue("topologiaiconpath",encode(topologiaiconpath));
+    settings.setValue("MnemonicsPath",ped->encode(mnemonicspath));
+    settings.setValue("topologiaconfpath",ped->encode(topologiaconfpath));
+    settings.setValue("topologiaiconpath",ped->encode(topologiaiconpath));
     settings.endGroup();
 
     settings.beginGroup("GroupRoots");
