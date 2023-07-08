@@ -9,7 +9,7 @@ class QueriesThreadWorker : public QObject
     Q_OBJECT
 public:
     explicit QueriesThreadWorker();
-    void setQueries(Queries *query) { qry=query; }
+    void setQueries(Queries *query) { qry=query; }   
 
 public slots:
     virtual void start();

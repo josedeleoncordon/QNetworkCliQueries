@@ -48,6 +48,9 @@ QStringList numberRangeToLST(QString str);
 //regresa un puntero ya que si no existe no podriamos regresar una referencia a algo que no existe
 Queries *buscarEquipoPorIPnombre(QList<Queries> &lst, QString ip, QString nombre);
 
+//Busca el query de una ip
+Queries* getQuery(QList<Queries*> lst, QString ip);
+
 //Busca un equipo en el listado de queries, solo ip
 //regresa un puntero ya que si no existe no podriamos regresar una referencia a algo que no existe
 Queries *buscarEquipoPorIP(QList<Queries> &lst, QString ip);
@@ -105,6 +108,9 @@ QString IP2Binario(QString ip);
 
 //convierte una IP (11000000101010000000000100000000) a octetos
 QString binario2IP(QString ip);
+
+//decimal to IP format
+QString decimal2IP(QString);
 
 //indica si la IP1 es mayor que IP2
 bool esIP1MayorQueIP2(QString ip1, QString ip2);
@@ -185,5 +191,25 @@ QString filasIndentadasSubirAanterior(QString txt);
 
 //Busca los IDs de un servicio en un texto
 QString buscarServicioID(QString txt);
+
+//Node              Type                       State             Config state
+//--------------------------------------------------------------------------------
+//0/RSP0/CPU0       A9K-RSP880-LT-TR(Active)   IOS XR RUN        NSHUT
+//
+//Regrea una tabla en columnas
+QStringList txt2Columns(QString txt, QList<short> lstIndex);
+
+//12151W -> 1215
+short numbertxt2short(QString);
+
+//12151W -> 1215
+int numbertxt2int(QString);
+
+//Devuelve todas las coincidencias de un texto
+QStringList getRegExpAllMatches(QRegExp rx, QString txt);
+
+//2.00658804295556E7 -> 20065880
+//20065880.4295556 -> 20065880
+QString numberExp10Anumber(QString);
 
 #endif // FUNCIONES_H

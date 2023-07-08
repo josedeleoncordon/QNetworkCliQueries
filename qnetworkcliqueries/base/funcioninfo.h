@@ -22,7 +22,7 @@ public:
 
     //
     QString txtReceived() { return _lstTxt.join("\n"); }
-    QStringList &lstTxtReceived() { return _lstTxt; }
+    QStringList lstTxtReceived() { return _lstTxt; }
 
     //
 

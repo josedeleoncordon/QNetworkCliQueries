@@ -165,8 +165,8 @@ interfaz_estado:
       type: integer
       unsigned: true
       notnull: true
-    fecha_hora:
-      type: datetime
+    fecha:
+      type: date
       notnull: true
     estado:
       type: boolean
@@ -310,6 +310,9 @@ pcp_peer:
     estado:
       type: boolean
       notnull: true
+    prefixin:
+      type: integer
+      unsigned: true
   relations:
     pcp_pais_1:
       foreignType: many
@@ -402,58 +405,6 @@ pcp_pe:
       type: string(45)
     ip:
       type: string(15)
-    pcp_pais_id:
-      type: tinyint
-      unsigned: true
-      notnull: true
-  relations:
-    pcp_pais_1:
-      foreignType: many
-      foreignAlias: pcp_pes
-      local: pcp_pais_id
-      foreign: id
-      class: pcp_pais
-      owningSide: true
-      onDelete: NO ACTION
-      onUpdate: NO ACTION
-
-pcp_pe_peer:
-  columns:
-    id:
-      type: integer
-      unsigned: true
-      primary: true
-      notnull: true
-      autoincrement: true
-    pcp_pe_id:
-      type: integer
-      unsigned: true
-      notnull: true
-    pcp_peer_id:
-      type: integer
-      unsigned: true
-      notnull: true
-    prepend:
-      type: smallint
-  relations:
-    pcp_pe_1:
-      foreignType: many
-      foreignAlias: pcp_pe_peers
-      local: pcp_pe_id
-      foreign: id
-      class: pcp_pe
-      owningSide: true
-      onDelete: NO ACTION
-      onUpdate: NO ACTION
-    pcp_peer_2:
-      foreignType: many
-      foreignAlias: pcp_pe_peers
-      local: pcp_peer_id
-      foreign: id
-      class: pcp_peer
-      owningSide: true
-      onDelete: NO ACTION
-      onUpdate: NO ACTION
 
 pcp_region:
   columns:
@@ -464,4 +415,427 @@ pcp_region:
       autoincrement: true
     region:
       type: string(45)
+
+a9k_equipo:
+  columns:
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_pais_id:
+      type: integer
+      notnull: true
+    nombre:
+      type: string(45)
+      notnull: true
+    IP:
+      type: string(45)
+      notnull: true
+  relations:
+    a9k_pais_1:
+      foreignType: many
+      foreignAlias: a9k_equipos
+      local: a9k_pais_id
+      foreign: id
+      class: a9k_pais
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_slots:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    node:
+      type: string(45)
+    type:
+      type: string(45)
+    state:
+      type: string(45)
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_slotss
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_memoria:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    fisica_total:
+      type: integer
+    fisica_disponible:
+      type: integer
+    app_disponible:
+      type: integer
+    bgp_limit:
+      type: integer
+    bgp:
+      type: integer
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_memorias
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_energia:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    nmas1:
+      type: tinyint
+    bandeja0fuentes:
+      type: smallint
+    bandeja1fuentes:
+      type: smallint
+    capacidad_total:
+      type: smallint
+    total_requerido:
+      type: smallint
+    disponible_en_falla:
+      type: smallint
+    sin_capacidad_en_falla:
+      type: tinyint
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_energias
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_sesiones_cola:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    neighbor:
+      type: string(45)
+    inq:
+      type: integer
+    outq:
+      type: integer
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_sesiones_colas
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_bgp_sesiones_weight:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    vrf:
+      type: string(45)
+    neighbor:
+      type: string(45)
+    routepolicy:
+      type: string(100)
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_bgp_sesiones_weights
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_bgp_sesiones_sin_lp200:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    neighbor:
+      type: string(45)
+    prefixin:
+      type: smallint
+    routepolicy:
+      type: string(45)
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_bgp_sesiones_sin_lp200s
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_mpls_label_table_summary:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    etiquetas_asignadas:
+      type: integer
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_mpls_label_table_summarys
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_peer_caida_prefix_in:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    proveedor:
+      type: string(45)
+    neighbor:
+      type: string(45)
+    prefixin:
+      type: integer
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_peer_caida_prefix_ins
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_internet_redistribucion_estaticas_conectadas:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    tipo:
+      type: string(45)
+    routepolicy:
+      type: string(100)
+    descripcion:
+      type: string(100)
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_internet_redistribucion_estaticas_conectadass
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_vrf_sin_label_pervrf:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    vrf:
+      type: string(45)
+    address_family:
+      type: string(45)
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_vrf_sin_label_pervrfs
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_bgp_inter_as:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    a9k_equipo_id:
+      type: integer
+      notnull: true
+    neighbor:
+      type: string(45)
+    asn:
+      type: string(45)
+  relations:
+    a9k_equipo_1:
+      foreignType: many
+      foreignAlias: a9k_bgp_inter_ass
+      local: a9k_equipo_id
+      foreign: id
+      class: a9k_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+a9k_pais:
+  columns:
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    pais:
+      type: string(45)
+
+ken_consulta:
+  columns:
+    id:
+      type: bigint
+      primary: true
+      notnull: true
+      autoincrement: true
+    ken_equipo_id:
+      type: integer
+      notnull: true
+    fecha:
+      type: date
+    destino_ip:
+      type: string(45)
+    max_bps:
+      type: double
+  relations:
+    ken_equipo_1:
+      foreignType: many
+      foreignAlias: ken_consultas
+      local: ken_equipo_id
+      foreign: id
+      class: ken_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+ken_equipo:
+  columns:
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    ip:
+      type: string(15)
+      notnull: true
+    nombre:
+      type: string(45)
+      notnull: true
 

@@ -101,8 +101,8 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
             min = secto/60;
             seg = secto%60;
 
-//            if ( false )
-            if ( _expIP.exactMatch(data.first().replace("\"","")) )
+            if ( false )
+//            if ( _expIP.exactMatch(data.first().replace("\"","")) )
             {
                 QString ip = data.takeFirst().replace("\"","");
 
@@ -146,7 +146,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
 
                 *l->ts << QDateTime::currentDateTime().toString("hh:mm:ss") <<
                           " Time min: " << QString::number(min)+" seg: " << QString::number(seg) << " " <<
-                          data.join(" ") << endl;
+                          msg << endl;
 
                 l->ts->flush();
 

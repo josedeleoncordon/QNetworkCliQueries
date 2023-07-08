@@ -631,7 +631,7 @@ void BGPInfo::on_term_receiveText_networksAttr()
         else if ( m_os == "VRP" )
         {
             line = line.simplified();
-//            qDebug() << line;
+//            qDebug() << "on_term_receiveText_networksAttr()" << line;
 
             QRegExp exp("BGP routing table entry information of (.+),");
             exp.setMinimal(false);
@@ -663,7 +663,7 @@ void BGPInfo::on_term_receiveText_networksAttr()
             }
 
             //AS y best
-            exp.setPattern("^AS-path (\\d| )+,");
+            exp.setPattern("^AS-path ((\\w| )+),");
             if ( line.contains(exp) )
             {
                 QString AP = exp.cap(1);
@@ -724,28 +724,28 @@ void BGPInfo::on_term_receiveText_networksAttrVRPCommunityList()
 
     QStringList lines = txt.split("\n");
 
-//    qDebug() << "---- on_term_receiveText_networksAttrVRPCommunityList. m_currentNetwork->from" << m_currentNetwork->from;
+    qDebug() << "---- on_term_receiveText_networksAttrVRPCommunityList. m_currentNetwork->from" << m_currentNetwork->from;
 
     QString lastfrom;
     for (QString line : lines)
     {
         line = line.simplified();
 
-//        qDebug() << line;
+        qDebug() << line;
 
         QRegExp exp("From: (.+)$");
         exp.setMinimal(false);
         if ( line.contains(exp) )
         {
             lastfrom = exp.cap(1);
-//            qDebug() << "---- lastFrom" << lastfrom;
+            qDebug() << "---- lastFrom" << lastfrom;
             continue;
         }
 
         exp.setPattern("Community: (.+)$");
         if ( line.contains( exp ) )
         {
-//            qDebug() << "---- Community: comparacion from" << lastfrom << m_currentNetwork->from;
+            qDebug() << "---- Community: comparacion from" << lastfrom << m_currentNetwork->from;
 
             if ( lastfrom == m_currentNetwork->from )
             {
@@ -754,7 +754,7 @@ void BGPInfo::on_term_receiveText_networksAttrVRPCommunityList()
                 comunidades.replace(">","");
                 comunidades.replace(",","");
                 m_currentNetwork->communityList = comunidades.split(" ",QString::SkipEmptyParts);
-//                qDebug() << "---- Agregando comunidades";
+                qDebug() << "---- Agregando comunidades";
                 break;
             }
         }

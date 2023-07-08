@@ -20,9 +20,9 @@ void interfaz_estadoRecord::set_estado(bool estado)
 	setProperty("estado",estado);
 }
 
-void interfaz_estadoRecord::set_fecha_hora(QDateTime fecha_hora)
+void interfaz_estadoRecord::set_fecha(QDate fecha)
 {
-	setProperty("fecha_hora",fecha_hora);
+	setProperty("fecha",fecha);
 }
 
 void interfaz_estadoRecord::set_id(unsigned long long id)
@@ -50,9 +50,9 @@ bool interfaz_estadoRecord::estado()
 	return property("estado").toBool();
 }
 
-QDateTime interfaz_estadoRecord::fecha_hora()
+QDate interfaz_estadoRecord::fecha()
 {
-	return property("fecha_hora").toDateTime();
+	return property("fecha").toDate();
 }
 
 unsigned long long interfaz_estadoRecord::id()

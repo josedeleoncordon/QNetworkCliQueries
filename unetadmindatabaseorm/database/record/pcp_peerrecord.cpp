@@ -55,6 +55,11 @@ void pcp_peerRecord::set_pcp_proveedor_id(unsigned int pcp_proveedor_id)
 	setProperty("pcp_proveedor_id",pcp_proveedor_id);
 }
 
+void pcp_peerRecord::set_prefixin(unsigned int prefixin)
+{
+	setProperty("prefixin",prefixin);
+}
+
 void pcp_peerRecord::set_vrf(QString vrf)
 {
 	setProperty("vrf",vrf);
@@ -98,6 +103,11 @@ int pcp_peerRecord::pcp_peer_tipo_id()
 unsigned int pcp_peerRecord::pcp_proveedor_id()
 {
 	return property("pcp_proveedor_id").toUInt();
+}
+
+unsigned int pcp_peerRecord::prefixin()
+{
+	return property("prefixin").toUInt();
 }
 
 QString pcp_peerRecord::vrf()

@@ -28,6 +28,7 @@ public:
 	void set_pcp_pais_id(int pcp_pais_id);
 	void set_pcp_peer_tipo_id(int pcp_peer_tipo_id);
 	void set_pcp_proveedor_id(unsigned int pcp_proveedor_id);
+	void set_prefixin(unsigned int prefixin);
 	void set_vrf(QString vrf);
 
 	QString comunidad_base();
@@ -38,6 +39,7 @@ public:
 	int pcp_pais_id();
 	int pcp_peer_tipo_id();
 	unsigned int pcp_proveedor_id();
+	unsigned int prefixin();
 	QString vrf();
 
 	pcp_paisRecord *r_pcp_pais_id();

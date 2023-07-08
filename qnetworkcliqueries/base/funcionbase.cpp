@@ -169,6 +169,7 @@ void FuncionBase::init()
 {
     term=nullptr;
     lastCommandFailed=false;
+    m_xr64=false;
     m_brand="Cisco";
     m_queryoption=QueryOpcion::Null;
     exp.setMinimal(true);

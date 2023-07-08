@@ -19,14 +19,14 @@ public:
 	~interfaz_estadoRecord();
 
 	void set_estado(bool estado);
-	void set_fecha_hora(QDateTime fecha_hora);
+	void set_fecha(QDate fecha);
 	void set_id(unsigned long long id);
 	void set_interfaz_id(unsigned int interfaz_id);
 	void set_ratein(long long ratein);
 	void set_rateout(long long rateout);
 
 	bool estado();
-	QDateTime fecha_hora();
+	QDate fecha();
 	unsigned long long id();
 	unsigned int interfaz_id();
 	long long ratein();

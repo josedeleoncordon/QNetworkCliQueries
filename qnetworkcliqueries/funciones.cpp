@@ -28,7 +28,7 @@ QStringList lstGrupos()
 
 QString equipmentOSFromPlatform(QString platform)
 {
-    QRegExp expNCS("NCS-[5-6]\\d{3,}");
+    QRegExp expNCS("NCS\\-*[5-6]\\d{2,}");
     if ( platform.contains("ASR9K") ||
          platform.contains("CRS") ||
          platform.contains(expNCS) )
@@ -53,7 +53,8 @@ QString equipmentOSFromPlatform(QString platform)
         return "IOS NX";
     else if ( platform.contains("ATN") ||
               platform.contains("NE40") ||
-              platform.contains("NE9000") )
+              platform.contains("NE9000") ||
+              platform.contains("NetEngine 8000") )
         return "VRP";
     else
         return "";
@@ -190,6 +191,14 @@ Queries *buscarEquipoPorIPnombre(QList<Queries> &lst, QString ip, QString nombre
 //        qDebug() << "buscarEquipos: no se encontro nombre del equipo en lst" << nombre <<
 //                    "no se se empezo a validar IP" << ip;
 
+    return nullptr;
+}
+
+Queries* getQuery(QList<Queries*> lst, QString ip)
+{
+    for ( Queries *q : lst )
+        if ( q->ip() == ip )
+            return q;
     return nullptr;
 }
 
@@ -518,14 +527,70 @@ QString IP2Binario(QString ip)
     if ( ip.contains("/") )
         ip = ip.split("/",QString::SkipEmptyParts).first();
 
-    QStringList lst = ip.split(".");
+    bool ipv4=true;
     QString salida;
-    foreach (QString oct, lst)
+    if ( ip.contains(".") )
     {
-        QString s="00000000";
-        s.append(QString::number(oct.toInt(),2));
-        salida.append( s.right(8) );
+        //IPv4
+        QStringList lst = ip.split(".");
+        foreach (QString bb, lst)
+        {
+            bool ok;
+            salida.append( QString("%1").arg(bb.toULongLong(&ok, 10), 8, 2, QChar('0')) );
+        }
     }
+    else if ( ip.contains(":") )
+    {
+        //IPv6
+        if ( !ip.contains("::") )
+        {
+            QStringList lst = ip.split(":");
+            foreach (QString bb, lst)
+            {
+                bool ok;
+                salida.append( QString("%1").arg(bb.toULongLong(&ok, 16), 16, 2, QChar('0')) );
+            }
+        }
+        else
+        {
+            QStringList data = ip.split("::",QString::SkipEmptyParts);
+            if ( data.size() == 1 )
+            {
+                //:: suponemos que esta al final
+                QStringList lst = data.first().split(":");
+                QString ii;
+                bool ok;
+                foreach (QString bb, lst)
+                    ii.append( QString("%1").arg(bb.toULongLong(&ok, 16), 16, 2, QChar('0')) );
+
+                salida.append( QString("%1").arg(ii.toULongLong(&ok, 2), -128, 2, QChar('0')) );
+            }
+            else if ( data.size() == 2 )
+            {
+                //:: esta en medio
+                QString primero,segundo;
+                for ( int c=0; c<data.size(); c++ )
+                {
+                    QString aa = data.at(c);
+                    QStringList lst = aa.split(":");
+                    foreach (QString bb, lst)
+                    {
+                        bool ok;
+                        QString cc = QString("%1").arg(bb.toULongLong(&ok, 16), 16, 2, QChar('0'));
+                        if ( c==0 )
+                            primero.append( cc );
+                        if ( c==1 )
+                            segundo.append( cc );
+                    }
+                }
+                int diferencia=128-primero.size()-segundo.size();
+                salida.append( primero + QString(diferencia,QChar('0'))+ segundo );
+            }
+        }
+    }
+
+//    qDebug() << "convirtiendo IP a binario" << ip << salida;
+
     return salida;
 }
 
@@ -543,6 +608,13 @@ QString binario2IP(QString ip)
     return octeto1+"."+octeto2+"."+octeto3+"."+octeto4;
 }
 
+QString decimal2IP(QString dec)
+{
+    bool ok;
+    QString bin = QString("%1").arg(dec.toULongLong(&ok, 10), 32, 2, QChar('0'));
+    return binario2IP( bin );
+}
+
 bool esIP1MayorQueIP2(QString ip1, QString ip2)
 {
     bool ok;
@@ -557,16 +629,25 @@ bool esIP1MayorQueIP2(QString ip1, QString ip2)
 
 bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos)
 {
-    QRegExp exp("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2})");
-    if ( !exp.exactMatch( segmentoIP_mascara2digitos ) )
+    QString segmento;
+    short int mascara;
+
+    QRegExp exp("(\\S+)/(\\d{1,3})");
+    if ( exp.exactMatch( segmentoIP_mascara2digitos ) )
+    {
+        segmento = exp.cap( 1 );
+        mascara = exp.cap( 2 ).toShort();
+    }
+    else
         return false;
 
-    QString segmento = exp.cap( 1 );
-    short int mascara = exp.cap( 2 ).toShort();
-
     if ( IP2Binario(IP).left(mascara) == IP2Binario(segmento).left(mascara) )
+    {
+//        qDebug() << "validarIPperteneceAsegmento" << IP <<  segmentoIP_mascara2digitos << "true";
         return true;
+    }
 
+//    qDebug() << "validarIPperteneceAsegmento" << IP <<  segmentoIP_mascara2digitos << "false";
     return false;
 }
 
@@ -686,7 +767,7 @@ QString eliminarCaractaresNoImprimibles(QString txt)
     forever
     {
         char caracter = txt.at( c ).toLatin1();
-        if ( caracter < 32 && caracter != 13 && caracter != 10 )
+        if ( caracter < 32 && caracter != 13 && caracter != 10 && caracter != 9 )
             txt.remove(c,1);
         else
             c++;
@@ -825,7 +906,8 @@ QString estandarizarInterfaz(QString interfaz)
     interfaz.replace("VLAN","Vlan");
     interfaz.replace("BVI","BV");
     interfaz.replace("Po0/0/","Po");
-    if ( !interfaz.contains("100GE") ) interfaz.replace("GE","Gi",Qt::CaseSensitive);
+    interfaz.replace("GE","Gi",Qt::CaseSensitive);
+    interfaz.replace(QRegExp("\\(\\w+\\)"),"");
 
     return interfaz;
 }
@@ -1087,4 +1169,89 @@ QString buscarServicioID(QString txt)
         return exp.cap(0);
 
     return "";
+}
+
+QStringList txt2Columns(QString txt, QList<short> lstIndex)
+{
+    QStringList lst;
+    for ( short c=0; c<lstIndex.size() ; c++ )
+    {
+        short a = lstIndex.at(c);
+        short b;
+
+        if ( lstIndex.size()-1 >= c+1 )
+            b=lstIndex.at(c+1);
+        else
+            b=txt.size()-1;
+
+//        qDebug() << "txt size" << txt.size() << "c" << c << "a" << a << "b" << b;
+
+        QString column = txt.mid( a,b-a).simplified();
+        if ( !column.isEmpty() )
+            lst.append( column );
+    }
+    return lst;
+}
+
+short numbertxt2short(QString numbertxt)
+{
+    QRegExp exp("\\d+");
+    if ( numbertxt.contains(exp) )
+        return exp.cap(0).toShort();
+    return 0;
+}
+
+int numbertxt2int(QString numbertxt)
+{
+    QRegExp exp("\\d+");
+    if ( numbertxt.contains(exp) )
+        return exp.cap(0).toInt();
+    return 0;
+}
+
+QStringList getRegExpAllMatches(QRegExp rx, QString txt)
+{
+    QStringList list;
+    int pos = 0;
+
+    while ((pos = rx.indexIn(txt, pos)) != -1) {
+        list << rx.cap(1);
+        pos += rx.matchedLength();
+    }
+    return list;
+}
+
+QString numberExp10Anumber(QString txt)
+{
+    QString salida;
+    QRegExp exp("(e|E)+(\\d+)$");
+
+    if ( txt.contains(exp) )
+    {
+        int e=exp.cap(2).toInt();
+        txt.replace(exp,QString(e,'0'));
+        bool encontrado = false;
+        int d=0;
+        for ( int c=0; c<txt.length(); c++ )
+        {
+            QChar qchar = txt.at(c);
+            if ( encontrado )
+            {
+                d++;
+                if ( d == e )
+                {
+                    salida.append(qchar);
+                    return salida;
+                }
+            }
+
+            if ( qchar != '.' )
+                salida.append( qchar );
+            else
+                encontrado=true;
+        }
+        return salida;
+    }
+    else
+        return txt.left( txt.indexOf(".") );
 }

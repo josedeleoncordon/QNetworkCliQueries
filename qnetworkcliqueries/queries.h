@@ -74,7 +74,8 @@ public:
     QString& hostName() { return m_name; }
     QString& country() { return m_country; }
     QString& platform() { return m_platform; }
-    QString& os() { return m_equipmenttype; }
+    bool xr64() { return m_xr64; }
+    QString& os() { return m_equipmenttype; }    
     QString& location() { return m_location; }
     QString& brand() { return m_brand; }
     QString& gw() { return m_gw; }
@@ -115,6 +116,7 @@ public:
     QList<SBGPNetwork>& bgpNetworksBGPAttrInfo(int i=0);
     QList<SIpRouteInfo>& ipRoutesInfo(int i=0);
     QString funcionTxtInfo(int i=0);
+    QStringList funcionLstTxtInfo(int i=0);
 
     void setId(QString id) { m_id = id; }
     void setGW(QString GW);
@@ -196,6 +198,7 @@ protected:
     QDateTime m_datetime;
     QString m_xr_location;
     QString m_location;
+    bool m_xr64;
     QRemoteShell::ConnectionProtocol m_connectionprotol;
     bool m_operativo;
     QString m_ip;
@@ -247,6 +250,10 @@ protected:
 private:
     void clone(const Queries& other);
     void _finalizar();
+
+private slots:
+
+    void on_finished(Queries*);
 };
 
 class QNETWORKCLIQUERIES_EXPORT LstQueries

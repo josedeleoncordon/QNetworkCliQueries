@@ -3,7 +3,7 @@ CONFIG   += ordered
 
 SUBDIRS =   qremoteshell \
             qnetworkcliqueries \
-			unetadmindatabaseorm \
+            unetadmindatabaseorm/database \
 #            testapps \
             apps
 

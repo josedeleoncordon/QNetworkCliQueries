@@ -125,6 +125,7 @@ protected:
     QString m_platform;
     QString m_os;
     QString m_xr_location;
+    bool m_xr64;
     QString m_location;
     QString m_name;
     QString m_ip;
@@ -146,10 +147,11 @@ public:
     FuncionBase(QRemoteShell *terminal, int option=QueryOpcion::Null);
     ~FuncionBase();
 
-    int queryOption() { return m_queryoption; };
+    int queryOption() { return m_queryoption; }
 
     void setBrand(QString brand) { m_brand = brand; }
     void setPlatform(QString platform);
+    void setXR64(bool xr64) { m_xr64=xr64; }
     void setXRLocation(QString location) { m_xr_location=location; }
     void setHostName(QString name) { m_name=name; }
     void setIp(QString ip) { m_ip = ip; }

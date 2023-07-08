@@ -52,6 +52,7 @@ void PlatformInfo::on_term_receiveText()
         if (m_name.contains(QRegExp("RP(_|/)0.+(_|:)")) &&
                 lastCommandFailed)
         {
+            m_xr64 = true;
             termSendText("show version");
             return;
         }
@@ -59,11 +60,12 @@ void PlatformInfo::on_term_receiveText()
         exp.setPattern("^(c|C)isco .+ processor .+ memory");
         exp2.setPattern(" *(c|C)isco .+ (c|C)hassis");
         QRegExp exp3("(c|C)isco .+ processor$");
+        QRegExp exp4("(c|C)isco \\S+ \\(.+");
         foreach (QString line, lines)
         {
             line = line.simplified();
 
-            if ( ! line.contains(exp) && !line.contains(exp2) && !line.contains(exp3) )
+            if ( ! line.contains(exp) && !line.contains(exp2) && !line.contains(exp3) && !line.contains(exp4) )
                 continue;                        
 
             QStringList data = line.split(" ",QString::SkipEmptyParts);

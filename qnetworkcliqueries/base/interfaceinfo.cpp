@@ -314,9 +314,8 @@ void InterfaceInfo::_getInterfacesInfoNextInteface()
             if ( m_brand == "Cisco" )
                 termSendText("show interface "+m_interfaceCurrent);
 
-            //TODO ANALIZAR HUAWEI
-//            else if ( m_brand == "Huawei" )
-//                termSendText("display interface "+m_interfaceCurrent);
+            else if ( m_brand == "Huawei" )
+                termSendText("display interface "+m_interfaceCurrent);
 
             else
                 finished();
@@ -329,19 +328,22 @@ void InterfaceInfo::_getInterfacesInfoNextInteface()
 
 void InterfaceInfo::getInterfacesIpAddresses()
 {
-    if ( m_brand != "Cisco" )
-    {
-        qDebug() << "InterfaceInfo::getInterfacesIpAddresses()" << m_brand << "no soportado";
-        finished();
-        return;
-    }
-
     term->disconnectReceiveTextSignalConnections();
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IpAddresses()));
-    if ( m_os == "IOS XR" )
-        termSendText("show ipv4 interface brief");
+    if ( m_brand == "Cisco" )
+    {
+        if ( m_os == "IOS XR" )
+            termSendText("show ipv4 interface brief");
+        else
+            termSendText("show ip interface brief");
+    }
+    else if ( m_brand == "Huawei" )
+        termSendText("display ip interface brief");
     else
-        termSendText("show ip interface brief");
+    {
+        emit finished();
+        return;
+    }
 }
 
 void InterfaceInfo::getInterfacesPermitedVlans()
@@ -1058,7 +1060,16 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
             id.interfaz = estandarizarInterfaz( data.at(0).simplified() );
             id.datetime = QDateTime::currentDateTime();
             id.operativo = true;
-            id.description = data.at(1).simplified().replace("\"","").replace("'","");
+            QString status = data.at(1).simplified();
+            QString protocol = data.at(2).simplified();
+            if ( status == "up" && protocol == "up" )
+                id.status = "up";
+            else if ( status.contains("*down") )
+                id.status = "admin down";
+            else
+                id.status = "down";
+            id.description = data.at(3).simplified().replace("\"","").replace("'","");
+
             m_lstInterfacesInfo.append(id);
         }        
     }    

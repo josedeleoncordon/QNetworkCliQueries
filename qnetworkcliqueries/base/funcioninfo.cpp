@@ -20,12 +20,17 @@ FuncionInfo::~FuncionInfo()
 
 void FuncionInfo::getTXT()
 {
-
-
     qDebug() << "FuncionInfo::getTXT()" << m_ip << m_os << m_conexionID;
 
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
-    _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,m_os,m_conexionID );
+
+    if ( m_os == "IOS XR" && m_xr64 )
+        //si es XR de 64 bits vemos si hay configuraciones especificas para este. Si no abajo buscara configuraciones para XR general
+        _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,"IOS XR64",m_conexionID );
+
+    if ( _lstFunciones.isEmpty() )
+        _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,m_os,m_conexionID );
+
     _siguienteFuncion();
 }
 

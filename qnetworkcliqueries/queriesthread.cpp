@@ -38,11 +38,13 @@ QueriesThread::~QueriesThread()
 void QueriesThread::_emitNewInformation()
 {
     emit newInformation();
-    qDebug() << Q_FUNC_INFO << "Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
+    qDebug() << Q_FUNC_INFO << m_uuid<< "Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
                 " Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                 QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter );
-    emit status( m_uuid,"Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
-                 " - Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
+//    emit status( m_uuid,"Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
+//                 " - Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
+//                 QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter ) );
+    emit status( m_uuid,"Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                  QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter ) );
 }
 
@@ -95,7 +97,7 @@ void QueriesThread::setQueriesConfiguration(QueriesConfiguration configuration)
 
 void QueriesThread::verificarLstIPsQueriesConfiguration()
 {
-    if ( m_lstIP.isEmpty() || m_queriesconfiguration.lstQueryParameters().isEmpty() )
+    if ( m_lstIP.isEmpty() )
         return;
 
     m_lstIPsMismoEquipo.clear();
@@ -195,6 +197,8 @@ void QueriesThread::detener()
 
 void QueriesThread::cancelar()
 {
+    //TODO Controlar la eliminacion de qry cuando se usa un worker personalizado
+
     qDebug() << Q_FUNC_INFO;
     m_timer->stop();
     m_cancelar=true;
@@ -381,6 +385,7 @@ void QueriesThread::siguienteEquipo(QString IP, bool gw)
 void QueriesThread::equipoConsultado(Queries *qry)
 {
     QMutexLocker locker(&m_mutex);
+    bool eliminar=false; //si es necesario borrar el qry
 
     if ( m_cancelar )
         return;
@@ -459,7 +464,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
                                               "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
                     qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
                     encontrado=true;
-                    qry->deleteLater();
+                    eliminar=true;
                     break;
                 }
             }
@@ -478,7 +483,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
             qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado -- Consulta con errores";
             qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- consulta con errores" << qry->ip();
             m_errorMap.insert( qry->ip(), "Error" );
-            qry->deleteLater();
+            eliminar=true;
         }
     }
     else
@@ -506,7 +511,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
                 qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- No conexion" << qry->ip();
                 m_errorMap.insert( qry->ip(), "No conexion" );
                 m_sinconexion++;
-                qry->deleteLater();
+                eliminar=true;
             }
         }
 
@@ -514,7 +519,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
 //        //por lo que no lo borramos para que pueda estar disponible a la hora de graficar
 //        if ( qry->platform().isEmpty() ||
 //             qry->hostName().isEmpty() )
-//            qry->deleteLater();
+//            eliminar=true;
 //        else
 //            m_lstQueries.append( qry );
     }        
@@ -611,6 +616,9 @@ void QueriesThread::equipoConsultado(Queries *qry)
     }
 
     qDebug() << qry->ip() << "QueriesThread::equipoConsultado FIN";//no con qCDebug ya que para cerrar el archivo debug del equipo es necesario est en QueriesMessageHandler. No Borrar. No usar con qCDebug ya que podria ser deshabilitado.
+
+    if ( eliminar )
+        qry->deleteLater();
 }
 
 void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,

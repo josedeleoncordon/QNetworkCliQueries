@@ -174,7 +174,7 @@ QDebug operator<<(QDebug dbg, const OSPFInfo &info)
     dbg.space() << "OSPFInfo" << "ABR:" << info.m_abr << "ASBR:" << info.m_asbr << ":\n";
     for (SOSPFInfo i : info.m_lstOSPFInfo)
         dbg.space() << "Id:" << i.id << i.interfaz << i.process << i.area << i.state << "Ad:" << i.address
-                    << i.cost << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
+                    << i.cost << i.operativo << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     dbg.nospace() << "\n";
 

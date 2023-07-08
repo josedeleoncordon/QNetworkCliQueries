@@ -86,6 +86,7 @@ void Queries::iniciar()
     m_contieneconsultas=false;
     m_consultaIntentos=0;     
     m_operativo=true;
+    m_xr64=false;
     m_datetime = QDateTime::currentDateTime();
 
     queryTimer = new QTimer(this);
@@ -340,6 +341,7 @@ void Queries::createEmptyQueries()
 void Queries::crearFuncionesFaltantes()
 {
     //TODO no se crean al principio en CreateQueries por el crash de QSocketNotifier, :V investigar
+    return;
 
     if (!equipmentNeighborsInfoQuery)
     {
@@ -708,6 +710,13 @@ QString Queries::funcionTxtInfo(int i)
     return dynamic_cast<FuncionInfo*>(getQuery(Funcion,i))->txtReceived();
 }
 
+QStringList Queries::funcionLstTxtInfo(int i)
+{
+    FuncionBase *f = getQuery(Funcion,i);
+    if ( !f ) return QStringList();
+    return dynamic_cast<FuncionInfo*>(getQuery(Funcion,i))->lstTxtReceived();
+}
+
 void Queries::nextProcess()
 {
     qCDebug(queries) << m_ip  << "Queries::nextProcess()";
@@ -809,6 +818,7 @@ void Queries::nextProcess()
         if ( !equipmentNeighborsInfoQuery || reemplazarFuncionPrimerPuntero ) equipmentNeighborsInfoQuery = f;   //la primera consulta tiene acceso rapido por este puntero
         f->setBrand(m_brand);
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -830,6 +840,7 @@ void Queries::nextProcess()
         if ( !interfacesInfoQuery || reemplazarFuncionPrimerPuntero) interfacesInfoQuery = f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -851,6 +862,7 @@ void Queries::nextProcess()
         if ( !interfacesDescriptionsQuery || reemplazarFuncionPrimerPuntero ) interfacesDescriptionsQuery = f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -872,6 +884,7 @@ void Queries::nextProcess()
         if ( !interfacesIpAddressesQuery || reemplazarFuncionPrimerPuntero ) interfacesIpAddressesQuery = f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -893,6 +906,7 @@ void Queries::nextProcess()
         if (!interfacesPermitedVlansQuery || reemplazarFuncionPrimerPuntero) interfacesPermitedVlansQuery=f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -908,6 +922,7 @@ void Queries::nextProcess()
         OSPFInfo *f = dynamic_cast<OSPFInfo*>(m_currentFuncion);
         if (!ospfQuery || reemplazarFuncionPrimerPuntero) ospfQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -924,6 +939,7 @@ void Queries::nextProcess()
         MplsTEtunnelsInfo *f = dynamic_cast<MplsTEtunnelsInfo*>(m_currentFuncion);
         if (!mplsTEtunnelsQuery || reemplazarFuncionPrimerPuntero) mplsTEtunnelsQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -940,6 +956,7 @@ void Queries::nextProcess()
         MplsL2TransportInfo *f = dynamic_cast<MplsL2TransportInfo*>(m_currentFuncion);
         if (!mplsL2TransportQuery || reemplazarFuncionPrimerPuntero) mplsL2TransportQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -956,6 +973,7 @@ void Queries::nextProcess()
         MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
         if (!mplsLdpDiscoveryQuery || reemplazarFuncionPrimerPuntero) mplsLdpDiscoveryQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -972,6 +990,7 @@ void Queries::nextProcess()
         MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
         if (!mplsLdpNeighborsQuery || reemplazarFuncionPrimerPuntero) mplsLdpNeighborsQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -988,6 +1007,7 @@ void Queries::nextProcess()
         MplsLdpInfo *f = dynamic_cast<MplsLdpInfo*>(m_currentFuncion);
         if (!mplsLdpInterfacesQuery || reemplazarFuncionPrimerPuntero) mplsLdpInterfacesQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -1010,6 +1030,7 @@ void Queries::nextProcess()
         PIMInfo *f = dynamic_cast<PIMInfo*>(m_currentFuncion);
         if (!pimInteracesQuery || reemplazarFuncionPrimerPuntero) pimInteracesQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -1035,6 +1056,7 @@ void Queries::nextProcess()
         if (!macsQuery || reemplazarFuncionPrimerPuntero) macsQuery=f;
         f->setBrand( m_brand );
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -1051,6 +1073,7 @@ void Queries::nextProcess()
         if (!portChannelInfoQuery || reemplazarFuncionPrimerPuntero) portChannelInfoQuery=f;
         f->setBrand(m_brand);
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -1067,6 +1090,7 @@ void Queries::nextProcess()
         if (!vrfsFromVlansQuery || reemplazarFuncionPrimerPuntero) vrfsFromVlansQuery=f;
         f->setBrand( m_brand );
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -1083,6 +1107,7 @@ void Queries::nextProcess()
         if (!vrfFromRTQuery || reemplazarFuncionPrimerPuntero) vrfFromRTQuery=f;
         f->setBrand( m_brand );
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -1099,6 +1124,7 @@ void Queries::nextProcess()
         if (!vrfsQuery || reemplazarFuncionPrimerPuntero) vrfsQuery=f;
         f->setBrand( m_brand );
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -1117,6 +1143,7 @@ void Queries::nextProcess()
         if (!arpsQuery || reemplazarFuncionPrimerPuntero) arpsQuery=f;
         f->setBrand(m_brand);
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -1132,6 +1159,7 @@ void Queries::nextProcess()
         BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
         if (!bgpNeighborsQuery || reemplazarFuncionPrimerPuntero) bgpNeighborsQuery=f;
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -1148,6 +1176,7 @@ void Queries::nextProcess()
         BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
         if (!bgpNetworksQuery || reemplazarFuncionPrimerPuntero) bgpNetworksQuery=f;
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -1164,6 +1193,7 @@ void Queries::nextProcess()
         BGPInfo *f = dynamic_cast<BGPInfo*>(m_currentFuncion);
         if (!bgpNetworksBGPAttrQuery || reemplazarFuncionPrimerPuntero) bgpNetworksBGPAttrQuery=f;
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -1180,6 +1210,7 @@ void Queries::nextProcess()
         IPRouteInfo *f = dynamic_cast<IPRouteInfo*>(m_currentFuncion);
         if (!ipRoutesQuery || reemplazarFuncionPrimerPuntero) ipRoutesQuery=f;
         f->setPlatform( m_platform );
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -1196,6 +1227,7 @@ void Queries::nextProcess()
         Config *f = dynamic_cast<Config*>(m_currentFuncion);
         if (!configQuery || reemplazarFuncionPrimerPuntero) configQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -1212,6 +1244,7 @@ void Queries::nextProcess()
         FuncionInfo *f = dynamic_cast<FuncionInfo*>(m_currentFuncion);
         if (!funcionQuery || reemplazarFuncionPrimerPuntero) funcionQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setXRLocation(m_xr_location);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
@@ -1230,6 +1263,7 @@ void Queries::nextProcess()
         ExitInfo *f = dynamic_cast<ExitInfo*>(m_currentFuncion);
         if (!exitQuery || reemplazarFuncionPrimerPuntero) exitQuery=f;
         f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
         f->setBrand(m_brand);
         f->setHostName(m_fullName);
         f->setIp(m_ip);
@@ -1242,7 +1276,7 @@ void Queries::nextProcess()
 
         //se crean las funciones restantes hasta que se sale del equipo por si el usuario esta haciendo consultas
         //por partes
-        crearFuncionesFaltantes();
+//        crearFuncionesFaltantes();
 
         return;
     }
@@ -1250,13 +1284,16 @@ void Queries::nextProcess()
 
 void Queries::startSync() //Sync
 {
-    qDebug() << m_ip << "Queries::startSync() thr" << thread();
+    qCDebug(queries) << m_ip << "Queries::startSync() thr" << thread();
 
     disconnect(); //desconectamos todas las señales antes configuradas
     QEventLoop loop;
     connect(this, SIGNAL(finished(Queries*)), &loop, SLOT(quit()));
+    connect(this, SIGNAL(finished(Queries*)), SLOT(on_finished(Queries*)));
     start();
     loop.exec();
+
+    qCDebug(queries) << m_ip << "sale de QEventLoop";
 }
 
 void Queries::start() //ASync
@@ -1289,7 +1326,7 @@ void Queries::processConnectToHostDisconnected()
         qCDebug(queries) << m_ip  << "**Equipo desconectado a media consulta**" << m_ip << m_name <<
                     "opcionActual" << m_opcionActual << "intentos" << m_consultaIntentos;
 
-        if ( m_consultaIntentos <= 3 )
+        if ( m_consultaIntentos <= 2 )
         {
             qCDebug(queries) << m_ip  << "reconectando y continuando consulta donde se quedo" << m_ip << m_name;
             m_connected=false;
@@ -1297,7 +1334,7 @@ void Queries::processConnectToHostDisconnected()
         }
         else
         {
-            qCDebug(queries) << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
+            qCDebug(queries) << m_ip  << "2 intentos de consulta, se finaliza" << m_ip << m_name;
             m_error=true;
             _finalizar();
         }
@@ -1308,7 +1345,7 @@ void Queries::processConnectToHostDisconnected()
 
         if ( m_ipreachable )
         {
-            if ( m_consultaIntentos <= 3 )
+            if ( m_consultaIntentos <= 2 )
             {
                 qCDebug(queries) << m_ip  << "intentando nuevamente conectarse al equipo" << m_ip << m_name;
                 conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
@@ -1391,6 +1428,7 @@ void Queries::processPlatform()
         PlatformInfo *pi=dynamic_cast<PlatformInfo*>(m_currentFuncion);
         m_platform=pi->platformInfo();
         m_xr_location=pi->xr_location();
+        m_xr64=pi->xr64();
         m_location=pi->location();
         m_equipmenttype=equipmentOSFromPlatform( m_platform );
     }
@@ -1467,6 +1505,12 @@ void Queries::_finalizar()
 
     m_queriesconfiguration.clear();
     emit finished(this);    
+//    disconnect();   //se mueve la desconexion a void on_finished(Queries*);
+}
+
+void Queries::on_finished(Queries* q)
+{
+    qCDebug(queries) << m_ip << Q_FUNC_INFO << m_ip << m_name;
     disconnect();
 }
 
@@ -2095,6 +2139,7 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
                 << equipmentOSFromPlatform(info.m_platform );
     dbg.space() << "Location: " << info.m_location;
     dbg.space() << "XR Active RP location: " << info.m_xr_location;
+    dbg.space() << "XR64" << info.m_xr64;
     dbg.space() << "\nQueryDate: " << info.m_datetime.toString("yyyy-MM-dd_hh:mm:ss");
     dbg.space() << "\nConectado: " << info.m_operativo;
     dbg.space() << "\nError: " << info.m_error;    
@@ -2160,7 +2205,7 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
     if ( info.bgpNetworksQuery )
         dbg.space() << "bgpNetworksQuery" << *info.bgpNetworksQuery;
 
-    if ( info.bgpNetworksQuery )
+    if ( info.bgpNetworksBGPAttrQuery )
         dbg.space() << "bgpNetworksBGPAttrQuery" << *info.bgpNetworksBGPAttrQuery;
 
     if ( info.ipRoutesQuery )

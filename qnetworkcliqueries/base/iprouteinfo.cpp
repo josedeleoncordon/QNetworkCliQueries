@@ -307,7 +307,7 @@ void IPRouteInfo::m_individualSiguienteRed()
     {
         m_redPos++;
         m_red = m_redes.at( m_redPos );
-        m_red.replace( QRegExp("/\\d+"),"" );
+//        m_red.replace( QRegExp("/\\d+"),"" );
 
         if ( m_brand == "Cisco" )
             termSendText("sh ip route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" "+m_red );
@@ -351,7 +351,7 @@ void IPRouteInfo::on_term_receiveText_individual()
         if ( !route )
             continue;
 
-        exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*, from ");
+        exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*, (from|via) ");
         if ( line.contains(exp) )
         {
             route->via.append( exp.cap(1) );

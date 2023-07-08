@@ -46,5 +46,10 @@ void WCUUIDs::setStillAlive(QStringList lst)
 bool WCUUIDs::isAlive(QString uuid)
 {
 //    qDebug() << Q_FUNC_INFO << uuid << _lstUUIDs;
+
+    if ( uuid.isEmpty() )
+        //un uuid en blanco significa que no se ejecuta desde una pagina web. Se regresa true
+        return true;
+
     return _lstUUIDs.contains(uuid);
 }
