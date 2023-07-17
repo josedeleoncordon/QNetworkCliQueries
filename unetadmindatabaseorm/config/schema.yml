@@ -839,3 +839,47 @@ ken_equipo:
       type: string(45)
       notnull: true
 
+red_consulta:
+  columns:
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    red_pais_id:
+      type: integer
+      notnull: true
+    fecha:
+      type: date
+      notnull: true
+    ok:
+      type: integer
+    principalcaido:
+      type: integer
+    no:
+      type: integer
+    excepcion:
+      type: integer
+    total:
+      type: integer
+  relations:
+    red_pais_1:
+      foreignType: many
+      foreignAlias: red_consultas
+      local: red_pais_id
+      foreign: id
+      class: red_pais
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+red_pais:
+  columns:
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    pais:
+      type: string(45)
+

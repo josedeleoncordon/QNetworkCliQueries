@@ -31,6 +31,8 @@
 #include "record/pcp_proveedorrecord.h"
 #include "record/pcp_regionrecord.h"
 #include "record/proveedorrecord.h"
+#include "record/red_consultarecord.h"
+#include "record/red_paisrecord.h"
 
 using namespace QAnt;
 using namespace Dao;
@@ -99,5 +101,9 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new pcp_regionRecord;
 	if ( table == "proveedor" )
 		return new proveedorRecord;
+	if ( table == "red_consulta" )
+		return new red_consultaRecord;
+	if ( table == "red_pais" )
+		return new red_paisRecord;
 	return nullptr;
 }

@@ -18,8 +18,8 @@ HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/a9k_mpls_label_table_summaryrecord.h \
 		$$PWD/record/a9k_paisrecord.h \
 		$$PWD/record/a9k_peer_caida_prefix_inrecord.h \
-		$$PWD/record/a9k_sesiones_colarecord.h \
-                $$PWD/record/a9k_slotsrecord.h \
+                $$PWD/record/a9k_sesiones_colarecord.h \
+		$$PWD/record/a9k_slotsrecord.h \
 		$$PWD/record/a9k_vrf_sin_label_pervrfrecord.h \
 		$$PWD/record/arearecord.h \
 		$$PWD/record/enlacerecord.h \
@@ -39,6 +39,8 @@ HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/pcp_proveedorrecord.h \
 		$$PWD/record/pcp_regionrecord.h \
 		$$PWD/record/proveedorrecord.h \
+		$$PWD/record/red_consultarecord.h \
+		$$PWD/record/red_paisrecord.h \
 		$$PWD/qant3_global.h \
 		$$PWD/recordfactory.h
 
@@ -73,6 +75,8 @@ SOURCES += $$PWD/record/a9k_bgp_inter_asrecord.cpp \
 		$$PWD/record/pcp_proveedorrecord.cpp \
 		$$PWD/record/pcp_regionrecord.cpp \
 		$$PWD/record/proveedorrecord.cpp \
+		$$PWD/record/red_consultarecord.cpp \
+		$$PWD/record/red_paisrecord.cpp \
 		$$PWD/recordfactory.cpp
 
 RESOURCES += schema.qrc

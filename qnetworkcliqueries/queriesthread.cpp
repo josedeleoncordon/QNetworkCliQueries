@@ -222,12 +222,14 @@ void QueriesThread::cancelar()
 
 void QueriesThread::on_timerActivity_timeOut()
 {
+    qDebug() << Q_FUNC_INFO;
     cancelar();
 }
 
 void QueriesThread::on_uuidCanceled(QString uuid)
 {
     qCDebug(queriesthread) << uuid;
+    qDebug() << Q_FUNC_INFO << uuid;
     if ( m_uuid == uuid )
         cancelar();
 }

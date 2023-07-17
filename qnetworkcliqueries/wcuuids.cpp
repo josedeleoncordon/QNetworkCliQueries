@@ -16,7 +16,7 @@ WCUUIDs::WCUUIDs()
 
 void WCUUIDs::addUUID(QString uuid)
 {
-//    qDebug() << Q_FUNC_INFO << uuid << _lstUUIDs;
+    qDebug() << Q_FUNC_INFO << uuid << _lstUUIDs;
     if ( !_lstUUIDs.contains(uuid) )
         _lstUUIDs.append(uuid);
 }
