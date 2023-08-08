@@ -35,6 +35,11 @@ void red_consultaRecord::set_no(int no)
 	setProperty("no",no);
 }
 
+void red_consultaRecord::set_noservicio(int noservicio)
+{
+	setProperty("noservicio",noservicio);
+}
+
 void red_consultaRecord::set_ok(int ok)
 {
 	setProperty("ok",ok);
@@ -73,6 +78,11 @@ int red_consultaRecord::id()
 int red_consultaRecord::no()
 {
 	return property("no").toInt();
+}
+
+int red_consultaRecord::noservicio()
+{
+	return property("noservicio").toInt();
 }
 
 int red_consultaRecord::ok()

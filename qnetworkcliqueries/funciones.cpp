@@ -905,6 +905,7 @@ QString estandarizarInterfaz(QString interfaz)
     interfaz.replace("Vlanif","Vlan");
     interfaz.replace("VLAN","Vlan");
     interfaz.replace("BVI","BV");
+    interfaz.replace("BDI","BD");
     interfaz.replace("Po0/0/","Po");
     interfaz.replace("GE","Gi",Qt::CaseSensitive);
     interfaz.replace(QRegExp("\\(\\w+\\)"),"");

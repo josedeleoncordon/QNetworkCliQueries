@@ -15,10 +15,10 @@ HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/a9k_equiporecord.h \
 		$$PWD/record/a9k_internet_redistribucion_estaticas_conectadasrecord.h \
 		$$PWD/record/a9k_memoriarecord.h \
-		$$PWD/record/a9k_mpls_label_table_summaryrecord.h \
+                $$PWD/record/a9k_mpls_label_table_summaryrecord.h \
 		$$PWD/record/a9k_paisrecord.h \
 		$$PWD/record/a9k_peer_caida_prefix_inrecord.h \
-                $$PWD/record/a9k_sesiones_colarecord.h \
+		$$PWD/record/a9k_sesiones_colarecord.h \
 		$$PWD/record/a9k_slotsrecord.h \
 		$$PWD/record/a9k_vrf_sin_label_pervrfrecord.h \
 		$$PWD/record/arearecord.h \

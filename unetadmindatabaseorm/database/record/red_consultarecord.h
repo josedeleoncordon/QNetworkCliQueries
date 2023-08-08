@@ -22,6 +22,7 @@ public:
 	void set_fecha(QDate fecha);
 	void set_id(int id);
 	void set_no(int no);
+	void set_noservicio(int noservicio);
 	void set_ok(int ok);
 	void set_principalcaido(int principalcaido);
 	void set_red_pais_id(int red_pais_id);
@@ -31,6 +32,7 @@ public:
 	QDate fecha();
 	int id();
 	int no();
+	int noservicio();
 	int ok();
 	int principalcaido();
 	int red_pais_id();

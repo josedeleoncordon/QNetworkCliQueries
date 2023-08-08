@@ -860,6 +860,8 @@ red_consulta:
       type: integer
     excepcion:
       type: integer
+    noservicio:
+      type: integer
     total:
       type: integer
   relations:
