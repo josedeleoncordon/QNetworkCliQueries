@@ -84,11 +84,13 @@ void QueriesConfiguration::addQueryParameter(const QList<QueriesConfigurationVal
     }
 }
 
-QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString platform, QString IDconexion)
+QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains)
 {        
     //Por IP, Plataforma especifica, ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
-        if ( v._key == parameter && v._IP == IP && v._Platform == platform && v._IDConexion == IDconexion  )
+        if ( v._key == parameter && v._IP == IP &&
+             ((!platformContains && v._Platform == platform) || (platformContains && platform.contains(v._Platform))) &&
+             v._IDConexion == IDconexion )
             return v._value;
 
     //por IP especifica e ID
@@ -98,7 +100,9 @@ QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString pla
 
     //plataforma e ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
-        if ( v._key == parameter && v._IP.isEmpty() && v._Platform == platform && v._IDConexion == IDconexion  )
+        if ( v._key == parameter && v._IP.isEmpty() &&
+             ((!platformContains && v._Platform == platform) || (platformContains && platform.contains(v._Platform))) &&
+             v._IDConexion == IDconexion  )
             return v._value;
 
     //no hay para una ip o plataforma, regresamos el general con ID
@@ -108,7 +112,9 @@ QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString pla
 
     //Por IP, Plataforma especifica, Sin ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
-        if ( v._key == parameter && v._IP == IP && v._Platform == platform && v._IDConexion.isEmpty()  )
+        if ( v._key == parameter && v._IP == IP &&
+             ((!platformContains && v._Platform == platform) || (platformContains && platform.contains(v._Platform))) &&
+             v._IDConexion.isEmpty()  )
             return v._value;
 
     //por IP especifica sin ID
@@ -118,8 +124,14 @@ QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString pla
 
     //plataforma sin ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
-        if ( v._key == parameter && v._IP.isEmpty() && v._Platform == platform && v._IDConexion.isEmpty()  )
+    {
+        qDebug() << "comparando" << v._key << v._value << v._IP << v._Platform << v._IDConexion;
+        qDebug() << "comparando" << platformContains << parameter << platform;
+        if ( v._key == parameter && v._IP.isEmpty() &&
+             ((!platformContains && v._Platform == platform) || (platformContains && platform.contains(v._Platform))) &&
+             v._IDConexion.isEmpty()  )
             return v._value;
+    }
 
     //no hay para una ip o plataforma, regresamos el general sin ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
@@ -129,19 +141,19 @@ QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString pla
     return QVariant();
 }
 
-bool QueriesConfiguration::state(QString parameter, QString IP, QString platform, QString IDconexion)
+bool QueriesConfiguration::state(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains)
 {
-    return m_find(parameter,IP,platform,IDconexion).toBool();
+    return m_find(parameter,IP,platform,IDconexion,platformContains).toBool();
 }
 
-QString QueriesConfiguration::value(QString parameter, QString IP, QString platform, QString IDconexion)
+QString QueriesConfiguration::value(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains)
 {
-    return m_find(parameter,IP,platform,IDconexion).toString();
+    return m_find(parameter,IP,platform,IDconexion,platformContains).toString();
 }
 
-QStringList QueriesConfiguration::values(QString parameter, QString IP, QString platform, QString IDconexion)
+QStringList QueriesConfiguration::values(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains)
 {
-    return value(parameter,IP,platform,IDconexion).split(",",QString::SkipEmptyParts);
+    return value(parameter,IP,platform,IDconexion,platformContains).split(",",QString::SkipEmptyParts);
 }
 
 void QueriesConfiguration::clear()

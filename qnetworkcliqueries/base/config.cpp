@@ -14,7 +14,15 @@ Config::~Config() {}
 
 void Config::configApply()
 {
-    m_lstComandos = m_queriesConfiguration.value("ConfigTemplate",m_ip,m_os,m_conexionID).split("\n",QString::SkipEmptyParts);
+    QString platformcontains = m_queriesConfiguration.value("ConfigPlatformType","","","");
+    qDebug() << "Config::configApply() platformcontains" << platformcontains;
+    if ( platformcontains == "Contains" )
+        m_lstComandos =
+                m_queriesConfiguration.value("ConfigTemplate",m_ip,m_platform,m_conexionID,true).split("\n",QString::SkipEmptyParts);
+    else
+        m_lstComandos = m_queriesConfiguration.value("ConfigTemplate",m_ip,m_os,m_conexionID).split("\n",QString::SkipEmptyParts);
+
+    qDebug() << "Config::configApply() lstComandos" << m_lstComandos;
 
     if ( !m_parentQuery )
     {
@@ -26,14 +34,18 @@ void Config::configApply()
                 finished();
                 return;
             }
-    }   
+    }
 
-    //entrando al modo de configuracion
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_configMode()));
-    if ( m_brand == "Cisco" )
-        termSendText("configure terminal");
-    else if ( m_brand == "Huawei" )
-        termSendText("system-view");
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_finished()));
+    siguienteComando();
+
+//    //entrando al modo de configuracion
+//    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_configMode()));
+//    if ( m_brand == "Cisco" )
+//        termSendText("configure terminal");
+//    else if ( m_brand == "Huawei" )
+//        termSendText("system-view");
 }
 
 void Config::on_term_receiveText_configMode()
@@ -46,7 +58,7 @@ void Config::on_term_receiveText_configMode()
     QString line = txt.split("\n").last();
     line.simplified();
 
-    if ( line.contains(exp) || line.contains(exp2) )
+    if ( line.contains(exp) || line.contains(exp2) || line.contains(QRegExp("^Password:$")) )
     {
         //modo de configuracion
         term->disconnectReceiveTextSignalConnections();
@@ -71,30 +83,34 @@ void Config::siguienteComando()
 
         //se envia el comando de configuracion
         //se reemplaza las variables por el valor
-        QStringList comando;
-        foreach (QString word, m_lstComandos.at(m_lstComandosPos).split(" ",QString::SkipEmptyParts))
-        {
-            if (word.contains("@"))
-            {
-                word.replace("@","");
-                comando.append( m_parentQuery->property(word.toLocal8Bit()).toString() );
-            }
-            else
-                comando.append(word);           
-        }
-        QString txt = comando.join(" ");
+//        QStringList comando;
+//        foreach (QString word, m_lstComandos.at(m_lstComandosPos).split(" ",QString::SkipEmptyParts))
+//        {
+//            if (word.contains("@"))
+//            {
+//                word.replace("@","");
+//                comando.append( m_parentQuery->property(word.toLocal8Bit()).toString() );
+//            }
+//            else
+//                comando.append(word);
+//        }
+//        QString txt = comando.join(" ");
+        QString txt = m_lstComandos.at(m_lstComandosPos);
+
         qDebug() << Q_FUNC_INFO << "enviando" << txt;
         termSendText( txt );
     }
     else
     {
-        //se termino de configurar, se sale del modo de configuracion
-        term->disconnectReceiveTextSignalConnections();
-        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_exited()));
-        if ( m_brand == "Cisco" )
-            termSendText("exit");
-        else if ( m_brand == "Huawei" )
-            termSendText("quit");        
+        //se termino de configurar
+//        term->disconnectReceiveTextSignalConnections();
+//        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_exited()));
+//        if ( m_brand == "Huawei" )
+//            termSendText("quit");
+//        else
+//            termSendText("exit");
+        qDebug() << "Config::siguienteComando() se finaliza";
+        finished();
     }
 }
 
@@ -110,13 +126,15 @@ void Config::on_term_receiveText_finished()
     line.simplified();
 
     exp.setPattern("^.+\\(config(\\-\\w+)*\\)#\\s*$");
-    exp2.setPattern("^\\[.+\\]");    
+    exp2.setPattern("^\\[.+\\]");
+    QRegExp exp3("^\\S+#\\s*$");
 
-    if ( line.contains(exp) || line.contains(exp2) )
+    if ( line.contains(exp) || line.contains(exp2) || line.contains(exp3) )
     {
         //si verifica si se salio error al ejecutar el comando
         if ( txt.contains("Unrecognized command") ||
-             txt.contains("Invalid input detected"))
+             txt.contains("Invalid input detected") ||
+             txt.contains("Error input in the position market by") )
         {
             m_error=true;            
             m_lstComandosConErrores.append( m_lastCommand );

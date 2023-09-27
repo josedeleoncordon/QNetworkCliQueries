@@ -94,16 +94,16 @@ private:
     QList<QueriesConfigurationValue> m_lstQueryParameters;
     QList<QueriesConfigurationValue> m_lstConfiguration;
 
-    QVariant m_find(QString parameter, QString IP, QString platform, QString IDconexion);
+    QVariant m_find(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains);
 
 public:
     QueriesConfiguration();
 
     void addQueryParameter(const QList<QueriesConfigurationValue>&);    
 
-    bool state(QString parameter, QString IP, QString platform, QString IDconexion);
-    QString value(QString parameter, QString IP, QString platform, QString IDconexion);
-    QStringList values(QString parameter, QString IP, QString platform, QString IDconexion);
+    bool state(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains=false);
+    QString value(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains=false);
+    QStringList values(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains=false);
 
     QList<QueriesConfigurationValue> lstQueryParameters() { return m_lstQueryParameters; }
 

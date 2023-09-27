@@ -18,6 +18,7 @@ public:
 	red_consultaRecord(const red_consultaRecord &other);
 	~red_consultaRecord();
 
+	void set_conexion_error(int conexion_error);
 	void set_excepcion(int excepcion);
 	void set_fecha(QDate fecha);
 	void set_id(int id);
@@ -28,6 +29,7 @@ public:
 	void set_red_pais_id(int red_pais_id);
 	void set_total(int total);
 
+	int conexion_error();
 	int excepcion();
 	QDate fecha();
 	int id();

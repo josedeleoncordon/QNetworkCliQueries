@@ -1,5 +1,6 @@
 #include "recordfactory.h"
 
+#include "record/tb_addressing_consultarecord.h"
 #include "record/a9k_bgp_inter_asrecord.h"
 #include "record/a9k_bgp_sesiones_sin_lp200record.h"
 #include "record/a9k_bgp_sesiones_weightrecord.h"
@@ -32,6 +33,7 @@
 #include "record/pcp_regionrecord.h"
 #include "record/proveedorrecord.h"
 #include "record/red_consultarecord.h"
+#include "record/red_consulta_detallerecord.h"
 #include "record/red_paisrecord.h"
 
 using namespace QAnt;
@@ -39,6 +41,8 @@ using namespace Dao;
 
 RecordBase *RecordFactory::newRecord(QString table)
 {
+	if ( table == "TB_Addressing_consulta" )
+		return new TB_Addressing_consultaRecord;
 	if ( table == "a9k_bgp_inter_as" )
 		return new a9k_bgp_inter_asRecord;
 	if ( table == "a9k_bgp_sesiones_sin_lp200" )
@@ -103,6 +107,8 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new proveedorRecord;
 	if ( table == "red_consulta" )
 		return new red_consultaRecord;
+	if ( table == "red_consulta_detalle" )
+		return new red_consulta_detalleRecord;
 	if ( table == "red_pais" )
 		return new red_paisRecord;
 	return nullptr;

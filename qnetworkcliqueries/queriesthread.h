@@ -25,6 +25,7 @@ public:
     void setPrincipalUserFirst(bool principalfirst) { m_principaluserfirst=principalfirst; }
     void setLinuxPrompt(QString prompt) { m_linuxprompt = prompt; }
     void setConnectionProtocol( QRemoteShell::ConnectionProtocol cp ) { m_connectionprotocol = cp; }
+    void setRemoteShellUsersPasswords(QStringList lst) { lstRemoteShellUsersPasswords=lst; }
     void setLstIP(QStringList lst);
     void setQueriesConfiguration(QueriesConfiguration configuration);
     void setLstIPsConsultaAnterior(QStringList lst) { lstIPsConsultaAnterior=lst; }
@@ -92,6 +93,7 @@ protected:
    QStringList m_lstIPsConectadosPorGW;
    QStringList lstIPsConsultaAnterior;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;
+   QStringList lstRemoteShellUsersPasswords;
    QList<int> m_opciones;
    int m_simultaneos; //cantidad de equipos se suman al mismo tiempo al grupo,
    QStringList m_equiposenconsulta;

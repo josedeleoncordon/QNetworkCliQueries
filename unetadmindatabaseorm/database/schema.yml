@@ -862,6 +862,8 @@ red_consulta:
       type: integer
     noservicio:
       type: integer
+    conexion_error:
+      type: integer
     total:
       type: integer
   relations:
@@ -884,4 +886,75 @@ red_pais:
       autoincrement: true
     pais:
       type: string(45)
+
+red_consulta_detalle:
+  columns:
+    id:
+      type: bigint
+      primary: true
+      notnull: true
+      autoincrement: true
+    red_pais_id:
+      type: integer
+      notnull: true
+    fecha:
+      type: date
+    Principal_PE:
+      type: string(100)
+    Principal_Interface:
+      type: string(45)
+    VRF:
+      type: string(45)
+    IP:
+      type: string(45)
+    Respaldo_PE:
+      type: string(100)
+    Respaldo_Interface:
+      type: string(45)
+    Remoto_IP:
+      type: string(45)
+    Remoto_Interface:
+      type: string(45)
+    VCID_Principal:
+      type: string(45)
+    VCID_Principal_Estado:
+      type: string(20)
+    VCID_Respaldo:
+      type: string(45)
+    VCID_Respaldo_Estado:
+      type: string(20)
+    Redundancia:
+      type: string(20)
+    Descripcion:
+      type: string(200)
+    Detalle:
+      type: string(200)
+  relations:
+    red_pais_1:
+      foreignType: many
+      foreignAlias: red_consulta_detalles
+      local: red_pais_id
+      foreign: id
+      class: red_pais
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
+TB_Addressing_consulta:
+  columns:
+    id:
+      type: bigint
+      primary: true
+      notnull: true
+      autoincrement: true
+    Fecha:
+      type: date
+    Hostname:
+      type: string(255)
+    Interface:
+      type: string(255)
+    VRF:
+      type: string(255)
+    IP:
+      type: string(255)
 

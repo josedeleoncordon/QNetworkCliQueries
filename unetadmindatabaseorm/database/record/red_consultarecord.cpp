@@ -15,6 +15,11 @@ red_consultaRecord::red_consultaRecord(const red_consultaRecord &other):
 
 red_consultaRecord::~red_consultaRecord() {}
 
+void red_consultaRecord::set_conexion_error(int conexion_error)
+{
+	setProperty("conexion_error",conexion_error);
+}
+
 void red_consultaRecord::set_excepcion(int excepcion)
 {
 	setProperty("excepcion",excepcion);
@@ -58,6 +63,11 @@ void red_consultaRecord::set_red_pais_id(int red_pais_id)
 void red_consultaRecord::set_total(int total)
 {
 	setProperty("total",total);
+}
+
+int red_consultaRecord::conexion_error()
+{
+	return property("conexion_error").toInt();
 }
 
 int red_consultaRecord::excepcion()

@@ -31,6 +31,7 @@ DEFINES += HAVE_POSIX_OPENPT HAVE_SYS_TIME_H HAVE_UPDWTMPX #Pty
 
 SOURCES += \
     qremoteshelllogging.cpp \
+    qtelnet.cpp \
     terminal/Pty.cpp \
     terminal/kprocess.cpp \
     terminal/kpty.cpp \
@@ -41,6 +42,7 @@ SOURCES += \
 
 HEADERS += \
     qremoteshelllogging.h \
+    qtelnet.h \
     terminal/Pty.h \
     terminal/kprocess.h \
     terminal/kpty.h \

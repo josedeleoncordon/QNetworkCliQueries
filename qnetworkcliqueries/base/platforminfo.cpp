@@ -75,6 +75,22 @@ void PlatformInfo::on_term_receiveText()
 
             break;
         }
+
+        //Raisecom. Tiene el mismo prompt de Cisco
+        exp.setPattern("Product (Version|Name|name): (.+)$");
+        foreach (QString line, lines)
+        {
+            line = line.simplified();
+
+            if ( line.contains(exp) )
+            {
+                m_platform = exp.cap(2);
+                if ( m_platform.contains("RAX") || m_platform.contains("ISCOM") )
+                    m_brand="RAISECOM";
+                break;
+            }
+        }
+
     }
     else if ( m_brand == "Huawei" )
     {

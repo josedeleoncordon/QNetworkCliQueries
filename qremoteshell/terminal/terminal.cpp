@@ -65,6 +65,8 @@ void Terminal::onReceiveBlock( const char * buf, int len )
 {
     QString received = QString::fromLatin1( buf, len ).toLatin1();
 
+    qDebug() << "Terminal::onReceiveBlock" << received;
+
     if ( !_ready )
     {
         _timer->stop();

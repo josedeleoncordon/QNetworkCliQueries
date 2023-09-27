@@ -123,6 +123,7 @@ public:
     void updateDate() { m_datetime = QDateTime::currentDateTime(); }
     void setKeepAlive(bool enable);
     void setRemoteShell(QRemoteShell *remoteShell) { term = remoteShell; }
+    void setRemoteShellUsersPasswords(QStringList lst) { lstRemoteShellUsersPasswords=lst; }
     void setOptions( QList<int> lst );
     void setOperativo(bool OPERATIVO) { m_operativo = OPERATIVO; }
     void setCountry(QString COUNTRY) { m_country = COUNTRY; }
@@ -200,6 +201,7 @@ protected:
     QString m_location;
     bool m_xr64;
     QRemoteShell::ConnectionProtocol m_connectionprotol;
+    QStringList lstRemoteShellUsersPasswords;
     bool m_operativo;
     QString m_ip;
     QString m_conexionID; //ID de conexion, para que las funciones puedan ubicar los parapemtros en m_queriesConfiguration

@@ -90,7 +90,7 @@ void Queries::iniciar()
     m_datetime = QDateTime::currentDateTime();
 
     queryTimer = new QTimer(this);
-    queryTimer->setInterval( 20000 );
+    queryTimer->setInterval( 30000 );
     queryTimer->setSingleShot( true );
     connect(queryTimer,SIGNAL(timeout()),SLOT(on_queryTimer_timeout()));
 }
@@ -481,6 +481,7 @@ void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString plat
     m_consultaIntentos++;
     term = new QRemoteShell(ip,user,pwd,platform,linuxprompt,this);
     term->setConnectionProtocol( m_connectionprotol );
+    term->setUsersPasswords( lstRemoteShellUsersPasswords );
     term->setGW(m_gw);
     term->setUser2( m_user2 );
     term->setPassword2( m_pwd2 );
@@ -1259,6 +1260,7 @@ void Queries::nextProcess()
     else if ( m_opcionActual == Exit )
     {
         queryTimer->setInterval( 3000 );
+        qDebug() << "Queries enviando Exit";
 
         ExitInfo *f = dynamic_cast<ExitInfo*>(m_currentFuncion);
         if (!exitQuery || reemplazarFuncionPrimerPuntero) exitQuery=f;
@@ -1343,11 +1345,23 @@ void Queries::processConnectToHostDisconnected()
     {
         qCDebug(queries) << m_ip << "**No se ha logrado autenticar en el equipo: intentos" << m_consultaIntentos;
 
-        if ( m_ipreachable )
+        if ( true )
+//        if ( m_ipreachable )
         {
             if ( m_consultaIntentos <= 2 )
             {
                 qCDebug(queries) << m_ip  << "intentando nuevamente conectarse al equipo" << m_ip << m_name;
+
+                //esperamos unos segundos para probar otra vez
+                queryTimer->stop();
+                QEventLoop loop;
+                QTimer *t = new QTimer;
+                t->setSingleShot(true);
+                connect(t, SIGNAL(timeout()), &loop, SLOT(quit()),Qt::QueuedConnection);
+                t->start(5000);
+                loop.exec();
+                queryTimer->start();
+                delete t;
                 conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
             }
             else
@@ -1430,6 +1444,7 @@ void Queries::processPlatform()
         m_xr_location=pi->xr_location();
         m_xr64=pi->xr64();
         m_location=pi->location();
+        m_brand=pi->vendor();
         m_equipmenttype=equipmentOSFromPlatform( m_platform );
     }
     nextProcess();

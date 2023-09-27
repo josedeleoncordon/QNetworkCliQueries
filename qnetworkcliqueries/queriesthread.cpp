@@ -12,7 +12,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_interval=1000;
     m_simultaneos=3;
     m_maxparalelos=40;
-    m_maxparalelosmismoequipo=4;
+    m_maxparalelosmismoequipo=1;
     m_lstIPsMismoEquipoCounter=0;
     m_lstIPsCounter=0;
     m_connectionprotocol = QRemoteShell::SSHTelnet;
@@ -356,6 +356,7 @@ void QueriesThread::siguienteEquipo(QString IP, bool gw)
     }
     query->setConexionID(IDConexion);
     query->setConnectionProtocol( m_connectionprotocol );
+    query->setRemoteShellUsersPasswords( lstRemoteShellUsersPasswords );
     query->setUser2( m_user2 );
     query->setPassword2( m_pwd2 );
     query->setQueriesConfiguration( m_queriesconfiguration );
@@ -511,7 +512,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
             {
                 qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado -- No conexion";
                 qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- No conexion" << qry->ip();
-                m_errorMap.insert( qry->ip(), "No conexion" );
+                m_errorMap.insert( qry->ip(), "No alcanzable" );
                 m_sinconexion++;
                 eliminar=true;
             }
