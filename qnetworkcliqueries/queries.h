@@ -78,6 +78,7 @@ public:
     QString& os() { return m_equipmenttype; }    
     QString& location() { return m_location; }
     QString& brand() { return m_brand; }
+    QString& model() { return m_model; }
     QString& gw() { return m_gw; }
     void setConnectionProtocol(QRemoteShell::ConnectionProtocol cp) { m_connectionprotol = cp; }
     QDateTime& dateTime() { return m_datetime; }
@@ -88,7 +89,13 @@ public:
     QString conexionID() { return m_conexionID; }
 
     bool existsQueryInformation(int option,int i=0);
+    //busqueda para un nombre de consulta nula e ir insertando nuevas consultas a la general
+    //busqueda por valor numerico, el numero de consulta q coincida con el numero
+    //muchas funciones por varias consulta de la misma funcion
+    //para mantener compatibilidad
     FuncionBase *getQuery(int option,int i=0);
+    //busqueda por nombre de consulta. Una funcion por consulta
+    FuncionBase *getQuery(int option,QString queryName);
 
     QList<SEquipmentNeighborsInfo>& equipmentNeighborsInfo(int i=0);
     QList<SInterfaceInfo>& interfacesInfo(int i=0);
@@ -116,7 +123,9 @@ public:
     QList<SBGPNetwork>& bgpNetworksBGPAttrInfo(int i=0);
     QList<SIpRouteInfo>& ipRoutesInfo(int i=0);
     QString funcionTxtInfo(int i=0);
+    QString funcionTxtInfo(QString name);
     QStringList funcionLstTxtInfo(int i=0);
+    QStringList funcionLstTxtInfo(QString name);
 
     void setId(QString id) { m_id = id; }
     void setGW(QString GW);
@@ -133,6 +142,7 @@ public:
     void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; }
     void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
     void setConexionID(QString ID) { m_conexionID=ID; }
+    void setQueryName(QString name) { m_queryname=name; }
 
     void setUser2(QString user) { m_user2=user; }
     void setPassword2(QString pwd) { m_pwd2=pwd; }
@@ -175,7 +185,7 @@ protected:
     QRemoteShell *term;
     QList<int> m_lstOpciones;
     int m_opcionActual;
-    QList<FuncionBase*> m_lstFunciones;
+    QMultiMap<QString,FuncionBase*> m_lstFunciones;
     FuncionBase *m_currentFuncion;
 
     QTimer *queryTimer;
@@ -195,10 +205,12 @@ protected:
     QString m_country;
     QString m_platform;
     QString m_equipmenttype;
+    QString m_model;
     QString m_brand;
     QDateTime m_datetime;
     QString m_xr_location;
     QString m_location;
+    QString m_queryname;
     bool m_xr64;
     QRemoteShell::ConnectionProtocol m_connectionprotol;
     QStringList lstRemoteShellUsersPasswords;

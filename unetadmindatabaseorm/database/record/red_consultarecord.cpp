@@ -55,9 +55,9 @@ void red_consultaRecord::set_principalcaido(int principalcaido)
 	setProperty("principalcaido",principalcaido);
 }
 
-void red_consultaRecord::set_red_pais_id(int red_pais_id)
+void red_consultaRecord::set_red_sector_id(int red_sector_id)
 {
-	setProperty("red_pais_id",red_pais_id);
+	setProperty("red_sector_id",red_sector_id);
 }
 
 void red_consultaRecord::set_total(int total)
@@ -105,9 +105,9 @@ int red_consultaRecord::principalcaido()
 	return property("principalcaido").toInt();
 }
 
-int red_consultaRecord::red_pais_id()
+int red_consultaRecord::red_sector_id()
 {
-	return property("red_pais_id").toInt();
+	return property("red_sector_id").toInt();
 }
 
 int red_consultaRecord::total()
@@ -115,9 +115,9 @@ int red_consultaRecord::total()
 	return property("total").toInt();
 }
 
-red_paisRecord *red_consultaRecord::r_red_pais_id()
+red_sectorRecord *red_consultaRecord::r_red_sector_id()
 {
-	return dynamic_cast<red_paisRecord*>( property("r_red_pais_id").value<RecordBase*>() );
+	return dynamic_cast<red_sectorRecord*>( property("r_red_sector_id").value<RecordBase*>() );
 }
 
 red_consultaRecord &red_consultaRecord::operator=(const red_consultaRecord &other)

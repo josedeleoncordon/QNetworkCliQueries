@@ -20,6 +20,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_soloequiposnuevos=false;
     m_consultarVecinosOSPFMismoDominio=false;
     m_equipmentNeighborsConsultarVecinos=false;
+    m_eliminarconsultasdeequiposduplicados=true;
     m_timer = nullptr;    
     m_timerActivity = nullptr;
     _clear();    
@@ -457,18 +458,21 @@ void QueriesThread::equipoConsultado(Queries *qry)
             //si ya hubiera otra consulta del mismo equipo se elimina porque pudo haberse realizado debido a que
             //se agrego el equipo por equipmentNeighbors cuando aun no existia el mismo, esto ya que hay varios equipos en consulta a la vez
             bool encontrado=false;
-            for (Queries *q : m_lstQueries)
+            if ( m_eliminarconsultasdeequiposduplicados )
             {
-                if ( qry->hostName() == q->hostName() &&
-                     !qry->hostName().isEmpty() &&
-                     qry->conexionID() == q->conexionID() )
-                {                    
-                    qCDebug(queriesthread) << qry->ip() <<
-                                              "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
-                    qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
-                    encontrado=true;
-                    eliminar=true;
-                    break;
+                for (Queries *q : m_lstQueries)
+                {
+                    if ( qry->hostName() == q->hostName() &&
+                        !qry->hostName().isEmpty() &&
+                        qry->conexionID() == q->conexionID() )
+                    {
+                        qCDebug(queriesthread) << qry->ip() <<
+                            "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
+                        qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
+                        encontrado=true;
+                        eliminar=true;
+                        break;
+                    }
                 }
             }
             if ( !encontrado )

@@ -40,7 +40,8 @@ public:
     void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
     void setEquipmentNeighborsOSPFEquipoRaizProceso(QString proceso) { m_consultarVecinosOSPFEquipoRaizProceso=proceso; }
     void setEquipmentNeighborsRegExpOSPFArea(QString area) { m_consultaOSPFArea=area; }
-    void setNewThreadWorker(QueriesThreadWorker*(*ThreadWorker)(void));    
+    void setNewThreadWorker(QueriesThreadWorker*(*ThreadWorker)(void));
+    void setEliminarConsultasEquiposDuplicados(bool eliminar) { m_eliminarconsultasdeequiposduplicados=eliminar; }
     void setUUID(QString uuid) { m_uuid = uuid; }
 
     void iniciar();
@@ -112,6 +113,7 @@ protected:
    bool m_detener;
    bool m_cancelar;
    bool m_equipmentNeighborsConsultarVecinos;
+   bool m_eliminarconsultasdeequiposduplicados;
    QString m_uuid;
 
    //si el equipo por donde se empieza la consulta tiene mas de un proceso recorrera todos. ASBR UMPLS

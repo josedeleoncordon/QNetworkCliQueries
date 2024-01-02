@@ -42,6 +42,7 @@ HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/red_consulta_detallerecord.h \
 		$$PWD/record/red_consultarecord.h \
 		$$PWD/record/red_paisrecord.h \
+		$$PWD/record/red_sectorrecord.h \
 		$$PWD/record/tb_addressing_consultarecord.h \
 		$$PWD/qant3_global.h \
 		$$PWD/recordfactory.h
@@ -80,6 +81,7 @@ SOURCES += $$PWD/record/a9k_bgp_inter_asrecord.cpp \
 		$$PWD/record/red_consulta_detallerecord.cpp \
 		$$PWD/record/red_consultarecord.cpp \
 		$$PWD/record/red_paisrecord.cpp \
+		$$PWD/record/red_sectorrecord.cpp \
 		$$PWD/record/tb_addressing_consultarecord.cpp \
 		$$PWD/recordfactory.cpp
 

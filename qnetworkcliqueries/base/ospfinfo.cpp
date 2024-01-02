@@ -138,6 +138,11 @@ SOSPFInfo *OSPFInfo::interfaceOspfInfo(QString interface)
     return nullptr;
 }
 
+void OSPFInfo::addInterfaceOSPFInfo(SOSPFInfo s)
+{
+    m_lstOSPFInfo.append( s );
+}
+
 QDataStream& operator<<(QDataStream& out, const OSPFInfo& info)
 {
     out << info.m_lstOSPFInfo;

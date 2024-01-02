@@ -237,21 +237,29 @@ MplsL2TransportInfo::~MplsL2TransportInfo()
 
 void MplsL2TransportInfo::getMplsL2Transport()
 {
-    if ( m_brand != "Cisco" )
+    if ( m_brand == "Cisco" )
+    {
+        if ( m_os == "IOS XR" )
+        {
+            connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_XR_BD()));
+            termSendText("sh l2vpn bridge-domain detail | i \"Bridge group|Description|AC:|PWs:|VFI|PW: neighbor|Interface|Preferred\"");
+        }
+        else
+        {
+            connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_VFI()));
+            termSendText("show vfi");
+        }
+    }
+    else if ( m_brand == "Huawei" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_VRP_VSI()));
+        termSendText("display vsi peer-info");
+    }
+    else
     {
         qDebug() << "MplsL2TransportInfo::getMplsL2Transport()" << m_brand << "no soportado";
         finished();
         return;
-    }
-    else if ( m_os == "IOS XR" )
-    {
-        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_XR_BD()));
-        termSendText("sh l2vpn bridge-domain detail | i \"Bridge group|Description|AC:|PWs:|VFI|PW: neighbor|Interface|Preferred\"");
-    }
-    else
-    {
-        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_VFI()));
-        termSendText("show vfi");
     }
 }
 
@@ -630,6 +638,119 @@ void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
         if ( line.contains(exp) )
         {
             xi->remoteDescripcion = exp.cap(1);
+            continue;
+        }
+    }
+    finished();
+}
+
+void MplsL2TransportInfo::on_term_receiveText_VRP_VSI()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    SMplsL2VFIInfo *mvi = nullptr;
+    foreach (QString line, lines)
+    {
+        line = line.simplified();
+
+        //VSI Name: BRBRESP10097311C                            Signaling: ldp
+        //--------------------------------------------------------------------
+        //Peer                Transport  Local      Remote      VC
+        //Addr                VC ID      VC Label   VC Label    State
+        //--------------------------------------------------------------------
+        //172.16.31.129       55248903   49804      18481       up
+        //172.17.38.18        55248903   49801      48065       up
+
+        QRegExp exp("VSI Name: (\\S+) ");
+        if ( line.contains(exp) )
+        {
+            SMplsL2VFIInfo i;
+            i.vfi = exp.cap( 1 );
+            m_lstMplsL2VFIs.append( i );
+            mvi = &m_lstMplsL2VFIs[m_lstMplsL2VFIs.size()-1];
+        }
+
+        if ( !mvi )
+            continue;
+
+        exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3} ");
+        if ( line.contains(exp) )
+        {
+            QStringList data = line.split(" ",QString::SkipEmptyParts);
+            if ( data.size() < 5 )
+                continue;
+            SMplsL2PWInfo i;
+            i.destino = data.at(0);
+            i.VCID = data.at(1);
+            i.estado = data.at(4);
+            mvi->lstPWs.append( i );
+            continue;
+        }
+    }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_VRP_L2Transport()));
+    termSendText("display mpls l2vc brief");
+}
+
+void MplsL2TransportInfo::on_term_receiveText_VRP_L2Transport()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    SMplsL2XconnectInfo *xi = nullptr;
+    foreach (QString line, lines)
+    {
+        line = line.simplified();
+
+//        *Client Interface     : 100GE0/1/48.1533
+//        Administrator PW     : no
+//        AC status            : up
+//        VC state             : up
+//        Label state          : 0
+//        Token state          : 0
+//        VC ID                : 55128910
+//        VC Type              : Ethernet
+//        session state        : up
+//        Destination          : 172.16.31.129
+//        link state           : up
+
+        QRegExp exp("Client Interface : (.*)$");
+        if ( line.contains(exp) )
+        {
+            SMplsL2XconnectInfo i;
+            i.AC = exp.cap(1);
+            m_lstMplsL2Xconnects.append(i);
+            xi = &m_lstMplsL2Xconnects.last();
+            continue;
+        }
+
+        if ( !xi  )
+            continue;
+
+        exp.setPattern("VC state : (.+)$");
+        if ( line.contains(exp) )
+        {
+            xi->estado = exp.cap(1);
+            continue;
+        }
+
+        exp.setPattern("VC ID : (.+)$");
+        if ( line.contains(exp) )
+        {
+            xi->VCID = exp.cap(1);
+            continue;
+        }
+
+        exp.setPattern("Destination : (.+)$");
+        if ( line.contains(exp) )
+        {
+            xi->destino = exp.cap(1);
             continue;
         }
     }

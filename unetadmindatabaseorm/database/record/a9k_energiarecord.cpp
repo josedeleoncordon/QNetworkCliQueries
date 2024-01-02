@@ -30,9 +30,24 @@ void a9k_energiaRecord::set_bandeja1fuentes(int bandeja1fuentes)
 	setProperty("bandeja1fuentes",bandeja1fuentes);
 }
 
+void a9k_energiaRecord::set_cantidad_caida_fuentes_soportado(int cantidad_caida_fuentes_soportado)
+{
+	setProperty("cantidad_caida_fuentes_soportado",cantidad_caida_fuentes_soportado);
+}
+
 void a9k_energiaRecord::set_capacidad_total(int capacidad_total)
 {
 	setProperty("capacidad_total",capacidad_total);
+}
+
+void a9k_energiaRecord::set_cisco_caida_mitad_potencia_no_soportado(int cisco_caida_mitad_potencia_no_soportado)
+{
+	setProperty("cisco_caida_mitad_potencia_no_soportado",cisco_caida_mitad_potencia_no_soportado);
+}
+
+void a9k_energiaRecord::set_cisco_capacidad_no_cableada(int cisco_capacidad_no_cableada)
+{
+	setProperty("cisco_capacidad_no_cableada",cisco_capacidad_no_cableada);
 }
 
 void a9k_energiaRecord::set_date(QDate date)
@@ -40,9 +55,9 @@ void a9k_energiaRecord::set_date(QDate date)
 	setProperty("date",date);
 }
 
-void a9k_energiaRecord::set_disponible_en_falla(int disponible_en_falla)
+void a9k_energiaRecord::set_disponible(int disponible)
 {
-	setProperty("disponible_en_falla",disponible_en_falla);
+	setProperty("disponible",disponible);
 }
 
 void a9k_energiaRecord::set_id(int id)
@@ -55,9 +70,9 @@ void a9k_energiaRecord::set_nmas1(int nmas1)
 	setProperty("nmas1",nmas1);
 }
 
-void a9k_energiaRecord::set_sin_capacidad_en_falla(int sin_capacidad_en_falla)
+void a9k_energiaRecord::set_no_soporta_caida_de_mas_de_una_fuente(int no_soporta_caida_de_mas_de_una_fuente)
 {
-	setProperty("sin_capacidad_en_falla",sin_capacidad_en_falla);
+	setProperty("no_soporta_caida_de_mas_de_una_fuente",no_soporta_caida_de_mas_de_una_fuente);
 }
 
 void a9k_energiaRecord::set_total_requerido(int total_requerido)
@@ -80,9 +95,24 @@ int a9k_energiaRecord::bandeja1fuentes()
 	return property("bandeja1fuentes").toInt();
 }
 
+int a9k_energiaRecord::cantidad_caida_fuentes_soportado()
+{
+	return property("cantidad_caida_fuentes_soportado").toInt();
+}
+
 int a9k_energiaRecord::capacidad_total()
 {
 	return property("capacidad_total").toInt();
+}
+
+int a9k_energiaRecord::cisco_caida_mitad_potencia_no_soportado()
+{
+	return property("cisco_caida_mitad_potencia_no_soportado").toInt();
+}
+
+int a9k_energiaRecord::cisco_capacidad_no_cableada()
+{
+	return property("cisco_capacidad_no_cableada").toInt();
 }
 
 QDate a9k_energiaRecord::date()
@@ -90,9 +120,9 @@ QDate a9k_energiaRecord::date()
 	return property("date").toDate();
 }
 
-int a9k_energiaRecord::disponible_en_falla()
+int a9k_energiaRecord::disponible()
 {
-	return property("disponible_en_falla").toInt();
+	return property("disponible").toInt();
 }
 
 int a9k_energiaRecord::id()
@@ -105,9 +135,9 @@ int a9k_energiaRecord::nmas1()
 	return property("nmas1").toInt();
 }
 
-int a9k_energiaRecord::sin_capacidad_en_falla()
+int a9k_energiaRecord::no_soporta_caida_de_mas_de_una_fuente()
 {
-	return property("sin_capacidad_en_falla").toInt();
+	return property("no_soporta_caida_de_mas_de_una_fuente").toInt();
 }
 
 int a9k_energiaRecord::total_requerido()

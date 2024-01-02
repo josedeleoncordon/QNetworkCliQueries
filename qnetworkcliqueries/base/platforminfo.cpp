@@ -76,6 +76,17 @@ void PlatformInfo::on_term_receiveText()
             break;
         }
 
+        exp.setPattern("^(.+) Chassis");
+        foreach (QString line, lines)
+        {
+            line = line.simplified();
+            if ( line.contains(exp) )
+            {
+                m_model = exp.cap(1);
+                break;
+            }
+        }
+
         //Raisecom. Tiene el mismo prompt de Cisco
         exp.setPattern("Product (Version|Name|name): (.+)$");
         foreach (QString line, lines)

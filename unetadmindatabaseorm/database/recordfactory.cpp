@@ -35,6 +35,7 @@
 #include "record/red_consultarecord.h"
 #include "record/red_consulta_detallerecord.h"
 #include "record/red_paisrecord.h"
+#include "record/red_sectorrecord.h"
 
 using namespace QAnt;
 using namespace Dao;
@@ -111,5 +112,7 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new red_consulta_detalleRecord;
 	if ( table == "red_pais" )
 		return new red_paisRecord;
+	if ( table == "red_sector" )
+		return new red_sectorRecord;
 	return nullptr;
 }

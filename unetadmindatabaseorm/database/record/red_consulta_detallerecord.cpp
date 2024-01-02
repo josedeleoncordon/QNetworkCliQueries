@@ -100,9 +100,9 @@ void red_consulta_detalleRecord::set_id(long long id)
 	setProperty("id",id);
 }
 
-void red_consulta_detalleRecord::set_red_pais_id(int red_pais_id)
+void red_consulta_detalleRecord::set_red_sector_id(int red_sector_id)
 {
-	setProperty("red_pais_id",red_pais_id);
+	setProperty("red_sector_id",red_sector_id);
 }
 
 QString red_consulta_detalleRecord::Descripcion()
@@ -190,14 +190,14 @@ long long red_consulta_detalleRecord::id()
 	return property("id").toLongLong();
 }
 
-int red_consulta_detalleRecord::red_pais_id()
+int red_consulta_detalleRecord::red_sector_id()
 {
-	return property("red_pais_id").toInt();
+	return property("red_sector_id").toInt();
 }
 
-red_paisRecord *red_consulta_detalleRecord::r_red_pais_id()
+red_sectorRecord *red_consulta_detalleRecord::r_red_sector_id()
 {
-	return dynamic_cast<red_paisRecord*>( property("r_red_pais_id").value<RecordBase*>() );
+	return dynamic_cast<red_sectorRecord*>( property("r_red_sector_id").value<RecordBase*>() );
 }
 
 red_consulta_detalleRecord &red_consulta_detalleRecord::operator=(const red_consulta_detalleRecord &other)

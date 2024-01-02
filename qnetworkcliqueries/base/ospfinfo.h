@@ -57,6 +57,9 @@ public:
     friend QDataStream& operator<<(QDataStream& out, const OSPFInfo* info);
     friend QDataStream& operator>>(QDataStream& in, OSPFInfo*& info);
     friend QDebug operator<<(QDebug dbg, const OSPFInfo &info);
+
+    //
+    void addInterfaceOSPFInfo(SOSPFInfo s); //Agregamos manualmente informacion de una interfaz ficticia. Para simulaciones
 };
 
 Q_DECLARE_METATYPE(SOSPFInfo)

@@ -533,9 +533,15 @@ a9k_energia:
       type: smallint
     total_requerido:
       type: smallint
-    disponible_en_falla:
+    disponible:
       type: smallint
-    sin_capacidad_en_falla:
+    cantidad_caida_fuentes_soportado:
+      type: smallint
+    no_soporta_caida_de_mas_de_una_fuente:
+      type: tinyint
+    cisco_capacidad_no_cableada:
+      type: smallint
+    cisco_caida_mitad_potencia_no_soportado:
       type: tinyint
   relations:
     a9k_equipo_1:
@@ -846,7 +852,7 @@ red_consulta:
       primary: true
       notnull: true
       autoincrement: true
-    red_pais_id:
+    red_sector_id:
       type: integer
       notnull: true
     fecha:
@@ -867,12 +873,12 @@ red_consulta:
     total:
       type: integer
   relations:
-    red_pais_1:
+    red_sector_1:
       foreignType: many
       foreignAlias: red_consultas
-      local: red_pais_id
+      local: red_sector_id
       foreign: id
-      class: red_pais
+      class: red_sector
       owningSide: true
       onDelete: NO ACTION
       onUpdate: NO ACTION
@@ -894,7 +900,7 @@ red_consulta_detalle:
       primary: true
       notnull: true
       autoincrement: true
-    red_pais_id:
+    red_sector_id:
       type: integer
       notnull: true
     fecha:
@@ -930,12 +936,12 @@ red_consulta_detalle:
     Detalle:
       type: string(200)
   relations:
-    red_pais_1:
+    red_sector_1:
       foreignType: many
       foreignAlias: red_consulta_detalles
-      local: red_pais_id
+      local: red_sector_id
       foreign: id
-      class: red_pais
+      class: red_sector
       owningSide: true
       onDelete: NO ACTION
       onUpdate: NO ACTION
@@ -957,4 +963,27 @@ TB_Addressing_consulta:
       type: string(255)
     IP:
       type: string(255)
+
+red_sector:
+  columns:
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    red_pais_id:
+      type: integer
+      notnull: true
+    sector:
+      type: string(45)
+  relations:
+    red_pais_1:
+      foreignType: many
+      foreignAlias: red_sectors
+      local: red_pais_id
+      foreign: id
+      class: red_pais
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
 

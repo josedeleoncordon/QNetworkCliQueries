@@ -310,7 +310,12 @@ void IPRouteInfo::m_individualSiguienteRed()
 //        m_red.replace( QRegExp("/\\d+"),"" );
 
         if ( m_brand == "Cisco" )
-            termSendText("sh ip route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" "+m_red );
+            if ( m_red.contains(":") )
+                //IPV6
+                termSendText("sh route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" ipv6 "+m_red );
+            else
+                //IPV4
+                termSendText("sh ip route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" "+m_red );
         else
         {
             finished();
@@ -352,6 +357,12 @@ void IPRouteInfo::on_term_receiveText_individual()
             continue;
 
         exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*, (from|via) ");
+        if ( line.contains(exp) )
+        {
+            route->via.append( exp.cap(1) );
+            continue;
+        }
+        exp.setPattern("::ffff:(\\S+), (from|via)");
         if ( line.contains(exp) )
         {
             route->via.append( exp.cap(1) );

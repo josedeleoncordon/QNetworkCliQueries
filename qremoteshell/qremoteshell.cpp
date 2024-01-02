@@ -69,6 +69,8 @@ void QRemoteShell::host_connect()
 {
     if ( m_gw.isEmpty() )
     {
+        qDebug() << "H:" << m_ip << "U:" << m_user << "P:" << m_pwd;
+
         //conexion directa
         m_terminal = new Terminal( m_ip,m_linuxprompt );
         connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool)));
@@ -347,12 +349,12 @@ void QRemoteShell::m_terminal_detaReceived(QString txt)
         }
 
         //verificamos si ya miramos el promt del equipo para saber que ya nos conectamos
-        exp.setPattern("^.+(#|>)\\s*$");
+        exp.setPattern("^\\w.+(#|>)\\s*$");
         if ( line.contains(exp) )
         {
             qCDebug(qremoteshell) << m_ip << "Encontro el prompt";
 
-            if ( line.contains(QRegExp(">\\s*$")) )
+            if ( line.contains(QRegExp("^\\w.+>\\s*$")) )
             {
                 if ( !m_enablesent )
                 {

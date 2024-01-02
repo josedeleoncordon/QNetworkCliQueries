@@ -123,6 +123,7 @@ protected:
     QRegExp exp, exp2;
     QString m_brand;
     QString m_platform;
+    QString m_model;
     QString m_os;
     QString m_xr_location;
     bool m_xr64;
@@ -151,6 +152,7 @@ public:
 
     void setBrand(QString brand) { m_brand = brand; }
     void setPlatform(QString platform);
+    void setModel(QString model) { m_model = model; }
     void setXR64(bool xr64) { m_xr64=xr64; }
     void setXRLocation(QString location) { m_xr_location=location; }
     void setHostName(QString name) { m_name=name; }

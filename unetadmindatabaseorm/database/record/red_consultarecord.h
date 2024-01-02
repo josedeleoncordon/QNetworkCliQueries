@@ -3,7 +3,7 @@
 
 #include "qant3_global.h"
 #include "recordbase.h"
-#include "red_paisrecord.h"
+#include "red_sectorrecord.h"
 
 class QANT3MVSHARED_EXPORT red_consultaRecord: public QAnt::Dao::RecordBase
 {
@@ -26,7 +26,7 @@ public:
 	void set_noservicio(int noservicio);
 	void set_ok(int ok);
 	void set_principalcaido(int principalcaido);
-	void set_red_pais_id(int red_pais_id);
+	void set_red_sector_id(int red_sector_id);
 	void set_total(int total);
 
 	int conexion_error();
@@ -37,10 +37,10 @@ public:
 	int noservicio();
 	int ok();
 	int principalcaido();
-	int red_pais_id();
+	int red_sector_id();
 	int total();
 
-	red_paisRecord *r_red_pais_id();
+	red_sectorRecord *r_red_sector_id();
 
 	red_consultaRecord& operator=(const red_consultaRecord &record);
 };

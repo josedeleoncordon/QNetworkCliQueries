@@ -17,6 +17,7 @@ public:
     QString& xr_location() { return m_xr_location; }
     QString& location() { return m_location; }
     QString& vendor() { return m_brand; }
+    QString& model() { return m_model; }
     bool& xr64() { return m_xr64; }
 
 private slots:
