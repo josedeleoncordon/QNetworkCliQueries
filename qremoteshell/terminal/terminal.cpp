@@ -113,11 +113,19 @@ void Terminal::close()
 {            
     qCDebug(terminal) << _debugIP << "Terminal::close()";
 
-    if ( shellStartResult < 0 )
-        shellProcess_finished();
-    else
+    if ( _shellProcess->isRunning() )
         //_shellProcess emitira finished y se ejecutara shellProcess_finished()
         _shellProcess->close();
+    else
+        shellProcess_finished();
+
+    // if ( shellStartResult < 0 )
+    //     shellProcess_finished();
+    // else
+    // {
+    //     //_shellProcess emitira finished y se ejecutara shellProcess_finished()
+    //     _shellProcess->close();
+    // }
 
 //    int result = ::kill(_shellProcess->pid(),SIGHUP);
 //    qDebug() << _debugIP << "Terminal::close()";

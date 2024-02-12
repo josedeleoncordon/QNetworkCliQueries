@@ -868,6 +868,8 @@ red_consulta:
       type: integer
     noservicio:
       type: integer
+    nohomologado:
+      type: integer
     conexion_error:
       type: integer
     total:

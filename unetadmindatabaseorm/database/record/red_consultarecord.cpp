@@ -40,6 +40,11 @@ void red_consultaRecord::set_no(int no)
 	setProperty("no",no);
 }
 
+void red_consultaRecord::set_nohomologado(int nohomologado)
+{
+	setProperty("nohomologado",nohomologado);
+}
+
 void red_consultaRecord::set_noservicio(int noservicio)
 {
 	setProperty("noservicio",noservicio);
@@ -88,6 +93,11 @@ int red_consultaRecord::id()
 int red_consultaRecord::no()
 {
 	return property("no").toInt();
+}
+
+int red_consultaRecord::nohomologado()
+{
+	return property("nohomologado").toInt();
 }
 
 int red_consultaRecord::noservicio()
