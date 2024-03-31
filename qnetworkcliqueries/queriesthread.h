@@ -132,7 +132,7 @@ protected:
    QMap<QString,QString> m_mapOSPFVecinosInterfazDondeVienen;
    QueriesConfiguration m_queriesconfiguration;
 
-   QueriesThreadWorker*(*ThreadWorker)(void) = nullptr;
+   QueriesThreadWorker*(*ThreadWorker)(void);
 
    void _emitNewInformation();
    void _emitFinished(bool);

@@ -45,6 +45,11 @@ void a9k_sesiones_colaRecord::set_outq(int outq)
 	setProperty("outq",outq);
 }
 
+void a9k_sesiones_colaRecord::set_prefixin(int prefixin)
+{
+	setProperty("prefixin",prefixin);
+}
+
 int a9k_sesiones_colaRecord::a9k_equipo_id()
 {
 	return property("a9k_equipo_id").toInt();
@@ -73,6 +78,11 @@ QString a9k_sesiones_colaRecord::neighbor()
 int a9k_sesiones_colaRecord::outq()
 {
 	return property("outq").toInt();
+}
+
+int a9k_sesiones_colaRecord::prefixin()
+{
+	return property("prefixin").toInt();
 }
 
 a9k_equipoRecord *a9k_sesiones_colaRecord::r_a9k_equipo_id()

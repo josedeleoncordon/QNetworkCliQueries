@@ -31,6 +31,7 @@ DEFINES += HAVE_POSIX_OPENPT HAVE_SYS_TIME_H HAVE_UPDWTMPX #Pty
 
 SOURCES += \
     qremoteshelllogging.cpp \
+    qsshsession.cpp \
     qtelnet.cpp \
     terminal/Pty.cpp \
     terminal/kprocess.cpp \
@@ -42,6 +43,7 @@ SOURCES += \
 
 HEADERS += \
     qremoteshelllogging.h \
+    qsshsession.h \
     qtelnet.h \
     terminal/Pty.h \
     terminal/kprocess.h \
@@ -58,3 +60,5 @@ unix {
     INSTALLS += target
 }
 
+# LIBS *= ../../thirdparty-libssh-main/build/linux/x86-64/libssh/release/lib/libssh0.105-1.a
+LIBS *= -lssh

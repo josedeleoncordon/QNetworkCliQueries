@@ -87,6 +87,9 @@ public:
     QString& ipOinterfazMismoDominioOSPFDondeSeViene() { return m_ipOinterfazMismoDominioOSPFdondeSeViene; }
     QueriesConfiguration queriesConfiguration() { return m_queriesconfiguration; }
     QString conexionID() { return m_conexionID; }
+    FuncionBase* createQuerieManual(int option);
+    QString& type() { return m_type; }
+    bool recorridoEnArbol() { return _recorridoEnArbol; }
 
     bool existsQueryInformation(int option,int i=0);
     //busqueda para un nombre de consulta nula e ir insertando nuevas consultas a la general
@@ -143,6 +146,8 @@ public:
     void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
     void setConexionID(QString ID) { m_conexionID=ID; }
     void setQueryName(QString name) { m_queryname=name; }
+    void setType(QString type) { m_type= type; }
+    void setRecorridoEnArbol(bool recorrido) { _recorridoEnArbol=recorrido; }
 
     void setUser2(QString user) { m_user2=user; }
     void setPassword2(QString pwd) { m_pwd2=pwd; }
@@ -211,6 +216,7 @@ protected:
     QString m_xr_location;
     QString m_location;
     QString m_queryname;
+    QString m_type;
     bool m_xr64;
     QRemoteShell::ConnectionProtocol m_connectionprotol;
     QStringList lstRemoteShellUsersPasswords;
@@ -228,6 +234,9 @@ protected:
     QueriesConfiguration m_queriesconfiguration;
 
     QString m_ipOinterfazMismoDominioOSPFdondeSeViene;
+
+    //Node helper
+    bool _recorridoEnArbol;
 
     //para regresar si un query no esta disponible
     QList<SEquipmentNeighborsInfo> _lstSEquipmentNeighborsInfo;

@@ -24,6 +24,7 @@ public:
 	void set_inq(int inq);
 	void set_neighbor(QString neighbor);
 	void set_outq(int outq);
+	void set_prefixin(int prefixin);
 
 	int a9k_equipo_id();
 	QDate date();
@@ -31,6 +32,7 @@ public:
 	int inq();
 	QString neighbor();
 	int outq();
+	int prefixin();
 
 	a9k_equipoRecord *r_a9k_equipo_id();
 

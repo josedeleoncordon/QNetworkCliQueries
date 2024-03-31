@@ -4,7 +4,9 @@
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(terminal)
+Q_DECLARE_LOGGING_CATEGORY(qsshsession)
 Q_DECLARE_LOGGING_CATEGORY(terminalReceived)
 Q_DECLARE_LOGGING_CATEGORY(qremoteshell)
+
 
 #endif // QREMOTESHELLLOGGING_H

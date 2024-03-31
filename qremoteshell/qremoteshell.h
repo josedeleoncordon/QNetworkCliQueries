@@ -11,6 +11,7 @@ class QTcpSocket;
 class QTimer;
 class Terminal;
 class QTelnet;
+class QSSHSession;
 
 class QREMOTESHELLSHARED_EXPORT QRemoteShell : public QObject
 {
@@ -32,6 +33,7 @@ public:
     void setConnectionProtocol( ConnectionProtocol cp );
     void setGW(QString GW) { m_gw = GW; }
     void host_connect();
+    void host_connect_new();
     void host_disconnect();
     void setUser2(QString user) { m_user2=user; }
     void setPassword2(QString pwd) { m_pwd2=pwd; }
@@ -69,13 +71,16 @@ private:
     bool m_probardiferentesprotocolos;
     QString m_dataReceived;
     QRegExp m_localprompt;
-    QTimer *m_timerNoResponse;
+    // QTimer *m_timerNoResponse;
     QTcpSocket *m_socket;
     QTelnet *m_telnet;
+    QSSHSession *m_ssh;
 
     Terminal *m_terminal;
 
+    QString eliminarCaractaresNoImprimibles(QString txt);
     void m_nextTry();
+    void m_nextTry_new();
 
     void finalizado();
 
@@ -83,10 +88,13 @@ private slots:
     void telnet_host_connected();
     void telnet_host_disconnected();
     void on_telnet_dataReceived();
+    void ssh_host_connected();
+    void ssh_host_disconnected();
+    void on_ssh_dataReceived();
     void m_terminal_ready(bool ready);
     void m_terminal_detaReceived(QString);
     void m_terminal_finished();    
-    void m_timeroutNoResponse();
+    // void m_timeroutNoResponse();
 
 signals:
     void reachable();

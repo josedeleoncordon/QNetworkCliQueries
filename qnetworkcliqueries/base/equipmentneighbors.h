@@ -35,6 +35,7 @@ public:
     EquipmentNeighborsInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     EquipmentNeighborsInfo(const EquipmentNeighborsInfo &other);
     ~EquipmentNeighborsInfo();
+    void addEquipmentNeighborsInfo(SEquipmentNeighborsInfo i) { m_lstEquipos.append( i ); }
     virtual void getEquipmentNeighborsInfo();
 
     //

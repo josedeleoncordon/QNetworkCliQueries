@@ -574,6 +574,8 @@ a9k_sesiones_cola:
       type: integer
     outq:
       type: integer
+    prefixin:
+      type: integer
   relations:
     a9k_equipo_1:
       foreignType: many
@@ -988,4 +990,20 @@ red_sector:
       owningSide: true
       onDelete: NO ACTION
       onUpdate: NO ACTION
+
+TB_Pais_anillos_cantidad:
+  columns:
+    id:
+      type: bigint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    fecha:
+      type: date
+    pais:
+      type: string(45)
+    cantidad:
+      type: integer
+      unsigned: true
 

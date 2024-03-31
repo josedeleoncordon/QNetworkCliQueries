@@ -15,14 +15,15 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_maxparalelosmismoequipo=1;
     m_lstIPsMismoEquipoCounter=0;
     m_lstIPsCounter=0;
-    m_connectionprotocol = QRemoteShell::SSHTelnet;
+    m_connectionprotocol = QRemoteShell::SSH;
     m_principaluserfirst=true;
     m_soloequiposnuevos=false;
     m_consultarVecinosOSPFMismoDominio=false;
     m_equipmentNeighborsConsultarVecinos=false;
     m_eliminarconsultasdeequiposduplicados=true;
-    m_timer = nullptr;    
+    m_timer = nullptr;
     m_timerActivity = nullptr;
+    ThreadWorker = nullptr;
     _clear();    
 
     m_user = Properties::Instance()->user;

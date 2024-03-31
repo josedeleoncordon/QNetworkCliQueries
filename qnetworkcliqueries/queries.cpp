@@ -41,6 +41,7 @@ Queries::Queries(const Queries &other) : QObject(other.parent())
 Queries::~Queries()
 {
     qCDebug(queries) << m_ip << "Queries::~Queries()" << this;
+    qDebug() << "Queries::~Queries()" << m_ip << this;
     qDeleteAll(m_lstFunciones);
 }
 
@@ -75,7 +76,7 @@ void Queries::iniciar()
     exitQuery = nullptr;
     funcionQuery = nullptr;
 
-    m_connectionprotol = QRemoteShell::SSHTelnet;
+    m_connectionprotol = QRemoteShell::SSH;
     m_opcionActual = QueryOpcion::Null;
     m_connected=false;
     m_error=false;
@@ -88,6 +89,7 @@ void Queries::iniciar()
     m_operativo=true;
     m_xr64=false;
     m_datetime = QDateTime::currentDateTime();
+    _recorridoEnArbol = false;
 
     queryTimer = new QTimer(this);
     queryTimer->setInterval( 30000 );
@@ -116,6 +118,8 @@ void Queries::clone(const Queries& other)
     m_pwd = other.m_pwd;
     m_lstOpciones = other.m_lstOpciones;
     m_queryname = other.m_queryname;
+    m_type = other.m_type;
+    _recorridoEnArbol = other._recorridoEnArbol;
 
     qDebug() << "Queries::clone" << m_ip << m_name;
 
@@ -334,6 +338,13 @@ FuncionBase *Queries::createQuerie(int option)
     }
 }
 
+FuncionBase* Queries::createQuerieManual(int option)
+{
+    FuncionBase* f = createQuerie(option);
+    m_lstFunciones.insert( m_queryname, f );
+    return f;
+}
+
 void Queries::createEmptyQueries()
 {
     crearFuncionesFaltantes();
@@ -502,7 +513,7 @@ void Queries::borrarTerminal()
         qCDebug(queries) << m_ip  << "borrando terminal";
 
         term->disconnectReceiveTextSignalConnections();
-        term->disconnect(); //para q no se emita la señal de desconectado
+        disconnect(term,SIGNAL(disconnected()),this,SLOT(processConnectToHostDisconnected())); //para q no se emita la señal de desconectado
         term->host_disconnect();
         term->deleteLater();
         term = nullptr;
@@ -1421,13 +1432,14 @@ void Queries::processConnectToHostDisconnected()
                 queryTimer->stop();
                 QEventLoop loop;
                 QTimer *t = new QTimer;
-                t->setSingleShot(true);
-                connect(t, SIGNAL(timeout()), &loop, SLOT(quit()),Qt::QueuedConnection);
-                t->start(5000);
-                loop.exec();
-                queryTimer->start();
-                delete t;
-                conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
+                // t->setSingleShot(true);
+                QTimer::singleShot( 5000,[this]() { conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt); } );
+                // connect(t, SIGNAL(timeout()), &loop, SLOT(quit()),Qt::QueuedConnection);
+                // t->start(5000);
+                // loop.exec();
+                // queryTimer->start();
+                // delete t;
+                // conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
             }
             else
             {
