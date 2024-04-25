@@ -24,6 +24,7 @@
 #include "record/interfaz_estadorecord.h"
 #include "record/interfaz_tiporecord.h"
 #include "record/ken_consultarecord.h"
+#include "record/ken_consulta_detallerecord.h"
 #include "record/ken_equiporecord.h"
 #include "record/paisrecord.h"
 #include "record/pcp_paisrecord.h"
@@ -91,6 +92,8 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new interfaz_tipoRecord;
 	if ( table == "ken_consulta" )
 		return new ken_consultaRecord;
+	if ( table == "ken_consulta_detalle" )
+		return new ken_consulta_detalleRecord;
 	if ( table == "ken_equipo" )
 		return new ken_equipoRecord;
 	if ( table == "pais" )

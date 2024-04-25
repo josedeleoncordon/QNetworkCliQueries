@@ -29,6 +29,7 @@ HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/interfaz_estadorecord.h \
 		$$PWD/record/interfaz_tiporecord.h \
 		$$PWD/record/interfazrecord.h \
+		$$PWD/record/ken_consulta_detallerecord.h \
 		$$PWD/record/ken_consultarecord.h \
 		$$PWD/record/ken_equiporecord.h \
 		$$PWD/record/paisrecord.h \
@@ -69,6 +70,7 @@ SOURCES += $$PWD/record/a9k_bgp_inter_asrecord.cpp \
 		$$PWD/record/interfaz_estadorecord.cpp \
 		$$PWD/record/interfaz_tiporecord.cpp \
 		$$PWD/record/interfazrecord.cpp \
+		$$PWD/record/ken_consulta_detallerecord.cpp \
 		$$PWD/record/ken_consultarecord.cpp \
 		$$PWD/record/ken_equiporecord.cpp \
 		$$PWD/record/paisrecord.cpp \

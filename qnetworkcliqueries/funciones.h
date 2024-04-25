@@ -212,4 +212,10 @@ QStringList getRegExpAllMatches(QRegExp rx, QString txt);
 //20065880.4295556 -> 20065880
 QString numberExp10Anumber(QString);
 
+//Devuelve si un prefix set permite una /32 o ipv6 /128
+//esto para un rango usando le y/o ge
+//no para /32 o /128 explicitas
+bool prefixSetAllowsRange32_128(QString &pfxtxt);
+
+
 #endif // FUNCIONES_H

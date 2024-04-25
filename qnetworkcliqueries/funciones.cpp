@@ -1256,3 +1256,54 @@ QString numberExp10Anumber(QString txt)
     else
         return txt.left( txt.indexOf(".") );
 }
+
+bool prefixSetAllowsRange32_128(QString &pfxtxt)
+{
+    QRegExp exple("le (\\d+)");
+    QRegExp expge("ge (\\d+)");
+    for ( QString &line : pfxtxt.split("\n",QString::SkipEmptyParts) )
+    {
+        if ( line.contains(QRegExp("0.0.0.0/0 (le|ge)")) )
+            return true;
+
+        //TODO
+        continue;
+
+        if ( !line.contains(" le ") && !line.contains(" ge ") )
+            //no tiene para rango. segmento especifico continuamos
+            continue;
+
+        int ge=0;
+        int le=0;
+        int gmask=0; //mayor mascara /32 /128
+        if ( line.contains(":") )
+            le=128;
+        else
+            le=32;
+        gmask=le;
+        if ( line.contains(expge) )
+            ge=expge.cap(1).toInt();
+        if ( line.contains(exple) )
+            le=exple.cap(1).toInt();
+
+        // line.replace(exple,"");
+        // line.replace(expge,"");
+        // if ( !line.contains(" ") && !line.contains("/") )
+        //     //es un cisco q no tiene mascara, host
+        //     continue;
+
+        // line.replace(" ","/"); //el espacio que queda es la separacion de la ip y masca en VRP
+        // int mask=line.split("/",QString::SkipEmptyParts).last().toInt();
+
+        // if ( mask == le || mask == ge )
+        //     //mascara igual a le
+        //     continue;
+
+        // if ( mask >= ge && mask <= le )
+        //     return true;
+
+        if ( ge <= gmask && gmask <= le )
+            return true;
+    }
+    return false;
+}

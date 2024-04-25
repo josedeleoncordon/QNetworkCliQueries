@@ -2,6 +2,7 @@
 #define OSPFINFO_H
 
 #include "funcionbase.h"
+#include <QMutex>
 
 struct SOSPFInfo : InfoBase
 {

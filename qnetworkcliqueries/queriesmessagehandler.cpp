@@ -75,10 +75,11 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
 
     switch (type) {
     case QtInfoMsg:
-    {
-        printf( qPrintable( QString(context.category)+": "+msg+"\n") );
-        break;
-    }
+    // {
+
+    //     printf( qPrintable( QString(context.category)+": "+msg+"\n") );
+    //     break;
+    // }
     case QtWarningMsg:
     case QtCriticalMsg:
     case QtFatalMsg:

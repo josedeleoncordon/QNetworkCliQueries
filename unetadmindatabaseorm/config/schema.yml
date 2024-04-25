@@ -1007,3 +1007,34 @@ TB_Pais_anillos_cantidad:
       type: integer
       unsigned: true
 
+ken_consulta_detalle:
+  columns:
+    id:
+      type: bigint
+      primary: true
+      notnull: true
+      autoincrement: true
+    ken_equipo_id:
+      type: integer
+      notnull: true
+    fecha:
+      type: date
+    destino_ip:
+      type: string(45)
+    asn:
+      type: string(100)
+    red:
+      type: string(100)
+    max_bps:
+      type: double
+  relations:
+    ken_equipo_1:
+      foreignType: many
+      foreignAlias: ken_consulta_detalles
+      local: ken_equipo_id
+      foreign: id
+      class: ken_equipo
+      owningSide: true
+      onDelete: NO ACTION
+      onUpdate: NO ACTION
+
