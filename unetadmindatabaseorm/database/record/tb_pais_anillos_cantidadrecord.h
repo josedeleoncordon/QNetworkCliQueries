@@ -18,11 +18,13 @@ public:
 	~TB_Pais_anillos_cantidadRecord();
 
 	void set_cantidad(unsigned int cantidad);
+	void set_cantidad_buses(int cantidad_buses);
 	void set_fecha(QDate fecha);
 	void set_id(unsigned long long id);
 	void set_pais(QString pais);
 
 	unsigned int cantidad();
+	int cantidad_buses();
 	QDate fecha();
 	unsigned long long id();
 	QString pais();

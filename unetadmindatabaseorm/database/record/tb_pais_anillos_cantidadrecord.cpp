@@ -20,6 +20,11 @@ void TB_Pais_anillos_cantidadRecord::set_cantidad(unsigned int cantidad)
 	setProperty("cantidad",cantidad);
 }
 
+void TB_Pais_anillos_cantidadRecord::set_cantidad_buses(int cantidad_buses)
+{
+	setProperty("cantidad_buses",cantidad_buses);
+}
+
 void TB_Pais_anillos_cantidadRecord::set_fecha(QDate fecha)
 {
 	setProperty("fecha",fecha);
@@ -38,6 +43,11 @@ void TB_Pais_anillos_cantidadRecord::set_pais(QString pais)
 unsigned int TB_Pais_anillos_cantidadRecord::cantidad()
 {
 	return property("cantidad").toUInt();
+}
+
+int TB_Pais_anillos_cantidadRecord::cantidad_buses()
+{
+	return property("cantidad_buses").toInt();
 }
 
 QDate TB_Pais_anillos_cantidadRecord::fecha()

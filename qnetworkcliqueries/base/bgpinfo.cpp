@@ -4,6 +4,7 @@
 SBGPNetwork::SBGPNetwork(const SBGPNetwork &other)
 {
     neighborip = other.neighborip;
+    vrf = other.vrf;
     network = other.network;
     RD = other.RD;
     nexthop = other.nexthop;
@@ -20,6 +21,7 @@ SBGPNetwork::SBGPNetwork(const SBGPNetwork &other)
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNetwork& data)
 {
     out << data.neighborip;
+    out << data.vrf;
     out << data.network;
     out << data.RD;
     out << data.nexthop;
@@ -37,6 +39,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNe
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNetwork& data)
 {
     in >> data.neighborip;
+    in >> data.vrf;
     in >> data.network;
     in >> data.RD;
     in >> data.nexthop;
@@ -54,6 +57,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNetwork& 
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNeighbor &data)
 {
     out << data.neighborip;
+    out << data.vrf;
     out << data.as;
     out << data.upDownTime;
     out << data.prfxRcd;
@@ -69,6 +73,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNe
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNeighbor& data)
 {
     in >> data.neighborip;
+    in >> data.vrf;
     in >> data.as;
     in >> data.upDownTime;
     in >> data.prfxRcd;
@@ -85,6 +90,7 @@ QNETWORKCLIQUERIES_EXPORT QDBusArgument& operator<<(QDBusArgument &argument, con
 {
     argument.beginStructure();
     argument << data.neighborip;
+    argument << data.vrf;
     argument << data.network;
     argument << data.RD;
     argument << data.nexthop;
@@ -103,6 +109,7 @@ QNETWORKCLIQUERIES_EXPORT const QDBusArgument& operator>>(const QDBusArgument& a
 {
     argument.beginStructure();
     argument >> data.neighborip;
+    argument >> data.vrf;
     argument >> data.network;
     argument >> data.RD;
     argument >> data.nexthop;
@@ -245,10 +252,9 @@ void BGPInfo::getNetworks()
     qDebug() << "\n BGP getNetworks";
     qDebug() << m_vrfs << m_neighborIPs << m_neighborIPsVRFs;
 
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_networks()));
-
     if ( m_neighborIPs.isEmpty() && m_neighborIPsVRFs.isEmpty() )
-    {        
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_networks()));
         if ( m_os == "IOS XR" )
         {
             if ( !m_community.isEmpty() )
@@ -292,6 +298,7 @@ void BGPInfo::networksNextNeighbor()
     if ( !m_neighborIPs.isEmpty() )
     {
         qDebug() << "m_neighborIPs.isEmpty()";
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_networks()));
         if ( m_neighborsPos < m_neighborIPs.size()-1 )
         {
             m_currentNeighbor = m_neighborIPs.at( ++m_neighborsPos );
@@ -329,6 +336,7 @@ void BGPInfo::networksNextNeighbor()
         if ( m_neighborsPos < m_neighborIPsVRFs.size()-1 )
         {
             QString Neighbor_VRF = m_neighborIPsVRFs.at( ++m_neighborsPos );
+            QString version;
             if ( Neighbor_VRF.contains("_") )
             {
                 QStringList data = Neighbor_VRF.split("_",QString::SkipEmptyParts);
@@ -340,11 +348,22 @@ void BGPInfo::networksNextNeighbor()
                 m_currentNeighbor = Neighbor_VRF;
                 m_vrf_currentVRF.clear();
             }
+            if ( m_currentNeighbor.contains(":") )
+            {
+                version="6";
+                connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_networksv6()));
+            }
+            else
+            {
+                version="4";
+                connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_networks()));
+            }
 
             if ( m_os == "IOS XR" )
             {
                 termSendText("sh bgp "+
                              (!m_vrf_currentVRF.isEmpty()?" vrf "+m_vrf_currentVRF:" ")+
+                             " ipv"+version+" unicast "+
                              " neighbor "+m_currentNeighbor+" "+
                              (m_neighbor_int_out=="IN"
                               ?"routes":(m_neighbor_int_out=="OUT"
@@ -380,6 +399,8 @@ void BGPInfo::on_term_receiveText_networks()
 
     QList<SBGPNetwork> m_lstNeighborNetworks;
 
+    qDebug() << "BGPInfo::on_term_receiveText_networks()" << m_currentNeighbor;
+
     QStringList lines = txt.split("\n");
     int pathi = 0;
     QString network;
@@ -411,13 +432,16 @@ void BGPInfo::on_term_receiveText_networks()
             SBGPNetwork s;
             network = exp.cap(1);
             s.neighborip = m_currentNeighbor;
+            s.vrf = m_vrf_currentVRF;
             s.network = network;
             s.nexthop = exp.cap(2);
             s.from = exp.cap(3);
-            s.path = line.mid( pathi ).replace("i","").simplified();
+            s.path = line.mid( pathi ).replace("i","").replace("?","").simplified();
             s.operativo = true;
             s.datetime = QDateTime::currentDateTime();
             s.equipo = m_parentQuery->hostName();
+
+            qDebug() << "Agregando" << m_currentNeighbor << s.network;
 
             m_lstNetworks.append(s);
             m_lstNeighborNetworks.append(s);
@@ -431,12 +455,15 @@ void BGPInfo::on_term_receiveText_networks()
             SBGPNetwork s;
             network = exp.cap(1);
             s.neighborip = m_currentNeighbor;
+            s.vrf = m_vrf_currentVRF;
             s.network = network;
             s.nexthop = exp.cap(2);
-            s.path = line.mid( pathi ).replace("i","").simplified();
+            s.path = line.mid( pathi ).replace("i","").replace("?","").simplified();
             s.operativo = true;
             s.datetime = QDateTime::currentDateTime();
             s.equipo = m_parentQuery->hostName();
+
+            qDebug() << "Agregando" << m_currentNeighbor << s.network;
 
             m_lstNetworks.append(s);
             m_lstNeighborNetworks.append(s);
@@ -448,12 +475,15 @@ void BGPInfo::on_term_receiveText_networks()
         {
             SBGPNetwork s;
             s.neighborip = m_currentNeighbor;
+            s.vrf = m_vrf_currentVRF;
             s.network = network;
             s.nexthop = exp.cap(1);
-            s.path = line.mid( pathi ).replace("i","").simplified();
+            s.path = line.mid( pathi ).replace("i","").replace("?","").simplified();
             s.operativo = true;
             s.datetime = QDateTime::currentDateTime();
             s.equipo = m_parentQuery->hostName();
+
+            qDebug() << "Agregando" << m_currentNeighbor << s.network;
 
             m_lstNetworks.append(s);
             m_lstNeighborNetworks.append(s);
@@ -461,7 +491,71 @@ void BGPInfo::on_term_receiveText_networks()
         }
     }
     m_mapNeighborLstNetworks.insert( m_currentNeighbor, m_lstNeighborNetworks );
+    term->disconnectReceiveTextSignalConnections();
 
+    if ( m_neighborIPs.isEmpty() && m_neighborIPsVRFs.isEmpty() )
+        finished();
+    else
+        networksNextNeighbor();
+}
+
+void BGPInfo::on_term_receiveText_networksv6()
+{
+    //TODO Distinguir routes de advertise-routes
+
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    qDebug() << "BGPInfo::on_term_receiveText_networksv6()" << m_currentNeighbor;
+    qDebug() << "txt" << txt;
+
+    QList<SBGPNetwork> m_lstNeighborNetworks;
+
+    if ( m_os == "IOS XR" )
+    {
+        QMap<int,QRegExp> map;
+        map.insert( 0,QRegExp("([0-9a-f]{1,4}:\\S+/\\d{1,3})"));
+        map.insert(22,QRegExp("([0-9a-f]{1,4}:\\S+)"));
+        map.insert(51,QRegExp(".+$"));
+
+        QList<QStringList> lstCampos = tableMultiRow2Table(txt,map);
+
+        for ( QStringList lst : lstCampos )
+        {
+            if ( lst.size() != 3 )
+                continue;
+
+            QString red = lst.at(0);
+
+            if ( red == "::/0" )
+                continue;
+
+            QString peer = lst.at(1);
+            QString aspath = lst.at(2);
+            aspath.replace("i","");
+            aspath.replace("?","");
+
+            SBGPNetwork s;
+            s.neighborip = m_currentNeighbor;
+            s.vrf = m_vrf_currentVRF;
+            s.network = red;
+            s.nexthop = peer;
+            s.path = aspath;
+            s.operativo = true;
+            s.datetime = QDateTime::currentDateTime();
+            s.equipo = m_parentQuery->hostName();
+
+            qDebug() << "Agregando" << m_currentNeighbor << s.network;
+
+            m_lstNetworks.append(s);
+            m_lstNeighborNetworks.append(s);
+            continue;
+        }
+        m_mapNeighborLstNetworks.insert( m_currentNeighbor, m_lstNeighborNetworks );
+    }
+
+    term->disconnectReceiveTextSignalConnections();
     if ( m_neighborIPs.isEmpty() && m_neighborIPsVRFs.isEmpty() )
         finished();
     else

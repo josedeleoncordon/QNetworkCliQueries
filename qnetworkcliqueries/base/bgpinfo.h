@@ -24,6 +24,7 @@ struct SBGPNetwork : InfoBase
     QString from;
     QString path;
     QString as;
+    QString vrf;
 
     QStringList communityList;
 
@@ -59,7 +60,7 @@ protected:
     QMap<QString,QList<SBGPNetwork>> m_mapNeighborLstNetworks;
 
     int m_neighborsPos;
-    QString m_currentNeighbor;    
+    QString m_currentNeighbor;
     SBGPNetwork* m_currentNetwork;
 
     void networksNextNeighbor();
@@ -93,6 +94,7 @@ public:
 private slots:
     void on_term_receiveText_BGPNeighbors();
     void on_term_receiveText_networks();
+    void on_term_receiveText_networksv6();
     void on_term_receiveText_networksAttr();
     void on_term_receiveText_networksAttrVRPCommunityList();
 

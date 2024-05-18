@@ -1006,6 +1006,8 @@ TB_Pais_anillos_cantidad:
     cantidad:
       type: integer
       unsigned: true
+    cantidad_buses:
+      type: integer
 
 ken_consulta_detalle:
   columns:
@@ -1037,4 +1039,19 @@ ken_consulta_detalle:
       owningSide: true
       onDelete: NO ACTION
       onUpdate: NO ACTION
+
+TB_Pais_anillos_detalle:
+  columns:
+    id:
+      type: bigint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    fecha:
+      type: date
+    pais:
+      type: string(45)
+    anillotxt:
+      type: string(10000)
 

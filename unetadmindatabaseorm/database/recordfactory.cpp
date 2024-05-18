@@ -2,6 +2,7 @@
 
 #include "record/tb_addressing_consultarecord.h"
 #include "record/tb_pais_anillos_cantidadrecord.h"
+#include "record/tb_pais_anillos_detallerecord.h"
 #include "record/a9k_bgp_inter_asrecord.h"
 #include "record/a9k_bgp_sesiones_sin_lp200record.h"
 #include "record/a9k_bgp_sesiones_weightrecord.h"
@@ -48,6 +49,8 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new TB_Addressing_consultaRecord;
 	if ( table == "TB_Pais_anillos_cantidad" )
 		return new TB_Pais_anillos_cantidadRecord;
+	if ( table == "TB_Pais_anillos_detalle" )
+		return new TB_Pais_anillos_detalleRecord;
 	if ( table == "a9k_bgp_inter_as" )
 		return new a9k_bgp_inter_asRecord;
 	if ( table == "a9k_bgp_sesiones_sin_lp200" )
