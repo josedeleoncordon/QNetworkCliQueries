@@ -908,6 +908,7 @@ QString estandarizarInterfaz(QString interfaz)
     interfaz.replace("BDI","BD");
     interfaz.replace("Po0/0/","Po");
     interfaz.replace("GE","Gi",Qt::CaseSensitive);
+    interfaz.replace("gigaethernet","Gi");
     interfaz.replace(QRegExp("\\(\\w+\\)"),"");
 
     return interfaz;

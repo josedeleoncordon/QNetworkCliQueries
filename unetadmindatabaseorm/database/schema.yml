@@ -1008,6 +1008,12 @@ TB_Pais_anillos_cantidad:
       unsigned: true
     cantidad_buses:
       type: integer
+    cantidad_equipos:
+      type: integer
+    cantidad_en_anillos:
+      type: integer
+    cantidad_en_buses:
+      type: integer
 
 ken_consulta_detalle:
   columns:
@@ -1040,7 +1046,7 @@ ken_consulta_detalle:
       onDelete: NO ACTION
       onUpdate: NO ACTION
 
-TB_Pais_anillos_detalle:
+TB_Pais_anillo_bus_detalle:
   columns:
     id:
       type: bigint
@@ -1048,10 +1054,65 @@ TB_Pais_anillos_detalle:
       primary: true
       notnull: true
       autoincrement: true
-    fecha:
-      type: date
     pais:
       type: string(45)
-    anillotxt:
+    fecha:
+      type: date
+    tipo:
+      type: string(45)
+    txt:
       type: string(10000)
+    con_reporte:
+      type: boolean
+    ip:
+      type: string(255)
+    hostname:
+      type: string(255)
+    local_port:
+      type: string(255)
+    local_port_description:
+      type: string(500)
+    remote_host:
+      type: string(255)
+    remote_port:
+      type: string(255)
+
+TB_Audit_Report:
+  columns:
+    id:
+      type: bigint
+      unsigned: true
+      primary: true
+      notnull: true
+      autoincrement: true
+    Date:
+      type: date
+      notnull: true
+    Hostname:
+      type: string(50)
+      notnull: true
+    Country:
+      type: string(500)
+      notnull: true
+    Category:
+      type: string(500)
+      notnull: true
+    Network_Severity:
+      type: string(500)
+      notnull: true
+    Config_Severity:
+      type: string(500)
+      notnull: true
+    Description:
+      type: string(500)
+      notnull: true
+    Parameter:
+      type: string(500)
+      notnull: true
+    Status:
+      type: string(100)
+      notnull: true
+    Detail:
+      type: string(500)
+      notnull: true
 

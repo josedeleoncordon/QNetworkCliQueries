@@ -19,12 +19,18 @@ public:
 
 	void set_cantidad(unsigned int cantidad);
 	void set_cantidad_buses(int cantidad_buses);
+	void set_cantidad_en_anillos(int cantidad_en_anillos);
+	void set_cantidad_en_buses(int cantidad_en_buses);
+	void set_cantidad_equipos(int cantidad_equipos);
 	void set_fecha(QDate fecha);
 	void set_id(unsigned long long id);
 	void set_pais(QString pais);
 
 	unsigned int cantidad();
 	int cantidad_buses();
+	int cantidad_en_anillos();
+	int cantidad_en_buses();
+	int cantidad_equipos();
 	QDate fecha();
 	unsigned long long id();
 	QString pais();

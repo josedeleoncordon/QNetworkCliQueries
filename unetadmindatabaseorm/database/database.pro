@@ -11,7 +11,7 @@ INCLUDEPATH *= /usr/include/qant3
 HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/a9k_bgp_sesiones_sin_lp200record.h \
 		$$PWD/record/a9k_bgp_sesiones_weightrecord.h \
-                $$PWD/record/a9k_energiarecord.h \
+		$$PWD/record/a9k_energiarecord.h \
 		$$PWD/record/a9k_equiporecord.h \
 		$$PWD/record/a9k_internet_redistribucion_estaticas_conectadasrecord.h \
 		$$PWD/record/a9k_memoriarecord.h \
@@ -45,8 +45,9 @@ HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/red_paisrecord.h \
 		$$PWD/record/red_sectorrecord.h \
 		$$PWD/record/tb_addressing_consultarecord.h \
+		$$PWD/record/tb_audit_reportrecord.h \
+		$$PWD/record/tb_pais_anillo_bus_detallerecord.h \
 		$$PWD/record/tb_pais_anillos_cantidadrecord.h \
-		$$PWD/record/tb_pais_anillos_detallerecord.h \
 		$$PWD/qant3_global.h \
 		$$PWD/recordfactory.h
 
@@ -87,8 +88,9 @@ SOURCES += $$PWD/record/a9k_bgp_inter_asrecord.cpp \
 		$$PWD/record/red_paisrecord.cpp \
 		$$PWD/record/red_sectorrecord.cpp \
 		$$PWD/record/tb_addressing_consultarecord.cpp \
+		$$PWD/record/tb_audit_reportrecord.cpp \
+		$$PWD/record/tb_pais_anillo_bus_detallerecord.cpp \
 		$$PWD/record/tb_pais_anillos_cantidadrecord.cpp \
-		$$PWD/record/tb_pais_anillos_detallerecord.cpp \
 		$$PWD/recordfactory.cpp
 
 RESOURCES += schema.qrc
