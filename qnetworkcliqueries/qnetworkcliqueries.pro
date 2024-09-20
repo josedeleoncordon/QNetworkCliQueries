@@ -19,6 +19,7 @@ HEADERS += \
     base/mplsl2transport.h \
     base/mplstetunnelsinfo.h \
     base/portchannelsinfo.h \
+    base/rplinfo.h \
     base/vrfinfo.h \
     base/arpinfo.h \
     base/bgpinfo.h \
@@ -59,6 +60,7 @@ SOURCES += \
     base/mplsl2transport.cpp \
     base/mplstetunnelsinfo.cpp \
     base/portchannelsinfo.cpp \
+    base/rplinfo.cpp \
     base/vrfinfo.cpp \
     base/arpinfo.cpp \
     base/bgpinfo.cpp \

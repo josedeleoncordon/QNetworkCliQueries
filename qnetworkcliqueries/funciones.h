@@ -217,5 +217,4 @@ QString numberExp10Anumber(QString);
 //no para /32 o /128 explicitas
 bool prefixSetAllowsRange32_128(QString &pfxtxt);
 
-
 #endif // FUNCIONES_H

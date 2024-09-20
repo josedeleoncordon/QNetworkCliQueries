@@ -73,8 +73,9 @@ void Queries::iniciar()
     bgpNetworksBGPAttrQuery = nullptr;
     ipRoutesQuery = nullptr;
     configQuery = nullptr;
-    exitQuery = nullptr;
     funcionQuery = nullptr;
+    rplRoutesQuery = nullptr;
+    exitQuery = nullptr;
 
     m_connectionprotol = QRemoteShell::SSH;
     m_opcionActual = QueryOpcion::Null;
@@ -292,6 +293,12 @@ void Queries::clone(const Queries& other)
             if ( !funcionQuery ) funcionQuery=ff;
             break;
         }
+        case (QueryOpcion::RplRoutes): {
+            RplInfo *ff = new RplInfo(*dynamic_cast<RplInfo*>(f)) ;
+            m_lstFunciones.insert(m_queryname,ff );
+            if ( !rplRoutesQuery ) rplRoutesQuery=ff;
+            break;
+        }
         default: {}
         }
     }
@@ -333,6 +340,7 @@ FuncionBase *Queries::createQuerie(int option)
     case (QueryOpcion::Configuration): { return factoryNewConfig(m_brand,m_equipmenttype,term,QueryOpcion::Configuration); }
     case (QueryOpcion::Mplsl2Transport): { return factoryNewMplsL2TransportInfo(m_brand,m_equipmenttype,term,QueryOpcion::Mplsl2Transport); }
     case (QueryOpcion::Funcion): { return factoryNewFuncionInfo(m_brand,m_equipmenttype,term,QueryOpcion::Funcion); }
+    case (QueryOpcion::RplRoutes): { return factoryNewRplInfo(m_brand,m_equipmenttype,term,QueryOpcion::RplRoutes); }
     case (QueryOpcion::Exit): { return factoryNewExit(m_brand,m_equipmenttype,term,QueryOpcion::Exit); }
     default: { return nullptr; }
     }
@@ -727,6 +735,13 @@ QList<SIpRouteInfo>& Queries::ipRoutesInfo(int i)
     FuncionBase *f = getQuery(IpRoutes,i);
     if ( !f ) return _lstSIpRouteInfo;
     return dynamic_cast<IPRouteInfo*>(f)->ipRouteInfo();
+}
+
+QList<SRplRouteInfo>& Queries::rplRoutesInfo(int i)
+{
+    FuncionBase *f = getQuery(RplRoutes,i);
+    if ( !f ) return _lstRplRoutesInfo;
+    return dynamic_cast<RplInfo*>(f)->rplRouteInfo();
 }
 
 QString Queries::funcionTxtInfo(int i)
@@ -1332,6 +1347,24 @@ void Queries::nextProcess()
         f->getTXT();
         return;
     }
+    else if ( m_opcionActual == RplRoutes )
+    {
+        RplInfo *f = dynamic_cast<RplInfo*>(m_currentFuncion);
+        if (!rplRoutesQuery || reemplazarFuncionPrimerPuntero) rplRoutesQuery=f;
+        f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setModel(m_model);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getRplRouteInfo();
+        return;
+    }
     else if ( m_opcionActual == Exit )
     {
         queryTimer->setInterval( 3000 );
@@ -1842,6 +1875,13 @@ void Queries::updateInfoQueries(QList<Queries> &lstDest, QList<Queries> &lstOrig
                     else
                         dest.funcionQuery = origin.funcionQuery;
                 }
+                if ( origin.rplRoutesQuery )
+                {
+                    if ( dest.rplRoutesQuery )
+                        dest.rplRoutesInfo() = origin.rplRoutesInfo();
+                    else
+                        dest.rplRoutesQuery = origin.rplRoutesQuery;
+                }
 
                 encontrado=true;
                 break;
@@ -2045,6 +2085,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     }
     else
         out << false;
+    if ( query.rplRoutesQuery )
+    {
+        out << true;
+        out << query.rplRoutesQuery;
+    }
+    else
+        out << false;
 
     return out;
 }
@@ -2205,6 +2252,12 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries& quer
         in >> query.funcionQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
     }
+    in >> a;
+    if ( a )
+    {
+        in >> query.rplRoutesQuery;
+        query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
+    }
 
     qCDebug(queries) << query.m_ip << "abrir: queries.m_lstFunciones size " << query.m_lstFunciones.size();
 
@@ -2313,6 +2366,9 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
 
     if ( info.funcionQuery )
         dbg.space() << "Funcion" << *info.funcionQuery;
+
+    if ( info.rplRoutesQuery )
+        dbg.space() << "RPL Route" << *info.rplRoutesQuery;
 
     dbg.nospace() << "--\n\n";
 

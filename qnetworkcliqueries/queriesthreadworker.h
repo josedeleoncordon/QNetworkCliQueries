@@ -9,7 +9,8 @@ class QueriesThreadWorker : public QObject
     Q_OBJECT
 public:
     explicit QueriesThreadWorker();
-    void setQueries(Queries *query) { qry=query; }   
+    void setQueries(Queries *query) { qry=query; }
+    void setUUID(QString uuid) { _uuid = uuid; }
 
 public slots:
     virtual void start();
@@ -19,6 +20,7 @@ signals:
 
 protected:
     Queries *qry;
+    QString _uuid;
 
 };
 

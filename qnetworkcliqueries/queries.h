@@ -18,6 +18,7 @@
 #include "config.h"
 #include "exitinfo.h"
 #include "funcioninfo.h"
+#include "rplinfo.h"
 
 #include <QFile>
 
@@ -65,6 +66,7 @@ public:
     IPRouteInfo *ipRoutesQuery;
     Config *configQuery;
     FuncionInfo *funcionQuery;
+    RplInfo *rplRoutesQuery;
     ExitInfo *exitQuery;
 
     bool isConnected() { return m_connected; }
@@ -125,6 +127,7 @@ public:
     QMap<QString,QList<SBGPNetwork>>& bgpMapNetworksInfo(int i=0);
     QList<SBGPNetwork>& bgpNetworksBGPAttrInfo(int i=0);
     QList<SIpRouteInfo>& ipRoutesInfo(int i=0);
+    QList<SRplRouteInfo>& rplRoutesInfo(int i=0);
     QString funcionTxtInfo(int i=0);
     QString funcionTxtInfo(QString name);
     QStringList funcionLstTxtInfo(int i=0);
@@ -259,6 +262,7 @@ protected:
     QMap<QString,QList<SBGPNetwork>> _mapNetworksInfo;
     QList<SBGPNetwork> _lstSBGPNetworkBGPAttr;
     QList<SIpRouteInfo> _lstSIpRouteInfo;
+    QList<SRplRouteInfo> _lstRplRoutesInfo;
 
     void iniciar();
     FuncionBase* createQuerie(int option);

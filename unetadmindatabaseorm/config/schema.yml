@@ -1116,3 +1116,71 @@ TB_Audit_Report:
       type: string(500)
       notnull: true
 
+bgp_sesiones_clientes_sin_prefix_filtro:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    pais:
+      type: string(45)
+      notnull: true
+    pe_ip:
+      type: string(45)
+      notnull: true
+    pe_nombre:
+      type: string(100)
+      notnull: true
+    neighbor:
+      type: string(45)
+      notnull: true
+    routepolicy:
+      type: string(100)
+    detalle:
+      type: string(500)
+      notnull: true
+
+bgp_serv_prin_bck_comunidades_faltantes:
+  columns:
+    date:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    pais:
+      type: string(45)
+      notnull: true
+    pe_ip:
+      type: string(45)
+      notnull: true
+    pe_nombre:
+      type: string(100)
+      notnull: true
+    vrf:
+      type: string(45)
+      notnull: true
+    neighbor_nexthop:
+      type: string(45)
+      notnull: true
+    red:
+      type: string(45)
+      notnull: true
+    activo:
+      type: tinyint
+      notnull: true
+    routepolicy:
+      type: string(100)
+      notnull: true
+    comunidades_faltantes:
+      type: string(750)
+      notnull: true
+

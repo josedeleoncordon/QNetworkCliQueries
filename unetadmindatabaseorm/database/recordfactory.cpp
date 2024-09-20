@@ -18,6 +18,8 @@
 #include "record/a9k_slotsrecord.h"
 #include "record/a9k_vrf_sin_label_pervrfrecord.h"
 #include "record/arearecord.h"
+#include "record/bgp_serv_prin_bck_comunidades_faltantesrecord.h"
+#include "record/bgp_sesiones_clientes_sin_prefix_filtrorecord.h"
 #include "record/enlacerecord.h"
 #include "record/equiporecord.h"
 #include "record/gruporecord.h"
@@ -82,6 +84,10 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new a9k_vrf_sin_label_pervrfRecord;
 	if ( table == "area" )
 		return new areaRecord;
+	if ( table == "bgp_serv_prin_bck_comunidades_faltantes" )
+		return new bgp_serv_prin_bck_comunidades_faltantesRecord;
+	if ( table == "bgp_sesiones_clientes_sin_prefix_filtro" )
+		return new bgp_sesiones_clientes_sin_prefix_filtroRecord;
 	if ( table == "enlace" )
 		return new enlaceRecord;
 	if ( table == "equipo" )

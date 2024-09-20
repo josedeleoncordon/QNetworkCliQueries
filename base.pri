@@ -1,7 +1,7 @@
 #PHPINSTALL = REMI
 #PHPINSTALL = SERVER
 
-#CONFIG+=release
+#CONFIG+=debug_and_release
 
 CONFIG(release, debug|release) {
 APP_BUILD_TREE = $$PWD/build/release

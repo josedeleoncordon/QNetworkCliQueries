@@ -17,6 +17,7 @@
 #include "config.h"
 #include "funcioninfo.h"
 #include "exitinfo.h"
+#include "rplinfo.h"
 
 ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, int option);
 BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, int option);
@@ -35,6 +36,7 @@ PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QR
 VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, int option);
 Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, int option);
 FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, int option);
+RplInfo *factoryNewRplInfo(QString brandName, QString type, QRemoteShell *term, int option);
 ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, int option);
 
 #endif // MACINFOFACTORY_H

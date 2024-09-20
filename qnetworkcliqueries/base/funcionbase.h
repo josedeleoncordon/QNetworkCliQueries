@@ -59,6 +59,7 @@ enum QueryOpcion {
     Funcion,
     BGPNetworks,
     BGPNetworksBGPAttr,
+    RplRoutes,
     Exit
 };
 

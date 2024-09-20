@@ -374,6 +374,7 @@ void QueriesThread::siguienteEquipo(QString IP, bool gw)
     QThread *thr = new QThread;
     QueriesThreadWorker *worker = (*ThreadWorker)();
     worker->setQueries(query);
+    worker->setUUID(m_uuid);
 
     worker->moveToThread( thr );
     query->moveToThread( thr );

@@ -121,6 +121,11 @@ FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell
     return new FuncionInfo(term,option);
 }
 
+RplInfo *factoryNewRplInfo(QString brandName, QString type, QRemoteShell *term, int option)
+{
+    return new RplInfo(term,option);
+}
+
 ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, int option)
 {
     return new ExitInfo(term,option);

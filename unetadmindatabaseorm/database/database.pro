@@ -22,6 +22,8 @@ HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/a9k_slotsrecord.h \
 		$$PWD/record/a9k_vrf_sin_label_pervrfrecord.h \
 		$$PWD/record/arearecord.h \
+		$$PWD/record/bgp_serv_prin_bck_comunidades_faltantesrecord.h \
+		$$PWD/record/bgp_sesiones_clientes_sin_prefix_filtrorecord.h \
 		$$PWD/record/enlacerecord.h \
 		$$PWD/record/equiporecord.h \
 		$$PWD/record/grupo_equiporecord.h \
@@ -65,6 +67,8 @@ SOURCES += $$PWD/record/a9k_bgp_inter_asrecord.cpp \
 		$$PWD/record/a9k_slotsrecord.cpp \
 		$$PWD/record/a9k_vrf_sin_label_pervrfrecord.cpp \
 		$$PWD/record/arearecord.cpp \
+		$$PWD/record/bgp_serv_prin_bck_comunidades_faltantesrecord.cpp \
+		$$PWD/record/bgp_sesiones_clientes_sin_prefix_filtrorecord.cpp \
 		$$PWD/record/enlacerecord.cpp \
 		$$PWD/record/equiporecord.cpp \
 		$$PWD/record/grupo_equiporecord.cpp \

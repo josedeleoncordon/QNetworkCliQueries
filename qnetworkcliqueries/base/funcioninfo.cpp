@@ -31,6 +31,8 @@ void FuncionInfo::getTXT()
     if ( _lstFunciones.isEmpty() )
         _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,m_os,m_conexionID );
 
+    qDebug() << m_ip << "FuncionInfo::getTXT()" << _lstFunciones;
+
     _siguienteFuncion();
 }
 

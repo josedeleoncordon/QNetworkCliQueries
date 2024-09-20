@@ -1,6 +1,8 @@
 #include "platforminfo.h"
 #include "properties.h"
 
+#include "funciones.h"
+
 PlatformInfo::PlatformInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
@@ -71,7 +73,7 @@ void PlatformInfo::on_term_receiveText()
             QStringList data = line.split(" ",QString::SkipEmptyParts);
             m_platform = data.at(1).simplified();
 
-            qDebug() << Q_FUNC_INFO << m_platform;
+            qDebug() << m_ip << Q_FUNC_INFO << m_platform;
 
             break;
         }
@@ -112,7 +114,6 @@ void PlatformInfo::on_term_receiveText()
             if ( line.contains(exp) )
             {
                 m_platform = exp.cap( 2 );
-                qDebug() << Q_FUNC_INFO << m_platform;
                 break;
             }
         }
@@ -127,6 +128,7 @@ void PlatformInfo::on_term_receiveText()
     }
     else
     {
+        qDebug() << m_ip << Q_FUNC_INFO << m_platform << equipmentOSFromPlatform( m_platform );
         if ( m_brand == "Cisco" )
         {
             term->disconnectReceiveTextSignalConnections();
@@ -135,7 +137,7 @@ void PlatformInfo::on_term_receiveText()
         }
         else
         {
-            qDebug() << "CLI SNMP Location no soportado" << m_brand;
+            qDebug() << m_ip << "CLI SNMP Location no soportado" << m_brand;
             finished();
         }
     }

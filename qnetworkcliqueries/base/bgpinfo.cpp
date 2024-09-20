@@ -11,6 +11,8 @@ SBGPNetwork::SBGPNetwork(const SBGPNetwork &other)
     from = other.from;
     path = other.path;
     communityList = other.communityList;
+    originator = other.originator;
+    best = other.best;
     //infobase
     datetime = other.datetime;
     operativo = other.operativo;
@@ -28,6 +30,8 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNe
     out << data.from;
     out << data.path;
     out << data.communityList;
+    out << data.originator;
+    out << data.best;
     //infobase
     out << data.datetime;
     out << data.operativo;
@@ -46,6 +50,8 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNetwork& 
     in >> data.from;
     in >> data.path;
     in >> data.communityList;
+    in >> data.originator;
+    in >> data.best;
     //infobase
     in >> data.datetime;
     in >> data.operativo;
@@ -62,7 +68,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNe
     out << data.upDownTime;
     out << data.prfxRcd;
     out << data.vrf;
-    out << data.addressfamily;
+    out << data.addressfamily;                   
     //infobase
     out << data.datetime;
     out << data.operativo;
@@ -120,6 +126,8 @@ QNETWORKCLIQUERIES_EXPORT const QDBusArgument& operator>>(const QDBusArgument& a
     argument >> data.operativo;
     argument >> data.equipo;
     argument >> data.as;
+    argument >> data.originator;
+    argument >> data.best;
     argument.endStructure();
     return argument;
 }
@@ -129,13 +137,12 @@ QNETWORKCLIQUERIES_EXPORT const QDBusArgument& operator>>(const QDBusArgument& a
 BGPInfo::BGPInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
-    m_currentNetwork=nullptr;
+    m_BGPNetworkAttAddOnlyBest=true;
 }
 
 BGPInfo::BGPInfo(const BGPInfo &other):
     FuncionBase(other.term,other.m_queryoption)
 {
-    m_currentNetwork=nullptr;
     m_brand = other.m_brand;
     m_platform = other.m_platform;
     m_name = other.m_name;
@@ -143,7 +150,8 @@ BGPInfo::BGPInfo(const BGPInfo &other):
     m_lstNeigbors= other.m_lstNeigbors;
     m_lstNetworks = other.m_lstNetworks;
     m_mapNeighborLstNetworks = other.m_mapNeighborLstNetworks;
-    m_type = other.m_type;    
+    m_type = other.m_type;
+    m_BGPNetworkAttAddOnlyBest = other.m_BGPNetworkAttAddOnlyBest;
 }
 
 BGPInfo::~BGPInfo()
@@ -566,6 +574,8 @@ void BGPInfo::getNetworksBGPAttr()
 {
     m_networks = m_queriesConfiguration.values("BGPNetworksBGPInfo_Network",m_ip,m_os,m_conexionID);
     m_vrf = m_queriesConfiguration.value("BGPNetworksBGPInfo_VRF",m_ip,m_os,m_conexionID);
+    QString bestall = m_queriesConfiguration.value("BGPNetworksBGPInfo_BestOrALL",m_ip,m_os,m_conexionID);
+    if ( bestall == "All" ) m_BGPNetworkAttAddOnlyBest = false;
 
     qDebug() << "\n BGP getNetworksBGPInfo";
     qDebug() << m_vrf << m_networks;
@@ -589,19 +599,15 @@ void BGPInfo::bgpNextNetwork()
 
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_networksAttr()));
 
-    SBGPNetwork network;
-    network.network = m_networks.takeFirst();
-    QString redhuawei = network.network;
+    m_currentNetworkTxt = m_networks.takeFirst();
+    QString redhuawei = m_currentNetworkTxt;
     redhuawei.replace("/"," ");
-
-    m_lstNetworks.append( network );
-    m_currentNetwork = &m_lstNetworks.last();
 
     if ( m_os == "IOS XR" )
     {
         termSendText("sh bgp "+
                      (!m_vrf.isEmpty()?" vrf "+m_vrf+" ":" ")+
-                     m_currentNetwork->network);
+                     m_currentNetworkTxt);
     }
     else if ( m_os == "VRP" )
     {
@@ -629,7 +635,9 @@ void BGPInfo::on_term_receiveText_networksAttr()
     QString lastNH;
     QString lastASN;
     QString lastFrom;
-    bool best = false;
+    QString lastLP;
+    QString lastOriginator;
+    bool lastBest = false;
     QStringList lastLstCommunities;
     for (QString line : lines)
     {
@@ -650,10 +658,13 @@ void BGPInfo::on_term_receiveText_networksAttr()
             exp.setPattern("^  \\d+");
             if ( line.contains(exp) )
             {
+                if ( line.contains("received-only") )
+                    continue;
+
                 lastNH.clear();
                 lastASN.clear();
                 lastFrom.clear();
-                best=false;
+                lastBest=false;
                 lastLstCommunities.clear();
 
                 line = line.simplified();
@@ -673,13 +684,16 @@ void BGPInfo::on_term_receiveText_networksAttr()
                 lastNH.clear();
                 lastASN.clear();
                 lastFrom.clear();
-                best=false;
+                lastBest=false;
                 lastLstCommunities.clear();
 
                 lastASN = "52468";
 //                qDebug() << "lastASN" << lastASN;
                 continue;
             }
+
+            if ( lastASN.isEmpty() )
+                continue;
 
             //Peer IP y From
             exp.setPattern("^    (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).+from (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) .+");
@@ -692,11 +706,16 @@ void BGPInfo::on_term_receiveText_networksAttr()
                 continue;
             }
 
-            //best
-            if ( line.contains(", best,") )
+            //lp y best
+            exp.setPattern("localpref (\\d+),");
+            if ( line.contains(exp) )
             {
-//                qDebug() << "---- BEST";
-                best=true;
+                lastLP=exp.cap(1);
+                if ( line.contains(", best,") )
+                {
+                    //qDebug() << "---- BEST";
+                    lastBest=true;
+                }
                 continue;
             }
 
@@ -705,20 +724,47 @@ void BGPInfo::on_term_receiveText_networksAttr()
             if ( line.contains(exp) )
             {
                 line.replace("Community:","");
-                lastLstCommunities=line.split(" ",QString::SkipEmptyParts);
+                lastLstCommunities=line.simplified().split(" ",QString::SkipEmptyParts);
+                continue;
+            }
 
-                if ( best )
+            //Originator
+            exp.setPattern("Originator: (\\S+)\\,");
+            if ( line.contains(exp) )
+            {
+                lastOriginator=exp.cap(1);
+                continue;
+            }
+
+            exp.setPattern("Path \\#\\d+:");
+            if ( line.contains(exp) )
+            {
+                if ( (!m_BGPNetworkAttAddOnlyBest) || (m_BGPNetworkAttAddOnlyBest && lastBest) )
                 {
-                    m_currentNetwork->neighborip = lastNH;
-                    m_currentNetwork->as = lastASN;
-                    m_currentNetwork->from = lastFrom;
-                    m_currentNetwork->communityList = lastLstCommunities;
+                    SBGPNetwork network;
+                    network.equipo = m_parentQuery->ip();
+                    network.vrf = m_vrf;
+                    network.network = m_currentNetworkTxt;
+                    network.neighborip = lastNH;
+                    network.as = lastASN;
+                    network.from = lastFrom;
+                    network.communityList = lastLstCommunities;
+                    network.best = lastBest;
+                    network.lp = lastLP;
+                    network.originator = lastOriginator;
+
+                    m_lstNetworks.append( network );
+
+                    if ( m_BGPNetworkAttAddOnlyBest && lastBest )
+                        break;
                 }
 
                 lastNH.clear();
                 lastASN.clear();
                 lastFrom.clear();
-                best=false;
+                lastLP.clear();
+                lastOriginator.clear();
+                lastBest=false;
                 lastLstCommunities.clear();
             }
         }
@@ -756,7 +802,7 @@ void BGPInfo::on_term_receiveText_networksAttr()
                 continue;
             }
 
-            //AS y best
+            //AS, LP y best
             exp.setPattern("^AS-path ((\\w| )+),");
             if ( line.contains(exp) )
             {
@@ -776,29 +822,66 @@ void BGPInfo::on_term_receiveText_networksAttr()
 //                    qDebug() << "lastASN" << lastASN;
                 }
 
+                //TODO agregar LP
+
                 if ( line.contains(" best,") )
+                    lastBest=true;
+
+                if ( (!m_BGPNetworkAttAddOnlyBest) || (m_BGPNetworkAttAddOnlyBest && lastBest) )
                 {
-//                    qDebug() << "---- BEST";
+                    SBGPNetwork network;
+                    network.network = m_currentNetworkTxt;
+                    network.neighborip = lastNH;
+                    network.as = lastASN;
+                    network.from = lastFrom;
+                    network.best = lastBest;
+                    m_lstNetworks.append( network );
 
-                    m_currentNetwork->neighborip = lastNH;
-                    m_currentNetwork->as = lastASN;
-                    m_currentNetwork->from = lastFrom;
-
-                    lastNH.clear();
-                    lastASN.clear();
-                    lastFrom.clear();
+                    if ( m_BGPNetworkAttAddOnlyBest && lastBest )
+                        break;
                 }
 
-                break;
+                lastNH.clear();
+                lastASN.clear();
+                lastFrom.clear();
+                lastBest=false;
             }
+        }                
+    }
+    if ( !lastNH.isEmpty() && !lastLstCommunities.isEmpty() )
+    {
+        //ultimo path que no se guardo ya que no hubo un Path #\\d para guardarlo
+        if ( (!m_BGPNetworkAttAddOnlyBest) || (m_BGPNetworkAttAddOnlyBest && lastBest) )
+        {
+            SBGPNetwork network;
+            network.equipo = m_parentQuery->ip();
+            network.vrf = m_vrf;
+            network.network = m_currentNetworkTxt;
+            network.neighborip = lastNH;
+            network.as = lastASN;
+            network.from = lastFrom;
+            network.communityList = lastLstCommunities;
+            network.best = lastBest;
+            network.lp = lastLP;
+            network.originator = lastOriginator;
+
+            m_lstNetworks.append( network );
         }
+
+        lastNH.clear();
+        lastASN.clear();
+        lastFrom.clear();
+        lastLP.clear();
+        lastOriginator.clear();
+        lastBest=false;
+        lastLstCommunities.clear();
     }
 
     if ( m_os == "IOS XR" )
         bgpNextNetwork();
     else if ( m_os == "VRP" )
     {
-        QString redhuawei = m_currentNetwork->network;
+        QString redhuawei = m_currentNetworkTxt;
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_networksAttrVRPCommunityList()));
         termSendText("display bgp "+
                      (!m_vrf.isEmpty()?" vpnv4 vpn-instance "+m_vrf:" ")+
@@ -817,8 +900,6 @@ void BGPInfo::on_term_receiveText_networksAttrVRPCommunityList()
     term->disconnectReceiveTextSignalConnections();
 
     QStringList lines = txt.split("\n");
-
-    qDebug() << "---- on_term_receiveText_networksAttrVRPCommunityList. m_currentNetwork->from" << m_currentNetwork->from;
 
     QString lastfrom;
     for (QString line : lines)
@@ -839,18 +920,17 @@ void BGPInfo::on_term_receiveText_networksAttrVRPCommunityList()
         exp.setPattern("Community: (.+)$");
         if ( line.contains( exp ) )
         {
-            qDebug() << "---- Community: comparacion from" << lastfrom << m_currentNetwork->from;
-
-            if ( lastfrom == m_currentNetwork->from )
-            {
-                QString comunidades = exp.cap(1);
-                comunidades.replace("<","");
-                comunidades.replace(">","");
-                comunidades.replace(",","");
-                m_currentNetwork->communityList = comunidades.split(" ",QString::SkipEmptyParts);
-                qDebug() << "---- Agregando comunidades";
-                break;
-            }
+            for ( SBGPNetwork &m_currentNetwork : m_lstNetworks )
+                if ( lastfrom == m_currentNetwork.from )
+                {
+                    QString comunidades = exp.cap(1);
+                    comunidades.replace("<","");
+                    comunidades.replace(">","");
+                    comunidades.replace(",","");
+                    m_currentNetwork.communityList = comunidades.split(" ",QString::SkipEmptyParts);
+                    qDebug() << "---- Agregando comunidades";
+                    break;
+                }
         }
     }
 
@@ -905,7 +985,7 @@ QDebug operator<<(QDebug dbg, const BGPInfo &info)
 
         for (SBGPNetwork i : info.m_lstNetworks)
             dbg.space() << i.neighborip << i.network << i.nexthop
-                        << i.from << i.path << i.communityList << i.datetime << "\n";
+                        << i.from << i.path << i.communityList << i.datetime << i.best << i.originator << "\n";
     }
 
     dbg.nospace() << "\n";

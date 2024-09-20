@@ -25,11 +25,19 @@ struct SBGPNetwork : InfoBase
     QString path;
     QString as;
     QString vrf;
+    QString lp;
+    QString originator;
+    bool best;
 
     QStringList communityList;
 
-    SBGPNetwork() {}
+    SBGPNetwork() { best=false; }
     SBGPNetwork(const SBGPNetwork &other);
+
+    bool operator<(const SBGPNetwork &other) const
+    {
+        return network < other.network;
+    }
 };
 
 QDataStream& operator<<(QDataStream& out, const SBGPNetwork &data);
@@ -53,6 +61,7 @@ protected:
     QString m_vrf_currentVRF;
     QString m_neighbor_int_out;
     QString m_community;
+    bool m_BGPNetworkAttAddOnlyBest;
     QList<SBGPNeighbor> m_lstNeigbors;
     QString m_vrf;
     QStringList m_vrfs;
@@ -61,7 +70,8 @@ protected:
 
     int m_neighborsPos;
     QString m_currentNeighbor;
-    SBGPNetwork* m_currentNetwork;
+    QString m_currentNetworkTxt;
+    // SBGPNetwork* m_currentNetwork;
 
     void networksNextNeighbor();
     void bgpNextNetwork();
