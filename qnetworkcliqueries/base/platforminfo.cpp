@@ -34,6 +34,12 @@ void PlatformInfo::getPlatformInfo()
     }
     else if ( m_brand == "Huawei" )
         termSendText("display version");
+    else if ( m_brand == "MikroTik" )
+    {
+        m_platform="MikroTik";
+        term->disconnectReceiveTextSignalConnections();
+        finished();
+    }
     else
     {
         qDebug() << "PlatformInfo::getPlatformInfo()" << m_brand << "no soportado";
@@ -128,7 +134,7 @@ void PlatformInfo::on_term_receiveText()
     }
     else
     {
-        qDebug() << m_ip << Q_FUNC_INFO << m_platform << equipmentOSFromPlatform( m_platform );
+        qDebug() << m_ip << Q_FUNC_INFO << m_platform << equipmentOSFromPlatform( m_platform ) << m_os;
         if ( m_brand == "Cisco" )
         {
             term->disconnectReceiveTextSignalConnections();

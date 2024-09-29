@@ -35,6 +35,7 @@ class QNETWORKCLIQUERIES_EXPORT Queries : public QObject
 
 public:
     explicit Queries(QString IP, QObject *parent = nullptr);
+    explicit Queries(QString IP, QString user, QString pwd, QObject *parent = nullptr);
     explicit Queries(QString IP, QString user, QString pwd, QString linuxprompt, QObject *parent = nullptr);
     explicit Queries();
     Queries(const Queries &other);
@@ -67,11 +68,13 @@ public:
     Config *configQuery;
     FuncionInfo *funcionQuery;
     RplInfo *rplRoutesQuery;
+    RplInfo *rplPrefixesQuery;
     ExitInfo *exitQuery;
 
     bool isConnected() { return m_connected; }
     bool successful() { return !m_error; }
     bool isReachable() { return m_ipreachable; }
+    QString errorTxt() { return _errortxt; }
     QString& id() { return m_id; }
     QString& hostName() { return m_name; }
     QString& country() { return m_country; }
@@ -123,11 +126,14 @@ public:
     QList<SVrfInfo>& vrfsInfo(int i=0);
     QList<SIpInfo>& arpsInfo(int i=0);
     QList<SBGPNeighbor>& bgpNeighborsInfo(int i=0);
+    QList<SBGPNeighbor>& bgpNeighborsInfo(QString name);
     QList<SBGPNetwork>& bgpNetworksInfo(int i=0);
     QMap<QString,QList<SBGPNetwork>>& bgpMapNetworksInfo(int i=0);
     QList<SBGPNetwork>& bgpNetworksBGPAttrInfo(int i=0);
     QList<SIpRouteInfo>& ipRoutesInfo(int i=0);
     QList<SRplRouteInfo>& rplRoutesInfo(int i=0);
+    QList<SRplPrefixInfo>& rplPrefixesInfo(int i=0);
+    QList<SRplPrefixInfo>& rplPrefixesInfo(QString name);
     QString funcionTxtInfo(int i=0);
     QString funcionTxtInfo(QString name);
     QStringList funcionLstTxtInfo(int i=0);
@@ -138,7 +144,7 @@ public:
     void updateDate() { m_datetime = QDateTime::currentDateTime(); }
     void setKeepAlive(bool enable);
     void setRemoteShell(QRemoteShell *remoteShell) { term = remoteShell; }
-    void setRemoteShellUsersPasswords(QStringList lst) { lstRemoteShellUsersPasswords=lst; }
+    void setRemoteShellUsersPasswords(QStringList lst) { lstRemoteShellUsersPasswords=lst; _userPwdusingList=true; }
     void setOptions( QList<int> lst );
     void setOperativo(bool OPERATIVO) { m_operativo = OPERATIVO; }
     void setCountry(QString COUNTRY) { m_country = COUNTRY; }
@@ -201,6 +207,7 @@ protected:
     bool m_error;
     bool m_ipreachable;
     bool m_contieneconsultas;
+    QString _errortxt;
 
     short int m_consultaIntentos;
     bool m_reintentandoConsulta;
@@ -223,6 +230,7 @@ protected:
     bool m_xr64;
     QRemoteShell::ConnectionProtocol m_connectionprotol;
     QStringList lstRemoteShellUsersPasswords;
+    bool _userPwdusingList;
     bool m_operativo;
     QString m_ip;
     QString m_conexionID; //ID de conexion, para que las funciones puedan ubicar los parapemtros en m_queriesConfiguration
@@ -263,6 +271,7 @@ protected:
     QList<SBGPNetwork> _lstSBGPNetworkBGPAttr;
     QList<SIpRouteInfo> _lstSIpRouteInfo;
     QList<SRplRouteInfo> _lstRplRoutesInfo;
+    QList<SRplPrefixInfo> _lstRplPrefixesInfo;
 
     void iniciar();
     FuncionBase* createQuerie(int option);

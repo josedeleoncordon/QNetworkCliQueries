@@ -18,6 +18,15 @@ Queries::Queries(QString IP, QObject *parent) : QObject(parent)
     m_linuxprompt = Properties::Instance()->linuxpromt;
 }
 
+Queries::Queries(QString IP, QString user, QString pwd, QObject *parent) : QObject(parent)
+{
+    iniciar();
+    m_ip=IP;
+    m_user=user;
+    m_pwd=pwd;
+    m_linuxprompt = Properties::Instance()->linuxpromt;
+}
+
 Queries::Queries(QString IP, QString user, QString pwd, QString linuxprompt, QObject *parent) : QObject(parent)
 {    
     iniciar();
@@ -75,6 +84,7 @@ void Queries::iniciar()
     configQuery = nullptr;
     funcionQuery = nullptr;
     rplRoutesQuery = nullptr;
+    rplPrefixesQuery = nullptr;
     exitQuery = nullptr;
 
     m_connectionprotol = QRemoteShell::SSH;
@@ -91,6 +101,7 @@ void Queries::iniciar()
     m_xr64=false;
     m_datetime = QDateTime::currentDateTime();
     _recorridoEnArbol = false;
+    _userPwdusingList=false;
 
     queryTimer = new QTimer(this);
     queryTimer->setInterval( 30000 );
@@ -299,6 +310,12 @@ void Queries::clone(const Queries& other)
             if ( !rplRoutesQuery ) rplRoutesQuery=ff;
             break;
         }
+        case (QueryOpcion::RplPrefixes): {
+            RplInfo *ff = new RplInfo(*dynamic_cast<RplInfo*>(f)) ;
+            m_lstFunciones.insert(m_queryname,ff );
+            if ( !rplPrefixesQuery ) rplPrefixesQuery=ff;
+            break;
+        }
         default: {}
         }
     }
@@ -341,6 +358,7 @@ FuncionBase *Queries::createQuerie(int option)
     case (QueryOpcion::Mplsl2Transport): { return factoryNewMplsL2TransportInfo(m_brand,m_equipmenttype,term,QueryOpcion::Mplsl2Transport); }
     case (QueryOpcion::Funcion): { return factoryNewFuncionInfo(m_brand,m_equipmenttype,term,QueryOpcion::Funcion); }
     case (QueryOpcion::RplRoutes): { return factoryNewRplInfo(m_brand,m_equipmenttype,term,QueryOpcion::RplRoutes); }
+    case (QueryOpcion::RplPrefixes): { return factoryNewRplInfo(m_brand,m_equipmenttype,term,QueryOpcion::RplPrefixes); }
     case (QueryOpcion::Exit): { return factoryNewExit(m_brand,m_equipmenttype,term,QueryOpcion::Exit); }
     default: { return nullptr; }
     }
@@ -501,10 +519,9 @@ void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString plat
     m_consultaIntentos++;
     term = new QRemoteShell(ip,user,pwd,platform,linuxprompt,this);
     term->setConnectionProtocol( m_connectionprotol );
-    term->setUsersPasswords( lstRemoteShellUsersPasswords );
-    term->setGW(m_gw);
-    term->setUser2( m_user2 );
-    term->setPassword2( m_pwd2 );
+    // term->setGW(m_gw);
+    // term->setUser2( m_user2 );
+    // term->setPassword2( m_pwd2 );
     connect(term,SIGNAL(reachable()),SLOT(processConnectToHostReachable()));
     connect(term,SIGNAL(connected()),SLOT(processConnectToHostConnected()));
     connect(term,SIGNAL(disconnected()),SLOT(processConnectToHostDisconnected()));
@@ -709,6 +726,13 @@ QList<SBGPNeighbor>& Queries::bgpNeighborsInfo(int i)
     return dynamic_cast<BGPInfo*>(f)->bgpNeighborInfo();
 }
 
+QList<SBGPNeighbor>& Queries::bgpNeighborsInfo(QString name)
+{
+    FuncionBase *f = getQuery(BGPNeig,name);
+    if ( !f ) return _lstSBGPNeighbor;
+    return dynamic_cast<BGPInfo*>(f)->bgpNeighborInfo();
+}
+
 QList<SBGPNetwork>& Queries::bgpNetworksInfo(int i)
 {
     FuncionBase *f = getQuery(BGPNetworks,i);
@@ -742,6 +766,20 @@ QList<SRplRouteInfo>& Queries::rplRoutesInfo(int i)
     FuncionBase *f = getQuery(RplRoutes,i);
     if ( !f ) return _lstRplRoutesInfo;
     return dynamic_cast<RplInfo*>(f)->rplRouteInfo();
+}
+
+QList<SRplPrefixInfo>& Queries::rplPrefixesInfo(int i)
+{
+    FuncionBase *f = getQuery(RplPrefixes,i);
+    if ( !f ) return _lstRplPrefixesInfo;
+    return dynamic_cast<RplInfo*>(f)->rplPrefixesInfo();
+}
+
+QList<SRplPrefixInfo>& Queries::rplPrefixesInfo(QString name)
+{
+    FuncionBase *f = getQuery(RplPrefixes,name);
+    if ( !f ) return _lstRplPrefixesInfo;
+    return dynamic_cast<RplInfo*>(f)->rplPrefixesInfo();
 }
 
 QString Queries::funcionTxtInfo(int i)
@@ -783,12 +821,14 @@ void Queries::nextProcess()
     {
         if ( m_lstOpciones.isEmpty() )
         {
-             qCDebug(queries) << m_ip  << "Finalizando, ya no hay mas opciones a ejectar";
+            //Cuando finaliza y no se uso la funcion de exit, por ejemplo con queristhread workers personalizados
+
+            qCDebug(queries) << m_ip  << "Finalizando, ya no hay mas opciones a ejectar";
 
             //no hay funciones a ejecutar, se finaliza
 
             //si hay informacion de OSPF se cambia la IP de la interfaz que se conoce por cdp/lldp
-            //y se reemplaza por el ID            
+            //y se reemplaza por el ID
             for ( SEquipmentNeighborsInfo &e : equipmentNeighborsInfo() )
                 for ( SOSPFInfo &oi : ospfInfo() )
                 {
@@ -848,8 +888,8 @@ void Queries::nextProcess()
     //consultas CLI    
 
     if ( m_opcionActual == Connect )
-    {        
-        qCDebug(queries) << m_ip  << "creando term";
+    {
+        qCDebug(queries) << m_ip  << "creando term" << m_ip << m_user << m_pwd;
         conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
         return;
     }
@@ -1365,10 +1405,28 @@ void Queries::nextProcess()
         f->getRplRouteInfo();
         return;
     }
+    else if ( m_opcionActual == RplPrefixes )
+    {
+        RplInfo *f = dynamic_cast<RplInfo*>(m_currentFuncion);
+        if (!rplPrefixesQuery || reemplazarFuncionPrimerPuntero) rplPrefixesQuery=f;
+        f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setModel(m_model);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getRplPrefixInfo();
+        return;
+    }
     else if ( m_opcionActual == Exit )
     {
         queryTimer->setInterval( 3000 );
-        qDebug() << "Queries enviando Exit";
+        qDebug() << m_ip << "Queries enviando Exit";
 
         ExitInfo *f = dynamic_cast<ExitInfo*>(m_currentFuncion);
         if (!exitQuery || reemplazarFuncionPrimerPuntero) exitQuery=f;
@@ -1380,7 +1438,7 @@ void Queries::nextProcess()
         f->setIp(m_ip);
         f->setConnectedByGW( !m_gw.isEmpty() );
         f->setParentQuery(this);
-        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(processFinished()),SLOT(processExit()));
         connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
         connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
         f->exit();
@@ -1396,6 +1454,16 @@ void Queries::nextProcess()
 void Queries::startSync() //Sync
 {
     qCDebug(queries) << m_ip << "Queries::startSync() thr" << thread();
+
+    QObject *o = sender();
+    if ( o )
+    {
+        qDebug() << m_ip << "SENDER este" << o << o->objectName();
+
+        QMetaMethod metaMethod = sender()->metaObject()->method(senderSignalIndex());
+        qDebug() << m_ip << metaMethod.name();
+        qDebug() << m_ip << metaMethod.methodSignature();
+    }
 
     disconnect(); //desconectamos todas las señales antes configuradas
     QEventLoop loop;
@@ -1417,6 +1485,15 @@ void Queries::start() //ASync
         _finalizar();
         return;
     }
+    else
+    {
+        if ( !m_lstOpciones.contains( QueryOpcion::Connect ) && term == nullptr )
+        {
+            qCDebug(queries) << m_ip  << "Queries::start()" << m_ip << "m_lstOpciones no contiene opcion para conectar y term=nullptr. No se pueden ejecutar las opciones configuradas sin una conexion establecidad";
+            _finalizar();
+            return;
+        }
+    }
 
     nextProcess();
 }
@@ -1429,6 +1506,8 @@ void Queries::processConnectToHostDisconnected()
 
     qCDebug(queries) << m_ip  << "Queries::processConnectToHostDisconnected()" << m_ip << m_name;
 
+    bool lastConnectionRefused = term->connectionRefused();
+    _errortxt = term->errorTxt();
     borrarTerminal();
 
     if ( m_connected )
@@ -1437,7 +1516,7 @@ void Queries::processConnectToHostDisconnected()
         qCDebug(queries) << m_ip  << "**Equipo desconectado a media consulta**" << m_ip << m_name <<
                     "opcionActual" << m_opcionActual << "intentos" << m_consultaIntentos;
 
-        if ( m_consultaIntentos <= 2 )
+        if ( m_consultaIntentos <= 3 )
         {
             qCDebug(queries) << m_ip  << "reconectando y continuando consulta donde se quedo" << m_ip << m_name;
             m_connected=false;
@@ -1446,7 +1525,9 @@ void Queries::processConnectToHostDisconnected()
         else
         {
             qCDebug(queries) << m_ip  << "2 intentos de consulta, se finaliza" << m_ip << m_name;
+            _errortxt = "Se pierde la conexion a media consulta";
             m_error=true;
+            m_connected=false;
             _finalizar();
         }
     }
@@ -1457,13 +1538,69 @@ void Queries::processConnectToHostDisconnected()
         if ( true )
 //        if ( m_ipreachable )
         {
-            if ( m_consultaIntentos <= 2 )
-            {
-                qCDebug(queries) << m_ip  << "intentando nuevamente conectarse al equipo" << m_ip << m_name;
+            qCDebug(queries) << m_ip  << "intentando nuevamente conectarse al equipo" << m_ip << m_name;
 
+            bool probar=false;
+            if ( _userPwdusingList )
+            {
+                if ( lastConnectionRefused )
+                {
+                    if ( m_consultaIntentos <= 1 )
+                        probar=true;
+                    else
+                    {
+                        qCDebug(queries) << m_ip << "2 intentos de consulta rechazada, se finaliza" << m_ip;
+                        m_error=true;
+                        _finalizar();
+                        return;
+                    }
+                }
+                else if ( !lstRemoteShellUsersPasswords.isEmpty() )
+                {
+                    QString up = lstRemoteShellUsersPasswords.takeFirst();
+                    QStringList data = up.split("\t");
+                    if (data.size() < 2)
+                    {
+                        qCDebug(queries) << m_ip <<
+                            "lstRemoteShellUsersPasswords user pass" << m_ip << data;
+                        m_error=true;
+                        _finalizar();
+                        return;
+                    }
+
+                    m_user = data.first();
+                    m_pwd = data.last();
+                    qCDebug(queries) << m_ip << "User Password a Probar" << m_user << m_pwd;
+                    probar=true;
+                }
+                else
+                {
+                    qCDebug(queries) << m_ip <<
+                        "se acaban los usuarios passwords, se finaliza" << m_ip << m_name;
+                    m_error=true;
+                    _finalizar();
+                    return;
+                }
+            }
+            else
+            {
+                if ( m_consultaIntentos <= 2 )
+                    probar=true;
+                else
+                {
+                    qCDebug(queries) << m_ip <<
+                        "3 intentos de consulta, se finaliza" << m_ip;
+                    m_error=true;
+                    _finalizar();
+                    return;
+                }
+            }
+
+            if ( probar )
+            {
                 //esperamos unos segundos para probar otra vez
                 queryTimer->stop();
-                QEventLoop loop;
+                // QEventLoop loop;
                 QTimer *t = new QTimer;
                 // t->setSingleShot(true);
                 QTimer::singleShot( 5000,[this]() { conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt); } );
@@ -1474,19 +1611,12 @@ void Queries::processConnectToHostDisconnected()
                 // delete t;
                 // conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
             }
-            else
-            {
-                qCDebug(queries) << m_ip  << "3 intentos de consulta, se finaliza" << m_ip << m_name;
-                m_error=true;
-                _finalizar();
-            }
         }
         else
         {
             //no se logro la conexion
             qCDebug(queries) << m_ip  << "**NoConexion**" << m_ip;
             m_operativo=false;
-            queryTimer->stop();
 
             //        //si tiene informacion de nombre o plataforma por snmp creamos los queries vacios para que este
             //        //disponible a la hora de graficar
@@ -1556,7 +1686,9 @@ void Queries::processPlatform()
         m_location=pi->location();
         m_brand=pi->vendor();
         m_model=pi->model();
-        m_equipmenttype=equipmentOSFromPlatform( m_platform );
+        m_equipmenttype=equipmentOSFromPlatform( m_platform );        
+        if ( m_equipmenttype.isEmpty() && m_brand=="Huawei" )
+            m_equipmenttype="VRP";
     }
     nextProcess();
 }
@@ -1587,9 +1719,35 @@ void Queries::processFinished()
 void Queries::processExit()
 {
     qCDebug(queries) << m_ip  << "Queries::processExit()";
-    borrarTerminal();
-    queryTimer->stop();
-    nextProcess();
+    qCDebug(queries) << m_ip  << "Finalizando, ya no hay mas opciones a ejectar";
+
+    //no hay funciones a ejecutar, se finaliza
+
+    //si hay informacion de OSPF se cambia la IP de la interfaz que se conoce por cdp/lldp
+    //y se reemplaza por el ID
+    for ( SEquipmentNeighborsInfo &e : equipmentNeighborsInfo() )
+        for ( SOSPFInfo &oi : ospfInfo() )
+        {
+            if ( oi.interfaz == e.interfazestesalida )
+            {
+                e.ip = oi.id;
+                break;
+            }
+        }
+
+    if ( !m_queryname.isEmpty() )
+    {
+        qCDebug(queries) << m_ip
+                         << "Limpiando nombre de indentificacion de consulta: m_queryname. Siguiente consulta quedara en la general si no se establece una nueva";
+        m_queryname.clear();
+    }
+
+    term->disconnect();
+    // term->host_disconnect(); //llamada en exitinfo.cpp al salir
+    delete term;
+    term = nullptr;
+
+    _finalizar();
 }
 
 void Queries::processKeepWorking()
@@ -1616,6 +1774,7 @@ void Queries::on_queryTimer_timeout()
     }
 
     //timeout consultas normales
+    _errortxt="Time Out";
     processConnectToHostDisconnected();
 }
 
@@ -1626,6 +1785,7 @@ void Queries::_finalizar()
     qCDebug(queries) << m_ip  << "Queries::_finalizar()" << m_ip
                      << "signal isconnected" << isSignalConnected( finishedSignal );
 
+    queryTimer->stop();
 //    qDebug() << "dumpObjectInfo" << m_ip;
 //    dumpObjectInfo();
 
@@ -1882,6 +2042,13 @@ void Queries::updateInfoQueries(QList<Queries> &lstDest, QList<Queries> &lstOrig
                     else
                         dest.rplRoutesQuery = origin.rplRoutesQuery;
                 }
+                if ( origin.rplPrefixesQuery )
+                {
+                    if ( dest.rplPrefixesQuery )
+                        dest.rplPrefixesInfo() = origin.rplPrefixesInfo();
+                    else
+                        dest.rplPrefixesQuery = origin.rplPrefixesQuery;
+                }
 
                 encontrado=true;
                 break;
@@ -2092,6 +2259,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     }
     else
         out << false;
+    if ( query.rplPrefixesQuery )
+    {
+        out << true;
+        out << query.rplPrefixesQuery;
+    }
+    else
+        out << false;
 
     return out;
 }
@@ -2258,6 +2432,12 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries& quer
         in >> query.rplRoutesQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
     }
+    in >> a;
+    if ( a )
+    {
+        in >> query.rplPrefixesQuery;
+        query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
+    }
 
     qCDebug(queries) << query.m_ip << "abrir: queries.m_lstFunciones size " << query.m_lstFunciones.size();
 
@@ -2284,9 +2464,8 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
                 << "IP" << info.m_ip
                 << "Vendor" << info.m_brand
                 << "platform" << info.m_platform
-                << "equipment type" << info.m_equipmenttype
                 << "model" << info.m_model
-                << "OS" << equipmentOSFromPlatform(info.m_platform );
+                << "OS" << info.m_equipmenttype;
     dbg.space() << "Location: " << info.m_location;
     dbg.space() << "XR Active RP location: " << info.m_xr_location;
     dbg.space() << "XR64" << info.m_xr64;
@@ -2369,6 +2548,9 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
 
     if ( info.rplRoutesQuery )
         dbg.space() << "RPL Route" << *info.rplRoutesQuery;
+
+    if ( info.rplPrefixesQuery )
+        dbg.space() << "RPL Prefix" << *info.rplPrefixesQuery;
 
     dbg.nospace() << "--\n\n";
 

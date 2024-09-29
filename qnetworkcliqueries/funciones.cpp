@@ -45,17 +45,31 @@ QString equipmentOSFromPlatform(QString platform)
               platform.contains("3550") ||
               platform.contains("360") ||
               platform.contains("380") ||
-              platform.contains("ASR1002"))
+              platform.contains("ASR1002") ||
+              platform.contains("WS-C4948") ||
+              platform.contains("C1111")
+             )
         return "IOS";
     else if ( platform.contains("N5K") ||
               platform.contains("N7K") ||
-              platform.contains("Nexus") )
+              platform.contains("Nexus")
+             )
         return "IOS NX";
     else if ( platform.contains("ATN") ||
               platform.contains("NE40") ||
               platform.contains("NE9000") ||
-              platform.contains("NetEngine 8000") )
+              platform.contains("NetEngine 8000") ||
+              platform.contains("S6730") ||
+              platform.contains("S5735") ||
+              platform.contains("S5731")
+             )
         return "VRP";
+    else if ( platform.contains("ISCOM2948")
+             )
+        return "ROS";
+    else if ( platform.contains("MikroTik")
+             )
+        return "RouterOS";
     else
         return "";
 }

@@ -12,6 +12,7 @@ QSSHSession::QSSHSession(QString host, QString port, QString user, QString pass,
     _port = port;
     _user = user;
     _password = pass;
+    m_error=NONE;
 
     read_notifier = nullptr;
 }
@@ -27,8 +28,11 @@ int QSSHSession::authenticate_console(ssh_session session){
 
     //Try to authenticate with password
     rc = ssh_userauth_password(session, _user.toLocal8Bit(), _password.toLocal8Bit());
-    if (rc == SSH_AUTH_ERROR) {
-        qCDebug(qsshsession) << _host << "Error al autenticar";
+    qDebug() <<  _host << "rc" << rc;
+    if (rc == SSH_AUTH_DENIED) {
+        m_errortxt = ssh_get_error(session);
+        qCDebug(qsshsession) << _host << "Error al autenticar"  << m_errortxt;
+        m_error = AUTH_DENIED;
         host_disconnect();
         return rc;
     }
@@ -62,14 +66,18 @@ void QSSHSession::shell(ssh_session session){
     this->channel = ssh_channel_new(session);
     // ssh_channel_accept_x11(channel, 10);
     if(ssh_channel_open_session(channel)){
-        qCDebug(qsshsession) << _host << "error opening channel" << ssh_get_error(session);
+        m_errortxt = ssh_get_error(session);
+        qCDebug(qsshsession) << _host << "error opening channel" << ssh_get_error(session) << m_errortxt;
+        m_error = CHANNEL_ERROR;
         host_disconnect();
         return;
     }
 
     ssh_channel_request_pty(channel);
     if(ssh_channel_request_shell(channel)){
-        qCDebug(qsshsession) << _host << "Requesting shell :" << ssh_get_error(session);
+        m_errortxt = ssh_get_error(session);
+        qCDebug(qsshsession) << _host << "Requesting shell :" << ssh_get_error(session) << m_errortxt;
+        m_error = SHELL_ERROR;
         host_disconnect();
         return;
     }
@@ -129,7 +137,9 @@ void QSSHSession::connect_to() {
     int rc = ssh_connect(session);
 
     if (rc != SSH_OK) {
-        qCDebug(qsshsession) << _host << "Connection to host failed!";
+        m_errortxt = ssh_get_error(session);
+        m_error = OPTIONS_ERROR;
+        qCDebug(qsshsession) << _host << "Connection to host failed!" << rc << ssh_get_error(session);
         host_disconnect();
         return;
     }
@@ -140,8 +150,9 @@ void QSSHSession::connect_to() {
         free(banner);
     }
 
-    authenticate_console(session);
-    shell(session);
+    authenticate_console(session); // <-- si falla autentiacacion este manda a finalizar y emitir señal
+    if ( m_error == NONE )
+        shell(session);
 }
 
 void QSSHSession::sendCommand(QString str)

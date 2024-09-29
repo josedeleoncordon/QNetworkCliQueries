@@ -159,45 +159,60 @@ BGPInfo::~BGPInfo()
 
 void BGPInfo::getBGPNeighbors()
 {
-    if ( m_brand != "Cisco" )
-    {
-        qDebug() << "BGPInfo::getBGPNeighbors():" << m_brand << "no soportado";
-        finished();
-        return;
-    }    
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_BGPNeighbors()));
-
     m_type = m_queriesConfiguration.value("BGPNeig_Type",m_ip,m_os,m_conexionID);
     m_vrf_vrfs = m_queriesConfiguration.values("BGPNeig_VRF_VRFs",m_ip,m_os,m_conexionID);
-
     if ( m_type.isEmpty() )
         m_type = "IPV4";
 
-    if ( m_type == "IPV4" )
+    if ( m_brand == "Cisco" )
     {
-        if ( m_os == "IOS XR" )
-            termSendText("show bgp summary");
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_BGPNeighbors()));
+
+        m_type = m_queriesConfiguration.value("BGPNeig_Type",m_ip,m_os,m_conexionID);
+        m_vrf_vrfs = m_queriesConfiguration.values("BGPNeig_VRF_VRFs",m_ip,m_os,m_conexionID);
+
+        if ( m_type.isEmpty() )
+            m_type = "IPV4";
+
+        if ( m_type == "IPV4" )
+        {
+            if ( m_os == "IOS XR" )
+                termSendText("show bgp summary");
+            else
+                termSendText("sh bgp ipv4 unicast summary");
+        }
+        else if ( m_type == "IPV4LU" )
+        {
+            if ( m_os == "IOS XR" )
+                termSendText("show bgp ipv4 labeled-unicast summary");
+            else
+                termSendText("sh bgp ipv4 unicast summary");
+        }
+        else if ( m_type == "VPNV4" )
+        {
+            if ( m_os == "IOS XR" )
+                termSendText("sh bgp vpnv4 unicast summary");
+            else
+                termSendText("sh bgp vpnv4 unicast all summary");
+        }
+        else if ( m_type == "VRF" )
+            getBGPNeighbors_VRF_nextVRF();
         else
-            termSendText("sh bgp ipv4 unicast summary");
+            finished();
     }
-    else if ( m_type == "IPV4LU" )
+    else if ( m_os == "VRP" )
     {
-        if ( m_os == "IOS XR" )
-            termSendText("show bgp ipv4 labeled-unicast summary");
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_BGPNeighbors()));
+        if ( m_type == "IPV4" )
+            termSendText("display bgp peer");
         else
-            termSendText("sh bgp ipv4 unicast summary");
+            finished();
     }
-    else if ( m_type == "VPNV4" )
-    {
-        if ( m_os == "IOS XR" )
-            termSendText("sh bgp vpnv4 unicast summary");
-        else
-            termSendText("sh bgp vpnv4 unicast all summary");
-    }
-    else if ( m_type == "VRF" )
-        getBGPNeighbors_VRF_nextVRF();
     else
+    {
+        qDebug() << "BGPInfo::getBGPNeighbors():" << m_brand << "no soportado";
         finished();
+    }
 }
 
 void BGPInfo::getBGPNeighbors_VRF_nextVRF()
@@ -221,25 +236,63 @@ void BGPInfo::on_term_receiveText_BGPNeighbors()
         return;
 
     QStringList lines = txt.split("\n");
+    QStringList data;
+    bool append=false;
     for (QString line : lines)
     {
-        exp.setPattern("^(\\d+\\.\\d+\\.\\d+\\.\\d+).+");
-        if ( ! line.contains(exp) )
+        //en una linea
+        //172.16.148.210  4 52468    1306    1306        4    0    0 21:42:44 1
+        //
+        //o en varias filas indentadas
+        //172.17.145.101  4 273068
+        //                              0       0        0    0    0 21:42:53 Idle
+
+        line = line.left( line.size()-1 );
+        exp.setPattern("^ *(\\d+\\.\\d+\\.\\d+\\.\\d+).+");
+        if ( line.contains(exp) )
+        {
+            data.clear();
+            append=true;
+        }
+        if ( append )
+            data.append( line.split(" ",QString::SkipEmptyParts) );
+
+        if ( data.isEmpty() )
             continue;
 
-        QStringList data = line.split(" ",QString::SkipEmptyParts);
-        if ( data.size() < 10 )
-            continue;
+        if ( m_brand == "Cisco" )
+        {
+            if ( data.size() == 10 )
+            {
+                SBGPNeighbor s;
+                s.neighborip = data.at(0).simplified();
+                s.as = data.at(2).simplified();
+                s.upDownTime = data.at(8).simplified();
+                s.prfxRcd = data.at(9).simplified();
+                s.vrf = m_vrf_currentVRF;
+                s.addressfamily = m_type;
 
-        SBGPNeighbor s;
-        s.neighborip = data.at(0).simplified();
-        s.as = data.at(2).simplified();
-        s.upDownTime = data.at(8).simplified();
-        s.prfxRcd = data.at(9).simplified();
-        s.vrf = m_vrf_currentVRF;
-        s.addressfamily = m_type;
+                m_lstNeigbors.append(s);
+            }
+        }
+        else if ( m_os == "VRP" )
+        {
+            if ( data.size() == 9 )
+            {
+                SBGPNeighbor s;
+                s.neighborip = data.at(0).simplified();
+                s.as = data.at(2).simplified();
+                s.upDownTime = data.at(6).simplified();
+                if ( data.at(7) != "Established" )
+                    s.prfxRcd = "Active";
+                else
+                    s.prfxRcd = data.at(8).simplified();
+                s.vrf = m_vrf_currentVRF;
+                s.addressfamily = m_type;
 
-        m_lstNeigbors.append(s);
+                m_lstNeigbors.append(s);
+            }
+        }
     }
 
     if ( m_type == "VRF" )

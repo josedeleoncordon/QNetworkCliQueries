@@ -102,7 +102,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
             min = secto/60;
             seg = secto%60;
 
-           // if ( false )
+            // if ( false )
             if ( _expIP.exactMatch(data.first().replace("\"","")) )
             {
                 QString ip = data.takeFirst().replace("\"","");

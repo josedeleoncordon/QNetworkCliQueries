@@ -123,6 +123,7 @@ KProcess::KProcess(KProcessPrivate *d, QObject *parent) :
 
 KProcess::~KProcess()
 {
+    close();
     delete d_ptr;
 }
 

@@ -11,7 +11,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
 {
     m_interval=1000;
     m_simultaneos=3;
-    m_maxparalelos=40;
+    m_maxparalelos=20;
     m_maxparalelosmismoequipo=1;
     m_lstIPsMismoEquipoCounter=0;
     m_lstIPsCounter=0;
@@ -396,8 +396,8 @@ void QueriesThread::equipoConsultado(Queries *qry)
     if ( m_cancelar )
         return;
 
-//    qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado 1111"
-//             << qry->hostName() << "conexionID" << qry->conexionID();
+   qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado 1111"
+            << qry->hostName() << "conexionID" << qry->conexionID();
     qCDebug(queriesthread) << "QueriesThread::equipoConsultado 1111"
              << qry->ip() << qry->hostName() << "conexionID" << qry->conexionID();
 
@@ -491,7 +491,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
             m_conerrores++;
             qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado -- Consulta con errores";
             qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- consulta con errores" << qry->ip();
-            m_errorMap.insert( qry->ip(), "Error" );
+            m_errorMap.insert( qry->ip(), "Error"+(!qry->errorTxt().isEmpty()?" "+qry->errorTxt():"") );
             eliminar=true;
         }
     }
@@ -501,7 +501,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
         {
             qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado -- Conexion Error";
             qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- Conexion Error" << qry->ip();
-            m_errorMap.insert( qry->ip(), "Conexion Error" );
+            m_errorMap.insert( qry->ip(), "Conexion Error"+(!qry->errorTxt().isEmpty()?" "+qry->errorTxt():"") );
             m_conexionerrores++;
         }
         else
@@ -545,6 +545,8 @@ void QueriesThread::equipoConsultado(Queries *qry)
         }
     }
 
+    qCDebug(queriesthread) << qry->ip() << "Qthread *****";
+
     if ( !m_detener )
     {
         //Si se termino de consultar los equipos se finaliza
@@ -568,6 +570,25 @@ void QueriesThread::equipoConsultado(Queries *qry)
                                       m_lstIPsMismoEquipo <<
                                       m_equiposPorGWenConsulta <<
                                       m_equiposenconsulta;
+
+            //Error MAP. Eliminar los errores de equipos que en segundas consultas fueron exitosas
+            QMapIterator<QString,QString> imap(m_errorMap);
+            QStringList lstEliminar;
+            while ( imap.hasNext() )
+            {
+                imap.next();
+                for ( Queries *qry : m_lstQueries )
+                {
+                    if ( imap.key() == qry->ip() )
+                    {
+                        lstEliminar.append( imap.key() );
+                        break;
+                    }
+                }
+            }
+            for ( QString ip : lstEliminar )
+                m_errorMap.remove(ip);
+
             _emitFinished(true);
         }        
         else

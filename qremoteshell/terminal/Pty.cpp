@@ -274,6 +274,7 @@ void Pty::init()
 
 Pty::~Pty()
 {
+    close();
     qDebug() << "Pty::~Pty()";
 }
 

@@ -27,9 +27,16 @@ public:
     void sendCommand(QString str);
     void sendData(const QByteArray &command);
 
-    /**
-    * try to connect host again
-    */
+    enum SSHError
+    {
+        NONE,
+        OPTIONS_ERROR,
+        AUTH_DENIED,
+        CHANNEL_ERROR,
+        SHELL_ERROR
+    };
+    SSHError error() { return m_error; }
+    QString errortxt() { return m_errortxt; }
 
 public slots:
     void connect_to();
@@ -53,8 +60,9 @@ private :
     QString _user;
     QString _password;
 
+    SSHError m_error;
+    QString m_errortxt;
     QString m_dataReceived;
-
 
     QSocketNotifier * read_notifier;
     // QSocketNotifier * error_notifier;

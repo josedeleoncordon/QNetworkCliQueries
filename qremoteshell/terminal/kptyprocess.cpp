@@ -82,6 +82,7 @@ KPtyProcess::~KPtyProcess()
         if (state() != QProcess::NotRunning)
             qCritical() << Q_FUNC_INFO << "process didn't stop upon SIGHUP and will be SIGKILL-ed";
     }
+    close();
 }
 
 void KPtyProcess::setPtyChannels(PtyChannels channels)
