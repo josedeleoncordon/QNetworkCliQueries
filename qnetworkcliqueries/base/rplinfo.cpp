@@ -20,6 +20,15 @@ SRplPrefixInfo::SRplPrefixInfo(const SRplPrefixInfo &other)
     operativo = other.operativo;
 }
 
+SRplCommunityInfo::SRplCommunityInfo(const SRplCommunityInfo &other)
+{
+    nombre = other.nombre;
+    lstComunities = other.lstComunities;
+    //infobase
+    datetime = other.datetime;
+    operativo = other.operativo;
+}
+
 QDataStream& operator<<(QDataStream& out, const SRplRouteInfo& data)
 {
     out << data.nombre;
@@ -58,6 +67,26 @@ QDataStream& operator>>(QDataStream& in, SRplPrefixInfo& data)
     in >> data.type;
     in >> data.ipversion;
     in << data.lstPrefixes;
+    //infobase
+    in >> data.datetime;
+    in >> data.operativo;
+    return in;
+}
+
+QDataStream& operator<<(QDataStream& out, const SRplCommunityInfo &data)
+{
+    out << data.nombre;
+    out << data.lstComunities;
+    //infobase
+    out << data.datetime;
+    out << data.operativo;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, SRplCommunityInfo& data)
+{
+    in >> data.nombre;
+    in >> data.lstComunities;
     //infobase
     in >> data.datetime;
     in >> data.operativo;
@@ -138,6 +167,47 @@ void updateInfoList(QList<SRplPrefixInfo> &lstDest, QList<SRplPrefixInfo> &lstOr
                 dest.lstPrefixes = origin.lstPrefixes;
                 dest.ipversion = origin.ipversion;
                 dest.type = origin.type;
+                encontrado=true;
+                break;
+            }
+        }
+        if ( !encontrado )
+            //no se encontro, se agrega
+            lstDest.append( origin );
+    }
+}
+
+void updateInfoList(QList<SRplCommunityInfo> &lstDest, QList<SRplCommunityInfo> &lstOrigin )
+{
+    //actualiza la lista anterior con la información de la nueva
+    //origen = nuevo
+    //destino = anterior
+
+    //borramos los datos anteriores que tengan mas de 30 dias
+    for ( int c=0; c<lstDest.size(); )
+    {
+        SRplCommunityInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
+            lstDest.removeAt( c );
+        else
+        {
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            c++;
+        }
+    }
+
+    //actualizamos los datos del anterior con la nueva, se agrega la nueva
+    for ( SRplCommunityInfo &origin : lstOrigin )
+    {
+        bool encontrado=false;
+        for ( SRplCommunityInfo &dest : lstDest )
+        {
+            if ( origin.nombre == dest.nombre )
+            {
+                //Si se encontro, actualizamos los datos
+                dest.nombre = origin.nombre;
+                dest.lstComunities = origin.lstComunities;
+                dest.operativo = true;
                 encontrado=true;
                 break;
             }
@@ -365,10 +435,119 @@ void RplInfo::on_term_receiveText_prefix_list()
     finished();
 }
 
+void RplInfo::getRplCommunityInfo()
+{
+    if ( m_os == "IOS" || m_os == "IOS NX" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_comunity_list()));
+        termSendText("sh run | i community-list");
+    }
+    else if ( m_os == "IOS XR" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplCommunity()));
+        termSendText("show rpl community-set");
+    }
+    else if ( m_os == "VRP" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplCommunity()));
+        termSendText("display current-configuration configuration xpl-community");
+    }
+    else
+        finished();
+}
+
+void RplInfo::on_term_receiveText_rplCommunity()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    QString lastName;
+    QStringList lst;
+    QRegExp exp("^(xpl community-list|community-set) (\\S+)$");
+    for (QString line : lines)
+    {
+        line = line.left( line.size()-1 );
+        // qDebug() << "line" << line;
+        if ( line.contains(exp) )
+        {
+            lastName = exp.cap(2);
+            continue;
+        }
+
+        if ( lastName.isEmpty() )
+            continue;
+
+        if ( line.contains(QRegExp("^(end-set| end-list)$")) )
+        {
+            // qDebug() << "Agregar rpl";
+            SRplCommunityInfo s;
+            s.nombre = lastName;
+            s.lstComunities = lst;
+            m_lstRplCommunities.append(s);
+            lastName.clear();
+            lst.clear();
+            continue;
+        }
+
+        lst.append( line.replace(",","").simplified() );
+    }
+    finished();
+}
+
+void RplInfo::on_term_receiveText_comunity_list()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    QRegExp exp("ip community-list expanded (\\S+) permit (.+)$");
+    QString lastName;
+    SRplCommunityInfo *lastS = nullptr;
+    for (QString line : lines)
+    {
+        line = line.left( line.size()-1 );
+        // qDebug() << "line2" << line;
+        if ( line.contains(exp) )
+        {
+            QString name = exp.cap(1);
+            QString community = exp.cap(2);
+            // qDebug() << "entro" << name << lastName;
+            if ( lastName != name )
+            {
+                //nuevo community-list
+                QStringList lst;
+                lst.append(community);
+
+                // qDebug() << "agregando communitylist" << name << exp.cap(2);
+
+                SRplCommunityInfo s;
+                s.nombre = name;
+                s.lstComunities = lst;
+                m_lstRplCommunities.append(s);
+                lastName = name;
+                lastS = &m_lstRplCommunities[m_lstRplCommunities.size()-1];
+                continue;
+            }
+            else
+            {
+                //sigue siendo el mismo community-list
+                // qDebug() << "sigue el mismo";
+                lastS->lstComunities.append(community);
+            }
+        }
+    }
+
+    finished();
+}
+
 QDataStream& operator<<(QDataStream& out, const RplInfo& info)
 {
     out << info.m_lstRplRoutes;
     out << info.m_lstRplPrefixes;
+    out << info.m_lstRplCommunities;
     out << info.m_queryoption;
     return out;
 }
@@ -377,6 +556,7 @@ QDataStream& operator>>(QDataStream& in, RplInfo& info)
 {
     in >> info.m_lstRplRoutes;
     in >> info.m_lstRplPrefixes;
+    in >> info.m_lstRplCommunities;
     in >> info.m_queryoption;
     return in;
 }
@@ -403,6 +583,10 @@ QDebug operator<<(QDebug dbg, const RplInfo &info)
     dbg.nospace() << "RplPrefixInfo:\n";
     for (SRplPrefixInfo i : info.m_lstRplPrefixes)
         dbg.space() << "------" << i.nombre << i.type << i.ipversion << i.lstPrefixes << "\n";
+
+    dbg.nospace() << "RplCommunitiesInfo:\n";
+    for (SRplCommunityInfo i : info.m_lstRplCommunities)
+        dbg.space() << "------" << i.nombre << i.lstComunities << "\n";
 
     dbg.nospace() << "\n";
 

@@ -188,21 +188,12 @@ void QRemoteShell::ssh_host_disconnected()
         {
         case QSSHSession::OPTIONS_ERROR:
         {
-            if ( m_ssh->errortxt().contains("Timeout connecting to") )
-            {
-                if ( m_consultaIntentos < 2 )
-                {
-                    qCDebug(qremoteshell) << m_ip << "LibSSH Timeout. Se intenta nuevamente";
-                    QTimer::singleShot( 2000,[this]() { m_protocolTry(); } );
-                }
-                else
-                    host_disconnect();
-            }
-            else
+            if ( m_ssh->errortxt().contains("kex error : no match for method") )
             {
                 //si se desconecta en este punto y sshok es falso, significa de que a traves de libssh
                 //no es posible la conexion ssh. Probamos con una terminal y cli ssh
-                qCDebug(qremoteshell) << m_ip << "LibSSH error. Probando SSH CLI via terminal";
+                qCDebug(qremoteshell) << m_ip << "LibSSH kex error. Probando SSH CLI via terminal";
+                qCDebug(qremoteshell) << "LibSSH kex error. Probando SSH CLI via terminal" << m_ip;
                 m_ssh->disconnect();
                 m_ssh->host_disconnect();
                 m_ssh->deleteLater();
@@ -212,6 +203,16 @@ void QRemoteShell::ssh_host_disconnected()
                 connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool)));
                 connect(m_terminal,SIGNAL(receivedData(QString)),SLOT(m_terminal_detaReceived(QString)));
                 connect(m_terminal,SIGNAL(finished()),SLOT(m_terminal_finished()));
+            }
+            else
+            {
+                if ( m_consultaIntentos < 2 )
+                {
+                    qCDebug(qremoteshell) << m_ip << "LibSSH Timeout. Se intenta nuevamente";
+                    QTimer::singleShot( 2000,[this]() { m_protocolTry(); } );
+                }
+                else
+                    host_disconnect();
             }
             break;
         }

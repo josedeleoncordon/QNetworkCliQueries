@@ -1136,14 +1136,28 @@ bgp_sesiones_clientes_sin_prefix_filtro:
     pe_nombre:
       type: string(100)
       notnull: true
+    vendor:
+      type: string(45)
+    platform:
+      type: string(45)
+    os:
+      type: string(45)
     neighbor:
       type: string(45)
       notnull: true
+    status:
+      type: string(10)
+    pfxincount:
+      type: string(10)
     routepolicy:
+      type: string(100)
+    prefix:
       type: string(100)
     detalle:
       type: string(500)
       notnull: true
+    pecpe:
+      type: string(3)
 
 bgp_serv_prin_bck_comunidades_faltantes:
   columns:

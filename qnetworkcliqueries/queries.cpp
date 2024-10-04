@@ -85,6 +85,7 @@ void Queries::iniciar()
     funcionQuery = nullptr;
     rplRoutesQuery = nullptr;
     rplPrefixesQuery = nullptr;
+    rplCommunitiesQuery = nullptr;
     exitQuery = nullptr;
 
     m_connectionprotol = QRemoteShell::SSH;
@@ -316,6 +317,12 @@ void Queries::clone(const Queries& other)
             if ( !rplPrefixesQuery ) rplPrefixesQuery=ff;
             break;
         }
+        case (QueryOpcion::RplCommunities): {
+            RplInfo *ff = new RplInfo(*dynamic_cast<RplInfo*>(f)) ;
+            m_lstFunciones.insert(m_queryname,ff );
+            if ( !rplCommunitiesQuery ) rplCommunitiesQuery=ff;
+            break;
+        }
         default: {}
         }
     }
@@ -359,6 +366,7 @@ FuncionBase *Queries::createQuerie(int option)
     case (QueryOpcion::Funcion): { return factoryNewFuncionInfo(m_brand,m_equipmenttype,term,QueryOpcion::Funcion); }
     case (QueryOpcion::RplRoutes): { return factoryNewRplInfo(m_brand,m_equipmenttype,term,QueryOpcion::RplRoutes); }
     case (QueryOpcion::RplPrefixes): { return factoryNewRplInfo(m_brand,m_equipmenttype,term,QueryOpcion::RplPrefixes); }
+    case (QueryOpcion::RplCommunities): { return factoryNewRplInfo(m_brand,m_equipmenttype,term,QueryOpcion::RplCommunities); }
     case (QueryOpcion::Exit): { return factoryNewExit(m_brand,m_equipmenttype,term,QueryOpcion::Exit); }
     default: { return nullptr; }
     }
@@ -780,6 +788,20 @@ QList<SRplPrefixInfo>& Queries::rplPrefixesInfo(QString name)
     FuncionBase *f = getQuery(RplPrefixes,name);
     if ( !f ) return _lstRplPrefixesInfo;
     return dynamic_cast<RplInfo*>(f)->rplPrefixesInfo();
+}
+
+QList<SRplCommunityInfo>& Queries::rplCommunitiesInfo(int i)
+{
+    FuncionBase *f = getQuery(RplCommunities,i);
+    if ( !f ) return _lstRplCommunitiesInfo;
+    return dynamic_cast<RplInfo*>(f)->rplCommunitiesInfo();
+}
+
+QList<SRplCommunityInfo>& Queries::rplCommunitiesInfo(QString name)
+{
+    FuncionBase *f = getQuery(RplCommunities,name);
+    if ( !f ) return _lstRplCommunitiesInfo;
+    return dynamic_cast<RplInfo*>(f)->rplCommunitiesInfo();
 }
 
 QString Queries::funcionTxtInfo(int i)
@@ -1423,6 +1445,24 @@ void Queries::nextProcess()
         f->getRplPrefixInfo();
         return;
     }
+    else if ( m_opcionActual == RplCommunities )
+    {
+        RplInfo *f = dynamic_cast<RplInfo*>(m_currentFuncion);
+        if (!rplCommunitiesQuery || reemplazarFuncionPrimerPuntero) rplPrefixesQuery=f;
+        f->setPlatform(m_platform);
+        f->setXR64(m_xr64);
+        f->setXRLocation(m_xr_location);
+        f->setBrand(m_brand);
+        f->setHostName(m_fullName);
+        f->setModel(m_model);
+        f->setIp(m_ip);
+        f->setParentQuery(this);
+        connect(f,SIGNAL(processFinished()),SLOT(processFinished()));
+        connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
+        connect(f,SIGNAL(lastCommand(QString)),SLOT(on_query_lastCommand(QString)));
+        f->getRplCommunityInfo();
+        return;
+    }
     else if ( m_opcionActual == Exit )
     {
         queryTimer->setInterval( 3000 );
@@ -2049,6 +2089,13 @@ void Queries::updateInfoQueries(QList<Queries> &lstDest, QList<Queries> &lstOrig
                     else
                         dest.rplPrefixesQuery = origin.rplPrefixesQuery;
                 }
+                if ( origin.rplCommunitiesQuery )
+                {
+                    if ( dest.rplCommunitiesQuery )
+                        dest.rplCommunitiesInfo() = origin.rplCommunitiesInfo();
+                    else
+                        dest.rplCommunitiesQuery = origin.rplCommunitiesQuery;
+                }
 
                 encontrado=true;
                 break;
@@ -2266,6 +2313,13 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     }
     else
         out << false;
+    if ( query.rplCommunitiesQuery )
+    {
+        out << true;
+        out << query.rplCommunitiesQuery;
+    }
+    else
+        out << false;
 
     return out;
 }
@@ -2438,6 +2492,12 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries& quer
         in >> query.rplPrefixesQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
     }
+    in >> a;
+    if ( a )
+    {
+        in >> query.rplCommunitiesQuery;
+        query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
+    }
 
     qCDebug(queries) << query.m_ip << "abrir: queries.m_lstFunciones size " << query.m_lstFunciones.size();
 
@@ -2551,6 +2611,9 @@ QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const Queries &info)
 
     if ( info.rplPrefixesQuery )
         dbg.space() << "RPL Prefix" << *info.rplPrefixesQuery;
+
+    if ( info.rplCommunitiesQuery )
+        dbg.space() << "RPL community" << *info.rplCommunitiesQuery;
 
     dbg.nospace() << "--\n\n";
 

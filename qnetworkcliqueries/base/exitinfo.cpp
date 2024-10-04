@@ -10,12 +10,10 @@ ExitInfo::ExitInfo(QRemoteShell *terminal, int option):
 void ExitInfo::exit()
 {
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
-    if ( m_brand == "Cisco" )
-        termSendText("exit");
-    else if ( m_brand == "Huawei" )
+    if ( m_brand == "Huawei" || m_brand == "MikroTik" )
         termSendText("quit");
     else
-        finished();
+        termSendText("exit");
 }
 
 void ExitInfo::on_term_receiveText()

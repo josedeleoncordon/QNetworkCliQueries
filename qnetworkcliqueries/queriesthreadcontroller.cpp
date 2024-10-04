@@ -31,7 +31,7 @@ void QueriesThreadController::registerQueriesThreadUUID(QString uuid)
 {
     if ( !m_mapUUIDParalelosDescubrimiento.contains(uuid) )
     {
-        qCDebug(queriesthreadController) << Q_FUNC_INFO << "Registrando UUID" << uuid;
+        // qCDebug(queriesthreadController) << Q_FUNC_INFO << "Registrando UUID" << uuid;
         m_mapUUIDParalelosDescubrimiento.insert(uuid,0);
         m_calcularMaxParalelosUUID();
         serverstatus();
@@ -42,7 +42,7 @@ void QueriesThreadController::registerQueriesThreadUUID(QString uuid, int cantid
 {    
     if ( !m_mapUUIDParalelosFijo.contains(uuid) )
     {
-        qCDebug(queriesthreadController) << Q_FUNC_INFO << "Registrando UUID" << uuid << "cantidad" << cantidadEquipos;
+        // qCDebug(queriesthreadController) << Q_FUNC_INFO << "Registrando UUID" << uuid << "cantidad" << cantidadEquipos;
         m_mapUUIDParalelosFijo.insert(uuid,0);
         m_mapUUIDFijoCantidadRegistrada.insert(uuid,cantidadEquipos);
         m_calcularMaxParalelosUUID();
@@ -54,7 +54,7 @@ void QueriesThreadController::unregisterQueriesThreadUUID(QString uuid)
 {
     if ( m_mapUUIDParalelosFijo.contains(uuid) )
     {
-        qCDebug(queriesthreadController) << Q_FUNC_INFO << "Eliminado registro UUID" << uuid;
+        // qCDebug(queriesthreadController) << Q_FUNC_INFO << "Eliminado registro UUID" << uuid;
         m_mapUUIDParalelosFijo.remove(uuid);
         m_mapUUIDFijoCantidadRegistrada.remove(uuid);
         m_mapUUIDFijoCantidadPermitida.remove(uuid);
@@ -79,7 +79,7 @@ void QueriesThreadController::m_calcularMaxParalelosUUID()
         cantidadtotalfijos += imap.value();
     }
 
-    qCDebug(queriesthreadController) << Q_FUNC_INFO << "cantidadtotalfijos" << cantidadtotalfijos;
+    // qCDebug(queriesthreadController) << Q_FUNC_INFO << "cantidadtotalfijos" << cantidadtotalfijos;
 
     //calculando fijos
     if ( cantidadtotalfijos )
@@ -90,7 +90,7 @@ void QueriesThreadController::m_calcularMaxParalelosUUID()
         else
             percent=((m_maxparalelosfijos*100)/(float)cantidadtotalfijos)/100.0;
 
-        qCDebug(queriesthreadController) << Q_FUNC_INFO << "Calculando fijos percent" << percent;
+        // qCDebug(queriesthreadController) << Q_FUNC_INFO << "Calculando fijos percent" << percent;
 
         m_mapUUIDFijoCantidadPermitida.clear();
         imap.toFront();
@@ -102,7 +102,7 @@ void QueriesThreadController::m_calcularMaxParalelosUUID()
             m_mapUUIDFijoCantidadPermitida.insert(imap.key(),cantidad);
         }
 
-        qCDebug(queriesthreadController) << Q_FUNC_INFO << "m_mapUUIDFijoCantidadPermitida" << m_mapUUIDFijoCantidadPermitida;
+        // qCDebug(queriesthreadController) << Q_FUNC_INFO << "m_mapUUIDFijoCantidadPermitida" << m_mapUUIDFijoCantidadPermitida;
     }
 
     //calculamos descubrimiento
@@ -111,9 +111,9 @@ void QueriesThreadController::m_calcularMaxParalelosUUID()
         if ( cantidadtotalfijos > m_maxparalelosfijos )
             cantidadtotalfijos = m_maxparalelosfijos;
 
-        qCDebug(queriesthreadController) << Q_FUNC_INFO <<
-                                            "Calculando descubrimiento cantidadtotalfijos referencia" <<
-                                            cantidadtotalfijos;
+        // qCDebug(queriesthreadController) << Q_FUNC_INFO <<
+        //                                     "Calculando descubrimiento cantidadtotalfijos referencia" <<
+        //                                     cantidadtotalfijos;
 
         short permitidosdescubrimiento = m_maxparalelos - cantidadtotalfijos;
         short div = permitidosdescubrimiento / m_mapUUIDParalelosDescubrimiento.size();
@@ -122,9 +122,9 @@ void QueriesThreadController::m_calcularMaxParalelosUUID()
         else
             m_maxparalelosuuiddescrubimiento = 1;
 
-        qCDebug(queriesthreadController) << Q_FUNC_INFO <<
-                                            "Calculando descubrimiento m_maxparalelosuuiddescrubimiento" <<
-                                            m_maxparalelosuuiddescrubimiento;
+        // qCDebug(queriesthreadController) << Q_FUNC_INFO <<
+        //                                     "Calculando descubrimiento m_maxparalelosuuiddescrubimiento" <<
+        //                                     m_maxparalelosuuiddescrubimiento;
     }
 }
 
@@ -147,7 +147,7 @@ bool QueriesThreadController::consultarAgregarEquipo(QString uuid, QString ip)
 
     if ( m_equiposenconsultaGeneral.size() >= m_maxparalelos )
     {
-        qDebug() << Q_FUNC_INFO << ip << "m_maxparalelos alcanzado, no es posible iniciar nueva consulta" <<
+        // qDebug() << Q_FUNC_INFO << ip << "m_maxparalelos alcanzado, no es posible iniciar nueva consulta" <<
                     m_equiposenconsultaGeneral;
         return false;
     }
@@ -155,7 +155,7 @@ bool QueriesThreadController::consultarAgregarEquipo(QString uuid, QString ip)
     {
         if ( m_mapUUIDParalelosFijo.value(uuid) >= m_mapUUIDFijoCantidadPermitida.value(uuid) )
         {
-            qDebug() << Q_FUNC_INFO << ip << "m_maxparalelosuuidfijo por UUID alcanzado, no es posible iniciar nueva consultar";
+            // qDebug() << Q_FUNC_INFO << ip << "m_maxparalelosuuidfijo por UUID alcanzado, no es posible iniciar nueva consultar";
             return false;
         }
     }
@@ -163,7 +163,7 @@ bool QueriesThreadController::consultarAgregarEquipo(QString uuid, QString ip)
     {
         if ( m_mapUUIDParalelosDescubrimiento.value(uuid) >= m_maxparalelosuuiddescrubimiento )
         {
-            qDebug() << Q_FUNC_INFO << ip << "m_maxparalelosuuiddescrubimiento por UUID alcanzado, no es posible iniciar nueva consultar";
+            // qDebug() << Q_FUNC_INFO << ip << "m_maxparalelosuuiddescrubimiento por UUID alcanzado, no es posible iniciar nueva consultar";
             return false;
         }
     }
@@ -182,18 +182,18 @@ bool QueriesThreadController::consultarAgregarEquipo(QString uuid, QString ip)
         else if ( m_mapUUIDParalelosDescubrimiento.contains(uuid) )
             m_mapUUIDParalelosDescubrimiento[uuid]++;
 
-        qDebug() << Q_FUNC_INFO << ip << "m_maxparalelosmismoequipo" << m_maxparalelosmismoequipo <<
-                    "c" << c <<
-                    "Se permite nueva consulta" <<
-                    "m_equiposenconsultaGeneral.size()" << m_equiposenconsultaGeneral.size();
+        // qDebug() << Q_FUNC_INFO << ip << "m_maxparalelosmismoequipo" << m_maxparalelosmismoequipo <<
+        //             "c" << c <<
+        //             "Se permite nueva consulta" <<
+        //             "m_equiposenconsultaGeneral.size()" << m_equiposenconsultaGeneral.size();
         return true;
     }
     else
     {
-        qDebug() << Q_FUNC_INFO << ip << "m_maxparalelosmismoequipo" << m_maxparalelosmismoequipo <<
-                    "c" << c <<
-                    "NO Se permite nueva consulta" <<
-                    "m_equiposenconsultaGeneral.size()" << m_equiposenconsultaGeneral.size();
+        // qDebug() << Q_FUNC_INFO << ip << "m_maxparalelosmismoequipo" << m_maxparalelosmismoequipo <<
+        //             "c" << c <<
+        //             "NO Se permite nueva consulta" <<
+        //             "m_equiposenconsultaGeneral.size()" << m_equiposenconsultaGeneral.size();
         return false;
     }
 }
@@ -207,7 +207,7 @@ void QueriesThreadController::consultaFinalizada(QString uuid, QString ip)
     else if ( m_mapUUIDParalelosDescubrimiento.contains(uuid) )
         m_mapUUIDParalelosDescubrimiento[uuid]--;
 
-    qDebug() << Q_FUNC_INFO << ip << "m_equiposenconsultaGeneral.size" << m_equiposenconsultaGeneral.size() <<
-                "m_mapUUIDParalelosFijo size" << m_mapUUIDParalelosFijo.size() <<
-                "m_mapUUIDParalelosDescubrimiento" << m_mapUUIDParalelosDescubrimiento.size();
+    // qDebug() << Q_FUNC_INFO << ip << "m_equiposenconsultaGeneral.size" << m_equiposenconsultaGeneral.size() <<
+    //             "m_mapUUIDParalelosFijo size" << m_mapUUIDParalelosFijo.size() <<
+    //             "m_mapUUIDParalelosDescubrimiento" << m_mapUUIDParalelosDescubrimiento.size();
 }

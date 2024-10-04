@@ -631,7 +631,7 @@ void BGPInfo::getNetworksBGPAttr()
     if ( bestall == "All" ) m_BGPNetworkAttAddOnlyBest = false;
 
     qDebug() << "\n BGP getNetworksBGPInfo";
-    qDebug() << m_vrf << m_networks;
+    qDebug() << m_vrf << bestall << m_networks;
 
     if ( m_networks.isEmpty() )
     {
@@ -890,6 +890,8 @@ void BGPInfo::on_term_receiveText_networksAttr()
                     network.best = lastBest;
                     m_lstNetworks.append( network );
 
+                    qDebug() << "Agregando SBGPNetwork attr" << network.network << network.neighborip << network.from;
+
                     if ( m_BGPNetworkAttAddOnlyBest && lastBest )
                         break;
                 }
@@ -917,6 +919,8 @@ void BGPInfo::on_term_receiveText_networksAttr()
             network.best = lastBest;
             network.lp = lastLP;
             network.originator = lastOriginator;
+
+            qDebug() << "Agregando SBGPNetwork attr" << network.network << network.neighborip << network.from;
 
             m_lstNetworks.append( network );
         }

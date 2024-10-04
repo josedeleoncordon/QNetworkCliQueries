@@ -46,6 +46,11 @@ void QueriesThread::_emitNewInformation()
 //    emit status( m_uuid,"Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
 //                 " - Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
 //                 QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter ) );
+    qInfo() << "Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
+                   " Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
+                   QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter );
+    qInfo() << "Equipos en consulta" << m_equiposenconsulta;
+
     emit status( m_uuid,"Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                  QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter ) );
 }
@@ -396,7 +401,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
     if ( m_cancelar )
         return;
 
-   qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado 1111"
+    qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado 1111"
             << qry->hostName() << "conexionID" << qry->conexionID();
     qCDebug(queriesthread) << "QueriesThread::equipoConsultado 1111"
              << qry->ip() << qry->hostName() << "conexionID" << qry->conexionID();
@@ -551,11 +556,11 @@ void QueriesThread::equipoConsultado(Queries *qry)
     {
         //Si se termino de consultar los equipos se finaliza
 
-        qCDebug(queriesthread) << "Analizando si se termina: m_equiposConsultados" << m_equiposConsultados
-                               << "m_lstIPsAintentarPorGW" << m_lstIPsAintentarPorGW
-                               << "m_equiposPorGWenConsulta" << m_equiposPorGWenConsulta                               
-                               << "m_lstIP.size()" << m_lstIP.size()
-                               << "m_equiposenconsulta" << m_equiposenconsulta;                                  
+        // qCDebug(queriesthread) << "Analizando si se termina: m_equiposConsultados" << m_equiposConsultados
+        //                        << "m_lstIPsAintentarPorGW" << m_lstIPsAintentarPorGW
+        //                        << "m_equiposPorGWenConsulta" << m_equiposPorGWenConsulta
+        //                        << "m_lstIP.size()" << m_lstIP.size()
+        //                        << "m_equiposenconsulta" << m_equiposenconsulta;
 
         if ( m_lstIP.isEmpty() &&
              m_lstIPsAintentarPorGW.isEmpty() &&

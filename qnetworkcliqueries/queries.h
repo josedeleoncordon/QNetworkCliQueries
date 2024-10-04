@@ -69,6 +69,7 @@ public:
     FuncionInfo *funcionQuery;
     RplInfo *rplRoutesQuery;
     RplInfo *rplPrefixesQuery;
+    RplInfo *rplCommunitiesQuery;
     ExitInfo *exitQuery;
 
     bool isConnected() { return m_connected; }
@@ -134,6 +135,8 @@ public:
     QList<SRplRouteInfo>& rplRoutesInfo(int i=0);
     QList<SRplPrefixInfo>& rplPrefixesInfo(int i=0);
     QList<SRplPrefixInfo>& rplPrefixesInfo(QString name);
+    QList<SRplCommunityInfo>& rplCommunitiesInfo(int i=0);
+    QList<SRplCommunityInfo>& rplCommunitiesInfo(QString name);
     QString funcionTxtInfo(int i=0);
     QString funcionTxtInfo(QString name);
     QStringList funcionLstTxtInfo(int i=0);
@@ -272,6 +275,7 @@ protected:
     QList<SIpRouteInfo> _lstSIpRouteInfo;
     QList<SRplRouteInfo> _lstRplRoutesInfo;
     QList<SRplPrefixInfo> _lstRplPrefixesInfo;
+    QList<SRplCommunityInfo> _lstRplCommunitiesInfo;
 
     void iniciar();
     FuncionBase* createQuerie(int option);
