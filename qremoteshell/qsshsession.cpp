@@ -20,7 +20,12 @@ QSSHSession::QSSHSession(QString host, QString port, QString user, QString pass,
 QSSHSession::~QSSHSession()
 {
     qCDebug(qsshsession) << _host << "QSSHSession::~QSSHSession()";
-    if ( read_notifier ) delete read_notifier;
+    if ( read_notifier )
+    {
+        qCDebug(qsshsession) << _host << "Del";
+        delete read_notifier;
+        qCDebug(qsshsession) << _host << "SI";
+    }
 }
 
 int QSSHSession::authenticate_console(ssh_session session){
