@@ -222,6 +222,7 @@ RplInfo::RplInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
     vrp_xpl_ipv4_trabajado=false;
+    _mikrotiksecondquery=false;
 }
 
 RplInfo::RplInfo(const RplInfo &other):
@@ -241,6 +242,11 @@ void RplInfo::getRplRouteInfo()
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplRoute()));
         termSendText("show rpl route");        
     }
+    else if ( m_os == "VRP" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplRoute()));
+        termSendText("display current-configuration configuration xpl-filter");
+    }
     else
         finished();
 }
@@ -252,7 +258,7 @@ void RplInfo::on_term_receiveText_rplRoute()
         return;
 
     QStringList lines = txt.split("\n");
-    QRegExp exp("^route-policy (\\S+)$");
+    QRegExp exp("^(route-policy|xpl route-filter) (\\S+)$");
     QString lastRPL;
     QString rpltxt;
     for (QString line : lines)
@@ -260,7 +266,7 @@ void RplInfo::on_term_receiveText_rplRoute()
         line = line.left( line.size()-1 );
         if ( line.contains(exp) )
         {
-            lastRPL = exp.cap(1);
+            lastRPL = exp.cap(2);
             rpltxt.append( line+"\n" );
             continue;
         }
@@ -270,7 +276,7 @@ void RplInfo::on_term_receiveText_rplRoute()
 
         rpltxt.append( line+"\n" );
 
-        if ( line.contains(QRegExp("^end-policy$")) )
+        if ( line.contains(QRegExp("^(end-policy|#)$")) )
         {
             SRplRouteInfo s;
             s.nombre = lastRPL;
@@ -301,6 +307,11 @@ void RplInfo::getRplPrefixInfo()
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplPrefix()));
         termSendText("display current-configuration configuration xpl-pfx");
     }
+    else if ( m_os == "RouterOS" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplPrefix()));
+        termSendText("routing filter rule print\r"); //este es un tipo de rpl route. sacaremos las redes que tengan accept
+    }
     else
         finished();
 }
@@ -308,58 +319,143 @@ void RplInfo::getRplPrefixInfo()
 void RplInfo::on_term_receiveText_rplPrefix()
 {
     txt.append(term->dataReceived());
+
+    // qDebug() << "\n\n\ntxt datareceived" << txt;
+
     if ( !allTextReceived() )
         return;
+
+    // qDebug() << "RplInfo::on_term_receiveText_rplPrefix()";
 
     QStringList lines = txt.split("\n");
     QRegExp exp("^(xpl ip.+prefix-list|prefix-set) (\\S+)$");
     QString lastName;
+    QString lastPrefix;
     QStringList lst;
     short lastVersion = 0;
+    SRplPrefixInfo *lastS = nullptr;
     for (QString line : lines)
     {
         line = line.left( line.size()-1 );
         // qDebug() << "line" << line;
-        if ( line.contains(exp) )
+
+        if ( m_brand == "Cisco" || m_os == "VRP" )
         {
-            lastName = exp.cap(2);
-            if ( m_os == "VRP" )
+            if ( line.contains(exp) )
             {
-                if ( line.contains( "xpl ipv6-" ) )
-                    lastVersion=6;
-                else
-                    lastVersion=4;
-            }//XR queda con version 0
-            continue;
+                lastName = exp.cap(2);
+                if ( m_os == "VRP" )
+                {
+                    if ( line.contains( "xpl ipv6-" ) )
+                        lastVersion=6;
+                    else
+                        lastVersion=4;
+                }//XR queda con version 0
+                continue;
+            }
+
+            if ( lastName.isEmpty() )
+                continue;
+
+            if ( line.contains(QRegExp("^(end-set| end-list)$")) )
+            {
+                // qDebug() << "Agregar rpl";
+                SRplPrefixInfo s;
+                s.nombre = lastName;
+                s.lstPrefixes = lst;
+                s.ipversion = lastVersion;
+                s.type = SRplPrefixInfo::Rpl;
+                m_lstRplPrefixes.append(s);
+                lastName.clear();
+                lst.clear();
+                continue;
+            }
+
+            //convertimos: 172.17.23.0 24 -> 172.17.23.0/24  VRP
+            QString p = line.replace(",","").simplified();
+            p.replace(QRegExp("^(\\S+) (\\d{1,3})(.*)"),
+                      "\\1/\\2\\3");
+
+            lst.append( p );
         }
-
-        if ( lastName.isEmpty() )
-            continue;
-
-        if ( line.contains(QRegExp("^(end-set| end-list)$")) )
+        else if ( m_os == "RouterOS" )
         {
-            // qDebug() << "Agregar rpl";
-            SRplPrefixInfo s;
-            s.nombre = lastName;
-            s.lstPrefixes = lst;
-            s.ipversion = lastVersion;
-            s.type = SRplPrefixInfo::Rpl;
-            m_lstRplPrefixes.append(s);
-            lastName.clear();
-            lst.clear();
-            continue;
+            qDebug() << "line" << line;
+
+            QRegExp exp("chain=(\\S+) rule=\"if \\(dst (in|==) (.+)\\) \\{ accept; \\}");
+            QRegExp exp2("chain=(\\S+) prefix=(\\S+) .+action=accept");
+            QString nombre;
+            QString prefix;
+            if ( line.contains(exp) )
+            {
+                nombre=exp.cap(1);
+                prefix=exp.cap(3);
+            }
+            else if ( line.contains(exp2) )
+            {
+                nombre=exp2.cap(1);
+                prefix=exp2.cap(2);
+            }
+            else
+            {
+                //debido que algunos equipos la linea con esta informacion la parte en dos lineas
+                exp.setPattern("chain=(\\S+) ");
+                if ( line.contains(exp) ) lastName=exp.cap(1);
+                exp.setPattern("prefix=(\\S+) ");
+                if ( line.contains(exp) ) lastPrefix=exp.cap(1);
+                if ( line.contains("action=accept") )
+                {
+                    if ( !lastName.isEmpty() && !lastPrefix.isEmpty() )
+                    {
+                        nombre=lastName;
+                        prefix=lastPrefix;
+                        lastName.clear();
+                        lastPrefix.clear();
+                    }
+                }
+            }
+
+            qDebug() << "nombre" << nombre << "prefix" << prefix;
+
+            if ( !nombre.isEmpty() && !prefix.isEmpty() )
+            {
+                bool nuevo=false;
+                if ( !lastS )
+                    nuevo=true;
+                else
+                {
+                    if ( lastS->nombre != nombre )
+                        nuevo=true;
+                }
+
+                if ( nuevo )
+                {
+                    SRplPrefixInfo s;
+                    s.nombre = nombre;
+                    QStringList lst;
+                    lst.append( prefix );
+                    s.lstPrefixes = lst;
+                    m_lstRplPrefixes.append(s);
+                    lastS = &m_lstRplPrefixes.last();
+                }
+                else
+                    lastS->lstPrefixes.append( prefix );
+            }
         }
-
-        //convertimos: 172.17.23.0 24 -> 172.17.23.0/24  VRP
-        QString p = line.replace(",","").simplified();
-        p.replace(QRegExp("^(\\S+) (\\d{1,3})(.*)"),
-                  "\\1/\\2\\3");
-
-        lst.append( p );
     }
 
-    if ( m_os == "IOS XR" )
-        finished();
+    if ( m_brand == "Cisco" )
+        finished();    
+    else if ( m_os == "RouterOS" )
+    {
+        if ( !_mikrotiksecondquery )
+        {
+            _mikrotiksecondquery=true;
+            termSendText("routing filter print\r");
+        }
+        else
+            finished();
+    }
     else if ( m_os == "VRP" )
     {
         if ( !vrp_xpl_ipv4_trabajado )
@@ -390,45 +486,53 @@ void RplInfo::on_term_receiveText_prefix_list()
     {
         line = line.left( line.size()-1 );
         // qDebug() << "line2" << line;
-        if ( line.contains(exp) )
+
+        if ( m_brand == "Cisco" || m_os == "VRP" )
         {
-            QString name = exp.cap(2);
-            QString prefix = exp.cap(4);
-            prefix.replace("greater-equal","ge").replace("less-equal","le");
-            //convertimos: 172.17.23.0 24 -> 172.17.23.0/24  VRP
-            prefix.replace(QRegExp("^(\\S+) (\\d{1,3})(.*)"),
-                           "\\1/\\2\\3");
-            // qDebug() << "entro" << name << lastName;
-            if ( lastName != name )
+            if ( line.contains(exp) )
             {
-                //nuevo prefix-list
-                QStringList lst;
-                lst.append(prefix);
+                QString name = exp.cap(2);
+                QString prefix = exp.cap(4);
+                prefix.replace("greater-equal","ge").replace("less-equal","le");
+                //convertimos: 172.17.23.0 24 -> 172.17.23.0/24  VRP
+                prefix.replace(QRegExp("^(\\S+) (\\d{1,3})(.*)"),
+                               "\\1/\\2\\3");
+                // qDebug() << "entro" << name << lastName;
+                if ( lastName != name )
+                {
+                    //nuevo prefix-list
+                    QStringList lst;
+                    lst.append(prefix);
 
-                short version=0;
-                if ( line.contains( "ip ipv6-prefix" ) || line.contains( "ipv6 prefix-list" ) )
-                    version=6;
+                    short version=0;
+                    if ( line.contains( "ip ipv6-prefix" ) || line.contains( "ipv6 prefix-list" ) )
+                        version=6;
+                    else
+                        version=4;
+
+                    // qDebug() << "agregando prefixlist" << name << exp.cap(4);
+
+                    SRplPrefixInfo s;
+                    s.nombre = name;
+                    s.lstPrefixes = lst;
+                    s.type = SRplPrefixInfo::PrefixList;
+                    s.ipversion = version;
+                    m_lstRplPrefixes.append(s);
+                    lastName = name;
+                    lastS = &m_lstRplPrefixes[m_lstRplPrefixes.size()-1];
+                    continue;
+                }
                 else
-                    version=4;
-
-                // qDebug() << "agregando prefixlist" << name << exp.cap(4);
-
-                SRplPrefixInfo s;
-                s.nombre = name;
-                s.lstPrefixes = lst;
-                s.type = SRplPrefixInfo::PrefixList;
-                s.ipversion = version;
-                m_lstRplPrefixes.append(s);
-                lastName = name;
-                lastS = &m_lstRplPrefixes[m_lstRplPrefixes.size()-1];
-                continue;
+                {
+                    //sigue siendo el mismo prefix-list
+                    // qDebug() << "sigue el mismo";
+                    lastS->lstPrefixes.append(prefix);
+                }
             }
-            else
-            {
-                //sigue siendo el mismo prefix-list
-                // qDebug() << "sigue el mismo";
-                lastS->lstPrefixes.append(prefix);
-            }
+        }
+        else if ( m_os == "RouterOS" )
+        {
+
         }
     }
 

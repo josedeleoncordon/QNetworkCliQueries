@@ -89,6 +89,7 @@ private slots:
 
 private:
     bool vrp_xpl_ipv4_trabajado;
+    bool _mikrotiksecondquery;
 };
 
 Q_DECLARE_METATYPE(RplInfo)

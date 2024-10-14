@@ -68,7 +68,8 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNe
     out << data.upDownTime;
     out << data.prfxRcd;
     out << data.vrf;
-    out << data.addressfamily;                   
+    out << data.addressfamily;
+    out << data.prefixFilterIN;
     //infobase
     out << data.datetime;
     out << data.operativo;
@@ -85,6 +86,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNeighbor&
     in >> data.prfxRcd;
     in >> data.vrf;
     in >> data.addressfamily;
+    in >> data.prefixFilterIN;
     //infobase
     in >> data.datetime;
     in >> data.operativo;
@@ -138,6 +140,7 @@ BGPInfo::BGPInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
     m_BGPNetworkAttAddOnlyBest=true;
+    _mikrotiksecondquery=false;
 }
 
 BGPInfo::BGPInfo(const BGPInfo &other):
@@ -208,6 +211,14 @@ void BGPInfo::getBGPNeighbors()
         else
             finished();
     }
+    else if ( m_os == "RouterOS" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_BGPNeighbors()));
+        if ( m_type == "IPV4" )
+            termSendText("routing bgp session print\r");
+        else
+            finished();
+    }
     else
     {
         qDebug() << "BGPInfo::getBGPNeighbors():" << m_brand << "no soportado";
@@ -237,6 +248,7 @@ void BGPInfo::on_term_receiveText_BGPNeighbors()
 
     QStringList lines = txt.split("\n");
     QStringList data;
+    SBGPNeighbor *lastS=nullptr;
     bool append=false;
     for (QString line : lines)
     {
@@ -248,55 +260,101 @@ void BGPInfo::on_term_receiveText_BGPNeighbors()
         //                              0       0        0    0    0 21:42:53 Idle
 
         line = line.left( line.size()-1 );
-        exp.setPattern("^ *(\\d+\\.\\d+\\.\\d+\\.\\d+).+");
-        if ( line.contains(exp) )
-        {
-            data.clear();
-            append=true;
-        }
-        if ( append )
-            data.append( line.split(" ",QString::SkipEmptyParts) );
+        // qDebug() << "line" << line;
 
-        if ( data.isEmpty() )
-            continue;
-
-        if ( m_brand == "Cisco" )
+        if ( m_brand == "Cisco" || m_os == "VRP" )
         {
-            if ( data.size() == 10 )
+            exp.setPattern("^ *(\\d+\\.\\d+\\.\\d+\\.\\d+).+");
+            if ( line.contains(exp) )
             {
-                SBGPNeighbor s;
-                s.neighborip = data.at(0).simplified();
-                s.as = data.at(2).simplified();
-                s.upDownTime = data.at(8).simplified();
-                s.prfxRcd = data.at(9).simplified();
-                s.vrf = m_vrf_currentVRF;
-                s.addressfamily = m_type;
+                data.clear();
+                append=true;
+            }
+            if ( append )
+                data.append( line.split(" ",QString::SkipEmptyParts) );
 
-                m_lstNeigbors.append(s);
+            if ( data.isEmpty() )
+                continue;
+
+            if ( m_brand == "Cisco" )
+            {
+                if ( data.size() == 10 )
+                {
+                    SBGPNeighbor s;
+                    s.neighborip = data.at(0).simplified();
+                    s.as = data.at(2).simplified();
+                    s.upDownTime = data.at(8).simplified();
+                    s.prfxRcd = data.at(9).simplified();
+                    s.vrf = m_vrf_currentVRF;
+                    s.addressfamily = m_type;
+
+                    m_lstNeigbors.append(s);
+                }
+            }
+            else if ( m_os == "VRP" )
+            {
+                if ( data.size() == 9 )
+                {
+                    SBGPNeighbor s;
+                    s.neighborip = data.at(0).simplified();
+                    s.as = data.at(2).simplified();
+                    s.upDownTime = data.at(6).simplified();
+                    if ( data.at(7) != "Established" )
+                        s.prfxRcd = "Active";
+                    else
+                        s.prfxRcd = data.at(8).simplified();
+                    s.vrf = m_vrf_currentVRF;
+                    s.addressfamily = m_type;
+
+                    m_lstNeigbors.append(s);
+                }
             }
         }
-        else if ( m_os == "VRP" )
+        else if ( m_os == "RouterOS" )
         {
-            if ( data.size() == 9 )
+            //MikroTik
+            QRegExp exp("remote.address=(\\S+) ");
+            if ( line.contains(exp) )
             {
                 SBGPNeighbor s;
-                s.neighborip = data.at(0).simplified();
-                s.as = data.at(2).simplified();
-                s.upDownTime = data.at(6).simplified();
-                if ( data.at(7) != "Established" )
-                    s.prfxRcd = "Active";
-                else
-                    s.prfxRcd = data.at(8).simplified();
-                s.vrf = m_vrf_currentVRF;
-                s.addressfamily = m_type;
-
+                s.neighborip = exp.cap(1);
                 m_lstNeigbors.append(s);
+                lastS = &m_lstNeigbors.last();
+            }
+            if ( !lastS ) continue;
+
+            exp.setPattern("remote-as=(\\S+) ");
+            if ( line.contains(exp) )
+                lastS->as = exp.cap(1);
+            exp.setPattern("remote.+ \\.as=(\\S+) ");
+            if ( line.contains(exp) )
+                lastS->as = exp.cap(1);
+            exp.setPattern("in-filter=(\\S+) ");
+            if ( line.contains(exp) )
+            {
+                QString str = exp.cap(1);
+                str.replace("\"","");
+                str.replace("\\","");
+                lastS->prefixFilterIN = str;
+            }
+            exp.setPattern("input.+ .filter=(\\S+) ");
+            if ( line.contains(exp) )
+            {
+                QString str = exp.cap(1);
+                str.replace("\"","");
+                str.replace("\\","");
+                lastS->prefixFilterIN = str;
             }
         }
     }
 
     if ( m_type == "VRF" )
         getBGPNeighbors_VRF_nextVRF();
+    else if ( m_os == "RouterOS" && !_mikrotiksecondquery )
+    {
+        _mikrotiksecondquery=true;
+        termSendText("routing bgp peer print detail\r");
+    }
     else
         finished();
 }
@@ -1033,7 +1091,8 @@ QDebug operator<<(QDebug dbg, const BGPInfo &info)
     {
         dbg.nospace() << "BGPNeighbor:\n";
         for (SBGPNeighbor i: info.m_lstNeigbors)
-            dbg.space() << i.addressfamily << i.vrf << i.neighborip << i.as << i.upDownTime << i.prfxRcd << "\n";
+            dbg.space() << i.addressfamily << i.vrf << i.neighborip << i.as << i.upDownTime
+                        << i.prfxRcd << i.prefixFilterIN << "\n";
     }
 
     if ( !info.m_lstNetworks.isEmpty() )

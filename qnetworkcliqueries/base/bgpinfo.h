@@ -13,6 +13,7 @@ struct SBGPNeighbor : InfoBase
     QString prfxRcd;
     QString vrf;
     QString addressfamily;
+    QString prefixFilterIN; //por si el equipo junto a la informacion de BGP manda el filtro. MickoTik
 };
 
 struct SBGPNetwork : InfoBase
@@ -110,6 +111,8 @@ private slots:
 
 private:
     void getBGPNeighbors_VRF_nextVRF();
+
+    bool _mikrotiksecondquery;
 };
 
 Q_DECLARE_METATYPE(SBGPNetwork)

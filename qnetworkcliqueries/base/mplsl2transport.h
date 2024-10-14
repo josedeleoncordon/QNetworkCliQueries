@@ -97,6 +97,7 @@ private slots:
     void on_term_receiveText_XR_Xconnect();
 
     void on_term_receiveText_VRP_VSI();
+    void on_term_receiveText_VRP_VSI_SERVICES_ALL();
     void on_term_receiveText_VRP_L2Transport();
 };
 

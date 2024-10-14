@@ -49,7 +49,7 @@ void QueriesThread::_emitNewInformation()
     qInfo() << "Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
                    " Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                    QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter );
-    qInfo() << "Equipos en consulta" << m_equiposenconsulta;
+    // qInfo() << "Equipos en consulta" << m_equiposenconsulta;
 
     emit status( m_uuid,"Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                  QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter ) );
@@ -363,7 +363,8 @@ void QueriesThread::siguienteEquipo(QString IP, bool gw)
     }
     query->setConexionID(IDConexion);
     query->setConnectionProtocol( m_connectionprotocol );
-    query->setRemoteShellUsersPasswords( lstRemoteShellUsersPasswords );
+    if ( !lstRemoteShellUsersPasswords.isEmpty() )
+        query->setRemoteShellUsersPasswords( lstRemoteShellUsersPasswords );
     query->setUser2( m_user2 );
     query->setPassword2( m_pwd2 );
     query->setQueriesConfiguration( m_queriesconfiguration );

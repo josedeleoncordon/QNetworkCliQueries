@@ -25,6 +25,7 @@ QRemoteShell::QRemoteShell(QString ip, QString user, QString pwd, QString platfo
     m_ssh = nullptr;
     m_sshok=false;
     m_sshmodelibssh=true;
+    m_lastlibsshfailed=false;
     m_connectionRefused=false;
     m_consultaIntentos=0;
     setConnectionProtocol( SSHTelnet );
@@ -125,6 +126,7 @@ void QRemoteShell::m_protocolTry()
     {
         if ( m_sshmodelibssh )
         {
+            qCDebug(qremoteshell) << m_ip << "try libssh";
             if ( m_ssh  )
             {
                 m_ssh->disconnect();
@@ -139,8 +141,19 @@ void QRemoteShell::m_protocolTry()
         }
         else
         {
-            emit reachable(); //como ya la sesion mode libssh rechazo la conexion suponemos que con cli es alcanzable
-            m_terminal->sendCommand( "ssh "+m_user+"@"+m_ip );
+            if ( m_terminal )
+            {
+                qCDebug(qremoteshell) << m_ip << "try ssh cli";
+                emit reachable(); //como ya la sesion mode libssh rechazo la conexion suponemos que con cli es alcanzable
+                m_terminal->sendCommand( "ssh "+m_user+"@"+m_ip );
+            }
+            else
+            {
+                m_terminal = new Terminal( m_ip,m_linuxprompt );
+                connect(m_terminal,SIGNAL(ready(bool)),SLOT(m_terminal_ready(bool))); //se emite este para luego regresar aca
+                connect(m_terminal,SIGNAL(receivedData(QString)),SLOT(m_terminal_detaReceived(QString)));
+                connect(m_terminal,SIGNAL(finished()),SLOT(m_terminal_finished()));
+            }
         }
 
         break;
@@ -183,7 +196,8 @@ void QRemoteShell::ssh_host_disconnected()
         emit disconnected();
     else
     {
-        qCDebug(qremoteshell) << m_ip << "SSH Error" << m_ssh->error();
+        qCDebug(qremoteshell) << m_ip << "SSH Error" << m_ssh->error() << m_ssh->errortxt();
+        _errortxt = m_ssh->errortxt();
         switch ( m_ssh->error() )
         {
         case QSSHSession::OPTIONS_ERROR:
@@ -194,6 +208,7 @@ void QRemoteShell::ssh_host_disconnected()
                 //no es posible la conexion ssh. Probamos con una terminal y cli ssh
                 qCDebug(qremoteshell) << m_ip << "LibSSH kex error. Probando SSH CLI via terminal";
                 qCDebug(qremoteshell) << "LibSSH kex error. Probando SSH CLI via terminal" << m_ip;
+                m_lastlibsshfailed=true;
                 m_ssh->disconnect();
                 m_ssh->host_disconnect();
                 m_ssh->deleteLater();

@@ -133,6 +133,7 @@ public:
     QList<SBGPNetwork>& bgpNetworksBGPAttrInfo(int i=0);
     QList<SIpRouteInfo>& ipRoutesInfo(int i=0);
     QList<SRplRouteInfo>& rplRoutesInfo(int i=0);
+    QList<SRplRouteInfo>& rplRoutesInfo(QString name);
     QList<SRplPrefixInfo>& rplPrefixesInfo(int i=0);
     QList<SRplPrefixInfo>& rplPrefixesInfo(QString name);
     QList<SRplCommunityInfo>& rplCommunitiesInfo(int i=0);
@@ -200,6 +201,7 @@ signals:
 
 protected:
     QRemoteShell *term;
+    bool _sshUseLibSsh;
     QList<int> m_lstOpciones;
     int m_opcionActual;
     QMultiMap<QString,FuncionBase*> m_lstFunciones;
@@ -279,7 +281,7 @@ protected:
 
     void iniciar();
     FuncionBase* createQuerie(int option);
-    void conectarAequipo(QString ip, QString user, QString pwd, QString platform, QString linuxprompt);
+    void conectarAequipo(QString ip, QString user, QString pwd, QString platform, QString linuxprompt, bool sshUseLibSsh);
     void nextProcess();    
     void borrarTerminal();
     void crearFuncionesFaltantes();

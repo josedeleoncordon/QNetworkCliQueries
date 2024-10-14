@@ -261,14 +261,24 @@ bool FuncionBase::allTextReceived()
 
     exp.setPattern("^\\S+#\\s*$");
     exp2.setPattern("^<\\S+>");
-    if ( (!data.last().simplified().contains(exp) &&
-          !data.last().simplified().contains(exp2))
-         || data.contains("Description: ") )
+    QRegExp exp3("\\[.+@(\\S+)\\] \\> *");
+
+    // qDebug() << m_ip << "verificando promt" << data.last();
+
+    if ((!data.last().simplified().contains(exp) &&
+         !data.last().simplified().contains(exp2) &&
+         !data.last().simplified().contains(exp3)
+         )
+        || data.contains("Description: ") )
         return false;
 
     txt.replace("---- More ----","");
     txt.replace("--More--","");
     txt.replace("more..","");
+
+    //Mikrotik
+    txt.replace(QRegExp("\\[m\\[\\d+m"),"");
+    txt.replace("[m","");
 
     if ( txt.contains("Invalid input detected at '^'") ||
          txt.contains(QRegExp("Translating .+domain server")) )

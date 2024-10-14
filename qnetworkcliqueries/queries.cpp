@@ -103,6 +103,7 @@ void Queries::iniciar()
     m_datetime = QDateTime::currentDateTime();
     _recorridoEnArbol = false;
     _userPwdusingList=false;
+    _sshUseLibSsh=true;
 
     queryTimer = new QTimer(this);
     queryTimer->setInterval( 30000 );
@@ -522,11 +523,13 @@ void Queries::setGW(QString GW)
     m_gw = GW;
 }
 
-void Queries::conectarAequipo(QString ip,QString user, QString pwd, QString platform, QString linuxprompt)
+void Queries::conectarAequipo(QString ip, QString user, QString pwd,
+                              QString platform, QString linuxprompt, bool sshUseLibSsh)
 {
     m_consultaIntentos++;
     term = new QRemoteShell(ip,user,pwd,platform,linuxprompt,this);
     term->setConnectionProtocol( m_connectionprotol );
+    term->setSshModeLibSshEnabled(sshUseLibSsh);
     // term->setGW(m_gw);
     // term->setUser2( m_user2 );
     // term->setPassword2( m_pwd2 );
@@ -776,6 +779,13 @@ QList<SRplRouteInfo>& Queries::rplRoutesInfo(int i)
     return dynamic_cast<RplInfo*>(f)->rplRouteInfo();
 }
 
+QList<SRplRouteInfo>& Queries::rplRoutesInfo(QString name)
+{
+    FuncionBase *f = getQuery(RplRoutes,name);
+    if ( !f ) return _lstRplRoutesInfo;
+    return dynamic_cast<RplInfo*>(f)->rplRouteInfo();
+}
+
 QList<SRplPrefixInfo>& Queries::rplPrefixesInfo(int i)
 {
     FuncionBase *f = getQuery(RplPrefixes,i);
@@ -912,7 +922,7 @@ void Queries::nextProcess()
     if ( m_opcionActual == Connect )
     {
         qCDebug(queries) << m_ip  << "creando term" << m_ip << m_user << m_pwd;
-        conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
+        conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt,_sshUseLibSsh);
         return;
     }
 
@@ -1548,6 +1558,11 @@ void Queries::processConnectToHostDisconnected()
 
     bool lastConnectionRefused = term->connectionRefused();
     _errortxt = term->errorTxt();
+    if ( term->lastLibSshFailed() )
+    {
+        qCDebug(queries) << m_ip  << "_sshUseLibSsh disabled";
+        _sshUseLibSsh = false;
+    }
     borrarTerminal();
 
     if ( m_connected )
@@ -1560,7 +1575,7 @@ void Queries::processConnectToHostDisconnected()
         {
             qCDebug(queries) << m_ip  << "reconectando y continuando consulta donde se quedo" << m_ip << m_name;
             m_connected=false;
-            conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt);
+            conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt,_sshUseLibSsh);
         }
         else
         {
@@ -1643,7 +1658,8 @@ void Queries::processConnectToHostDisconnected()
                 // QEventLoop loop;
                 QTimer *t = new QTimer;
                 // t->setSingleShot(true);
-                QTimer::singleShot( 5000,[this]() { conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt); } );
+                QTimer::singleShot( 5000,[this]() { conectarAequipo(m_ip,m_user,m_pwd,m_platform,
+                                                                    m_linuxprompt,_sshUseLibSsh); } );
                 // connect(t, SIGNAL(timeout()), &loop, SLOT(quit()),Qt::QueuedConnection);
                 // t->start(5000);
                 // loop.exec();
@@ -1715,6 +1731,7 @@ void Queries::processConnectToHostConnected()
 
 void Queries::processPlatform()
 {
+    qCDebug(queries) << m_ip  << "Queries::processPlatform()";
     queryTimer->stop();
     m_contieneconsultas=true;
     if ( m_platform.isEmpty() )

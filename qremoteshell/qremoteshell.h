@@ -43,6 +43,8 @@ public:
     QString& dataReceived() { return m_dataReceived; }
     bool connectionRefused() { return m_connectionRefused; }
     QString errorTxt() { return _errortxt; }
+    void setSshModeLibSshEnabled(bool enabled) { m_sshmodelibssh=enabled; }
+    bool lastLibSshFailed() { return m_lastlibsshfailed; }
 
 private:
     ConnectionProtocol m_protocol;    
@@ -68,6 +70,7 @@ private:
     bool m_sshok;
     bool m_sshmodelibssh;
     short m_consultaIntentos;
+    bool m_lastlibsshfailed;
 
     Terminal *m_terminal;
 

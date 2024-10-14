@@ -915,6 +915,7 @@ QString estandarizarInterfaz(QString interfaz)
     interfaz.replace("nGigE","");
     interfaz.replace("GigE","");
     interfaz.replace("POS","PO");
+    interfaz.replace("Virtual-Ethernet","VE");
     interfaz.replace("Ethernet","Eth");
     interfaz.replace("Vlanif","Vlan");
     interfaz.replace("VLAN","Vlan");

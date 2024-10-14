@@ -692,6 +692,46 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI()
     }
 
     term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_VRP_VSI_SERVICES_ALL()));
+    termSendText("display vsi services all");
+}
+
+void MplsL2TransportInfo::on_term_receiveText_VRP_VSI_SERVICES_ALL()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    //asociamos la vsi con el bridge o ac
+    //Virtual-Ethernet1/0/1.1731          COCOINT10114314I                up    up
+    //Virtual-Ethernet1/0/1.1732          COCOECO10119621I                up    up
+    //Virtual-Ethernet1/0/1.1733          COCOINV10119506I                up    up
+    //Bridge-domain 3989                  COCOINT10075827I                --    --
+    //Bridge-domain 3990                  COCOINT10076499I                --    --
+    QStringList lines = txt.split("\n");
+    foreach (QString line, lines)
+    {
+        line = line.simplified();
+
+        //reemplazamos la lineas de Bridge-domain 3990 por Vbdif
+        QRegExp expbridge("Bridge-domain (\\d+)");
+        line.replace(expbridge,"Vbdif\\1");
+
+        QStringList data=line.split(" ",QString::SkipEmptyParts);
+        if ( data.size() < 4 )
+            continue;
+
+        for ( SMplsL2VFIInfo& i : m_lstMplsL2VFIs )
+        {
+            if ( i.vfi == data.at(1) )
+            {
+                i.AC=estandarizarInterfaz(data.at(0));
+                break;
+            }
+        }
+    }
+
+    term->disconnectReceiveTextSignalConnections();
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_VRP_L2Transport()));
     termSendText("display mpls l2vc brief");
 }
