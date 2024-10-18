@@ -1,5 +1,5 @@
 /* remoteshell con opcion para abrir shell locales y ejecutar ssh por medio de cli
- * para conexiones hacia servidores que solo soportan DSA.
+ * para conexiones hacia equipos que solo soportan DSA.
  * Antes de compilar libssh con -DWITH_DSA=ON */
 
 #ifndef QREMOTESHELL_H
@@ -8,13 +8,12 @@
 #include <QObject>
 #include <QFile>
 #include <QTextStream>
-#include <QRegularExpression>
-#include <QRegularExpressionMatch>
 
 #include "qremoteshell_global.h"
 
 class QTcpSocket;
 class QTimer;
+class Terminal;
 class QTelnet;
 class QSSHSession;
 
@@ -62,7 +61,6 @@ private:
     QString m_vendor;
     QString m_host;
     QString m_linuxprompt;
-    QRegularExpressionMatch match;
     bool m_hostConnected;
     bool m_termle;
     bool m_enablesent;
@@ -70,13 +68,15 @@ private:
     bool m_connectionRefused;
     QString _errortxt;
     QString m_dataReceived;
-    QRegularExpression m_localprompt;
+    QRegExp m_localprompt;
     QTelnet *m_telnet;
     QSSHSession *m_ssh;
     bool m_sshok;
     bool m_sshmodelibssh;
     short m_consultaIntentos;
     bool m_lastlibsshfailed;
+
+    Terminal *m_terminal;
 
     QString eliminarCaractaresNoImprimibles(QString txt);
     void m_nextTry();
@@ -90,7 +90,9 @@ private slots:
     void ssh_host_connected();
     void ssh_host_disconnected();
     void on_ssh_dataReceived();
+    void m_terminal_ready(bool ready);
     void m_terminal_detaReceived(QString);
+    void m_terminal_finished();    
 
 signals:
     void reachable();

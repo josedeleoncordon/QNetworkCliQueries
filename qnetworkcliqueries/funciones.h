@@ -178,7 +178,7 @@ QString convertirMascaraOctetosAdos(QString mascara);
 //
 // lista de posiciones debe venir ordenada en forma ascendente
 QList<QStringList> tableMultiRow2Table(QString &txt,
-                                       QMap<int, QRegExp> &mapPosicionesExpCampos);
+                                       QMap<int, QRegularExpression> &mapPosicionesExpCampos);
 
 //Una fila que este indentada la sube al finalizar la linea anterior
 //*  2a00:86c0:2008::/47
@@ -206,7 +206,7 @@ short numbertxt2short(QString);
 int numbertxt2int(QString);
 
 //Devuelve todas las coincidencias de un texto
-QStringList getRegExpAllMatches(QRegExp rx, QString txt);
+QStringList getRegExpAllMatches(QRegularExpression rx, QString txt);
 
 //2.00658804295556E7 -> 20065880
 //20065880.4295556 -> 20065880

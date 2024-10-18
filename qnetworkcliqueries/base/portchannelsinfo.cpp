@@ -118,7 +118,7 @@ void PortChannelsInfo::on_term_receiveText()
     QStringList lines = txt.split("\n");
 
     QString lastBundle;
-    QRegExp expGroup;
+    QRegularExpression expGroup;
 
     foreach (QString line, lines)
     {
@@ -127,17 +127,17 @@ void PortChannelsInfo::on_term_receiveText()
         if ( m_os == "IOS XR" )
         {
             expGroup.setPattern("^Bundle-Ether(\\d+)$");
-            if ( line.contains(expGroup) )
+            if ( line.contains(expGroup,&match) )
             {
-                lastBundle = expGroup.cap(1);
+                lastBundle = match.captured(1);
                 continue;
             }
 
             exp.setPattern("\\w+\\d/\\d.+Active");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 SPortChannel pc;
-                pc.interfaz = estandarizarInterfaz( line.split(" ",QString::SkipEmptyParts).at(0).simplified() );
+                pc.interfaz = estandarizarInterfaz( line.split(" ",Qt::SkipEmptyParts).at(0).simplified() );
                 pc.group = lastBundle;
                 pc.datetime = QDateTime::currentDateTime();
                 pc.operativo = true;
@@ -150,9 +150,9 @@ void PortChannelsInfo::on_term_receiveText()
             int c=0;
 
             expGroup.setPattern("Po(\\d+)");
-            if ( line.contains(expGroup) )
+            if ( line.contains(expGroup,&match) )
             {
-                lastBundle = expGroup.cap(1);
+                lastBundle = match.captured(1);
 
                 //Si la linea contiene la interfaz Po1 entonces se empieza en la cuarta o quinta columna
                 //Si la linea no contiene la interfaz se comienza en la primera
@@ -173,16 +173,16 @@ void PortChannelsInfo::on_term_receiveText()
             }
 
             exp.setPattern("\\d+\\((P|bndl)\\)");
-            if ( line.contains(exp) && !lastBundle.isEmpty() )
+            if ( line.contains(exp,&match) && !lastBundle.isEmpty() )
             {
-                QStringList data = line.split(" ",QString::SkipEmptyParts);
+                QStringList data = line.split(" ",Qt::SkipEmptyParts);
 
                 QString interfaz;
                 for ( ; c<data.size(); c++ )
                 {
                     interfaz = data.at(c).simplified();
                     exp.setPattern("\\((P|bndl)\\)");
-                    if ( interfaz.contains(exp) )
+                    if ( interfaz.contains(exp,&match) )
                     {
                         interfaz.replace(exp,"");
                         interfaz = estandarizarInterfaz( interfaz );
@@ -216,17 +216,17 @@ void PortChannelsInfo::on_term_receiveTextHuawei()
 
         //LAG ID: 1                   WorkingMode: STATIC
         exp.setPattern("LAG ID: (\\d+) +WorkingMode.+");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            lastBundle = exp.cap(1);
+            lastBundle = match.captured(1);
             continue;
         }
 
         exp.setPattern("([a-zA-Z]+\\d+/\\d+(/\\d+)*) +\\d+ +\\w+\\-\\w+\\-\\w+");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             SPortChannel pc;
-            pc.interfaz = estandarizarInterfaz(exp.cap(1));
+            pc.interfaz = estandarizarInterfaz(match.captured(1));
             pc.group = lastBundle;
             pc.datetime = QDateTime::currentDateTime();
             pc.operativo = true;

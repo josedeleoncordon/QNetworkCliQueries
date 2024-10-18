@@ -38,13 +38,13 @@ void OSPFInfoCisco::on_term_receiveTextNeighbors()
         line = line.simplified();
 
         exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
-        if ( !line.contains(exp) )
+        if ( !line.contains(exp,&match) )
             continue;
 
         SOSPFInfo oii;
         oii.datetime = QDateTime::currentDateTime();
         oii.operativo = true;
-        QStringList lstColumns = line.split(" ",QString::SkipEmptyParts);
+        QStringList lstColumns = line.split(" ",Qt::SkipEmptyParts);
 
         oii.id = lstColumns.at(0).simplified();
         oii.state = lstColumns.at(2).simplified();
@@ -85,15 +85,15 @@ void OSPFInfoCisco::on_term_receiveTextInterfaces()
     for (QString line : lines)
     {
         exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
-        if ( !line.contains(exp) )
+        if ( !line.contains(exp,&match) )
             continue;
 
-        QStringList lstColumns = line.split(" ",QString::SkipEmptyParts);
+        QStringList lstColumns = line.split(" ",Qt::SkipEmptyParts);
 
         QString interfaz = lstColumns.at(0).simplified();
-        if ( interfaz.contains(QRegExp("Vl\\d+")) )
+        if ( interfaz.contains(QRegularExpression("Vl\\d+")) )
             interfaz.replace("Vl","Vlan");
-        if ( interfaz.contains(QRegExp("BV\\d+")) )
+        if ( interfaz.contains(QRegularExpression("BV\\d+")) )
             interfaz.replace("BV","BVI");
 
         for ( SOSPFInfo &oii : m_lstOSPFInfo )

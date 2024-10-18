@@ -153,7 +153,7 @@ QString QueriesConfiguration::value(QString parameter, QString IP, QString platf
 
 QStringList QueriesConfiguration::values(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains)
 {
-    return value(parameter,IP,platform,IDconexion,platformContains).split(",",QString::SkipEmptyParts);
+    return value(parameter,IP,platform,IDconexion,platformContains).split(",",Qt::SkipEmptyParts);
 }
 
 void QueriesConfiguration::clear()
@@ -184,8 +184,6 @@ void FuncionBase::init()
     m_xr64=false;
     m_brand="Cisco";
     m_queryoption=QueryOpcion::Null;
-    exp.setMinimal(true);
-    exp2.setMinimal(true);
     m_parentQuery=nullptr;
 }
 
@@ -261,11 +259,11 @@ bool FuncionBase::allTextReceived()
 
     exp.setPattern("^\\S+#\\s*$");
     exp2.setPattern("^<\\S+>");
-    QRegExp exp3("\\[.+@(\\S+)\\] \\> *");
+    QRegularExpression exp3("\\[.+@(\\S+)\\] \\> *");
 
     // qDebug() << m_ip << "verificando promt" << data.last();
 
-    if ((!data.last().simplified().contains(exp) &&
+    if ((!data.last().simplified().contains(exp,&match) &&
          !data.last().simplified().contains(exp2) &&
          !data.last().simplified().contains(exp3)
          )
@@ -277,11 +275,11 @@ bool FuncionBase::allTextReceived()
     txt.replace("more..","");
 
     //Mikrotik
-    txt.replace(QRegExp("\\[m\\[\\d+m"),"");
+    txt.replace(QRegularExpression("\\[m\\[\\d+m"),"");
     txt.replace("[m","");
 
     if ( txt.contains("Invalid input detected at '^'") ||
-         txt.contains(QRegExp("Translating .+domain server")) )
+         txt.contains(QRegularExpression("Translating .+domain server")) )
     {
         lastCommandFailed=true;
 //        qDebug() << "**ErrorMenor**" << m_ip << m_name << m_platform << "No se pudo ejecutar comando:" << m_lastCommand;

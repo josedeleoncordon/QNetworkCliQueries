@@ -64,10 +64,10 @@ void ArpInfoHuawei::on_term_receiveText()
 
         //10.31.15.104    0020-d237-ac51  5         D-0         Vlanif115        ADMIN_RAD_ISLAS_METRO
         exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}.+\\w{4}\\-\\w{4}\\-\\w{4} +\\d+ +D");
-        if ( !line.contains(exp) )
+        if ( !line.contains(exp,&match) )
             continue;
 
-        QStringList data = line.split(" ",QString::SkipEmptyParts);
+        QStringList data = line.split(" ",Qt::SkipEmptyParts);
         QString _ip;
         QString _mac;
         QString _vlan;

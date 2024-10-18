@@ -283,11 +283,11 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_VFI()
 //        172.17.27.8      57374502     Y
 //        172.17.27.9      57374501     Y
 
-        QRegExp exp("VFI name: (\\S+), state: \\S+,");
-        if ( line.contains(exp) )
+        QRegularExpression exp("VFI name: (\\S+), state: \\S+,");
+        if ( line.contains(exp,&match) )
         {
             SMplsL2VFIInfo i;
-            i.vfi = exp.cap( 1 );            
+            i.vfi = match.captured( 1 );            
             m_lstMplsL2VFIs.append( i );
             mvi = &m_lstMplsL2VFIs[m_lstMplsL2VFIs.size()-1];
         }
@@ -296,18 +296,18 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_VFI()
             continue;
 
         exp.setPattern("Bridge-Domain (\\S+) attachment");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            mvi->bridge = exp.cap(1);
+            mvi->bridge = match.captured(1);
             continue;
         }
 
         exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) (\\d+) \\S");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             SMplsL2PWInfo i;
-            i.VCID = exp.cap(2);
-            i.destino = exp.cap(1);
+            i.VCID = match.captured(2);
+            i.destino = match.captured(1);
             mvi->lstPWs.append( i );
             continue;
         }
@@ -338,22 +338,22 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_L2Transport()
 //            Preferred path: Tunnel5701,  active
 //            Remote interface description: COUS09820001|PGM|CALLZILLA_BOGOTA
 
-        QRegExp exp("Local interface: VFI (\\S+) \\S+");
-        if ( line.contains(exp) )
+        QRegularExpression exp("Local interface: VFI (\\S+) \\S+");
+        if ( line.contains(exp,&match) )
         {
-            lastVFI = exp.cap(1);
+            lastVFI = match.captured(1);
             continue;
         }
 
         exp.setPattern("Local interface: (\\S+) \\S+");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             lastVFI.clear();
             lastVCID.clear();
             lastDestino.clear();
 
             SMplsL2XconnectInfo i;
-            i.AC = exp.cap(1);
+            i.AC = match.captured(1);
             m_lstMplsL2Xconnects.append(i);
             mxi = &m_lstMplsL2Xconnects.last();
 
@@ -367,55 +367,55 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_L2Transport()
 
 
         exp.setPattern("Destination address: (\\S+), VC ID: (\\d+), VC status: (\\S+)");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             if ( lastVFI.isEmpty() )
             {
                 //normal
-                mxi->destino = exp.cap(1);
-                mxi->VCID = exp.cap(2);
-                mxi->estado = exp.cap(3);
+                mxi->destino = match.captured(1);
+                mxi->VCID = match.captured(2);
+                mxi->estado = match.captured(3);
             }
             else
             {
                 //vfi
-                lastDestino = exp.cap(1);
-                lastVCID = exp.cap(2);
+                lastDestino = match.captured(1);
+                lastVCID = match.captured(2);
                 SMplsL2PWInfo *pw = buscarVFI_PW( lastVFI, lastDestino, lastVCID );
                 if ( pw )
-                    pw->estado = exp.cap(3);
+                    pw->estado = match.captured(3);
             }
             continue;
         }
 
         exp.setPattern("Preferred path: (\\S+), \\S+");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             if ( lastVFI.isEmpty() )
                 //normal
-                mxi->preferredPath = exp.cap(1);
+                mxi->preferredPath = match.captured(1);
             else
             {
                 //vfi
                 SMplsL2PWInfo *pw = buscarVFI_PW( lastVFI, lastDestino, lastVCID );
                 if ( pw )
-                    pw->estado = exp.cap(1);
+                    pw->estado = match.captured(1);
             }
             continue;
         }
 
         exp.setPattern("Remote interface description: (.+)$");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             if ( lastVFI.isEmpty() )
                 //normal
-                mxi->remoteDescripcion = exp.cap(1);
+                mxi->remoteDescripcion = match.captured(1);
             else
             {
                 //vfi
                 SMplsL2PWInfo *pw = buscarVFI_PW( lastVFI, lastDestino, lastVCID );
                 if ( pw )
-                    pw->remoteDescripcion = exp.cap(1);
+                    pw->remoteDescripcion = match.captured(1);
             }
             continue;
         }
@@ -438,14 +438,14 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_Xconnect()
         line = line.simplified();
 
         //UP pri ac Te0/0/4:307(Eth VLAN) UP mpls 172.17.22.79:502307 UP
-        QRegExp exp("\\w{2} \\S+ ac (\\S+):(\\d+)\\(.+\\) \\w{2} mpls (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d+) \\w{2}");
-        if ( line.contains(exp) )
+        QRegularExpression exp("\\w{2} \\S+ ac (\\S+):(\\d+)\\(.+\\) \\w{2} mpls (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d+) \\w{2}");
+        if ( line.contains(exp,&match) )
         {
             for ( SMplsL2XconnectInfo &i : m_lstMplsL2Xconnects )
             {
-                if ( i.AC == exp.cap(1) && i.VCID == exp.cap(4) && i.destino == exp.cap(3) )
+                if ( i.AC == match.captured(1) && i.VCID == match.captured(4) && i.destino == match.captured(3) )
                 {
-                    i.AC.append( ":"+exp.cap(2) );
+                    i.AC.append( ":"+match.captured(2) );
                     break;
                 }
             }
@@ -485,9 +485,10 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_runInterfaces()
     {
         line = line.simplified();
 
-        QRegExp exp("^interface (.+)$");
-        if ( exp.exactMatch(line) )
-            lastInterface = estandarizarInterfaz(exp.cap(1));
+        QRegularExpression exp(QRegularExpression::anchoredPattern("^interface (.+)$"));
+        QRegularExpressionMatch match = exp.match(line);
+        if ( match.hasMatch() )
+            lastInterface = estandarizarInterfaz(match.captured(1));
     }
 
     nextIOSrunInterfaces();
@@ -522,11 +523,11 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
 //          VFI Statistics:
 //      List of Access VFIs:
 
-        QRegExp exp("Bridge group: \\S+, bridge-domain: (\\S+),");
-        if ( line.contains(exp) )
+        QRegularExpression exp("Bridge group: \\S+, bridge-domain: (\\S+),");
+        if ( line.contains(exp,&match) )
         {
             SMplsL2VFIInfo i;
-            i.bridge = exp.cap(1);
+            i.bridge = match.captured(1);
             m_lstMplsL2VFIs.append(i);
             mvi = &m_lstMplsL2VFIs.last();
             continue;
@@ -536,48 +537,48 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
             continue;
 
         exp.setPattern("Description: (\\S+)$");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            mvi->descripcion = exp.cap(1);
+            mvi->descripcion = match.captured(1);
             continue;
         }
 
         exp.setPattern("AC: (\\S+), state");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            mvi->AC = exp.cap(1);
+            mvi->AC = match.captured(1);
             continue;
         }
 
         exp.setPattern("VFI (\\S+) ");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            mvi->vfi = exp.cap(1);
+            mvi->vfi = match.captured(1);
             continue;
         }
 
         exp.setPattern("PW: neighbor (\\S+), PW ID (\\d+), state is (\\S+) ");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             SMplsL2PWInfo i;
-            i.destino = exp.cap(1);
-            i.VCID = exp.cap(2);
-            i.estado = exp.cap(3);
+            i.destino = match.captured(1);
+            i.VCID = match.captured(2);
+            i.estado = match.captured(3);
             mvi->lstPWs.append(i);
             pw = &mvi->lstPWs.last();
         }
 
         exp.setPattern("Preferred path Active : (\\S+),");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            if ( pw ) pw->preferredPath = exp.cap(1);
+            if ( pw ) pw->preferredPath = match.captured(1);
             continue;
         }
 
         exp.setPattern("Interface \\S+ (\\S+)");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            pw->remoteDescripcion = exp.cap(1);
+            pw->remoteDescripcion = match.captured(1);
             continue;
         }
     }
@@ -605,11 +606,11 @@ void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
 //              Group ID     0x10000500                     0x4000340
 //              Interface    TenGigE0/6/0/5.1001            TenGigE0/0/0/4.1001
 
-        QRegExp exp("Group \\S+, XC (\\S+), state");
-        if ( line.contains(exp) )
+        QRegularExpression exp("Group \\S+, XC (\\S+), state");
+        if ( line.contains(exp,&match) )
         {
             SMplsL2XconnectInfo i;
-            i.xc = exp.cap(1);
+            i.xc = match.captured(1);
             m_lstMplsL2Xconnects.append(i);
             xi = &m_lstMplsL2Xconnects.last();
             continue;
@@ -619,25 +620,25 @@ void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
             continue;
 
         exp.setPattern("AC: (\\S+), state");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            xi->AC = exp.cap(1);
+            xi->AC = match.captured(1);
             continue;
         }
 
         exp.setPattern("PW: neighbor (\\S+), PW ID (\\d+), state is (\\S+) ");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            xi->destino = exp.cap(1);
-            xi->VCID = exp.cap(2);
-            xi->estado = exp.cap(3);
+            xi->destino = match.captured(1);
+            xi->VCID = match.captured(2);
+            xi->estado = match.captured(3);
             continue;
         }
 
         exp.setPattern("Interface \\S+ (\\S+)");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            xi->remoteDescripcion = exp.cap(1);
+            xi->remoteDescripcion = match.captured(1);
             continue;
         }
     }
@@ -664,11 +665,11 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI()
         //172.16.31.129       55248903   49804      18481       up
         //172.17.38.18        55248903   49801      48065       up
 
-        QRegExp exp("VSI Name: (\\S+) ");
-        if ( line.contains(exp) )
+        QRegularExpression exp("VSI Name: (\\S+) ");
+        if ( line.contains(exp,&match) )
         {
             SMplsL2VFIInfo i;
-            i.vfi = exp.cap( 1 );
+            i.vfi = match.captured( 1 );
             m_lstMplsL2VFIs.append( i );
             mvi = &m_lstMplsL2VFIs[m_lstMplsL2VFIs.size()-1];
         }
@@ -677,9 +678,9 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI()
             continue;
 
         exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3} ");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            QStringList data = line.split(" ",QString::SkipEmptyParts);
+            QStringList data = line.split(" ",Qt::SkipEmptyParts);
             if ( data.size() < 5 )
                 continue;
             SMplsL2PWInfo i;
@@ -714,10 +715,10 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI_SERVICES_ALL()
         line = line.simplified();
 
         //reemplazamos la lineas de Bridge-domain 3990 por Vbdif
-        QRegExp expbridge("Bridge-domain (\\d+)");
+        QRegularExpression expbridge("Bridge-domain (\\d+)");
         line.replace(expbridge,"Vbdif\\1");
 
-        QStringList data=line.split(" ",QString::SkipEmptyParts);
+        QStringList data=line.split(" ",Qt::SkipEmptyParts);
         if ( data.size() < 4 )
             continue;
 
@@ -760,11 +761,11 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_L2Transport()
 //        Destination          : 172.16.31.129
 //        link state           : up
 
-        QRegExp exp("Client Interface : (.*)$");
-        if ( line.contains(exp) )
+        QRegularExpression exp("Client Interface : (.*)$");
+        if ( line.contains(exp,&match) )
         {
             SMplsL2XconnectInfo i;
-            i.AC = exp.cap(1);
+            i.AC = match.captured(1);
             m_lstMplsL2Xconnects.append(i);
             xi = &m_lstMplsL2Xconnects.last();
             continue;
@@ -774,23 +775,23 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_L2Transport()
             continue;
 
         exp.setPattern("VC state : (.+)$");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            xi->estado = exp.cap(1);
+            xi->estado = match.captured(1);
             continue;
         }
 
         exp.setPattern("VC ID : (.+)$");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            xi->VCID = exp.cap(1);
+            xi->VCID = match.captured(1);
             continue;
         }
 
         exp.setPattern("Destination : (.+)$");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            xi->destino = exp.cap(1);
+            xi->destino = match.captured(1);
             continue;
         }
     }

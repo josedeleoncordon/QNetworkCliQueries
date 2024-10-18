@@ -171,30 +171,30 @@ void IPRouteInfo::on_term_receiveText_general()
         line = line.simplified();       
 
         exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
-        if ( ! line.contains(exp) )
+        if ( ! line.contains(exp,&match) )
             continue;
 
         if ( m_brand == "Cisco" )
         {
             //  10.0.0.0/8 is variably subnetted, 4762 subnets, 16 masks
             exp.setPattern("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/(\\d{1,2}).+ subnetted.+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                mask = exp.cap(1);
+                mask = match.captured(1);
                 continue;
             }
 
             //O E2     10.0.0.0/24 [110/20] via 10.192.56.42, 7w0d, TenGigabitEthernet8/2   --> con mascara
             //S        10.110.163.14/32 [1/0] via 10.110.162.14
             exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}).+ via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(,.+)*$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 SIpRouteInfo i;
-                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
-                i.network = exp.cap(2);
-                i.mask = exp.cap(3);
+                i.protocol = estandarizarProtocoloEnrutamiento(match.captured(1));
+                i.network = match.captured(2);
+                i.mask = match.captured(3);
                 i.vrf = m_vrf;
-                i.via.append( exp.cap(4) );
+                i.via.append( match.captured(4) );
                 i.datetime = QDateTime::currentDateTime();
                 i.operativo = true;
                 m_lstRoutes.append(i);
@@ -204,17 +204,17 @@ void IPRouteInfo::on_term_receiveText_general()
 
             //O E2     10.0.0.0 [110/20] via 10.192.56.42, 7w0d, TenGigabitEthernet8/2   --> sin mascara
             exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).+ via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}),.+$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 SIpRouteInfo i;
                 i.datetime = QDateTime::currentDateTime();
                 i.operativo = true;
 
-                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
-                i.network = exp.cap(2);
+                i.protocol = estandarizarProtocoloEnrutamiento(match.captured(1));
+                i.network = match.captured(2);
                 i.mask = mask;
                 i.vrf = m_vrf;
-                i.via.append( exp.cap(3) );
+                i.via.append( match.captured(3) );
                 m_lstRoutes.append(i);
                 route = &i;
                 continue;
@@ -223,9 +223,9 @@ void IPRouteInfo::on_term_receiveText_general()
             //[110/20] via 10.9.2.126, 7w0d, TenGigabitEthernet1/0/0
             //[1/0] via 10.110.162.14, Vlan1667
             exp.setPattern("^\\[.+\\] via (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(,.+)$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                QString via = exp.cap(1);
+                QString via = match.captured(1);
                 if ( !route->via.contains( via ) )
                     route->via.append( via );
                 continue;
@@ -234,14 +234,14 @@ void IPRouteInfo::on_term_receiveText_general()
             //O E2     129.250.207.152/30  --> con mascara
             exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2})$");
 
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 SIpRouteInfo i;
                 i.datetime = QDateTime::currentDateTime();
                 i.operativo = true;
-                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
-                i.network = exp.cap(2);
-                i.mask = exp.cap(3);
+                i.protocol = estandarizarProtocoloEnrutamiento(match.captured(1));
+                i.network = match.captured(2);
+                i.mask = match.captured(3);
                 i.vrf = m_vrf;
                 m_lstRoutes.append(i);
                 route = &i;
@@ -251,13 +251,13 @@ void IPRouteInfo::on_term_receiveText_general()
             //O E2     129.250.207.152  --> sin mascara
             exp.setPattern("^(\\w{1,2}).+(\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3})$");
 
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 SIpRouteInfo i;
                 i.datetime = QDateTime::currentDateTime();
                 i.operativo = true;
-                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(1));
-                i.network = exp.cap(2);
+                i.protocol = estandarizarProtocoloEnrutamiento(match.captured(1));
+                i.network = match.captured(2);
                 i.vrf = m_vrf;
                 i.mask = mask;
                 m_lstRoutes.append(i);
@@ -269,13 +269,13 @@ void IPRouteInfo::on_term_receiveText_general()
         {
             //10.10.22.0/24  IBGP    200  20            RD  10.192.33.7     100GE8/0/0
             exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}) (\\w+) .+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) ");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 SIpRouteInfo i;
-                i.protocol = estandarizarProtocoloEnrutamiento(exp.cap(3));
-                i.network = exp.cap(1);
-                i.mask = exp.cap(2);
-                i.via.append( exp.cap(4) );
+                i.protocol = estandarizarProtocoloEnrutamiento(match.captured(3));
+                i.network = match.captured(1);
+                i.mask = match.captured(2);
+                i.via.append( match.captured(4) );
                 i.vrf = m_vrf;
                 i.datetime = QDateTime::currentDateTime();
                 i.operativo = true;
@@ -286,12 +286,12 @@ void IPRouteInfo::on_term_receiveText_general()
 
             // IBGP    200  20            RD  10.192.32. 7    100GE8/0/0    //otra interfaz o ip de destino de la ruta anterior
             exp.setPattern("(\\w+) .+(\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3}) ");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 if ( !route )
                     continue;
 
-                QString via = exp.cap(2);
+                QString via = match.captured(2);
                 if ( !route->via.contains(via) )
                     route->via.append(via);
                 continue;
@@ -307,7 +307,7 @@ void IPRouteInfo::m_individualSiguienteRed()
     {
         m_redPos++;
         m_red = m_redes.at( m_redPos );
-//        m_red.replace( QRegExp("/\\d+"),"" );
+//        m_red.replace( QRegularExpression("/\\d+"),"" );
 
         if ( m_brand == "Cisco" )
             if ( m_red.contains(":") )
@@ -339,13 +339,13 @@ void IPRouteInfo::on_term_receiveText_individual()
     {
         line = line.simplified();
 
-        QRegExp exp("Routing entry for (\\S+)/(\\d+)$");
-        if ( line.contains(exp) )
+        QRegularExpression exp("Routing entry for (\\S+)/(\\d+)$");
+        if ( line.contains(exp,&match) )
         {
             SIpRouteInfo ri;
             ri.vrf = m_vrf;
-            ri.network = exp.cap(1);
-            ri.mask = exp.cap(2);
+            ri.network = match.captured(1);
+            ri.mask = match.captured(2);
             ri.datetime = QDateTime::currentDateTime();
             ri.operativo = true;
             m_lstRoutes.append(ri);
@@ -357,15 +357,15 @@ void IPRouteInfo::on_term_receiveText_individual()
             continue;
 
         exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*, (from|via) ");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            route->via.append( exp.cap(1) );
+            route->via.append( match.captured(1) );
             continue;
         }
         exp.setPattern("::ffff:(\\S+), (from|via)");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            route->via.append( exp.cap(1) );
+            route->via.append( match.captured(1) );
             continue;
         }
     }

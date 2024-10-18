@@ -114,8 +114,8 @@ void QueriesThread::verificarLstIPsQueriesConfiguration()
     {
         if ( !value._IDConexion.isEmpty() )
         {
-            QRegExp exp("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
-            if ( exp.exactMatch( value._IP ) )
+            QRegularExpression exp(QRegularExpression::anchoredPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}"));
+            if ( value._IP.contains(exp) )
             {
                 m_lstIPsMismoEquipo.append(value._IP+"_"+value._IDConexion);
                 m_lstIP.removeOne(value._IP);
@@ -714,11 +714,14 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
         //ospf area
         if ( !m_consultaOSPFArea.isEmpty() )
         {
-            QRegExp exp(m_consultaOSPFArea);
+            QRegularExpression exp(QRegularExpression::anchoredPattern(m_consultaOSPFArea));
             for ( SOSPFInfo &oi : qry->ospfInfo() )
-                if ( oi.interfaz == interfazEsteEquipoSalida &&
-                     !exp.exactMatch(oi.area) )
+            {
+                QRegularExpressionMatch match = exp.match(oi.area);
+                if (oi.interfaz == interfazEsteEquipoSalida &&
+                    !match.hasMatch())
                     return;
+            }
         }
 
         //ospf mismo dominio        

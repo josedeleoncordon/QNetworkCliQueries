@@ -27,7 +27,7 @@ void PlatformInfo::getPlatformInfo()
         //la unica manera de por el nombre, si es un XR tendra la informacion de procesador, etc
         //asi mandamos un show version brief y no tener que perder tiempo con el show version
         //si es un NCS6000 fallara, no podemos diferenciar un CRS a un NCS6000 por el nombre.
-        if (m_name.contains(QRegExp("RP(_|/)0.+(_|:)")))
+        if (m_name.contains(QRegularExpression("RP(_|/)0.+(_|:)")))
             termSendText( "show version brief" );
         else
             termSendText( "show version" );
@@ -57,7 +57,7 @@ void PlatformInfo::on_term_receiveText()
     if ( m_brand == "Cisco" )
     {
         //si el equipo es un NCS6000 fallara el comando, le mandamos un show version
-        if (m_name.contains(QRegExp("RP(_|/)0.+(_|:)")) &&
+        if (m_name.contains(QRegularExpression("RP(_|/)0.+(_|:)")) &&
                 lastCommandFailed)
         {
             m_xr64 = true;
@@ -67,16 +67,16 @@ void PlatformInfo::on_term_receiveText()
 
         exp.setPattern("^(c|C)isco .+ processor .+ memory");
         exp2.setPattern(" *(c|C)isco .+ (c|C)hassis");
-        QRegExp exp3("(c|C)isco .+ processor$");
-        QRegExp exp4("(c|C)isco \\S+ \\(.+");
+        exp3.setPattern("(c|C)isco .+ processor$");
+        exp4.setPattern("(c|C)isco \\S+ \\(.+");
         foreach (QString line, lines)
         {
             line = line.simplified();
 
-            if ( ! line.contains(exp) && !line.contains(exp2) && !line.contains(exp3) && !line.contains(exp4) )
+            if ( ! line.contains(exp,&match) && !line.contains(exp2) && !line.contains(exp3) && !line.contains(exp4) )
                 continue;                        
 
-            QStringList data = line.split(" ",QString::SkipEmptyParts);
+            QStringList data = line.split(" ",Qt::SkipEmptyParts);
             m_platform = data.at(1).simplified();
 
             qDebug() << m_ip << Q_FUNC_INFO << m_platform;
@@ -88,9 +88,9 @@ void PlatformInfo::on_term_receiveText()
         foreach (QString line, lines)
         {
             line = line.simplified();
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                m_model = exp.cap(1);
+                m_model = match.captured(1);
                 break;
             }
         }
@@ -101,9 +101,9 @@ void PlatformInfo::on_term_receiveText()
         {
             line = line.simplified();
 
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                m_platform = exp.cap(2);
+                m_platform = match.captured(2);
                 if ( m_platform.contains("RAX") || m_platform.contains("ISCOM") )
                     m_brand="RAISECOM";
                 break;
@@ -117,9 +117,9 @@ void PlatformInfo::on_term_receiveText()
         foreach (QString line, lines)
         {
             line = line.simplified();
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                m_platform = exp.cap( 2 );
+                m_platform = match.captured( 2 );
                 break;
             }
         }
@@ -157,10 +157,10 @@ void PlatformInfo::on_term_on_term_receiveText_xr_location()
 
     QStringList lines = txt.split("\n");
 
-    QRegExp exp("^\\d/\\d/CPU\\d ");
+    QRegularExpression exp("^\\d/\\d/CPU\\d ");
     foreach (QString line, lines)
     {        
-        if ( line.contains( exp ) )
+        if ( line.contains( exp,&match ) )
         {            
             m_xr_location = line.split(" ").at(0);
             break;
@@ -178,7 +178,7 @@ void PlatformInfo::on_term_on_term_receiveTextSnmpLocation()
     if ( !allTextReceived() )
         return;
 
-    QStringList lines = txt.split("\n",QString::SkipEmptyParts);
+    QStringList lines = txt.split("\n",Qt::SkipEmptyParts);
 
     if ( equipmentOSFromPlatform(m_platform) == "IOS XR" )
     {

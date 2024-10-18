@@ -23,8 +23,7 @@ QueriesMessageHandler::QueriesMessageHandler(QString path,bool savelogs)
 {
     _path = path;
     _savelogs = savelogs;
-    _expIP.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
-    _expIP.setMinimal(false);    
+    _expIP.setPattern(QRegularExpression::anchoredPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}"));
 
     init();
 
@@ -83,14 +82,14 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
     case QtCriticalMsg:
     case QtFatalMsg:
     {
-        _otherS << msg << endl;
+        _otherS << msg << Qt::endl;
         _otherS.flush();
         break;
     }
     case QtDebugMsg:
     {
         QString dt = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
-        QStringList data = msg.split(" ",QString::SkipEmptyParts);                
+        QStringList data = msg.split(" ",Qt::SkipEmptyParts);                
 
         if ( !data.isEmpty() )
         {
@@ -102,7 +101,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
             seg = secto%60;
 
             // if ( false )
-            if ( _expIP.exactMatch(data.first().replace("\"","")) )
+            if ( data.first().replace("\"","").contains(_expIP) )
             {
                 QString ip = data.takeFirst().replace("\"","");
 
@@ -146,7 +145,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
 
                 *l->ts << QDateTime::currentDateTime().toString("hh:mm:ss") <<
                           " Time min: " << QString::number(min)+" seg: " << QString::number(seg) << " " <<
-                          msg << endl;
+                    msg << Qt::endl;
 
                 l->ts->flush();
 
@@ -157,10 +156,10 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
 //                    l->file->remove();
                     l->file->deleteLater();
                     _lstLogs.removeOne( l );
-//                    lstIPsfinalizadas.append(ip);                    
+//                    lstIPsfinalizadas.append(ip);
 
-                    _dbgS << "Cerrando archivo log " << l->ip << endl;
-                    _dbgS << "lstLogs size" << _lstLogs.size() << endl;
+                    _dbgS << "Cerrando archivo log " << l->ip << Qt::endl;
+                    _dbgS << "lstLogs size" << _lstLogs.size() << Qt::endl;
                     _dbgS.flush();
                 }
             }
@@ -168,7 +167,7 @@ void QueriesMessageHandler::messageHandler(QtMsgType type, const QMessageLogCont
             {
                 _dbgS << QDateTime::currentDateTime().toString("hh:mm:ss") <<
                          " Time min: " << QString::number(min)+" seg: " << QString::number(seg) << " " <<
-                         msg << endl;                
+                    msg << Qt::endl;
                 _dbgS.flush();
             }
         }

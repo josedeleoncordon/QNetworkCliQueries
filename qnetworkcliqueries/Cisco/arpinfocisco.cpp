@@ -53,10 +53,10 @@ void ArpInfoCisco::on_term_receiveText()
         line = line.simplified();
 
         exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}.+\\w{4}\\.\\w{4}\\.\\w{4}");
-        if ( !line.contains(exp) )
+        if ( !line.contains(exp,&match) )
             continue;
 
-        QStringList data = line.split(" ",QString::SkipEmptyParts);
+        QStringList data = line.split(" ",Qt::SkipEmptyParts);
         QString _ip;
         QString _mac;
         QString _vlan;
@@ -71,8 +71,8 @@ void ArpInfoCisco::on_term_receiveText()
             _interfaz = data.at(5).simplified();
 
             QString vlan = data.at(5).simplified();
-            if ( vlan.contains(QRegExp("(Vlan|BDI|BVI)")) )
-                vlan.replace(QRegExp("(Vlan|BDI|BVI)"),"");
+            if ( vlan.contains(QRegularExpression("(Vlan|BDI|BVI)")) )
+                vlan.replace(QRegularExpression("(Vlan|BDI|BVI)"),"");
             else if ( vlan.contains(".") )
                 vlan = vlan.right( vlan.size() - vlan.indexOf(".") -1 );
 
@@ -95,8 +95,8 @@ void ArpInfoCisco::on_term_receiveText()
             {
                 _interfaz = data.at(5).simplified();
                 QString vlan = data.at(5).simplified();
-                if ( vlan.contains(QRegExp("(Vlan|BDI)")) )
-                    vlan.replace(QRegExp("(Vlan|BDI)"),"");
+                if ( vlan.contains(QRegularExpression("(Vlan|BDI)")) )
+                    vlan.replace(QRegularExpression("(Vlan|BDI)"),"");
                 else if ( vlan.contains(".") )
                     vlan = vlan.right( vlan.size() - vlan.indexOf(".") -1 );
 

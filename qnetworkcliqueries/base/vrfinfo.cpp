@@ -165,9 +165,9 @@ void VrfInfo::on_term_receiveTextFromVlans()
         if ( m_os == "IOS XR" )
         {
             exp.setPattern("\\S+\\.(\\d+) is (Up|Down|Shutdown)\\,.+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastVlan = exp.cap(1);
+                lastVlan = match.captured(1);
                 if ( m_vlans.contains(lastVlan) )
                     break; //se continua con la siguiente linea para ver su vrf
                 else
@@ -175,9 +175,9 @@ void VrfInfo::on_term_receiveTextFromVlans()
             }
 
             exp.setPattern("Vrf is (\\S+) \\(.+\\)");
-            if ( line.contains(exp) && !lastVlan.isEmpty() )
+            if ( line.contains(exp,&match) && !lastVlan.isEmpty() )
             {
-                lastVrf = exp.cap(1);
+                lastVrf = match.captured(1);
                 if ( ! m_lstVrf.contains( lastVrf ) )
                     m_lstVrf.append( lastVrf );
             }
@@ -186,11 +186,11 @@ void VrfInfo::on_term_receiveTextFromVlans()
         {
             exp.setPattern("^.+#\\s*$");
             if ( line.contains("name",Qt::CaseInsensitive) ||
-                 line.contains(exp))
+                 line.contains(exp,&match))
                 continue;
 
             QString interface;
-            QStringList data = line.split(" ",QString::SkipEmptyParts);
+            QStringList data = line.split(" ",Qt::SkipEmptyParts);
 
             if ( data.size() >= 3 )
             {
@@ -203,12 +203,12 @@ void VrfInfo::on_term_receiveTextFromVlans()
             QString interfaceVlan;
 
             exp.setPattern("(Vl|BD)+(\\d+)$");
-            if ( interface.contains(exp) )
-                interfaceVlan = exp.cap(2);
+            if ( interface.contains(exp,&match) )
+                interfaceVlan = match.captured(2);
 
             exp.setPattern(".+\\d+/\\d+\\.(\\d+)$");
-            if ( interface.contains(exp) )
-                interfaceVlan = exp.cap(1);
+            if ( interface.contains(exp,&match) )
+                interfaceVlan = match.captured(1);
 
             if ( m_vlans.contains(interfaceVlan) )
             {
@@ -220,17 +220,17 @@ void VrfInfo::on_term_receiveTextFromVlans()
         {
             //VPN-Instance Name and ID : ADMIN_RAD_ISLAS_METRO, 7
             exp.setPattern("VPN-Instance Name and ID : (.+), \\d+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastVrf=exp.cap(1);
+                lastVrf=match.captured(1);
                 continue;
             }
 
             //Interfaces : Vlanif115,
             exp.setPattern("Interfaces : (.+)$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastVlan = exp.cap(1).simplified();
+                lastVlan = match.captured(1).simplified();
                 lastVlan.replace("Vlanif","");
                 hagregar=true;
 
@@ -289,7 +289,7 @@ void VrfInfo::on_term_receiveTextFromRT()
                  !line.contains("IPV4") &&
                  !line.contains("show"))
             {
-                QStringList data = line.split(" ",QString::SkipEmptyParts);
+                QStringList data = line.split(" ",Qt::SkipEmptyParts);
                 m_vrf = data.at(0).simplified();
                 break;
             }
@@ -298,10 +298,10 @@ void VrfInfo::on_term_receiveTextFromRT()
         {
             exp.setPattern("\\d+\\:\\d+");
 
-            if ( ! line.contains(exp) || line.contains("show") )
+            if ( ! line.contains(exp,&match) || line.contains("show") )
                 continue;
 
-            QStringList data = line.split(" ",QString::SkipEmptyParts);
+            QStringList data = line.split(" ",Qt::SkipEmptyParts);
             if ( data.size() < 3 )
                 continue;
 
@@ -327,17 +327,17 @@ void VrfInfo::on_term_receiveTextVRFs()
         if ( m_os == "IOS XR" )
         {
             exp.setPattern("(\\S+) is (Up|Down|Shutdown)\\,.+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastInterface = estandarizarInterfaz( exp.cap(1) );
+                lastInterface = estandarizarInterfaz( match.captured(1) );
                 qDebug() << "line interfaz" <<  lastInterface;
                 continue;
             }
 
             exp.setPattern("Vrf is (\\S+) \\(.+\\)");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastVrf = exp.cap(1).simplified();
+                lastVrf = match.captured(1).simplified();
                 if ( lastVrf == "default" )
                     lastVrf.clear();
 
@@ -358,10 +358,10 @@ void VrfInfo::on_term_receiveTextVRFs()
             exp.setPattern("^.+#\\s*$");
             if ( line.contains("name",Qt::CaseInsensitive) ||
                  line.contains("show ip vrf") ||
-                 line.contains(exp))
+                 line.contains(exp,&match))
                 continue;
 
-            QStringList data = line.split(" ",QString::SkipEmptyParts);
+            QStringList data = line.split(" ",Qt::SkipEmptyParts);
 
             if ( data.size() >= 3 )
             {
@@ -386,17 +386,17 @@ void VrfInfo::on_term_receiveTextVRFs()
         {
             //VPN-Instance Name and ID : ADMIN_RAD_ISLAS_METRO, 7
             exp.setPattern("VPN-Instance Name and ID : (.+), \\d+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastVrf=exp.cap(1);
+                lastVrf=match.captured(1);
                 continue;
             }
 
             //Interfaces : Vlanif115,
             exp.setPattern("Interfaces : (.+)$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastInterface = exp.cap(1).simplified();
+                lastInterface = match.captured(1).simplified();
                 hagregar=true;
                 if ( lastInterface.contains(",") )
                 {

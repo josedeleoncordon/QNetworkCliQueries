@@ -143,27 +143,27 @@ void MplsLdpInfo::on_term_receiveTextDiscovery()
         {
             //Local LDP Identifier: 10.192.0.27:0
             exp.setPattern("Local LDP Identifier: (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):.+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 localid=false;
-                m_localID = exp.cap(1);
+                m_localID = match.captured(1);
                 continue;
             }
 
             //        Local LDP Identifier:
             //           10.192.33.77:0
             exp.setPattern("Local LDP Identifier:$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 reachedLocalID = true;
                 continue;
             }
             exp.setPattern("^(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):.+");
-            if ( reachedLocalID && line.contains(exp) )
+            if ( reachedLocalID && line.contains(exp,&match) )
             {
                 reachedLocalID=false;
                 localid=false;
-                m_localID = exp.cap(1);
+                m_localID = match.captured(1);
                 continue;
             }
         }
@@ -180,11 +180,11 @@ void MplsLdpInfo::on_term_receiveTextDiscovery()
 
             //Si la interfaz tiene xmit/recv significa que se esta aprendiendo un vecino por esa interfaz, esta arriba
             //si solo tiene xmit, esta caido, no se aprende un vecino.
-            QRegExp exp("(([a-zA-Z]|\\-)+\\d+(/\\d+)*(\\.\\d+)*).+xmit/recv");
-            if ( line.contains(exp) )
+            QRegularExpression exp("(([a-zA-Z]|\\-)+\\d+(/\\d+)*(\\.\\d+)*).+xmit/recv");
+            if ( line.contains(exp,&match) )
             {
                 SMplsLdpInfo sm;
-                sm.interfaz = estandarizarInterfaz( exp.cap(1) );
+                sm.interfaz = estandarizarInterfaz( match.captured(1) );
                 sm.datetime = QDateTime::currentDateTime();
                 sm.operativo = true;
                 m_lstMplsLdpInfo.append(sm);
@@ -206,11 +206,10 @@ void MplsLdpInfo::on_term_receiveTextNeighbors()
         line = line.simplified();
 
         exp.setPattern("([a-zA-Z]|\\-)+\\d+(/\\d+)*(\\.\\d+)*");
-        exp.setMinimal(false);
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {            
             SMplsLdpInfo sm;
-            sm.interfaz = estandarizarInterfaz( exp.cap(0) );
+            sm.interfaz = estandarizarInterfaz( match.captured(0) );
             sm.datetime = QDateTime::currentDateTime();
             sm.operativo = true;
             m_lstMplsLdpInfo.append(sm);
@@ -236,7 +235,7 @@ void MplsLdpInfo::on_term_receiveTextInterfaces()
             continue;
 
         SMplsLdpInfo sm;
-        sm.interfaz = estandarizarInterfaz( line.split(" ",QString::SkipEmptyParts).at(0) );
+        sm.interfaz = estandarizarInterfaz( line.split(" ",Qt::SkipEmptyParts).at(0) );
         sm.datetime = QDateTime::currentDateTime();
         sm.operativo = true;
         m_lstMplsLdpInfo.append(sm);

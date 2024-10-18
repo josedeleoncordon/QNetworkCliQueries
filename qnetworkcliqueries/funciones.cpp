@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QTimer>
+#include <QRegularExpression>
 
 #include "qnetworkquerieslogging.h"
 
@@ -28,7 +29,7 @@ QStringList lstGrupos()
 
 QString equipmentOSFromPlatform(QString platform)
 {
-    QRegExp expNCS("NCS\\-*[5-6]\\d{2,}");
+    QRegularExpression expNCS("NCS\\-*[5-6]\\d{2,}");
     if ( platform.contains("ASR9K") ||
          platform.contains("CRS") ||
          platform.contains(expNCS) )
@@ -89,7 +90,7 @@ QString openFile(QString path)
 QStringList openFile2List( QString path, bool eliminarDuplicados )
 {
     QStringList lst;
-    QStringList lstmie = openFile( path ).split("\n",QString::SkipEmptyParts);
+    QStringList lstmie = openFile( path ).split("\n",Qt::SkipEmptyParts);
     if ( eliminarDuplicados )
     {
         for ( QString line : lstmie )
@@ -143,7 +144,7 @@ QString simplicateName(QString name)
     if ( pos > 0 )
         name = name.left( pos );
 
-    QRegExp exp2("RP.+CPU\\d\\:");
+    QRegularExpression exp2("RP.+CPU\\d\\:");
     if ( name.contains(exp2) )
         name.replace(exp2,"");
 
@@ -152,7 +153,7 @@ QString simplicateName(QString name)
 
 QStringList numberRangeToLST(QString str)
 {
-    QStringList lst = str.split(",",QString::SkipEmptyParts);
+    QStringList lst = str.split(",",Qt::SkipEmptyParts);
 
     QStringList salida;
     foreach (QString txt, lst)
@@ -290,9 +291,7 @@ bool equipmentNeighborsVecinoValidarEquipo(SEquipmentNeighborsInfo &e)
 //        if ( buscarEquipo( lstQueries, e->ip, e->nombreequipo ) )
 //            return true;
 
-    QRegExp exp,exp2;
-    exp.setMinimal(true);
-    exp2.setMinimal(true);
+    QRegularExpression exp,exp2;
 
     exp.setPattern("\\w+\\.(telgua|enitel|claro|sercom|telecom)+");
     exp2.setPattern("\\w{13}(XM|GM|RM)+\\d+");
@@ -322,12 +321,13 @@ QList<SEquipmentNeighborsInfo*> interfaceHasEquipmentNeighborsInfo(QList<SEquipm
     QStringList lstVecinos;
     QList<SEquipmentNeighborsInfo*> lstSalida;
 
-    QRegExp exp;
+    QRegularExpression exp;
+    QRegularExpressionMatch match;
     //Si es un Po lo convertimos a una de sus interfaces, esto para poder averiguar si tiene vecinos
     exp.setPattern("(Po|BE)([0-9]+)");
-    if ( i.contains(exp) )
+    if ( i.contains(exp,&match) )
     {
-        QString group = exp.cap(2);
+        QString group = match.captured(2);
         for (SPortChannel &pc : lstPCInfo)
         {
             if ( group == pc.group )
@@ -427,7 +427,7 @@ bool interfaceIsL3(Queries &q, QString interfaz)
                                                         interfaz,
                                                         q.platform() );
 
-    QRegExp exp( interfazPO1+"\\.\\d+" ); //para verificar si existe una sesion ospf en un subinterfa, si si, regresamos true
+    QRegularExpression exp( interfazPO1+"\\.\\d+" ); //para verificar si existe una sesion ospf en un subinterfa, si si, regresamos true
     for (SOSPFInfo &oi1 : q.ospfInfo())
     {
         if ( oi1.interfaz == interfazPO1 ||
@@ -500,10 +500,11 @@ QString interfaceToPortChannelInterface(QList<SPortChannel> &lst, QString interf
 QStringList interfacePortChannelToInterfaces(QList<SPortChannel> &lst, QString pcInterface)
 {
     QString group;
-    QRegExp exp;
+    QRegularExpression exp;
+    QRegularExpressionMatch match;
     exp.setPattern( "(Po|Bundle\\-Ether|BE)(\\d+)$" );
-    if ( pcInterface.contains(exp) )
-        group = exp.cap(2);
+    if ( pcInterface.contains(exp,&match) )
+        group = match.captured(2);
 
     if ( group.isEmpty() )
     {
@@ -539,7 +540,7 @@ bool sonIPsParejaMascara30_31(QString ip1, QString ip2 )
 QString IP2Binario(QString ip)
 {
     if ( ip.contains("/") )
-        ip = ip.split("/",QString::SkipEmptyParts).first();
+        ip = ip.split("/",Qt::SkipEmptyParts).first();
 
     bool ipv4=true;
     QString salida;
@@ -567,7 +568,7 @@ QString IP2Binario(QString ip)
         }
         else
         {
-            QStringList data = ip.split("::",QString::SkipEmptyParts);
+            QStringList data = ip.split("::",Qt::SkipEmptyParts);
             if ( data.size() == 1 )
             {
                 //:: suponemos que esta al final
@@ -646,11 +647,12 @@ bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos)
     QString segmento;
     short int mascara;
 
-    QRegExp exp("(\\S+)/(\\d{1,3})");
-    if ( exp.exactMatch( segmentoIP_mascara2digitos ) )
+    QRegularExpression exp(QRegularExpression::anchoredPattern("(\\S+)/(\\d{1,3})"));
+    QRegularExpressionMatch match;
+    if ( segmentoIP_mascara2digitos.contains(exp,&match) )
     {
-        segmento = exp.cap( 1 );
-        mascara = exp.cap( 2 ).toShort();
+        segmento = match.captured( 1 );
+        mascara = match.captured( 2 ).toShort();
     }
     else
         return false;
@@ -874,14 +876,15 @@ QString buscarArchivoConsultasActual(QString path, QString filelabel, QString gr
     QDateTime mieDateTime;
     QDir dir(path);
     QDirIterator dirIter( path, QDir::Files );
-    QRegExp exp(grupo+"_"+filelabel+"_*Queries_"+dir.dirName()+"_(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})\\.dat");
+    QRegularExpression exp(grupo+"_"+filelabel+"_*Queries_"+dir.dirName()+"_(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})\\.dat");
+    QRegularExpressionMatch match;
     while (dirIter.hasNext())
     {
         QString filepath = dirIter.next();
 
-        if ( filepath.contains(exp) )
+        if ( filepath.contains(exp,&match) )
         {
-            QDateTime dateTime = QDateTime::fromString( exp.cap(1),"yyyy-MM-dd-hh-mm-ss" );
+            QDateTime dateTime = QDateTime::fromString( match.captured(1),"yyyy-MM-dd-hh-mm-ss" );
             if ( dateTime > mieDateTime )
             {
                 file = filepath;
@@ -924,7 +927,7 @@ QString estandarizarInterfaz(QString interfaz)
     interfaz.replace("Po0/0/","Po");
     interfaz.replace("GE","Gi",Qt::CaseSensitive);
     interfaz.replace("gigaethernet","Gi");
-    interfaz.replace(QRegExp("\\(\\w+\\)"),"");
+    interfaz.replace(QRegularExpression("\\(\\w+\\)"),"");
 
     return interfaz;
 }
@@ -951,7 +954,7 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
 
     QString ospfProceso;
     QString interfazDeDondeSeViene;
-    QRegExp expIP("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+    QRegularExpression expIP("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
     if ( !interfazOipDondeViene.contains(expIP) )
         //se paso una interfaz de informacion de cdp
         interfazDeDondeSeViene = interfazOipDondeViene;
@@ -1024,7 +1027,7 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
 
 QString convertirMascaraMayorAmenor(QString red, int mascara)
 {
-    QRegExp exp("/\\d+");
+    QRegularExpression exp("/\\d+");
     red.replace(exp,"");
     red = IP2Binario( red );
     red = red.left(mascara);
@@ -1039,7 +1042,7 @@ QString convertirMascaraOctetosAdos(QString mascara)
 }
 
 QList<QStringList> tableMultiRow2Table(QString &txt,
-                                       QMap<int,QRegExp> &mapPosicionesExpCampos)
+                                       QMap<int,QRegularExpression> &mapPosicionesExpCampos)
 {
     QList<QStringList> lstSalida;
     if ( mapPosicionesExpCampos.isEmpty() )
@@ -1048,9 +1051,9 @@ QList<QStringList> tableMultiRow2Table(QString &txt,
     qDebug() << "\n\n\n tableMultiRow2Table ************************************* ";
 
     QStringList *lstFilaActual=nullptr;
-    QMapIterator<int,QRegExp> imap(mapPosicionesExpCampos);
+    QMapIterator<int,QRegularExpression> imap(mapPosicionesExpCampos);
     uint c=0;
-    for ( QString line : txt.split("\n",QString::SkipEmptyParts) )
+    for ( QString line : txt.split("\n",Qt::SkipEmptyParts) )
     {
         //cada inicio de linea se empieza a analizar los campos desde la primera posicion
         //a medida de que se vaya avanzando con las fila se van a gregando los campos
@@ -1067,7 +1070,7 @@ QList<QStringList> tableMultiRow2Table(QString &txt,
         forever
         {
             int pos = imap.key();
-            QRegExp exp = imap.value();
+            QRegularExpression exp = imap.value();
             d++;
 
 //            qDebug() << "c" << c << "d" << d << "pos" << pos << "exp" << exp.pattern() << "imapOnFirst" << imapOnFirst;
@@ -1078,7 +1081,8 @@ QList<QStringList> tableMultiRow2Table(QString &txt,
                 break;
             }
 
-            int posmatch = exp.indexIn( line, pos );
+            QRegularExpressionMatch match = exp.match(line,pos);
+            int posmatch = match.capturedStart(0);
 
 //            qDebug() << "pos" << pos << "posmatch" << posmatch;
 
@@ -1095,8 +1099,8 @@ QList<QStringList> tableMultiRow2Table(QString &txt,
                 else
                     c++;
 
-//                qDebug() << "agregando campo" << exp.cap(0);
-                lstFilaActual->append( exp.cap(0).simplified() );
+//                qDebug() << "agregando campo" << match.captured(0);
+                lstFilaActual->append( match.captured(0).simplified() );
             }
             else
             {
@@ -1142,7 +1146,7 @@ QString filasIndentadasSubirAanterior(QString txt)
 {
     QStringList lstSalida;
 
-    QRegExp exp("^ +");
+    QRegularExpression exp("^ +");
     for ( QString line : txt.split("\n") )
     {
         if ( lstSalida.isEmpty() )
@@ -1165,25 +1169,26 @@ QString filasIndentadasSubirAanterior(QString txt)
 
 QString buscarServicioID(QString txt)
 {
-    QRegExp exp("([A-Z]|&){7}\\d{8}(I|C)");
-    if ( txt.contains(exp) )
-        return exp.cap(0);
+    QRegularExpression exp("([A-Z]|&){7}\\d{8}(I|C)");
+    QRegularExpressionMatch match;
+    if ( txt.contains(exp,&match) )
+        return match.captured(0);
 
     exp.setPattern("[A-Z]{6}\\,\\d{8}(I|C)");
-    if ( txt.contains(exp) )
-        return exp.cap(0);
+    if ( txt.contains(exp,&match) )
+        return match.captured(0);
 
     exp.setPattern("[A-Z]{4}(\\d{8}|\\d{7})");
-    if ( txt.contains(exp) )
-        return exp.cap(0);
+    if ( txt.contains(exp,&match) )
+        return match.captured(0);
 
     exp.setPattern("[A-Z]{2}(\\d{8}|\\d{7})");
-    if ( txt.contains(exp) )
-        return exp.cap(0);
+    if ( txt.contains(exp,&match) )
+        return match.captured(0);
 
     exp.setPattern("IDU:(\\S+)-(CLI|DE)");
-    if ( txt.contains(exp) )
-        return exp.cap(0);
+    if ( txt.contains(exp,&match) )
+        return match.captured(0);
 
     return "";
 }
@@ -1212,40 +1217,45 @@ QStringList txt2Columns(QString txt, QList<short> lstIndex)
 
 short numbertxt2short(QString numbertxt)
 {
-    QRegExp exp("\\d+");
-    if ( numbertxt.contains(exp) )
-        return exp.cap(0).toShort();
+    QRegularExpression exp("\\d+");
+    QRegularExpressionMatch match;
+    if ( numbertxt.contains(exp,&match) )
+        return match.captured(0).toShort();
     return 0;
 }
 
 int numbertxt2int(QString numbertxt)
 {
-    QRegExp exp("\\d+");
-    if ( numbertxt.contains(exp) )
-        return exp.cap(0).toInt();
+    QRegularExpression exp("\\d+");
+    QRegularExpressionMatch match;
+    if ( numbertxt.contains(exp,&match) )
+        return match.captured(0).toInt();
     return 0;
 }
 
-QStringList getRegExpAllMatches(QRegExp rx, QString txt)
+QStringList getRegExpAllMatches(QRegularExpression rx, QString txt)
 {
     QStringList list;
-    int pos = 0;
 
-    while ((pos = rx.indexIn(txt, pos)) != -1) {
-        list << rx.cap(1);
-        pos += rx.matchedLength();
+    QRegularExpressionMatchIterator i = rx.globalMatch(txt);
+    while ( i.hasNext() )
+    {
+        QRegularExpressionMatch match = i.next();
+        list << match.captured(1);
     }
+
     return list;
 }
 
 QString numberExp10Anumber(QString txt)
 {
     QString salida;
-    QRegExp exp("(e|E)+(\\d+)$");
+    QRegularExpression exp("(e|E)+(\\d+)$");
+    QRegularExpressionMatch match;
 
-    if ( txt.contains(exp) )
+    if ( txt.contains(exp,&match) )
     {
-        int e=exp.cap(2).toInt();
+        int e=match.captured(2).toInt();
         txt.replace(exp,QString(e,'0'));
         bool encontrado = false;
         int d=0;
@@ -1275,11 +1285,12 @@ QString numberExp10Anumber(QString txt)
 
 bool prefixSetAllowsRange32_128(QString &pfxtxt)
 {
-    QRegExp exple("le (\\d+)");
-    QRegExp expge("ge (\\d+)");
-    for ( QString &line : pfxtxt.split("\n",QString::SkipEmptyParts) )
+    QRegularExpression exple("le (\\d+)");
+    QRegularExpression expge("ge (\\d+)");
+    QRegularExpressionMatch match;
+    for ( QString &line : pfxtxt.split("\n",Qt::SkipEmptyParts) )
     {
-        if ( line.contains(QRegExp("0.0.0.0/0 (le|ge)")) )
+        if ( line.contains(QRegularExpression("0.0.0.0/0 (le|ge)")) )
             return true;
 
         //TODO
@@ -1297,10 +1308,10 @@ bool prefixSetAllowsRange32_128(QString &pfxtxt)
         else
             le=32;
         gmask=le;
-        if ( line.contains(expge) )
-            ge=expge.cap(1).toInt();
-        if ( line.contains(exple) )
-            le=exple.cap(1).toInt();
+        if ( line.contains(expge,&match) )
+            ge=match.captured(1).toInt();
+        if ( line.contains(exple,&match) )
+            le=match.captured(1).toInt();
 
         // line.replace(exple,"");
         // line.replace(expge,"");
@@ -1309,7 +1320,7 @@ bool prefixSetAllowsRange32_128(QString &pfxtxt)
         //     continue;
 
         // line.replace(" ","/"); //el espacio que queda es la separacion de la ip y masca en VRP
-        // int mask=line.split("/",QString::SkipEmptyParts).last().toInt();
+        // int mask=line.split("/",Qt::SkipEmptyParts).last().toInt();
 
         // if ( mask == le || mask == ge )
         //     //mascara igual a le

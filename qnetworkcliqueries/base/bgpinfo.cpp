@@ -265,13 +265,13 @@ void BGPInfo::on_term_receiveText_BGPNeighbors()
         if ( m_brand == "Cisco" || m_os == "VRP" )
         {
             exp.setPattern("^ *(\\d+\\.\\d+\\.\\d+\\.\\d+).+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 data.clear();
                 append=true;
             }
             if ( append )
-                data.append( line.split(" ",QString::SkipEmptyParts) );
+                data.append( line.split(" ",Qt::SkipEmptyParts) );
 
             if ( data.isEmpty() )
                 continue;
@@ -313,34 +313,34 @@ void BGPInfo::on_term_receiveText_BGPNeighbors()
         else if ( m_os == "RouterOS" )
         {
             //MikroTik
-            QRegExp exp("remote.address=(\\S+) ");
-            if ( line.contains(exp) )
+            QRegularExpression exp("remote.address=(\\S+) ");
+            if ( line.contains(exp,&match) )
             {
                 SBGPNeighbor s;
-                s.neighborip = exp.cap(1);
+                s.neighborip = match.captured(1);
                 m_lstNeigbors.append(s);
                 lastS = &m_lstNeigbors.last();
             }
             if ( !lastS ) continue;
 
             exp.setPattern("remote-as=(\\S+) ");
-            if ( line.contains(exp) )
-                lastS->as = exp.cap(1);
+            if ( line.contains(exp,&match) )
+                lastS->as = match.captured(1);
             exp.setPattern("remote.+ \\.as=(\\S+) ");
-            if ( line.contains(exp) )
-                lastS->as = exp.cap(1);
+            if ( line.contains(exp,&match) )
+                lastS->as = match.captured(1);
             exp.setPattern("in-filter=(\\S+) ");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                QString str = exp.cap(1);
+                QString str = match.captured(1);
                 str.replace("\"","");
                 str.replace("\\","");
                 lastS->prefixFilterIN = str;
             }
             exp.setPattern("input.+ .filter=(\\S+) ");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                QString str = exp.cap(1);
+                QString str = match.captured(1);
                 str.replace("\"","");
                 str.replace("\\","");
                 lastS->prefixFilterIN = str;
@@ -458,7 +458,7 @@ void BGPInfo::networksNextNeighbor()
             QString version;
             if ( Neighbor_VRF.contains("_") )
             {
-                QStringList data = Neighbor_VRF.split("_",QString::SkipEmptyParts);
+                QStringList data = Neighbor_VRF.split("_",Qt::SkipEmptyParts);
                 m_currentNeighbor = data.first();
                 m_vrf_currentVRF = data.last();
             }
@@ -541,20 +541,20 @@ void BGPInfo::on_term_receiveText_networks()
         }
 
         exp.setPattern("\\d+\\.\\d+\\.\\d+\\.\\d+");
-        if ( ! line.contains(exp) || line.contains("routes") )
+        if ( ! line.contains(exp,&match) || line.contains("routes") )
             continue;
 
         //Advertised-routes Cisco
         exp.setPattern("(\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+) +(\\d+\\.\\d+\\.\\d+\\.\\d+) +((\\d+\\.\\d+\\.\\d+\\.\\d+|Local)) ");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             SBGPNetwork s;
-            network = exp.cap(1);
+            network = match.captured(1);
             s.neighborip = m_currentNeighbor;
             s.vrf = m_vrf_currentVRF;
             s.network = network;
-            s.nexthop = exp.cap(2);
-            s.from = exp.cap(3);
+            s.nexthop = match.captured(2);
+            s.from = match.captured(3);
             s.path = line.mid( pathi ).replace("i","").replace("?","").simplified();
             s.operativo = true;
             s.datetime = QDateTime::currentDateTime();
@@ -569,14 +569,14 @@ void BGPInfo::on_term_receiveText_networks()
 
         //Routes Cisco,  Advertised-routes y Routes Huawei
         exp.setPattern("(\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+) +(\\d+\\.\\d+\\.\\d+\\.\\d+) ");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             SBGPNetwork s;
-            network = exp.cap(1);
+            network = match.captured(1);
             s.neighborip = m_currentNeighbor;
             s.vrf = m_vrf_currentVRF;
             s.network = network;
-            s.nexthop = exp.cap(2);
+            s.nexthop = match.captured(2);
             s.path = line.mid( pathi ).replace("i","").replace("?","").simplified();
             s.operativo = true;
             s.datetime = QDateTime::currentDateTime();
@@ -590,13 +590,13 @@ void BGPInfo::on_term_receiveText_networks()
         }
 
         exp.setPattern(" +(\\d+\\.\\d+\\.\\d+\\.\\d+) ");
-        if ( line.contains(exp) && !network.isEmpty() && !m_currentNeighbor.isEmpty())
+        if ( line.contains(exp,&match) && !network.isEmpty() && !m_currentNeighbor.isEmpty())
         {
             SBGPNetwork s;
             s.neighborip = m_currentNeighbor;
             s.vrf = m_vrf_currentVRF;
             s.network = network;
-            s.nexthop = exp.cap(1);
+            s.nexthop = match.captured(1);
             s.path = line.mid( pathi ).replace("i","").replace("?","").simplified();
             s.operativo = true;
             s.datetime = QDateTime::currentDateTime();
@@ -633,10 +633,10 @@ void BGPInfo::on_term_receiveText_networksv6()
 
     if ( m_os == "IOS XR" )
     {
-        QMap<int,QRegExp> map;
-        map.insert( 0,QRegExp("([0-9a-f]{1,4}:\\S+/\\d{1,3})"));
-        map.insert(22,QRegExp("([0-9a-f]{1,4}:\\S+)"));
-        map.insert(51,QRegExp(".+$"));
+        QMap<int,QRegularExpression> map;
+        map.insert( 0,QRegularExpression("([0-9a-f]{1,4}:\\S+/\\d{1,3})"));
+        map.insert(22,QRegularExpression("([0-9a-f]{1,4}:\\S+)"));
+        map.insert(51,QRegularExpression(".+$"));
 
         QList<QStringList> lstCampos = tableMultiRow2Table(txt,map);
 
@@ -757,17 +757,16 @@ void BGPInfo::on_term_receiveText_networksAttr()
             //no realizar line.simplified ya que es necesario tener los caracteres de espacio al inicio de la cadena
 //            qDebug() << line;
 
-            QRegExp exp("BGP routing table entry for (.+),");
-            exp.setMinimal(false);
-            if ( line.contains(exp) )
+            QRegularExpression exp("BGP routing table entry for (.+),");
+            if ( line.contains(exp,&match) )
             {
-//                qDebug() << "----- lastred" << exp.cap(1);
+//                qDebug() << "----- lastred" << match.captured(1);
                 continue;
             }
 
             //AS
             exp.setPattern("^  \\d+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 if ( line.contains("received-only") )
                     continue;
@@ -780,17 +779,17 @@ void BGPInfo::on_term_receiveText_networksAttr()
 
                 line = line.simplified();
                 exp.setPattern("(\\d| )+");
-                if ( line.contains(exp) )
+                if ( line.contains(exp,&match) )
                 {
-                    lastASN = exp.cap(0);
+                    lastASN = match.captured(0);
                     if ( lastASN.contains(" ") )
-                        lastASN = lastASN.split(" ",QString::SkipEmptyParts).last();
+                        lastASN = lastASN.split(" ",Qt::SkipEmptyParts).last();
 //                    qDebug() << "----- lastASN" << lastASN;
                 }
                 continue;
             }
             exp.setPattern("^  Local");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 lastNH.clear();
                 lastASN.clear();
@@ -808,10 +807,10 @@ void BGPInfo::on_term_receiveText_networksAttr()
 
             //Peer IP y From
             exp.setPattern("^    (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).+from (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) .+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastNH = exp.cap(1);
-                lastFrom = exp.cap(2);
+                lastNH = match.captured(1);
+                lastFrom = match.captured(2);
 //                qDebug() << "---- lastNh" << lastNH;
 //                qDebug() << "---- lastfrom" << lastFrom;
                 continue;
@@ -819,9 +818,9 @@ void BGPInfo::on_term_receiveText_networksAttr()
 
             //lp y best
             exp.setPattern("localpref (\\d+),");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastLP=exp.cap(1);
+                lastLP=match.captured(1);
                 if ( line.contains(", best,") )
                 {
                     //qDebug() << "---- BEST";
@@ -832,23 +831,23 @@ void BGPInfo::on_term_receiveText_networksAttr()
 
             //comunidades
             exp.setPattern("^ +Community:");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 line.replace("Community:","");
-                lastLstCommunities=line.simplified().split(" ",QString::SkipEmptyParts);
+                lastLstCommunities=line.simplified().split(" ",Qt::SkipEmptyParts);
                 continue;
             }
 
             //Originator
             exp.setPattern("Originator: (\\S+)\\,");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastOriginator=exp.cap(1);
+                lastOriginator=match.captured(1);
                 continue;
             }
 
             exp.setPattern("Path \\#\\d+:");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 if ( (!m_BGPNetworkAttAddOnlyBest) || (m_BGPNetworkAttAddOnlyBest && lastBest) )
                 {
@@ -884,11 +883,10 @@ void BGPInfo::on_term_receiveText_networksAttr()
             line = line.simplified();
 //            qDebug() << "on_term_receiveText_networksAttr()" << line;
 
-            QRegExp exp("BGP routing table entry information of (.+),");
-            exp.setMinimal(false);
-            if ( line.contains(exp) )
+            QRegularExpression exp("BGP routing table entry information of (.+),");
+            if ( line.contains(exp,&match) )
             {
-//                qDebug() << "----- lastred" << exp.cap(1);
+//                qDebug() << "----- lastred" << match.captured(1);
                 lastNH.clear();
                 lastASN.clear();
                 lastFrom.clear();
@@ -897,34 +895,34 @@ void BGPInfo::on_term_receiveText_networksAttr()
 
             //From
             exp.setPattern("^From: (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastFrom = exp.cap(1);
+                lastFrom = match.captured(1);
 //                qDebug() << "---- lastfrom" << lastFrom;
                 continue;
             }
 
             //IP nexthop
             exp.setPattern("^Original nexthop: (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastNH = exp.cap(1);
+                lastNH = match.captured(1);
 //                qDebug() << "---- lastNH" << lastNH;
                 continue;
             }
 
             //AS, LP y best
             exp.setPattern("^AS-path ((\\w| )+),");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                QString AP = exp.cap(1);
+                QString AP = match.captured(1);
 
                 exp.setPattern("(\\d| )+");
-                if ( AP.contains(exp) )
+                if ( AP.contains(exp,&match) )
                 {
                     lastASN = AP;
                     if ( lastASN.contains(" ") )
-                        lastASN = lastASN.split(" ",QString::SkipEmptyParts).last();
+                        lastASN = lastASN.split(" ",Qt::SkipEmptyParts).last();
 //                    qDebug() << "----- lastASN" << lastASN;
                 }
                 else if ( AP.contains("Nil") )
@@ -1023,26 +1021,25 @@ void BGPInfo::on_term_receiveText_networksAttrVRPCommunityList()
 
         qDebug() << line;
 
-        QRegExp exp("From: (.+)$");
-        exp.setMinimal(false);
-        if ( line.contains(exp) )
+        QRegularExpression exp("From: (.+)$");
+        if ( line.contains(exp,&match) )
         {
-            lastfrom = exp.cap(1);
+            lastfrom = match.captured(1);
             qDebug() << "---- lastFrom" << lastfrom;
             continue;
         }
 
         exp.setPattern("Community: (.+)$");
-        if ( line.contains( exp ) )
+        if ( line.contains( exp,&match ) )
         {
             for ( SBGPNetwork &m_currentNetwork : m_lstNetworks )
                 if ( lastfrom == m_currentNetwork.from )
                 {
-                    QString comunidades = exp.cap(1);
+                    QString comunidades = match.captured(1);
                     comunidades.replace("<","");
                     comunidades.replace(">","");
                     comunidades.replace(",","");
-                    m_currentNetwork.communityList = comunidades.split(" ",QString::SkipEmptyParts);
+                    m_currentNetwork.communityList = comunidades.split(" ",Qt::SkipEmptyParts);
                     qDebug() << "---- Agregando comunidades";
                     break;
                 }

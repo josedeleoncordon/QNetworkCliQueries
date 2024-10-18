@@ -8,6 +8,8 @@
 #include <QDateTime>
 #include <QTimer>
 #include <QFile>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #include "qnetworkcliqueries_global.h"
 #include "qremoteshell.h"
@@ -123,7 +125,8 @@ private:
 protected:
     QRemoteShell *term;
     QString txt;
-    QRegExp exp, exp2;
+    QRegularExpression exp, exp2, exp3, exp4;
+    QRegularExpressionMatch match, match2, match3, match4;
     QString m_brand;
     QString m_platform;
     QString m_model;

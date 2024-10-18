@@ -112,7 +112,7 @@ void ConsultaEquipos::consultarEquipos()
         //consulta normal
 
         if ( !m_lstIPsPath.isEmpty() )
-            lstIP.append( openFile( m_lstIPsPath ).split("\n",QString::SkipEmptyParts) );
+            lstIP.append( openFile( m_lstIPsPath ).split("\n",Qt::SkipEmptyParts) );
         if ( !m_ip.isEmpty() )
             lstIP.append(m_ip);
         if ( lstIP.isEmpty() ) //si ninguna de las dos anteriores se configuro usamos la de la consulta anterior

@@ -438,7 +438,7 @@ void InterfaceInfo::on_term_receiveText_Info()
     QStringList lines = txt.split("\n");
     SInterfaceInfo *nuevo=nullptr;
     QString interline,interstatus;
-    QRegExp expInterface;
+    QRegularExpression expInterface;
     for (QString line : lines)
     {
         line = line.simplified();
@@ -446,9 +446,9 @@ void InterfaceInfo::on_term_receiveText_Info()
         if ( m_brand == "Cisco" )
         {
             expInterface.setPattern("^(.+) is (.+), line protocol is (\\w+)");
-            if ( line.contains(expInterface) )
+            if ( line.contains(expInterface,&match) )
             {
-                QString interface = estandarizarInterfaz(expInterface.cap(1));
+                QString interface = estandarizarInterfaz(match.captured(1));
 
 //                qDebug() << m_queriesParent->ip() << "interfaz encontrada" << interface;
 
@@ -457,8 +457,8 @@ void InterfaceInfo::on_term_receiveText_Info()
                 id.datetime = QDateTime::currentDateTime();
                 id.operativo = true;
 
-                interstatus = id.status = expInterface.cap(2);
-                interline = id.status = expInterface.cap(3);
+                interstatus = id.status = match.captured(2);
+                interline = id.status = match.captured(3);
                 if ( interstatus == "administratively down" )
                     id.status = interstatus;
                 else
@@ -474,13 +474,13 @@ void InterfaceInfo::on_term_receiveText_Info()
                 continue;
             }
             expInterface.setPattern("^(.+) is (up|down)($| )+");
-            if ( line.contains(expInterface) )
+            if ( line.contains(expInterface,&match) )
             {
-                QString interface = estandarizarInterfaz(expInterface.cap(1));
+                QString interface = estandarizarInterfaz(match.captured(1));
 
                 SInterfaceInfo id;
                 id.interfaz = interface;
-                id.status = expInterface.cap(2);
+                id.status = match.captured(2);
                 id.datetime = QDateTime::currentDateTime();
                 id.operativo = true;
                 m_lstInterfacesInfo.append(id);
@@ -494,93 +494,93 @@ void InterfaceInfo::on_term_receiveText_Info()
 
             //MTU, BW
             exp.setPattern("MTU (\\d+) bytes, BW (\\d+) Kbit");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                nuevo->mtu = exp.cap(1);
-                nuevo->bandwidth = exp.cap(2).append("000"); //kilo2bit
+                nuevo->mtu = match.captured(1);
+                nuevo->bandwidth = match.captured(2).append("000"); //kilo2bit
                 continue;
             }
 
             //duplex, speed
             exp.setPattern("(.+duplex), (\\S+),");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                nuevo->duplex = exp.cap(1);
-                nuevo->speed = exp.cap(2);
+                nuevo->duplex = match.captured(1);
+                nuevo->speed = match.captured(2);
                 exp.setPattern("media type is (.+)$");
-                if ( line.contains(exp) )
-                    nuevo->mediaType = exp.cap(1);
+                if ( line.contains(exp,&match) )
+                    nuevo->mediaType = match.captured(1);
                 continue;
             }
 
             //mac
             exp.setPattern("Hardware.+address is ((\\w|\\d|\\.)+)( |$)");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                nuevo->mac = exp.cap(1);
+                nuevo->mac = match.captured(1);
                 continue;
             }
 
             //Descripcion
             exp.setPattern("Description: (.+)$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                nuevo->description = exp.cap(1).simplified().replace("\"","").replace("'","");
+                nuevo->description = match.captured(1).simplified().replace("\"","").replace("'","");
                 continue;
             }
 
             //rate
             exp.setPattern("input rate (\\d+) bits");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                nuevo->ratein=exp.cap(1);
+                nuevo->ratein=match.captured(1);
                 continue;
             }
             exp.setPattern("output rate (\\d+) bits");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                nuevo->rateout=exp.cap(1);
+                nuevo->rateout=match.captured(1);
                 continue;
             }
 
             //drops
             expInterface.setPattern("Total output drops: (\\d+)");
-            if ( line.contains(expInterface) )
+            if ( line.contains(expInterface,&match) )
             {
-                nuevo->dropsout = expInterface.cap(1);
+                nuevo->dropsout = match.captured(1);
                 continue;
             }
             expInterface.setPattern("(\\d+) total output drops");
-            if ( line.contains(expInterface) )
+            if ( line.contains(expInterface,&match) )
             {
-                nuevo->dropsout = expInterface.cap(1);
+                nuevo->dropsout = match.captured(1);
                 continue;
             }
             expInterface.setPattern("(\\d+) total input drops");
-            if ( line.contains(expInterface) )
+            if ( line.contains(expInterface,&match) )
             {
-                nuevo->dropsin = expInterface.cap(1);
+                nuevo->dropsin = match.captured(1);
                 continue;
             }
 
             //input errors, CRC, overruns
             expInterface.setPattern("(\\d+) input errors,.+(\\d+) CRC,.+(\\d+) overrun");
-            if ( line.contains(expInterface) )
+            if ( line.contains(expInterface,&match) )
             {
-                nuevo->errorsin = expInterface.cap(1);
-                nuevo->CRC = expInterface.cap(2);
-                nuevo->overrun = expInterface.cap(3);
+                nuevo->errorsin = match.captured(1);
+                nuevo->CRC = match.captured(2);
+                nuevo->overrun = match.captured(3);
                 continue;
             }
 
             //output errors, collisions
             expInterface.setPattern("(\\d+) output errors");
-            if ( line.contains(expInterface) )
+            if ( line.contains(expInterface,&match) )
             {
-                nuevo->errorsout = expInterface.cap(1);
+                nuevo->errorsout = match.captured(1);
                 expInterface.setPattern("(\\d)+ collisions");
-                if ( line.contains(expInterface) )
-                    nuevo->collisions = expInterface.cap(1);
+                if ( line.contains(expInterface,&match) )
+                    nuevo->collisions = match.captured(1);
 
                 //lo ultimo que se busca
                 nuevo=nullptr;
@@ -591,12 +591,12 @@ void InterfaceInfo::on_term_receiveText_Info()
         else if ( m_brand == "Huawei" )
         {
             expInterface.setPattern("^(.+) current state : (UP|DOWN|Administratively DOWN)");
-            if ( line.contains(expInterface) )
+            if ( line.contains(expInterface,&match) )
             {
-                QString interface = estandarizarInterfaz(expInterface.cap(1));
+                QString interface = estandarizarInterfaz(match.captured(1));
                 if ( interface == "Line protocol" )
                 {
-                    interline = expInterface.cap(1).simplified().toLower();
+                    interline = match.captured(1).simplified().toLower();
                     if ( interstatus == "administratively down" )
                         nuevo->status = interstatus;
                     else
@@ -613,7 +613,7 @@ void InterfaceInfo::on_term_receiveText_Info()
                     id.interfaz = interface;
                     id.datetime = QDateTime::currentDateTime();
                     id.operativo = true;
-                    interstatus = expInterface.cap(2).toLower();
+                    interstatus = match.captured(2).toLower();
                     m_lstInterfacesInfo.append(id);
                     nuevo = &id;
                 }
@@ -625,9 +625,9 @@ void InterfaceInfo::on_term_receiveText_Info()
 
             //Descripcion
             exp.setPattern("^Description:(.+)$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                nuevo->description = exp.cap(1).simplified().replace("\"","").replace("'","");
+                nuevo->description = match.captured(1).simplified().replace("\"","").replace("'","");
                 continue;
             }
         }
@@ -692,18 +692,18 @@ void InterfaceInfo::on_term_receiveText_InfoTransceiver()
         if ( m_os == "IOS XR" )
         {
             exp.setPattern( "Rx power: (.+)$" );
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                rx = exp.cap(1).simplified();
+                rx = match.captured(1).simplified();
                 break;
             }
         }
         else
         {
             exp.setPattern(" +\\-\\d+\\.\\d+ +(\\-\\d+\\.\\d+)");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                rx = exp.cap(1);
+                rx = match.captured(1);
                 break;
             }
         }       
@@ -730,17 +730,16 @@ void InterfaceInfo::on_term_receiveText_IpAddresses()
     QStringList lines = txt.split("\n");
 
     exp.setPattern("^(.+) +(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|unassigned).+");
-    exp.setMinimal(false);
     for (QString line : lines)
     {
         line = line.simplified();
 
-        if ( !line.contains(exp) )
+        if ( !line.contains(exp,&match) )
             continue;
 
         SIpInfo m;
-        m.interfaz = estandarizarInterfaz( exp.cap( 1 ) );
-        m.ip = exp.cap(2);
+        m.interfaz = estandarizarInterfaz( match.captured( 1 ) );
+        m.ip = match.captured(2);
         m.datetime = QDateTime::currentDateTime();
         m.operativo = true;
         m_lstInterfacesIPAddresses.append(m);
@@ -771,10 +770,10 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
 //            GigabitEthernet200/0/0/8.1705  unassigned      Up                    Up
 
             exp.setPattern("unassigned +Up +Up");
-            if ( ! line.contains(exp) )
+            if ( ! line.contains(exp,&match) )
                 continue;
 
-            QStringList c = line.split(" ",QString::SkipEmptyParts);
+            QStringList c = line.split(" ",Qt::SkipEmptyParts);
             QString interface = c.at(0);
 
             if ( !interface.contains(".") )
@@ -829,7 +828,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
                         break;
                     }
 
-                    QStringList a = line.split(" ",QString::SkipEmptyParts);
+                    QStringList a = line.split(" ",Qt::SkipEmptyParts);
                     nuevo = new SInterfaceVlans;
                     nuevo->interfaz =  estandarizarInterfaz( a.at(0) );
                     nuevo->datetime = QDateTime::currentDateTime();
@@ -866,32 +865,32 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansTrunkHuawei()
 
     QStringList lines = txt.split("\n");
 
-    QMap<QString,QString> map;
+    QMultiMap<QString,QString> map;
     QString vlan;
-    QRegExp exp("(\\d+).+enable +(TG|UT): ");
-    QRegExp expinter("(Eth-Trunk\\d+|[a-zA-Z]+\\d+/\\d+(/\\d+)*)\\(");
+    QRegularExpression exp("(\\d+).+enable +(TG|UT): ");
+    QRegularExpression expinter("(Eth-Trunk\\d+|[a-zA-Z]+\\d+/\\d+(/\\d+)*)\\(");
     for (QString line : lines)
     {
         line = line.simplified();
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            vlan = exp.cap(1);
-            int pos = 0;
-            while ((pos = expinter.indexIn(line, pos)) != -1)
+            vlan = match.captured(1);
+            QRegularExpressionMatchIterator i = expinter.globalMatch(line);
+            while (i.hasNext())
             {
-                QString interfaz = estandarizarInterfaz(expinter.cap(1));
-                map.insertMulti(interfaz,vlan);
-                pos += expinter.matchedLength();
+                QRegularExpressionMatch match2 = i.next();
+                QString interfaz = estandarizarInterfaz(match2.captured(1));
+                map.insert(interfaz,vlan);
             }
         }
         else if ( line.contains(expinter) )
         {
-            int pos = 0;
-            while ((pos = expinter.indexIn(line, pos)) != -1)
+            QRegularExpressionMatchIterator i = expinter.globalMatch(line);
+            while (i.hasNext())
             {
-                QString interfaz = estandarizarInterfaz(expinter.cap(1));
-                map.insertMulti(interfaz,vlan);
-                pos += expinter.matchedLength();
+                QRegularExpressionMatch match2 = i.next();
+                QString interfaz = estandarizarInterfaz(match2.captured(1));
+                map.insert(interfaz,vlan);
             }
         }
     }
@@ -923,9 +922,9 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansBridge()
         line = line.simplified();
 
         exp.setPattern("Associated Interface: (.+)$"); //Associated Interface: GigabitEthernet0/0/0
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            QString interfaz = estandarizarInterfaz( exp.cap(1) );
+            QString interfaz = estandarizarInterfaz( match.captured(1) );
             if ( lastInterface != interfaz )
             {
                 SInterfaceVlans i;
@@ -944,9 +943,9 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansBridge()
             continue;
 
         exp.setPattern("Encapsulation: dot1q (.+) "); //Encapsulation: dot1q 1194 vlan protocol type 0x8100
-        if ( line.contains(exp) && iv )
+        if ( line.contains(exp,&match) && iv )
         {
-            iv->vlans.append( exp.cap(1) );
+            iv->vlans.append( match.captured(1) );
             continue;
         }
     }
@@ -982,7 +981,7 @@ void InterfaceInfo::on_term_receiveText_PermitedVlansAccess()
         if ( !line.contains(" active") )
             continue;
 
-        QStringList data = line.split(" ",QString::SkipEmptyParts);
+        QStringList data = line.split(" ",Qt::SkipEmptyParts);
         if ( data.size() > 3 )
         {
             for ( int c=3; c<data.size(); c++ )
@@ -1018,12 +1017,12 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
         {
             if (line.contains("Interface") || line.contains("Status") ||
                     line.contains("interface descr") || line.contains("Description") ||
-                    !line.contains(QRegExp(" (up|down|admin) +(up|down) ")))
+                    !line.contains(QRegularExpression(" (up|down|admin) +(up|down) ")))
                 continue;                                    
 
             SInterfaceInfo id;
 
-            QStringList data = line.split("  ",QString::SkipEmptyParts);
+            QStringList data = line.split("  ",Qt::SkipEmptyParts);
 
             id.interfaz = estandarizarInterfaz( data.at(0).simplified() );
             id.datetime = QDateTime::currentDateTime();
@@ -1051,7 +1050,7 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
             if ((line.contains("Interface",Qt::CaseInsensitive) && line.contains("Description",Qt::CaseInsensitive)) )
                 continue;
 
-            QStringList data = line.split("   ",QString::SkipEmptyParts);
+            QStringList data = line.split("   ",Qt::SkipEmptyParts);
 
             if ( data.size() < 2 )
                 continue;
@@ -1094,10 +1093,10 @@ void InterfaceInfo::on_term_receiveText_ServiceInstances()
         line = line.simplified();
 
         exp.setPattern("Service Instance ID: (.+)$"); //Service Instance ID: 1194
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             SInterfaceIOSServiceInstanceInfo i;
-            i.serviceinstance = exp.cap(1);
+            i.serviceinstance = match.captured(1);
             i.datetime = QDateTime::currentDateTime();
             i.operativo = true;
             m_lstInterfaceServiceInstance.append(i);
@@ -1109,30 +1108,30 @@ void InterfaceInfo::on_term_receiveText_ServiceInstances()
             continue;
 
         exp.setPattern("Description: (.+)$"); //Description: ENLACE_INTERNET_WIFINIC_SanJuan_DelSur
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            sii->description = exp.cap(1);
+            sii->description = match.captured(1);
             continue;
         }
 
         exp.setPattern("Associated Interface: (.+)$"); //Associated Interface: GigabitEthernet0/0/0
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            sii->interfaz = exp.cap(1);
+            sii->interfaz = match.captured(1);
             continue;
         }
 
         exp.setPattern("Encapsulation: dot1q (.+) "); //Encapsulation: dot1q 1194 vlan protocol type 0x8100
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            sii->vlan = exp.cap(1);
+            sii->vlan = match.captured(1);
             continue;
         }
 
         exp.setPattern("Bridge-domain: (.+)$"); //Bridge-domain: 3046
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            sii->bridgedomain = exp.cap(1);
+            sii->bridgedomain = match.captured(1);
             continue;
         }
     }

@@ -20,8 +20,8 @@ void ExitInfo::on_term_receiveText()
 {
     txt.append(term->dataReceived());
     // qDebug() << m_ip << "ExitInfo::on_term_receiveText()" << txt;
-    // if ( !txt.contains(QRegExp(Properties::Instance()->linuxpromt)) &&
-    //      !txt.contains(QRegExp("^.+#\\s*$") ) )
+    // if ( !txt.contains(QRegularExpression(Properties::Instance()->linuxpromt)) &&
+    //      !txt.contains(QRegularExpression("^.+#\\s*$") ) )
     //     return;
 
     // if ( m_gw )

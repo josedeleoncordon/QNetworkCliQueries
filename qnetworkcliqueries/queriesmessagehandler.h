@@ -7,6 +7,7 @@
 #include <QMutex>
 #include <QTime>
 #include <QLoggingCategory>
+#include <QRegularExpression>
 
 class QueriesMessageHandler
 {
@@ -39,7 +40,7 @@ private:
     QTextStream _otherS;
 
     QList<log*> _lstLogs;
-    QRegExp _expIP;
+    QRegularExpression _expIP;
     QString _path;
     QMap<QString,QString> _mapIPnumero;
     int _c;

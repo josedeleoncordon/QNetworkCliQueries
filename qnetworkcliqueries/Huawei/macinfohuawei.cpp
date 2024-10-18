@@ -44,7 +44,7 @@ void MacInfoHuawei::on_term_receiveText()
              line.contains("drop",Qt::CaseInsensitive) )
              continue;
 
-        QStringList data = line.split(" ",QString::SkipEmptyParts);
+        QStringList data = line.split(" ",Qt::SkipEmptyParts);
         QString m = data.at(0).simplified();
         m.replace("-",".");
 

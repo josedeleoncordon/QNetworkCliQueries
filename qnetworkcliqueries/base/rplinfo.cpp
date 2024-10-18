@@ -258,15 +258,15 @@ void RplInfo::on_term_receiveText_rplRoute()
         return;
 
     QStringList lines = txt.split("\n");
-    QRegExp exp("^(route-policy|xpl route-filter) (\\S+)$");
+    QRegularExpression exp("^(route-policy|xpl route-filter) (\\S+)$");
     QString lastRPL;
     QString rpltxt;
     for (QString line : lines)
     {
         line = line.left( line.size()-1 );
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            lastRPL = exp.cap(2);
+            lastRPL = match.captured(2);
             rpltxt.append( line+"\n" );
             continue;
         }
@@ -276,7 +276,7 @@ void RplInfo::on_term_receiveText_rplRoute()
 
         rpltxt.append( line+"\n" );
 
-        if ( line.contains(QRegExp("^(end-policy|#)$")) )
+        if ( line.contains(QRegularExpression("^(end-policy|#)$")) )
         {
             SRplRouteInfo s;
             s.nombre = lastRPL;
@@ -328,7 +328,7 @@ void RplInfo::on_term_receiveText_rplPrefix()
     // qDebug() << "RplInfo::on_term_receiveText_rplPrefix()";
 
     QStringList lines = txt.split("\n");
-    QRegExp exp("^(xpl ip.+prefix-list|prefix-set) (\\S+)$");
+    QRegularExpression exp("^(xpl ip.+prefix-list|prefix-set) (\\S+)$");
     QString lastName;
     QString lastPrefix;
     QStringList lst;
@@ -341,9 +341,9 @@ void RplInfo::on_term_receiveText_rplPrefix()
 
         if ( m_brand == "Cisco" || m_os == "VRP" )
         {
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                lastName = exp.cap(2);
+                lastName = match.captured(2);
                 if ( m_os == "VRP" )
                 {
                     if ( line.contains( "xpl ipv6-" ) )
@@ -357,7 +357,7 @@ void RplInfo::on_term_receiveText_rplPrefix()
             if ( lastName.isEmpty() )
                 continue;
 
-            if ( line.contains(QRegExp("^(end-set| end-list)$")) )
+            if ( line.contains(QRegularExpression("^(end-set| end-list)$")) )
             {
                 // qDebug() << "Agregar rpl";
                 SRplPrefixInfo s;
@@ -373,7 +373,7 @@ void RplInfo::on_term_receiveText_rplPrefix()
 
             //convertimos: 172.17.23.0 24 -> 172.17.23.0/24  VRP
             QString p = line.replace(",","").simplified();
-            p.replace(QRegExp("^(\\S+) (\\d{1,3})(.*)"),
+            p.replace(QRegularExpression("^(\\S+) (\\d{1,3})(.*)"),
                       "\\1/\\2\\3");
 
             lst.append( p );
@@ -382,27 +382,27 @@ void RplInfo::on_term_receiveText_rplPrefix()
         {
             qDebug() << "line" << line;
 
-            QRegExp exp("chain=(\\S+) rule=\"if \\(dst (in|==) (.+)\\) \\{ accept; \\}");
-            QRegExp exp2("chain=(\\S+) prefix=(\\S+) .+action=accept");
+            QRegularExpression exp("chain=(\\S+) rule=\"if \\(dst (in|==) (.+)\\) \\{ accept; \\}");
+            QRegularExpression exp2("chain=(\\S+) prefix=(\\S+) .+action=accept");
             QString nombre;
             QString prefix;
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                nombre=exp.cap(1);
-                prefix=exp.cap(3);
+                nombre=match.captured(1);
+                prefix=match.captured(3);
             }
-            else if ( line.contains(exp2) )
+            else if ( line.contains(exp2,&match) )
             {
-                nombre=exp2.cap(1);
-                prefix=exp2.cap(2);
+                nombre=match.captured(1);
+                prefix=match.captured(2);
             }
             else
             {
                 //debido que algunos equipos la linea con esta informacion la parte en dos lineas
                 exp.setPattern("chain=(\\S+) ");
-                if ( line.contains(exp) ) lastName=exp.cap(1);
+                if ( line.contains(exp,&match) ) lastName=match.captured(1);
                 exp.setPattern("prefix=(\\S+) ");
-                if ( line.contains(exp) ) lastPrefix=exp.cap(1);
+                if ( line.contains(exp,&match) ) lastPrefix=match.captured(1);
                 if ( line.contains("action=accept") )
                 {
                     if ( !lastName.isEmpty() && !lastPrefix.isEmpty() )
@@ -479,7 +479,7 @@ void RplInfo::on_term_receiveText_prefix_list()
         return;
 
     QStringList lines = txt.split("\n");
-    QRegExp exp("(list|prefix) (\\S+) (seq|index) \\d+ permit (.+)$");
+    QRegularExpression exp("(list|prefix) (\\S+) (seq|index) \\d+ permit (.+)$");
     QString lastName;
     SRplPrefixInfo *lastS = nullptr;
     for (QString line : lines)
@@ -489,13 +489,13 @@ void RplInfo::on_term_receiveText_prefix_list()
 
         if ( m_brand == "Cisco" || m_os == "VRP" )
         {
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                QString name = exp.cap(2);
-                QString prefix = exp.cap(4);
+                QString name = match.captured(2);
+                QString prefix = match.captured(4);
                 prefix.replace("greater-equal","ge").replace("less-equal","le");
                 //convertimos: 172.17.23.0 24 -> 172.17.23.0/24  VRP
-                prefix.replace(QRegExp("^(\\S+) (\\d{1,3})(.*)"),
+                prefix.replace(QRegularExpression("^(\\S+) (\\d{1,3})(.*)"),
                                "\\1/\\2\\3");
                 // qDebug() << "entro" << name << lastName;
                 if ( lastName != name )
@@ -510,7 +510,7 @@ void RplInfo::on_term_receiveText_prefix_list()
                     else
                         version=4;
 
-                    // qDebug() << "agregando prefixlist" << name << exp.cap(4);
+                    // qDebug() << "agregando prefixlist" << name << match.captured(4);
 
                     SRplPrefixInfo s;
                     s.nombre = name;
@@ -569,21 +569,21 @@ void RplInfo::on_term_receiveText_rplCommunity()
     QStringList lines = txt.split("\n");
     QString lastName;
     QStringList lst;
-    QRegExp exp("^(xpl community-list|community-set) (\\S+)$");
+    QRegularExpression exp("^(xpl community-list|community-set) (\\S+)$");
     for (QString line : lines)
     {
         line = line.left( line.size()-1 );
         // qDebug() << "line" << line;
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            lastName = exp.cap(2);
+            lastName = match.captured(2);
             continue;
         }
 
         if ( lastName.isEmpty() )
             continue;
 
-        if ( line.contains(QRegExp("^(end-set| end-list)$")) )
+        if ( line.contains(QRegularExpression("^(end-set| end-list)$")) )
         {
             // qDebug() << "Agregar rpl";
             SRplCommunityInfo s;
@@ -607,17 +607,17 @@ void RplInfo::on_term_receiveText_comunity_list()
         return;
 
     QStringList lines = txt.split("\n");
-    QRegExp exp("ip community-list expanded (\\S+) permit (.+)$");
+    QRegularExpression exp("ip community-list expanded (\\S+) permit (.+)$");
     QString lastName;
     SRplCommunityInfo *lastS = nullptr;
     for (QString line : lines)
     {
         line = line.left( line.size()-1 );
         // qDebug() << "line2" << line;
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            QString name = exp.cap(1);
-            QString community = exp.cap(2);
+            QString name = match.captured(1);
+            QString community = match.captured(2);
             // qDebug() << "entro" << name << lastName;
             if ( lastName != name )
             {
@@ -625,7 +625,7 @@ void RplInfo::on_term_receiveText_comunity_list()
                 QStringList lst;
                 lst.append(community);
 
-                // qDebug() << "agregando communitylist" << name << exp.cap(2);
+                // qDebug() << "agregando communitylist" << name << match.captured(2);
 
                 SRplCommunityInfo s;
                 s.nombre = name;

@@ -142,7 +142,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_CDP()
             line = line.simplified();
 
             exp.setPattern("Device ID: *.+");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 line.replace(" ","");
                 QStringList lst = line.split(":");
@@ -198,7 +198,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_CDP()
             }
 
             exp.setPattern("IP(v4)* (a|A)ddress:");
-            if ( line.contains(exp) && nuevo  )
+            if ( line.contains(exp,&match) && nuevo  )
             {
                 if ( nuevo->ip.isEmpty() )
                 {
@@ -239,13 +239,13 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Cisco()
     int con=-1;
     foreach (QString line, txt.split("\n"))
     {
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             //Device ID           Local Intf     Hold-time  Capability      Port ID
             //GMIXGTEMN1D1102A25ENTe1/1          120        B,R             GigabitEthernet0/2/24
             //GNCYGTEMN1D1103A40EITe2/2          120        B,R             GigabitEthernet2/0/1
             con++;
-            QStringList col = line.split("  ",QString::SkipEmptyParts);
+            QStringList col = line.split("  ",Qt::SkipEmptyParts);
             if ( col.size() == 5  )
                 mapInterfazLocales.insert(col.at(0)+"_"+QString::number(con),estandarizarInterfaz(col.at(1)));            
             if ( col.size() == 4 )
@@ -279,7 +279,7 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Cisco_detail()
         if ( entry.contains("show lldp neighbors") )
             continue;
 
-        QStringList lstValues = entry.split("\n",QString::SkipEmptyParts);
+        QStringList lstValues = entry.split("\n",Qt::SkipEmptyParts);
         SEquipmentNeighborsInfo *nuevo=nullptr;
         QString localint;
         QString otroint;
@@ -290,21 +290,21 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Cisco_detail()
             line = line.simplified();
 
             exp.setPattern("Local (Intf|Interface): (.+)$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                localint = estandarizarInterfaz(exp.cap(2).simplified());
+                localint = estandarizarInterfaz(match.captured(2).simplified());
                 continue;
             }
 
             exp.setPattern("Port id: (.+)$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                otroint = estandarizarInterfaz(exp.cap(1).simplified());
+                otroint = estandarizarInterfaz(match.captured(1).simplified());
                 continue;
             }
 
             exp.setPattern("System Name: *.+$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
                 con++;
                 line.replace(" ","");
@@ -337,19 +337,19 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Cisco_detail()
 
             if ( systemdescriptiontxt )
             {
-                QRegExp exp3("\\((\\s|\\w|&|_|-){4,}\\)");
-                if ( line.contains(exp3) )
+                QRegularExpression exp3("\\((\\s|\\w|&|_|-){4,}\\)");
+                if ( line.contains(exp3,&match) )
                 {
-                    nuevo->plataforma = exp3.cap(0).replace("(","").replace(")","");
+                    nuevo->plataforma = match.captured(0).replace("(","").replace(")","");
                     systemdescriptiontxt=false;
                     continue;
                 }
             }
 
             exp.setPattern("IP(v4)*( address)*: (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})$");
-            if ( line.contains(exp) )
+            if ( line.contains(exp,&match) )
             {
-                nuevo->ip = exp.cap(3).simplified();
+                nuevo->ip = match.captured(3).simplified();
                 continue;
             }
         }
@@ -390,19 +390,19 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Huawei()
 
     SEquipmentNeighborsInfo *nuevo=nullptr;
     QString localint;
-    foreach (QString line, txt.split("\n",QString::SkipEmptyParts))
+    foreach (QString line, txt.split("\n",Qt::SkipEmptyParts))
     {
         line = line.simplified();
 
         exp.setPattern("([0-9a-zA-Z]+[0-9](/[0-9]*)+) has \\d+ neighbor");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            localint = exp.cap(1).simplified();
+            localint = match.captured(1).simplified();
             continue;
         }
 
-        if ( line.contains(QRegExp("Neighbor \\d+:")) ||
-             line.contains(QRegExp("Neighbor index *:\\d+")))
+        if ( line.contains(QRegularExpression("Neighbor \\d+:")) ||
+             line.contains(QRegularExpression("Neighbor index *:\\d+")))
         {            
             SEquipmentNeighborsInfo e;
             e.interfazestesalida = estandarizarInterfaz(localint);
@@ -417,20 +417,20 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Huawei()
             continue;
 
         exp.setPattern("(PortId|Port ID) *: *(.+)$");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            nuevo->interfazotroentrada = estandarizarInterfaz(exp.cap(2).simplified());
+            nuevo->interfazotroentrada = estandarizarInterfaz(match.captured(2).simplified());
             continue;
         }
 
         exp.setPattern("(SysName|System name) *: *(.+)$");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            nuevo->nombreequipo = exp.cap(2).simplified();
+            nuevo->nombreequipo = match.captured(2).simplified();
             continue;
         }
 
-        if ( line.contains(QRegExp("(SysDesc|System description) *: *")) )
+        if ( line.contains(QRegularExpression("(SysDesc|System description) *: *")) )
         {
             description=true;
             QStringList data = line.split(":");
@@ -439,21 +439,21 @@ void EquipmentNeighborsInfo::on_term_receiveText_LLDP_Huawei()
         }
 
         exp.setPattern("Management address *:");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
             description=false;
             if ( nuevo->plataforma.isEmpty() ) nuevo->plataforma = descriptionmie;
 
-            nuevo->ip = line.split(" ",QString::SkipEmptyParts).last().simplified().replace(":","");
+            nuevo->ip = line.split(" ",Qt::SkipEmptyParts).last().simplified().replace(":","");
             continue;
         }
 
         if ( description )
         {
-            QRegExp exp3("\\((\\s|\\w|&|_|-){4,}\\)");
-            if ( line.contains(exp3) )
+            QRegularExpression exp3("\\((\\s|\\w|&|_|-){4,}\\)");
+            if ( line.contains(exp3,&match) )
             {
-                nuevo->plataforma = exp3.cap(0).replace("(","").replace(")","").simplified();
+                nuevo->plataforma = match.captured(0).replace("(","").replace(")","").simplified();
                 description=false;
             }                            
             continue;        

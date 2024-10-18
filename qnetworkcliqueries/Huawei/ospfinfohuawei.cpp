@@ -35,9 +35,9 @@ void OSPFInfoHuawei::on_term_receiveTextNeighbors()
         line = line.simplified();
 
         exp.setPattern("OSPF Process (\\d+) with Router");
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            proceso = exp.cap(1);
+            proceso = match.captured(1);
             continue;
         }
 
@@ -48,7 +48,7 @@ void OSPFInfoHuawei::on_term_receiveTextNeighbors()
         SOSPFInfo oii;
         oii.datetime = QDateTime::currentDateTime();
         oii.operativo = true;
-        QStringList lstColumns = line.split(" ",QString::SkipEmptyParts);
+        QStringList lstColumns = line.split(" ",Qt::SkipEmptyParts);
 
         oii.id = lstColumns.at(2).simplified();
         oii.state = lstColumns.at(3).simplified();
@@ -85,10 +85,10 @@ void OSPFInfoHuawei::on_term_receiveTextInterfaces()
     foreach (QString line, lines)
     {
         exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
-        if ( !line.contains(exp) )
+        if ( !line.contains(exp,&match) )
             continue;
 
-        QStringList lstColumns = line.split(" ",QString::SkipEmptyParts);
+        QStringList lstColumns = line.split(" ",Qt::SkipEmptyParts);
 
         for ( SOSPFInfo &oii : m_lstOSPFInfo )
         {

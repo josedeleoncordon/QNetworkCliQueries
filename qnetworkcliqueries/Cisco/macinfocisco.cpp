@@ -66,7 +66,7 @@ void MacInfoCisco::on_term_receiveText()
 
         line.replace("* ","");
 
-        QStringList data = line.split(" ",QString::SkipEmptyParts);
+        QStringList data = line.split(" ",Qt::SkipEmptyParts);
 
         if ( m_os == "IOS XR" )
         {
@@ -75,7 +75,7 @@ void MacInfoCisco::on_term_receiveText()
 
             mac.mac = data.at(0).simplified();
 
-            QRegExp expip("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+            QRegularExpression expip("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
             if ( data.at(2).contains(expip) ) //PW
             {
                 //000e.50ef.4340 dynamic (10.192.65.146, 322261)     0/0/CPU0   0d 0h 0m 18s       N/A
@@ -89,7 +89,7 @@ void MacInfoCisco::on_term_receiveText()
                 QString interfaz;
                 interfaz = data.at(2).simplified();
 
-                QStringList inter = interfaz.split(".",QString::SkipEmptyParts);
+                QStringList inter = interfaz.split(".",Qt::SkipEmptyParts);
                 mac.interfaz = estandarizarInterfaz( inter.at(0) );
                 if ( inter.size() > 1 )
                     mac.vlan = inter.at(1);
@@ -106,7 +106,7 @@ void MacInfoCisco::on_term_receiveText()
             if ( line.contains("efp_id") )
                 //1666  0025.9ed3.10a8   dynamic  Yes          0   Te3/1 efp_id 1666
                 interface = estandarizarInterfaz( data.at(data.size()-3).simplified() );
-            else if ( line.contains(exp) )
+            else if ( line.contains(exp,&match) )
             {
                 //3222  001a.302b.35c0   dynamic  Yes        160   Eth VLAN 3222
                 //En IOS se tendra que conultar los xconnect para ver hacia que PE va el PW
@@ -178,12 +178,12 @@ void MacInfoCisco::on_term_receiveText_iosXconnect()
     {
         line = line.simplified();
 
-        if ( !line.contains(exp) )
+        if ( !line.contains(exp,&match) )
             continue;
 
-        QString vlan = exp.cap(1);
-        QString ip = exp.cap(2);
-        QString id = exp.cap(3);
+        QString vlan = match.captured(1);
+        QString ip = match.captured(2);
+        QString id = match.captured(3);
 
         for (SMacInfo &mi : m_lstMacs)
         {

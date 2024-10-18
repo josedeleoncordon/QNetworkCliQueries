@@ -120,10 +120,10 @@ void PIMInfo::getPIMInterfaces()
 
 //        exp.setPattern("([a-zA-Z]|\\-)+\\d+(/\\d+)*(\\.\\d+)*");
 //        exp.setMinimal(false);
-//        if ( line.contains(exp) )
+//        if ( line.contains(exp,&match) )
 //        {
 //            SPIMInfo *pi = new SPIMInfo;
-//            pi->interface = estandarizarInterfaz( exp.cap(0) );
+//            pi->interface = estandarizarInterfaz( match.captured(0) );
 //            lstPIMNeighbors.append(pi);
 //        }
 //    }
@@ -136,16 +136,16 @@ void PIMInfo::on_term_receiveTextInterfaces()
     if ( !allTextReceived() )
         return;
 
-    QRegExp exp("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+    QRegularExpression exp("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
 
     QStringList lines = txt.split("\n");
     foreach (QString line, lines)
     {
         line = line.simplified();
 
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            QStringList data=line.split(" ",QString::SkipEmptyParts);
+            QStringList data=line.split(" ",Qt::SkipEmptyParts);
 
             SPIMInfo pi;
             pi.interfaz = estandarizarInterfaz( data.at(1) );
@@ -179,7 +179,7 @@ void PIMInfo::on_term_receiveTextRouterPim()
     if ( !allTextReceived() )
         return;
 
-    QRegExp exp("^interface (([a-zA-Z]|\\-)+\\d+(/\\d+)*(\\.\\d+)*)");
+    QRegularExpression exp("^interface (([a-zA-Z]|\\-)+\\d+(/\\d+)*(\\.\\d+)*)");
     QString lastInterface;
     QStringList lines = txt.split("\n");
     foreach (QString line, lines)
@@ -187,9 +187,9 @@ void PIMInfo::on_term_receiveTextRouterPim()
         line = line.simplified();
 
         //Se verifica la interfaz
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            lastInterface=estandarizarInterfaz(exp.cap(1));
+            lastInterface=estandarizarInterfaz(match.captured(1));
             continue;
         }
 
@@ -216,7 +216,7 @@ void PIMInfo::on_term_receiveTextMulticastRouting()
     if ( !allTextReceived() )
         return;
 
-    QRegExp exp("^interface (([a-zA-Z]|\\-)+\\d+(/\\d+)*(\\.\\d+)*)");
+    QRegularExpression exp("^interface (([a-zA-Z]|\\-)+\\d+(/\\d+)*(\\.\\d+)*)");
     QString lastInterface;
     QStringList lines = txt.split("\n");
     foreach (QString line, lines)
@@ -224,9 +224,9 @@ void PIMInfo::on_term_receiveTextMulticastRouting()
         line = line.simplified();
 
         //Se verifica la interfaz
-        if ( line.contains(exp) )
+        if ( line.contains(exp,&match) )
         {
-            lastInterface=estandarizarInterfaz(exp.cap(1));
+            lastInterface=estandarizarInterfaz(match.captured(1));
             continue;
         }
 

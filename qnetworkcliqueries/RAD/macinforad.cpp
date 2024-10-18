@@ -67,16 +67,16 @@ void MacInfoRAD::on_term_receiveTextETX1()
     if ( !allTextReceived() )
         return;
 
-    QRegExp expmac("(\\d+) *(\\S{17}) +(\\d+)");
+    QRegularExpression expmac("(\\d+) *(\\S{17}) +(\\d+)");
 
     QStringList lines = txt.split("\n");
     foreach (QString line, lines)
     {
         line = line.simplified();
 
-        if ( line.contains( expmac ) )
+        if ( line.contains( expmac,&match ) )
         {
-            QString mac = expmac.cap(2);
+            QString mac = match.captured(2);
 
             mac.replace("-","");
             mac.insert(4,".");
@@ -86,8 +86,8 @@ void MacInfoRAD::on_term_receiveTextETX1()
             m.datetime = QDateTime::currentDateTime();
             m.operativo = true;
             m.mac = mac.toLower();
-            m.interfaz = expmac.cap(3);
-            m.vlan = expmac.cap(1);
+            m.interfaz = match.captured(3);
+            m.vlan = match.captured(1);
 
             //verificando si la mac esta en la vlans permitidas, si se configuro
             QStringList vlanfilter = m_queriesConfiguration.values("MAC_vlansFilter",m_ip,m_os,m_conexionID);
@@ -119,10 +119,10 @@ void MacInfoRAD::on_term_receiveTextETX1002001300()
 //        qDebug() << "\n\nbuscando el menu:" << menu << "en el texto" << txt;
 
         exp.setPattern("(\\d+)\\. "+menu);
-        if ( txt.contains( exp ) )
+        if ( txt.contains( exp,&match ) )
         {
             ext201menus.removeFirst();
-            QString este = exp.cap(1);
+            QString este = match.captured(1);
             txt.clear();
             menuintentos=0;
 
@@ -148,12 +148,12 @@ void MacInfoRAD::on_term_receiveTextETX1002001300()
         if ( totalMacs == -1 )
         {
             exp.setPattern("(\\d+) entries in range out of");
-            QRegExp exp2("Total (\\d+) MAC Entries");
+            exp2.setPattern("Total (\\d+) MAC Entries");
 
-            if ( txt.contains( exp ) )
-                totalMacs = exp.cap(1).toInt();
-            else if ( txt.contains( exp2 ) )
-                totalMacs = exp2.cap(1).toInt();
+            if ( txt.contains( exp,&match ) )
+                totalMacs = match.captured(1).toInt();
+            else if ( txt.contains( exp2,&match ) )
+                totalMacs = match.captured(1).toInt();
 
             if ( totalMacs == 0 )
             {
@@ -166,9 +166,9 @@ void MacInfoRAD::on_term_receiveTextETX1002001300()
         qDebug() << "total de MACs" << totalMacs;
 
         //recorriendo las lineas
-        QRegExp expmac("(\\w{12}) +Learned +(User \\d+|Network)+ +(\\d+)"); //etx-202 102
-        QRegExp expmac2("\\d+ +(\\d+) +((\\w|\\-)+) +(\\w+) +Dynamic"); //etx-1300
-        QStringList data = txt.split("\r",QString::SkipEmptyParts);
+        QRegularExpression expmac("(\\w{12}) +Learned +(User \\d+|Network)+ +(\\d+)"); //etx-202 102
+        QRegularExpression expmac2("\\d+ +(\\d+) +((\\w|\\-)+) +(\\w+) +Dynamic"); //etx-1300
+        QStringList data = txt.split("\r",Qt::SkipEmptyParts);
         foreach (QString line, data)
         {
             line = line.simplified();
@@ -179,31 +179,31 @@ void MacInfoRAD::on_term_receiveTextETX1002001300()
             QString iface;
             QString vlan;
             QString mac;
-            if ( line.contains(expmac) ) //etx-202 102
+            if ( line.contains(expmac,&match) ) //etx-202 102
             {
-                mac = expmac.cap(1);
+                mac = match.captured(1);
                 mac.insert(4,".");
                 mac.insert(9,".");
                 mac = mac.toLower();
-                iface = expmac.cap(2);
-                vlan = expmac.cap(3);
+                iface = match.captured(2);
+                vlan = match.captured(3);
 
                 pageMacCounter++;
                 encontradamac=true;
             }
-            else if ( line.contains(expmac2) ) //etx-1300
+            else if ( line.contains(expmac2,&match) ) //etx-1300
             {
-                mac = expmac2.cap(2);
+                mac = match.captured(2);
 
-                qDebug() << "todo" << expmac2.cap(0);
+                qDebug() << "todo" << match.captured(0);
                 qDebug() << "mac" << mac;
 
                 mac.replace("-","");
                 mac.insert(4,".");
                 mac.insert(9,".");
                 mac = mac.toLower();
-                iface = expmac2.cap(4);
-                vlan = expmac2.cap(1);
+                iface = match.captured(4);
+                vlan = match.captured(1);
 
                 qDebug() << "encontrada la mac" << mac << iface << vlan;
 

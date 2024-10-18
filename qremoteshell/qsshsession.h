@@ -9,8 +9,8 @@ https://github.com/softengineer/qsshterm
 #define QSSHSESSION_H
 
 #include <QObject>
-#include </usr/include/libssh/libssh.h>
-#include </usr/include/libssh/callbacks.h>
+#include </usr/local/include/libssh/libssh.h>
+#include </usr/local/include/libssh/callbacks.h>
 
 class QTimer;
 class QSocketNotifier;

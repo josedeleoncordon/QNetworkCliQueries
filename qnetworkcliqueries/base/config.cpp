@@ -18,9 +18,9 @@ void Config::configApply()
     qDebug() << "Config::configApply() platformcontains" << platformcontains;
     if ( platformcontains == "Contains" )
         m_lstComandos =
-                m_queriesConfiguration.value("ConfigTemplate",m_ip,m_platform,m_conexionID,true).split("\n",QString::SkipEmptyParts);
+                m_queriesConfiguration.value("ConfigTemplate",m_ip,m_platform,m_conexionID,true).split("\n",Qt::SkipEmptyParts);
     else
-        m_lstComandos = m_queriesConfiguration.value("ConfigTemplate",m_ip,m_os,m_conexionID).split("\n",QString::SkipEmptyParts);
+        m_lstComandos = m_queriesConfiguration.value("ConfigTemplate",m_ip,m_os,m_conexionID).split("\n",Qt::SkipEmptyParts);
 
     qDebug() << "Config::configApply() lstComandos" << m_lstComandos;
 
@@ -54,11 +54,12 @@ void Config::on_term_receiveText_configMode()
 
     exp.setPattern("^.+\\(config(\\-\\w+)*\\)#\\s*$");
     exp2.setPattern("^\\[.+\\]");
+    exp3.setPattern("^Password:$");
 
     QString line = txt.split("\n").last();
     line.simplified();
 
-    if ( line.contains(exp) || line.contains(exp2) || line.contains(QRegExp("^Password:$")) )
+    if ( line.contains(exp,&match) || line.contains(exp2) || line.contains(exp3) )
     {
         //modo de configuracion
         term->disconnectReceiveTextSignalConnections();
@@ -84,7 +85,7 @@ void Config::siguienteComando()
         //se envia el comando de configuracion
         //se reemplaza las variables por el valor
 //        QStringList comando;
-//        foreach (QString word, m_lstComandos.at(m_lstComandosPos).split(" ",QString::SkipEmptyParts))
+//        foreach (QString word, m_lstComandos.at(m_lstComandosPos).split(" ",Qt::SkipEmptyParts))
 //        {
 //            if (word.contains("@"))
 //            {
@@ -127,9 +128,9 @@ void Config::on_term_receiveText_finished()
 
     exp.setPattern("^.+\\(config(\\-\\w+)*\\)#\\s*$");
     exp2.setPattern("^\\[.+\\]");
-    QRegExp exp3("^\\S+#\\s*$");
+    exp3.setPattern("^\\S+#\\s*$");
 
-    if ( line.contains(exp) || line.contains(exp2) || line.contains(exp3) )
+    if ( line.contains(exp,&match) || line.contains(exp2) || line.contains(exp3) )
     {
         //si verifica si se salio error al ejecutar el comando
         if ( txt.contains("Unrecognized command") ||
@@ -160,7 +161,7 @@ void Config::on_term_receiveText_exited()
         termSendText("no");   //cambiar a yes
         m_guardado=true;
     }
-    else if ( line.contains(exp) || line.contains(exp2) )
+    else if ( line.contains(exp,&match) || line.contains(exp2) )
     {
         //Se esta aun en el modo de configuracion, nos salimos
         if ( m_brand == "Cisco" )

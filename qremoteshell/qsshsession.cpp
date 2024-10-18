@@ -136,8 +136,8 @@ void QSSHSession::connect_to() {
     ssh_options_set(session, SSH_OPTIONS_HOST, _host.toLocal8Bit());
     ssh_options_set(session, SSH_OPTIONS_PORT, _port.toLocal8Bit());
     ssh_options_set(session, SSH_OPTIONS_LOG_VERBOSITY, &verbosity);
-    // ssh_options_set(session, SSH_OPTIONS_PUBLICKEY_ACCEPTED_TYPES, "+ssh-dss,rsa-sha2-256,rsa-sha2-512,ecdh-sha2-nistp256,ssh-rsa");
-    // ssh_options_set(session, SSH_OPTIONS_HOSTKEYS, "+ssh-dss,ssh-rsa,ecdh-sha2-nistp256,ssh-ed25519,ecdsa-sha2-nistp521,ecdsa-sha2-nistp384,ecdsa-sha2-nistp256,rsa-sha2-512,rsa-sha2-256,ssh-rsa,ssh-dss");
+    // ssh_options_set(session, SSH_OPTIONS_PUBLICKEY_ACCEPTED_TYPES, "ssh-dss,rsa-sha2-256,rsa-sha2-512,ecdh-sha2-nistp256,ssh-rsa");
+    // ssh_options_set(session, SSH_OPTIONS_HOSTKEYS, "ssh-dss,ssh-rsa,ecdh-sha2-nistp256,ssh-ed25519,ecdsa-sha2-nistp521,ecdsa-sha2-nistp384,ecdsa-sha2-nistp256,rsa-sha2-512,rsa-sha2-256,ssh-rsa,ssh-dss");
     // ssh_options_set(session, SSH_OPTIONS_KEY_EXCHANGE, "diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group18-sha512,diffie-hellman-group16-sha512,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha256,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1");
     int rc = ssh_connect(session);
 
