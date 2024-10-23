@@ -1,17 +1,6 @@
 #include "ospfinfo.h"
 #include "funciones.h"
 
-SOSPFInfo::SOSPFInfo(const SOSPFInfo &other)
-{
-    interfaz = other.interfaz;
-    cost = other.cost;
-    id = other.id;
-    state = other.state;
-    address = other.address;
-    process = other.process;
-    area = other.area;
-}
-
 QDataStream& operator<<(QDataStream& out, const SOSPFInfo& data)
 {
     out << data.address;

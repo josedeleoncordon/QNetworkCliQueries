@@ -13,6 +13,7 @@ QSSHSession::QSSHSession(QString host, QString port, QString user, QString pass,
     _user = user;
     _password = pass;
     m_error=NONE;
+    _host_disconnected = false;
 
     read_notifier = nullptr;
 }
@@ -109,7 +110,10 @@ void QSSHSession::shell(ssh_session session){
     emit connected();
 }
 
-void QSSHSession::host_disconnect() {
+void QSSHSession::host_disconnect()
+{
+    if ( _host_disconnected ) return;
+
     if (read_notifier)
         read_notifier->setEnabled(false);
     if (ssh_channel_is_open(channel))
@@ -122,6 +126,7 @@ void QSSHSession::host_disconnect() {
         ssh_free(session);
     }
     //ssh_finalize();
+    _host_disconnected=true;
     qCDebug(qsshsession) << _host << "SSH session is closing ...";
     emit disconnected();
 }

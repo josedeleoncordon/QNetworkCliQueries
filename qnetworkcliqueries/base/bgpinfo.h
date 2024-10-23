@@ -1,7 +1,6 @@
 #ifndef BGPINFO_H
 #define BGPINFO_H
 
-#include <QtDBus/QDBusArgument>
 #include "funcionbase.h"
 #include "macinfo.h"
 
@@ -33,8 +32,6 @@ struct SBGPNetwork : InfoBase
     QStringList communityList;
 
     SBGPNetwork() { best=false; }
-    SBGPNetwork(const SBGPNetwork &other);
-
     bool operator<(const SBGPNetwork &other) const
     {
         return network < other.network;
@@ -43,12 +40,8 @@ struct SBGPNetwork : InfoBase
 
 QDataStream& operator<<(QDataStream& out, const SBGPNetwork &data);
 QDataStream& operator>>(QDataStream& in, SBGPNetwork& data);
-
 QDataStream& operator<<(QDataStream& out, const SBGPNeighbor &data);
 QDataStream& operator>>(QDataStream& in, SBGPNeighbor& data);
-
-QDBusArgument& operator<<(QDBusArgument &argument, const SBGPNetwork &data);
-const QDBusArgument& operator>>(const QDBusArgument& argument, SBGPNetwork &data);
 
 class QNETWORKCLIQUERIES_EXPORT BGPInfo : public FuncionBase
 {

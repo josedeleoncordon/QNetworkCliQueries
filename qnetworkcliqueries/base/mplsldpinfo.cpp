@@ -1,12 +1,6 @@
 #include "mplsldpinfo.h"
 #include "funciones.h"
 
-SMplsLdpInfo::SMplsLdpInfo(const SMplsLdpInfo &other)
-{
-    neighbor = other.neighbor;
-    interfaz = other.interfaz;
-}
-
 QDataStream& operator<<(QDataStream& out, const SMplsLdpInfo& data)
 {
     out << data.interfaz;

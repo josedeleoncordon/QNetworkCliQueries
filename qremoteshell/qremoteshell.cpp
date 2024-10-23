@@ -177,16 +177,15 @@ void QRemoteShell::ssh_host_disconnected()
                 QTimer::singleShot( 2000,[this]() { m_protocolTry(); } );
             }
             else
-                host_disconnect();
+                emit disconnected();
 
             break;
         }
         case QSSHSession::AUTH_DENIED:
-        case QSSHSession::CHANNEL_ERROR: { m_nextTry(); break; }
+        case QSSHSession::CHANNEL_ERROR:
         case QSSHSession::SHELL_ERROR:
         {
-
-            m_connectionRefused=true;
+            m_nextTry();
             break;
         }
         default: break;

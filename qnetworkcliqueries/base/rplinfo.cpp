@@ -1,34 +1,5 @@
 #include "rplinfo.h"
 
-SRplRouteInfo::SRplRouteInfo(const SRplRouteInfo &other)
-{
-    nombre = other.nombre;
-    txt = other.txt;
-    //infobase
-    datetime = other.datetime;
-    operativo = other.operativo;
-}
-
-SRplPrefixInfo::SRplPrefixInfo(const SRplPrefixInfo &other)
-{
-    nombre = other.nombre;
-    type = other.type;
-    ipversion = other.ipversion;
-    lstPrefixes = other.lstPrefixes;
-    //infobase
-    datetime = other.datetime;
-    operativo = other.operativo;
-}
-
-SRplCommunityInfo::SRplCommunityInfo(const SRplCommunityInfo &other)
-{
-    nombre = other.nombre;
-    lstComunities = other.lstComunities;
-    //infobase
-    datetime = other.datetime;
-    operativo = other.operativo;
-}
-
 QDataStream& operator<<(QDataStream& out, const SRplRouteInfo& data)
 {
     out << data.nombre;

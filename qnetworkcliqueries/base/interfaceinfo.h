@@ -25,18 +25,12 @@ struct SInterfaceInfo : InfoBase
     QString speed;
     QString opticalRx;
     QString mediaType;
-
-    SInterfaceInfo() {}
-    SInterfaceInfo(const SInterfaceInfo &other);
 };
 
 struct SInterfaceVlans : InfoBase
 {
     QString interfaz;
     QStringList vlans;
-
-    SInterfaceVlans() {}
-    SInterfaceVlans(const SInterfaceVlans &other);
 };
 
 struct SInterfaceIOSServiceInstanceInfo : InfoBase
@@ -46,9 +40,6 @@ struct SInterfaceIOSServiceInstanceInfo : InfoBase
     QString description;
     QString vlan;
     QString bridgedomain;
-
-    SInterfaceIOSServiceInstanceInfo() {}
-    SInterfaceIOSServiceInstanceInfo(const SInterfaceIOSServiceInstanceInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SInterfaceInfo& data);

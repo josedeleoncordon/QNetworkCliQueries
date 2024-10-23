@@ -1,12 +1,6 @@
 #include "vrfinfo.h"
 #include "funciones.h"
 
-SVrfInfo::SVrfInfo(const SVrfInfo &other)
-{
-    interfaz = other.interfaz;
-    vrf = other.vrf;
-}
-
 QDataStream& operator<<(QDataStream& out, const SVrfInfo& data)
 {
     out << data.interfaz;

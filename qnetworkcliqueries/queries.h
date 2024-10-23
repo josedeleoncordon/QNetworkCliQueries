@@ -176,7 +176,7 @@ public:
 
     friend QDataStream& operator<<(QDataStream& out, const Queries& query);
     friend QDataStream& operator>>(QDataStream& in, Queries& query);
-    friend QDataStream& operator<<(QDataStream& out, const Queries* query);
+    friend QDataStream& operator<<(QDataStream& out, const Queries*& query);
     friend QDataStream& operator>>(QDataStream& in, Queries*& query);
     friend QDebug operator<<(QDebug dbg, const Queries &info);
 
@@ -304,6 +304,8 @@ public:
     LstQueries() {}
     LstQueries(const LstQueries &lstOrigen);
     ~LstQueries();
+    LstQueries& operator=(const LstQueries &lstOrigen);
+    void clone(const LstQueries &lstOrigen);
     bool isEmpty();
 
     QString grupo;

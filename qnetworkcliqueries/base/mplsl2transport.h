@@ -12,9 +12,6 @@ struct SMplsL2PWInfo : InfoBase
     QString remoteDescripcion;
     QString estado;
     //los PW no tienen descripcion
-
-    SMplsL2PWInfo() {}
-    SMplsL2PWInfo(const SMplsL2PWInfo &other);
 };
 
 struct SMplsL2XconnectInfo : SMplsL2PWInfo
@@ -22,9 +19,6 @@ struct SMplsL2XconnectInfo : SMplsL2PWInfo
     QString xc;
     QString descripcion; //descripcion del xconnect
     QString AC;
-
-    SMplsL2XconnectInfo() {}
-    SMplsL2XconnectInfo(const SMplsL2XconnectInfo &other);
 };
 
 struct SMplsL2VFIInfo : InfoBase
@@ -34,9 +28,6 @@ struct SMplsL2VFIInfo : InfoBase
     QString descripcion; //descripcion de la vfi
     QString bridge;
     QList<SMplsL2PWInfo> lstPWs;
-
-    SMplsL2VFIInfo() {}
-    SMplsL2VFIInfo(const SMplsL2VFIInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SMplsL2PWInfo& data);

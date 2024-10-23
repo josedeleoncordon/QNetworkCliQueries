@@ -87,6 +87,8 @@ public:
                               bool appendValue=true);
     QueriesConfigurationValue(const QueriesConfigurationValue &other);
     QueriesConfigurationValue() {}
+    QueriesConfigurationValue& operator =(const QueriesConfigurationValue &other);
+    void clone(const QueriesConfigurationValue &other);
 
     friend QDataStream& operator<<(QDataStream& out, const QueriesConfigurationValue& qcv);
     friend QDataStream& operator>>(QDataStream& in, QueriesConfigurationValue& qcv);

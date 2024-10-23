@@ -7,9 +7,6 @@ struct SMplsLdpInfo : InfoBase
 {
     QString neighbor;
     QString interfaz;
-
-    SMplsLdpInfo() {}
-    SMplsLdpInfo(const SMplsLdpInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SMplsLdpInfo& data);

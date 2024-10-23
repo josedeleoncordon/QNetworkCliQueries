@@ -16,9 +16,6 @@ struct SMplsTETunnelInfo : InfoBase
     QString InterfaceOut;
     QString status;
     short int autoRouteDestinationsCount;
-
-    SMplsTETunnelInfo() { autoRouteDestinationsCount=0; }
-    SMplsTETunnelInfo(const SMplsTETunnelInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SMplsTETunnelInfo& data);

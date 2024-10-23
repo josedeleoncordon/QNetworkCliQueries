@@ -2,29 +2,6 @@
 #include "funciones.h"
 #include "queries.h"
 
-SInterfaceInfo::SInterfaceInfo(const SInterfaceInfo &other)
-{
-    interfaz = other.interfaz;
-    status = other.status;
-    mac = other.mac;
-    ratein = other.ratein;
-    rateout = other.rateout;
-    dropsin = other.dropsin;
-    dropsout = other.dropsout;
-    errorsin = other.errorsin;
-    errorsout = other.errorsout;
-    CRC = other.CRC;
-    overrun = other.overrun;
-    collisions = other.collisions;
-    bandwidth = other.bandwidth;
-    mtu = other.mtu;
-    duplex = other.duplex;
-    speed = other.speed;
-    opticalRx = other.opticalRx;
-    mediaType = other.mediaType;
-    description = other.description;
-}
-
 QDataStream& operator<<(QDataStream& out, const SInterfaceInfo& data)
 {
     out << data.interfaz;
@@ -57,12 +34,6 @@ QDataStream& operator>>(QDataStream& in, SInterfaceInfo& data)
     return in;
 }
 
-SInterfaceVlans::SInterfaceVlans(const SInterfaceVlans &other)
-{
-    interfaz = other.interfaz;
-    vlans = other.vlans;
-}
-
 QDataStream& operator<<(QDataStream& out, const SInterfaceVlans& data)
 {
     out << data.interfaz;
@@ -81,15 +52,6 @@ QDataStream& operator>>(QDataStream& in, SInterfaceVlans& data)
     in >> data.datetime;
     in >> data.operativo;
     return in;
-}
-
-SInterfaceIOSServiceInstanceInfo::SInterfaceIOSServiceInstanceInfo(const SInterfaceIOSServiceInstanceInfo &other)
-{
-   interfaz = other.interfaz;
-   serviceinstance = other.serviceinstance;
-   description = other.description;
-   vlan = other.vlan;
-   bridgedomain = other.bridgedomain;
 }
 
 QDataStream& operator<<(QDataStream& out, const SInterfaceIOSServiceInstanceInfo& data)

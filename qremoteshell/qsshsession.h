@@ -59,6 +59,7 @@ private :
     QString _port;
     QString _user;
     QString _password;
+    bool _host_disconnected;
 
     SSHError m_error;
     QString m_errortxt;

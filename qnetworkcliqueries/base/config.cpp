@@ -57,7 +57,7 @@ void Config::on_term_receiveText_configMode()
     exp3.setPattern("^Password:$");
 
     QString line = txt.split("\n").last();
-    line.simplified();
+    line = line.simplified();
 
     if ( line.contains(exp,&match) || line.contains(exp2) || line.contains(exp3) )
     {
@@ -124,7 +124,7 @@ void Config::on_term_receiveText_finished()
 
     qDebug() << Q_FUNC_INFO << "recibido" << txt;
 
-    line.simplified();
+    line = line.simplified();
 
     exp.setPattern("^.+\\(config(\\-\\w+)*\\)#\\s*$");
     exp2.setPattern("^\\[.+\\]");
@@ -150,7 +150,7 @@ void Config::on_term_receiveText_exited()
 {
     txt.append( term->dataReceived() );
     QString line = txt.split("\n").last();
-    line.simplified();    
+    line = line.simplified();
 
     exp.setPattern("^.+\\(config(\\-\\w+)*\\)#\\s*$");
     exp2.setPattern("^\\[.+\\]");

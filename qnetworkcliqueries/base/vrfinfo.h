@@ -7,9 +7,6 @@ struct SVrfInfo : InfoBase
 {
     QString interfaz;
     QString vrf;
-
-    SVrfInfo() {}
-    SVrfInfo(const SVrfInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SVrfInfo& data);

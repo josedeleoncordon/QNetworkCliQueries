@@ -23,37 +23,50 @@ ArpInfo *factoryNewArpInfo(QString brandName, QString type, QRemoteShell *term, 
 
 BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new BGPInfo(term,option);
 }
 
 BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new BGPInfo(term,option);
 }
 
 BGPInfo *factoryNewBGPNetworksBGPAttrInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new BGPInfo(term,option);
 }
 
 EquipmentNeighborsInfo *factoryNewEquipmentNeighborsInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new EquipmentNeighborsInfo(term,option);
 }
 
 InterfaceInfo *factoryNewInterfaceInfo(QString brandName, QString type, QRemoteShell *term, int option)
-{  
+{
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new InterfaceInfo(term,option);
 }
 
 IPRouteInfo *factoryNewIPRouteInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new IPRouteInfo(term,option);
 }
 
 MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
-    Q_UNUSED( type )
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
 
     if ( brandName == "Cisco" )           
         return new MacInfoCisco(term,option);
@@ -67,27 +80,29 @@ MacInfo *factoryNewMacInfo(QString brandName, QString type, QRemoteShell *term, 
 
 MplsTEtunnelsInfo *factoryNewMplsTEtunnelsInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
-    Q_UNUSED( type )
-
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new MplsTEtunnelsInfo(term,option);
 }
 
 MplsL2TransportInfo *factoryNewMplsL2TransportInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
-    Q_UNUSED( type )
-
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new MplsL2TransportInfo(term,option);
 }
 
 MplsLdpInfo *factoryNewMplsLdpInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new MplsLdpInfo(term,option);
 }
 
 OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
-    Q_UNUSED( type )
-
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     if ( brandName == "Cisco" )
         return new OSPFInfoCisco(term,option);
     else if ( brandName == "Huawei" )
@@ -98,35 +113,49 @@ OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term
 
 PIMInfo *factoryNewPIMInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new PIMInfo(term,option);
 }
 
 PortChannelsInfo *factoryNewPortChannelsInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new PortChannelsInfo(term,option);
 }
 
 VrfInfo *factoryNewVrfInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new VrfInfo(term,option);
 }
 
 Config *factoryNewConfig(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName);
+    Q_UNUSED(type);
     return new Config(term,option);
 }
 
 FuncionInfo *factoryNewFuncionInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new FuncionInfo(term,option);
 }
 
 RplInfo *factoryNewRplInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new RplInfo(term,option);
 }
 
 ExitInfo *factoryNewExit(QString brandName, QString type, QRemoteShell *term, int option)
 {
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
     return new ExitInfo(term,option);
 }

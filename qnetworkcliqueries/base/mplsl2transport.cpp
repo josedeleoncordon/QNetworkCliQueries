@@ -1,35 +1,5 @@
 #include "mplsl2transport.h"
 
-SMplsL2PWInfo::SMplsL2PWInfo(const SMplsL2PWInfo &other)
-{
-    VCID = other.VCID;
-    destino = other.destino;
-    preferredPath = other.preferredPath;
-    remoteDescripcion = other.remoteDescripcion;
-    estado = other.estado;
-}
-
-SMplsL2XconnectInfo::SMplsL2XconnectInfo(const SMplsL2XconnectInfo &other)
-{
-    VCID = other.VCID;
-    destino = other.destino;
-    preferredPath = other.preferredPath;
-    remoteDescripcion = other.remoteDescripcion;
-    estado = other.estado;
-    xc = other.xc;
-    descripcion = other.descripcion;
-    AC = other.AC;
-}
-
-SMplsL2VFIInfo::SMplsL2VFIInfo(const SMplsL2VFIInfo &other)
-{
-    vfi = other.vfi;
-    AC = other.AC;
-    descripcion = other.descripcion;
-    bridge = other.bridge;
-    lstPWs = other.lstPWs;
-}
-
 QDataStream& operator<<(QDataStream& out, const SMplsL2PWInfo& data)
 {
     out << data.VCID;

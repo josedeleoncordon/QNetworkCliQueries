@@ -7,9 +7,6 @@ struct SRplRouteInfo : InfoBase
 {
     QString nombre;
     QString txt;
-
-    SRplRouteInfo() {}
-    SRplRouteInfo(const SRplRouteInfo &other);
 };
 struct SRplPrefixInfo : InfoBase
 {
@@ -26,15 +23,15 @@ struct SRplPrefixInfo : InfoBase
     QStringList lstPrefixes;
 
     SRplPrefixInfo() { type=None; ipversion=0; }
-    SRplPrefixInfo(const SRplPrefixInfo &other);
+    // SRplPrefixInfo(const SRplPrefixInfo &other);
 };
 struct SRplCommunityInfo : InfoBase
 {
     QString nombre;
     QStringList lstComunities;
 
-    SRplCommunityInfo() {}
-    SRplCommunityInfo(const SRplCommunityInfo &other);
+    // SRplCommunityInfo() {}
+    // SRplCommunityInfo(const SRplCommunityInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SRplRouteInfo &data);

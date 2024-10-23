@@ -135,10 +135,12 @@ void Queries::clone(const Queries& other)
     m_type = other.m_type;
     _recorridoEnArbol = other._recorridoEnArbol;
 
-    qDebug() << "Queries::clone" << m_ip << m_name;
+    qDebug() << "Queries::clone funciones size" << m_ip << m_name
+             << other.m_lstFunciones.size();
 
     for ( FuncionBase *f : other.m_lstFunciones )
     {
+        qDebug() << f;
         qDebug() << "Queries::clone funcion" << m_ip << m_name << f->queryOption();
 
         switch (f->queryOption()) {
@@ -1656,7 +1658,7 @@ void Queries::processConnectToHostDisconnected()
                 //esperamos unos segundos para probar otra vez
                 queryTimer->stop();
                 // QEventLoop loop;
-                QTimer *t = new QTimer;
+                // QTimer *t = new QTimer;
                 // t->setSingleShot(true);
                 QTimer::singleShot( 5000,[this]() { conectarAequipo(m_ip,m_user,m_pwd,m_platform,
                                                                     m_linuxprompt,_sshUseLibSsh); } );
@@ -1853,6 +1855,7 @@ void Queries::_finalizar()
 
 void Queries::on_finished(Queries* q)
 {
+    Q_UNUSED(q)
     qCDebug(queries) << m_ip << Q_FUNC_INFO << m_ip << m_name;
     disconnect();
 }
@@ -2362,158 +2365,184 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries& quer
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion equipmentNeighborsInfoQuery";
         in >> query.equipmentNeighborsInfoQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.equipmentNeighborsInfoQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion interfacesInfoQuery";
         in >> query.interfacesInfoQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.interfacesInfoQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion interfacesDescriptionsQuery";
         in >> query.interfacesDescriptionsQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.interfacesDescriptionsQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion interfacesIpAddressesQuery";
         in >> query.interfacesIpAddressesQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.interfacesIpAddressesQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion interfacesPermitedVlansQuery";
         in >> query.interfacesPermitedVlansQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.interfacesPermitedVlansQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion ospfQuery";
         in >> query.ospfQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.ospfQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion mplsTEtunnelsQuery";
         in >> query.mplsTEtunnelsQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.mplsTEtunnelsQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion mplsL2TransportQuery";
         in >> query.mplsL2TransportQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.mplsL2TransportQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion mplsLdpDiscoveryQuery";
         in >> query.mplsLdpDiscoveryQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.mplsLdpDiscoveryQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion mplsLdpNeighborsQuery";
         in >> query.mplsLdpNeighborsQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.mplsLdpNeighborsQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion mplsLdpInterfacesQuery";
         in >> query.mplsLdpInterfacesQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.mplsLdpInterfacesQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion pimInteracesQuery";
         in >> query.pimInteracesQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.pimInteracesQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion macsQuery";
         in >> query.macsQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.macsQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion portChannelInfoQuery";
         in >> query.portChannelInfoQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.portChannelInfoQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion vrfsFromVlansQuery";
         in >> query.vrfsFromVlansQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.vrfsFromVlansQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion vrfFromRTQuery";
         in >> query.vrfFromRTQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.vrfFromRTQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion vrfsQuery";
         in >> query.vrfsQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.vrfsQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion arpsQuery";
         in >> query.arpsQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.arpsQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion bgpNeighborsQuery";
         in >> query.bgpNeighborsQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.bgpNeighborsQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion bgpNetworksQuery";
         in >> query.bgpNetworksQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.bgpNetworksQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion bgpNetworksBGPAttrQuery";
         in >> query.bgpNetworksBGPAttrQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.bgpNetworksBGPAttrQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion ipRoutesQuery";
         in >> query.ipRoutesQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.ipRoutesQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion funcionQuery";
         in >> query.funcionQuery;
         query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion rplRoutesQuery";
         in >> query.rplRoutesQuery;
-        query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
+        query.m_lstFunciones.insert(query.m_queryname,query.rplRoutesQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion rplPrefixesQuery";
         in >> query.rplPrefixesQuery;
-        query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
+        query.m_lstFunciones.insert(query.m_queryname,query.rplPrefixesQuery);
     }
     in >> a;
     if ( a )
     {
+        qCDebug(queries) << "Queries operator>> funcion rplCommunitiesQuery";
         in >> query.rplCommunitiesQuery;
-        query.m_lstFunciones.insert(query.m_queryname,query.funcionQuery);
+        query.m_lstFunciones.insert(query.m_queryname,query.rplCommunitiesQuery);
     }
 
     qCDebug(queries) << query.m_ip << "abrir: queries.m_lstFunciones size " << query.m_lstFunciones.size();
@@ -2527,7 +2556,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     return out;
 }
 
-QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries* query)
+QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries*& query)
 {
     query = new Queries;
     in >> *query;
@@ -2658,6 +2687,20 @@ QNETWORKCLIQUERIES_EXPORT  Queries& Queries::operator=(const Queries& other)
 
 LstQueries::LstQueries(const LstQueries &lstOrigen)
 {
+    clone(lstOrigen);
+}
+
+LstQueries::~LstQueries()
+{}
+
+LstQueries& LstQueries::operator=(const LstQueries &lstOrigen)
+{
+    clone(lstOrigen);
+    return *this;
+}
+
+void LstQueries::clone(const LstQueries &lstOrigen)
+{
     grupo = lstOrigen.grupo;
     opcionesConsulta = lstOrigen.opcionesConsulta;
     gw = lstOrigen.gw;
@@ -2670,9 +2713,6 @@ LstQueries::LstQueries(const LstQueries &lstOrigen)
     label = lstOrigen.label;
     tipoconsulta = lstOrigen.tipoconsulta;
 }
-
-LstQueries::~LstQueries()
-{}
 
 bool LstQueries::isEmpty()
 {

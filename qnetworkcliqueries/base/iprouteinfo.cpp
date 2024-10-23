@@ -1,14 +1,5 @@
 #include "iprouteinfo.h"
 
-SIpRouteInfo::SIpRouteInfo(const SIpRouteInfo &other)
-{
-    network = other.network;
-    mask = other.mask;
-    protocol = other.protocol;
-    via = other.via;
-    vrf = other.vrf;
-}
-
 QDataStream& operator<<(QDataStream& out, const SIpRouteInfo& data)
 {
     out << data.mask;

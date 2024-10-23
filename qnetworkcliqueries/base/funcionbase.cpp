@@ -20,6 +20,17 @@ QueriesConfigurationValue::QueriesConfigurationValue(QString key,
 
 QueriesConfigurationValue::QueriesConfigurationValue(const QueriesConfigurationValue &other)
 {
+    clone(other);
+}
+
+QueriesConfigurationValue& QueriesConfigurationValue::operator =(const QueriesConfigurationValue &other)
+{
+    clone(other);
+    return *this;
+}
+
+void QueriesConfigurationValue::clone(const QueriesConfigurationValue &other)
+{
     _key = other._key;
     _value = other._value;
     _IP = other._IP;

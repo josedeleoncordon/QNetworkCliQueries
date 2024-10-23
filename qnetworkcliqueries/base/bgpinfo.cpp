@@ -1,25 +1,6 @@
 #include "bgpinfo.h"
 #include "queries.h"
 
-SBGPNetwork::SBGPNetwork(const SBGPNetwork &other)
-{
-    neighborip = other.neighborip;
-    vrf = other.vrf;
-    network = other.network;
-    RD = other.RD;
-    nexthop = other.nexthop;
-    from = other.from;
-    path = other.path;
-    communityList = other.communityList;
-    originator = other.originator;
-    best = other.best;
-    //infobase
-    datetime = other.datetime;
-    operativo = other.operativo;
-    equipo = other.equipo;
-    as = other.as;
-}
-
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const SBGPNetwork& data)
 {
     out << data.neighborip;
@@ -93,48 +74,6 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, SBGPNeighbor&
     in >> data.equipo;
     return in;
 }
-
-QNETWORKCLIQUERIES_EXPORT QDBusArgument& operator<<(QDBusArgument &argument, const SBGPNetwork &data)
-{
-    argument.beginStructure();
-    argument << data.neighborip;
-    argument << data.vrf;
-    argument << data.network;
-    argument << data.RD;
-    argument << data.nexthop;
-    argument << data.from;
-    argument << data.path;
-    argument << data.communityList;
-    argument << data.datetime;
-    argument << data.operativo;
-    argument << data.equipo;
-    argument << data.as;
-    argument.endStructure();
-    return argument;
-}
-
-QNETWORKCLIQUERIES_EXPORT const QDBusArgument& operator>>(const QDBusArgument& argument, SBGPNetwork &data)
-{
-    argument.beginStructure();
-    argument >> data.neighborip;
-    argument >> data.vrf;
-    argument >> data.network;
-    argument >> data.RD;
-    argument >> data.nexthop;
-    argument >> data.from;
-    argument >> data.path;
-    argument >> data.communityList;
-    argument >> data.datetime;
-    argument >> data.operativo;
-    argument >> data.equipo;
-    argument >> data.as;
-    argument >> data.originator;
-    argument >> data.best;
-    argument.endStructure();
-    return argument;
-}
-
-//falta DBUS para SBGPNeighbor
 
 BGPInfo::BGPInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)

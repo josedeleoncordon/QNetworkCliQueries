@@ -9,9 +9,6 @@ struct SMacInfo : InfoBase
     QString vlan;
     QString interfaz;
     QString age;
-
-    SMacInfo() {}
-    SMacInfo(const SMacInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SMacInfo& data);

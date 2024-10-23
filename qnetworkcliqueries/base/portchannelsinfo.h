@@ -7,9 +7,6 @@ struct SPortChannel : InfoBase
 {
     QString interfaz;
     QString group;
-
-    SPortChannel() {}
-    SPortChannel(const SPortChannel &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SPortChannel& data);

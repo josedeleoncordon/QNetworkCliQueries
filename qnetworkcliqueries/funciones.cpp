@@ -178,7 +178,7 @@ QStringList numberRangeToLST(QString str)
 
 Queries *buscarEquipoPorIPnombre(QList<Queries> &lst, QString ip, QString nombre)
 {
-    bool nom=false;
+    // bool nom=false;
     for (Queries &qry : lst)
     {
         //si no habia informacion de cdp/lldp y fue agregado por ospf
@@ -195,7 +195,7 @@ Queries *buscarEquipoPorIPnombre(QList<Queries> &lst, QString ip, QString nombre
 
         if ( qry.hostName() == nombre )
         {
-            nom=true;
+            // nom=true;
 
             if ( validateIpQuery( qry,ip ) )
                 return &qry;
@@ -542,7 +542,6 @@ QString IP2Binario(QString ip)
     if ( ip.contains("/") )
         ip = ip.split("/",Qt::SkipEmptyParts).first();
 
-    bool ipv4=true;
     QString salida;
     if ( ip.contains(".") )
     {

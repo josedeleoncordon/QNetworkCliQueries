@@ -11,9 +11,6 @@ struct SEquipmentNeighborsInfo : public InfoBase
     QString interfazotroentrada;
     QString plataforma;
     QList<SEquipmentNeighborsInfo> lstEquipos;
-
-    SEquipmentNeighborsInfo() {}
-    SEquipmentNeighborsInfo(const SEquipmentNeighborsInfo &other);
 };
 
 QDataStream& operator<<(QDataStream& out, const SEquipmentNeighborsInfo &data);
@@ -35,7 +32,7 @@ public:
     EquipmentNeighborsInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     EquipmentNeighborsInfo(const EquipmentNeighborsInfo &other);
     ~EquipmentNeighborsInfo();
-    void addEquipmentNeighborsInfo(SEquipmentNeighborsInfo i) { m_lstEquipos.append( i ); }
+    void addEquipmentNeighborsInfo(SEquipmentNeighborsInfo i);
     virtual void getEquipmentNeighborsInfo();
 
     //
@@ -47,7 +44,6 @@ public:
     //
     friend QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo& data);
     friend QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo& data);
-
     friend QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo* data);
     friend QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo*& data);
 

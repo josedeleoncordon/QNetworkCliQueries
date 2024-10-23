@@ -147,8 +147,7 @@ bool QueriesThreadController::consultarAgregarEquipo(QString uuid, QString ip)
 
     if ( m_equiposenconsultaGeneral.size() >= m_maxparalelos )
     {
-        // qDebug() << Q_FUNC_INFO << ip << "m_maxparalelos alcanzado, no es posible iniciar nueva consulta" <<
-                    m_equiposenconsultaGeneral;
+        // qDebug() << Q_FUNC_INFO << ip << "m_maxparalelos alcanzado, no es posible iniciar nueva consulta" << m_equiposenconsultaGeneral;
         return false;
     }
     else if ( m_mapUUIDParalelosFijo.contains(uuid) )

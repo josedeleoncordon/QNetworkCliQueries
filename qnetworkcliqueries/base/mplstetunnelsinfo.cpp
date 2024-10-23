@@ -1,20 +1,6 @@
 #include "mplstetunnelsinfo.h"
 #include "qnetworkquerieslogging.h"
 
-SMplsTETunnelInfo::SMplsTETunnelInfo(const SMplsTETunnelInfo &other)
-{
-    name = other.name;
-    origen = other.origen;
-    destino = other.destino;
-    TuID = other.TuID;
-    route = other.route;
-    role = other.role;
-    InterfaceIn = other.InterfaceIn;
-    InterfaceOut = other.InterfaceOut;
-    status = other.status;
-    autoRouteDestinationsCount = other.autoRouteDestinationsCount;
-}
-
 QDataStream& operator<<(QDataStream& out, const SMplsTETunnelInfo& data)
 {
     out << data.name;

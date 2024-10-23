@@ -1,18 +1,5 @@
 #include "arpinfo.h"
 
-SIpInfo::SIpInfo(const SIpInfo &other)
-{
-    ip = other.ip;
-    vrf = other.vrf;
-    mac = other.mac;
-    vlan = other.vlan;
-    interfaz = other.interfaz;
-    age = other.age;
-    //infobase
-    datetime = other.datetime;
-    operativo = other.operativo;
-}
-
 QDataStream& operator<<(QDataStream& out, const SIpInfo& data)
 {
     out << data.ip;
