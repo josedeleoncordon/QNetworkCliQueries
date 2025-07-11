@@ -3,11 +3,10 @@ QNetworkCliQueries
 
 QNetworkCliQueries is a network automation library for C++/Qt5 which aims to query thousands of devices using CLI commands. It is useful when some specific information is not available through SNMP, the device does not support Netconf or is not enabled.
 
-This project is based on QTermWidget library.
-All the credits to them! 
-(https://github.com/lxqt/qtermwidget)
-
-It is compatible with BSD, Linux and OS X.
+This project is based on QtTelnet and QSShTerm
+All the credits to them!
+https://github.com/Aseman-Land/QtTelnet/tree/master
+https://github.com/softengineer/qsshterm
 
 The library supports:
  
