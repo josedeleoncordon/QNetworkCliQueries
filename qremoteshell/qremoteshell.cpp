@@ -1,6 +1,5 @@
 #include "qremoteshell.h"
 #include <QDebug>
-#include <QTcpSocket>
 #include <QTimer>
 #include <QThread>
 #include "qremoteshelllogging.h"
@@ -167,10 +166,21 @@ void QRemoteShell::ssh_host_disconnected()
         qCDebug(qremoteshell) << m_ip << "SSH Error" << m_ssh->error() << m_ssh->errortxt();
         _errortxt = m_ssh->errortxt();
 
+        if (!_errortxt.contains("Timeout") &&
+            !_errortxt.contains("La red es inaccesible") &&
+            !_errortxt.contains("Network is unreachable"))
+            emit reachable();
+
         switch ( m_ssh->error() )
         {
         case QSSHSession::OPTIONS_ERROR:
         {
+            if ( _errortxt.contains("kex error") )
+            {
+                emit disconnected();
+                return;
+            }
+
             if ( m_consultaIntentos < 2 )
             {
                 qCDebug(qremoteshell) << m_ip << "LibSSH Disconnected. Se intenta nuevamente";
@@ -201,7 +211,7 @@ void QRemoteShell::on_ssh_dataReceived()
 
 void QRemoteShell:: m_terminal_detaReceived(QString txt)
 {
-    m_dataReceived = eliminarCaractaresNoImprimibles(txt);
+    m_dataReceived = eliminarCaractaresMenorASCII32(txt);
 
     qCDebug(terminalReceived).noquote() << m_ip << m_dataReceived; //debug de todo el texto recibido en la terminal
 
@@ -452,7 +462,7 @@ QString QRemoteShell::platform()
     return m_platform;
 }
 
-QString QRemoteShell::eliminarCaractaresNoImprimibles(QString txt)
+QString QRemoteShell::eliminarCaractaresMenorASCII32(QString txt)
 {
     //eliminamos caracteres menores al ascii 32
 

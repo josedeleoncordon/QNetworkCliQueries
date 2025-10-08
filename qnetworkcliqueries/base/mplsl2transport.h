@@ -11,6 +11,7 @@ struct SMplsL2PWInfo : InfoBase
     QString preferredPath;
     QString remoteDescripcion;
     QString estado;
+    QString source;
     //los PW no tienen descripcion
 };
 

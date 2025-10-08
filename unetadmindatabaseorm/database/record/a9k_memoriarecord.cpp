@@ -40,6 +40,16 @@ void a9k_memoriaRecord::set_date(QDate date)
 	setProperty("date",date);
 }
 
+void a9k_memoriaRecord::set_device_ip(QString device_ip)
+{
+	setProperty("device_ip",device_ip);
+}
+
+void a9k_memoriaRecord::set_device_name(QString device_name)
+{
+	setProperty("device_name",device_name);
+}
+
 void a9k_memoriaRecord::set_fisica_disponible(int fisica_disponible)
 {
 	setProperty("fisica_disponible",fisica_disponible);
@@ -53,6 +63,11 @@ void a9k_memoriaRecord::set_fisica_total(int fisica_total)
 void a9k_memoriaRecord::set_id(int id)
 {
 	setProperty("id",id);
+}
+
+void a9k_memoriaRecord::set_pais(QString pais)
+{
+	setProperty("pais",pais);
 }
 
 int a9k_memoriaRecord::a9k_equipo_id()
@@ -80,6 +95,16 @@ QDate a9k_memoriaRecord::date()
 	return property("date").toDate();
 }
 
+QString a9k_memoriaRecord::device_ip()
+{
+	return property("device_ip").toString();
+}
+
+QString a9k_memoriaRecord::device_name()
+{
+	return property("device_name").toString();
+}
+
 int a9k_memoriaRecord::fisica_disponible()
 {
 	return property("fisica_disponible").toInt();
@@ -93,6 +118,11 @@ int a9k_memoriaRecord::fisica_total()
 int a9k_memoriaRecord::id()
 {
 	return property("id").toInt();
+}
+
+QString a9k_memoriaRecord::pais()
+{
+	return property("pais").toString();
 }
 
 a9k_equipoRecord *a9k_memoriaRecord::r_a9k_equipo_id()

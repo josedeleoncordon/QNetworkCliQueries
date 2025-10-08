@@ -8,6 +8,7 @@ QueriesConfigurationValue::QueriesConfigurationValue(QString key,
                                                      QString IP,
                                                      QString plataforma,
                                                      QString IDConexion,
+                                                     QString queryName,
                                                      bool appendValue)
 {
     _key = key;
@@ -16,6 +17,7 @@ QueriesConfigurationValue::QueriesConfigurationValue(QString key,
     _Platform = plataforma;
     _appendValue = appendValue;
     _IDConexion = IDConexion;
+    _queryName = queryName;
 }
 
 QueriesConfigurationValue::QueriesConfigurationValue(const QueriesConfigurationValue &other)
@@ -37,6 +39,7 @@ void QueriesConfigurationValue::clone(const QueriesConfigurationValue &other)
     _Platform = other._Platform;
     _appendValue = other._appendValue;
     _IDConexion = other._IDConexion;
+    _queryName = other._queryName;
 }
 
 QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const QueriesConfigurationValue& qcv)
@@ -48,6 +51,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     out << qcv._value;
     out << qcv._appendValue;
     out << qcv._IDConexion;
+    out << qcv._queryName;
     return out;
 }
 
@@ -60,12 +64,14 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, QueriesConfig
     in >> qcv._value;
     in >> qcv._appendValue;
     in >> qcv._IDConexion;
+    in >> qcv._queryName;
     return in;
 }
 
 QNETWORKCLIQUERIES_EXPORT QDebug operator<<(QDebug dbg, const QueriesConfigurationValue &info)
 {
-     dbg.space() << info._key << info._value << info._IP << info._Platform << info._appendValue << info._IDConexion;
+     dbg.space() << info._key << info._value << info._IP << info._Platform
+                << info._appendValue << info._IDConexion << info._queryName;
      return dbg;
 }
 
@@ -83,7 +89,9 @@ void QueriesConfiguration::addQueryParameter(const QList<QueriesConfigurationVal
             if ( n._IP == e._IP &&
                  n._Platform == e._Platform &&
                  n._key == e._key &&
-                 n._IDConexion == e._IDConexion )
+                 n._IDConexion == e._IDConexion &&
+                 n._queryName == e._queryName
+                )
             {
                 encontrado=true;
                 if ( n._appendValue ) e._value.append(","+n._value); else e._value = n._value;
@@ -95,76 +103,113 @@ void QueriesConfiguration::addQueryParameter(const QList<QueriesConfigurationVal
     }
 }
 
-QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains)
-{        
+QVariant QueriesConfiguration::m_find(QString parameter, QString IP, QString platform,
+                                      QString IDconexion, QString queryName,bool platformContains)
+{
+    qDebug() << IP << "QueriesConfiguration::m_find" << parameter << IP << platform << IDconexion << queryName;
+
     //Por IP, Plataforma especifica, ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
+    {
+        qDebug() << IP << "QueriesConfiguration::m_find buscando" << v._key << v._IP << v._Platform << v._IDConexion;
         if ( v._key == parameter && v._IP == IP &&
              ((!platformContains && v._Platform == platform) || (platformContains && platform.contains(v._Platform))) &&
-             v._IDConexion == IDconexion )
+             v._IDConexion == IDconexion && v._queryName == queryName)
+        {
+            qDebug() << IP << "encontrado 1";
             return v._value;
+        }
+    }
 
     //por IP especifica e ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )     
-        if ( v._key == parameter && v._IP == IP && v._Platform.isEmpty() && v._IDConexion == IDconexion  )
+        if (v._key == parameter && v._IP == IP && v._Platform.isEmpty() &&
+            v._IDConexion == IDconexion  && v._queryName == queryName)
+        {
+            // qDebug() << IP << "encontrado 2";
             return v._value;
+        }
 
     //plataforma e ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
         if ( v._key == parameter && v._IP.isEmpty() &&
              ((!platformContains && v._Platform == platform) || (platformContains && platform.contains(v._Platform))) &&
-             v._IDConexion == IDconexion  )
+             v._IDConexion == IDconexion  && v._queryName == queryName )
+        {
+            // qDebug() << IP << "encontrado 3";
             return v._value;
+        }
 
     //no hay para una ip o plataforma, regresamos el general con ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
-        if ( v._key == parameter && v._IP.isEmpty() && v._Platform.isEmpty() && v._IDConexion == IDconexion )
+        if (v._key == parameter && v._IP.isEmpty() && v._Platform.isEmpty() &&
+            v._IDConexion == IDconexion  && v._queryName == queryName )
+        {
+            // qDebug() << IP << "encontrado 4";
             return v._value;
+        }
 
     //Por IP, Plataforma especifica, Sin ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
         if ( v._key == parameter && v._IP == IP &&
              ((!platformContains && v._Platform == platform) || (platformContains && platform.contains(v._Platform))) &&
-             v._IDConexion.isEmpty()  )
+             v._IDConexion.isEmpty() && v._queryName == queryName )
+        {
+            // qDebug() << IP << "encontrado 5";
             return v._value;
+        }
 
     //por IP especifica sin ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
-        if ( v._key == parameter && v._IP == IP && v._Platform.isEmpty() && v._IDConexion.isEmpty()  )
+        if (v._key == parameter && v._IP == IP && v._Platform.isEmpty() &&
+            v._IDConexion.isEmpty() && v._queryName == queryName )
+        {
+            // qDebug() << IP << "encontrado 6";
             return v._value;
+        }
 
     //plataforma sin ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
     {
-        qDebug() << "comparando" << v._key << v._value << v._IP << v._Platform << v._IDConexion;
-        qDebug() << "comparando" << platformContains << parameter << platform;
+        // qDebug() << "comparando" << v._key << v._value << v._IP << v._Platform << v._IDConexion;
+        // qDebug() << "comparando" << platformContains << parameter << platform;
         if ( v._key == parameter && v._IP.isEmpty() &&
              ((!platformContains && v._Platform == platform) || (platformContains && platform.contains(v._Platform))) &&
-             v._IDConexion.isEmpty()  )
+             v._IDConexion.isEmpty() && v._queryName == queryName )
+        {
+            // qDebug() << IP << "encontrado 7";
             return v._value;
+        }
     }
 
     //no hay para una ip o plataforma, regresamos el general sin ID
     for ( QueriesConfigurationValue v : m_lstQueryParameters )
-        if ( v._key == parameter && v._IP.isEmpty() && v._Platform.isEmpty() && v._IDConexion.isEmpty() )
+        if (v._key == parameter && v._IP.isEmpty() && v._Platform.isEmpty() &&
+            v._IDConexion.isEmpty() && v._queryName == queryName )
+        {
+            // qDebug() << IP << "encontrado 8";
             return v._value;
+        }
 
     return QVariant();
 }
 
-bool QueriesConfiguration::state(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains)
+bool QueriesConfiguration::state(QString parameter, QString IP, QString platform,
+                                 QString IDconexion, QString queryName,bool platformContains)
 {
-    return m_find(parameter,IP,platform,IDconexion,platformContains).toBool();
+    return m_find(parameter,IP,platform,IDconexion,queryName,platformContains).toBool();
 }
 
-QString QueriesConfiguration::value(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains)
+QString QueriesConfiguration::value(QString parameter, QString IP, QString platform,
+                                    QString IDconexion, QString queryName,bool platformContains)
 {
-    return m_find(parameter,IP,platform,IDconexion,platformContains).toString();
+    return m_find(parameter,IP,platform,IDconexion,queryName,platformContains).toString();
 }
 
-QStringList QueriesConfiguration::values(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains)
+QStringList QueriesConfiguration::values(QString parameter, QString IP, QString platform,
+                                         QString IDconexion, QString queryName, bool platformContains)
 {
-    return value(parameter,IP,platform,IDconexion,platformContains).split(",",Qt::SkipEmptyParts);
+    return value(parameter,IP,platform,IDconexion,queryName,platformContains).split(",",Qt::SkipEmptyParts);
 }
 
 void QueriesConfiguration::clear()
@@ -250,7 +295,7 @@ bool FuncionBase::allTextReceived()
     //eliminamos caracteres especiales ansi vt100 al cortar por paginas la informacion
     //en el caso de que no sea un cisco y no se haya configurado algo como terminal lenght 0
     //---- More ----[42D                                          [42D
-    txt = eliminarCaractaresNoImprimibles( txt );
+    txt = eliminarCaractaresMenorASCII32( txt );
     exp.setPattern("\\[42D.+\\[42D");
     txt.replace( exp,"" );
 
@@ -289,8 +334,9 @@ bool FuncionBase::allTextReceived()
     txt.replace(QRegularExpression("\\[m\\[\\d+m"),"");
     txt.replace("[m","");
 
-    if ( txt.contains("Invalid input detected at '^'") ||
-         txt.contains(QRegularExpression("Translating .+domain server")) )
+    if (txt.contains("Invalid input detected at '^'") ||
+        txt.contains("Error: ") ||
+        txt.contains(QRegularExpression("Translating .+domain server")) )
     {
         lastCommandFailed=true;
 //        qDebug() << "**ErrorMenor**" << m_ip << m_name << m_platform << "No se pudo ejecutar comando:" << m_lastCommand;

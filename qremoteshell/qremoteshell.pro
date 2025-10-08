@@ -6,7 +6,7 @@
 
 include(../base.pri)
 
-QT       += widgets network
+QT       += network
 
 DESTDIR = $$APP_BUILD_TREE
 
@@ -75,3 +75,4 @@ unix {
 
 #Previamente compilar libssh con soporte de DSA
 LIBS *= -L/usr/local/lib64/ -lssh
+

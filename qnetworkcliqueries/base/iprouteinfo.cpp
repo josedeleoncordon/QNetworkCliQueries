@@ -2,11 +2,13 @@
 
 QDataStream& operator<<(QDataStream& out, const SIpRouteInfo& data)
 {
+    out << data.ipconsultar;
     out << data.mask;
     out << data.network;
     out << data.vrf;
     out << data.protocol;
     out << data.via;
+    out << data.viainterfaces;
     //infobase
     out << data.datetime;
     out << data.operativo;
@@ -15,11 +17,13 @@ QDataStream& operator<<(QDataStream& out, const SIpRouteInfo& data)
 
 QDataStream& operator>>(QDataStream& in, SIpRouteInfo& data)
 {
+    in >> data.ipconsultar;
     in >> data.mask;
     in >> data.network;
     in >> data.vrf;
     in >> data.protocol;
     in >> data.via;
+    in >> data.viainterfaces;
     //infobase
     in >> data.datetime;
     in >> data.operativo;
@@ -75,6 +79,7 @@ IPRouteInfo::IPRouteInfo(QRemoteShell *terminal, int option):
 {
     m_vrfsPos=-1;
     m_redPos=-1;
+    routeStaticSended=false;
 }
 
 IPRouteInfo::IPRouteInfo(const IPRouteInfo &other):
@@ -87,6 +92,8 @@ IPRouteInfo::IPRouteInfo(const IPRouteInfo &other):
     m_lstRoutes = other.m_lstRoutes;
     m_protocol = other.m_protocol;
     m_vrfs = other.m_vrfs;
+    routeStaticSended=false;
+    m_queryName = other.m_queryName;
 }
 
 IPRouteInfo::~IPRouteInfo()
@@ -94,6 +101,7 @@ IPRouteInfo::~IPRouteInfo()
 
 void IPRouteInfo::getIPRouteInfo()
 {
+    qDebug() << "IPRouteInfo::getIPRouteInfo()";
     if ( m_brand != "Cisco" && m_brand != "Huawei" )
     {
         qDebug() << "IPRouteInfo::getIPRouteInfo()" << m_brand << "no soportado";
@@ -101,9 +109,11 @@ void IPRouteInfo::getIPRouteInfo()
         return;
     }
 
-    m_vrfs = m_queriesConfiguration.values("IPRoutes_VRFs",m_ip,m_os,m_conexionID);
-    m_protocol = m_queriesConfiguration.value("IPRoutes_protocol",m_ip,m_os,m_conexionID);
-    m_redes = m_queriesConfiguration.values("IPRoutes_redes",m_ip,m_os,m_conexionID);
+    m_vrfs = m_queriesConfiguration.values("IPRoutes_VRFs",m_ip,m_os,m_conexionID,m_queryName);
+    m_protocol = m_queriesConfiguration.value("IPRoutes_protocol",m_ip,m_os,m_conexionID,m_queryName);
+    m_redes = m_queriesConfiguration.values("IPRoutes_redes",m_ip,m_os,m_conexionID,m_queryName);
+
+    qDebug() << "IPRouteInfo::getIPRouteInfo()" << m_vrfs << m_protocol << m_redes;
 
     if ( m_vrfs.isEmpty() )
         m_vrfs.append(""); //para la global
@@ -259,14 +269,15 @@ void IPRouteInfo::on_term_receiveText_general()
         else if ( m_brand == "Huawei" )
         {
             //10.10.22.0/24  IBGP    200  20            RD  10.192.33.7     100GE8/0/0
-            exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}) (\\w+) .+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) ");
+            exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}) +(\\w+) .+ (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) +(\\S+)");
             if ( line.contains(exp,&match) )
             {
                 SIpRouteInfo i;
                 i.protocol = estandarizarProtocoloEnrutamiento(match.captured(3));
-                i.network = match.captured(1);
+                i.network = match.captured(1).toLower();
                 i.mask = match.captured(2);
-                i.via.append( match.captured(4) );
+                i.via.append( match.captured(4).toLower() );
+                i.viainterfaces.append( match.captured(5) );
                 i.vrf = m_vrf;
                 i.datetime = QDateTime::currentDateTime();
                 i.operativo = true;
@@ -282,7 +293,7 @@ void IPRouteInfo::on_term_receiveText_general()
                 if ( !route )
                     continue;
 
-                QString via = match.captured(2);
+                QString via = match.captured(2).toLower();
                 if ( !route->via.contains(via) )
                     route->via.append(via);
                 continue;
@@ -298,15 +309,42 @@ void IPRouteInfo::m_individualSiguienteRed()
     {
         m_redPos++;
         m_red = m_redes.at( m_redPos );
+
+        if (m_red.contains("_"))
+        {
+            //viene la vrf junto a la IP
+            QStringList data = m_red.split("_",Qt::SkipEmptyParts);
+            m_vrf=data.first();
+            m_red=data.last();
+        }
+
 //        m_red.replace( QRegularExpression("/\\d+"),"" );
 
         if ( m_brand == "Cisco" )
+        {
             if ( m_red.contains(":") )
                 //IPV6
                 termSendText("sh route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" ipv6 "+m_red );
             else
+            {
                 //IPV4
-                termSendText("sh ip route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" "+m_red );
+                if ( m_os == "IOS XR" )
+                    termSendText("sh route "+( !m_vrf.isEmpty()?"vrf "+m_vrf:"" )+" "+m_red );
+                else
+                    termSendText("sh ip route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" "+m_red );
+            }
+        }
+        else if (m_brand == "Huawei")
+        {
+            if ( m_red.contains(":") )
+                //IPV6
+                termSendText("display ipv6 routing-table "+( !m_vrf.isEmpty()?" vpn-instance "+m_vrf:"" )+" "+
+                             m_red.replace("/"," ") );
+            else
+                //IPV4
+                termSendText("display ip routing-table "+( !m_vrf.isEmpty()?" vpn-instance "+m_vrf:"" )+" "+
+                             m_red.replace("/"," ") );
+        }
         else
         {
             finished();
@@ -324,50 +362,182 @@ void IPRouteInfo::on_term_receiveText_individual()
         return;
 
     QStringList lines = txt.split("\n");
-    SIpRouteInfo *route = nullptr;
 
+    bool lastStatic=false;
     for (QString line : lines)
     {
-        line = line.simplified();
+        line = line.left(line.size()-1);
+        // qDebug() << "lineeee" << line;
 
-        QRegularExpression exp("Routing entry for (\\S+)/(\\d+)$");
-        if ( line.contains(exp,&match) )
+        QRegularExpression exp;
+        if ( m_brand == "Cisco" )
         {
-            SIpRouteInfo ri;
-            ri.vrf = m_vrf;
-            ri.network = match.captured(1);
-            ri.mask = match.captured(2);
-            ri.datetime = QDateTime::currentDateTime();
-            ri.operativo = true;
-            m_lstRoutes.append(ri);
-            route = &m_lstRoutes.last();
-            continue;
+            exp.setPattern("Routing entry for (\\S+)/(\\d+)$");
+            if ( line.contains(exp,&match) && !route )
+            {
+                SIpRouteInfo ri;
+                ri.ipconsultar = m_red;
+                ri.vrf = m_vrf;
+                ri.network = match.captured(1);
+                ri.mask = match.captured(2);
+                ri.datetime = QDateTime::currentDateTime();
+                ri.operativo = true;
+                m_lstRoutes.append(ri);
+                route = &m_lstRoutes.last();
+                continue;
+            }
+
+            if ( !route )
+                continue;
+
+            if (line.contains("Known via \"static\""))
+            {
+                if (!routeStaticSended)
+                    lastStatic=true;
+
+                continue;
+            }
+
+            exp.setPattern("directly connected, via (\\S+)");
+            if ( line.contains(exp,&match) )
+            {
+                route->viainterfaces.append( match.captured(1) );
+                route->protocol = estandarizarProtocoloEnrutamiento("directly connected");
+                continue;
+            }
+            exp.setPattern(" (\\S+), (from|via) ");
+            if ( line.contains(exp,&match) )
+            {
+                route->via.append( match.captured(1) );
+                continue;
+            }
+            exp.setPattern("^    (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})$");
+            if ( line.contains(exp,&match) )
+            {
+                route->via.append( match.captured(1) );
+                continue;
+            }
+            exp.setPattern("::ffff:(\\S+), (from|via)");
+            if ( line.contains(exp,&match) )
+            {
+                route->via.append( match.captured(1) );
+                continue;
+            }
+            exp.setPattern("^    (([0-9a-f]{1,4}|:)+)$");
+            if ( line.contains(exp,&match) )
+            {
+                qDebug() << "aqui";
+                route->via.append( match.captured(1) );
+                continue;
+            }  
         }
-
-        if ( !route )
-            continue;
-
-        exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*, (from|via) ");
-        if ( line.contains(exp,&match) )
+        else if (m_brand == "Huawei")
         {
-            route->via.append( match.captured(1) );
-            continue;
-        }
-        exp.setPattern("::ffff:(\\S+), (from|via)");
-        if ( line.contains(exp,&match) )
-        {
-            route->via.append( match.captured(1) );
-            continue;
+            //10.10.22.0/24  IBGP    200  20            RD  10.192.33.7     100GE8/0/0
+            exp.setPattern("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})/(\\d{1,2}) +(\\w+) .+ (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) +(\\S+)");
+            if ( line.contains(exp,&match) )
+            {
+                SIpRouteInfo i;
+                i.ipconsultar = m_red;
+                i.protocol = estandarizarProtocoloEnrutamiento(match.captured(3));
+                i.network = match.captured(1).toLower();
+                i.mask = match.captured(2);
+                i.via.append( match.captured(4).toLower() );
+                i.viainterfaces.append( match.captured(5) );
+                i.vrf = m_vrf;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                m_lstRoutes.append(i);
+                route = &m_lstRoutes[m_lstRoutes.size()-1];
+                continue;
+            }
+
+            // IBGP    200  20            RD  10.192.32. 7    100GE8/0/0    //otra interfaz o ip de destino de la ruta anterior
+            exp.setPattern("\\w+ .+ (\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3}\\.+\\d{1,3}) +(\\S+)");
+            if ( line.contains(exp,&match) )
+            {
+                if ( !route )
+                    continue;
+
+                QString via = match.captured(1).toLower();
+                if ( !route->via.contains(via) )
+                    route->via.append(via);
+                route->viainterfaces.append(match.captured(2));
+                continue;
+            }
+
+            //Destination  : 2803:BC40:81FF::2                       PrefixLength : 127
+            exp.setPattern("^Destination +: (\\S+) +PrefixLength +\\: (\\S+)");
+            if (line.contains(exp,&match))
+            {
+                SIpRouteInfo i;
+                i.ipconsultar = m_red;
+                i.network = match.captured(1).toLower();
+                i.mask = match.captured(2);
+                i.vrf = m_vrf;
+                i.datetime = QDateTime::currentDateTime();
+                i.operativo = true;
+                m_lstRoutes.append(i);
+                route = &m_lstRoutes[m_lstRoutes.size()-1];
+                continue;
+            }
+
+            //NextHop      : ::FFFF:172.17.28.248                    Preference   : 200
+            exp.setPattern("^NextHop +: ::FFFF:(\\S+) ");
+            if (line.contains(exp,&match))
+            {
+                QString via = match.captured(1).toLower();
+                if ( !route->via.contains(via) )
+                    route->via.append(via);
+                continue;
+            }
+
+            //Interface    : 100GE4/0/12                             Flags        : RD
+            exp.setPattern("^Interface +: (\\S+) ");
+            if (line.contains(exp,&match))
+            {
+                QString viainterface = match.captured(1);
+                if ( !route->viainterfaces.contains(viainterface) )
+                    route->viainterfaces.append(viainterface);
+                continue;
+            }
         }
     }
 
-    m_individualSiguienteRed();
+    if (lastStatic && route)
+    {
+        //TODO solo se consulta la primera opcion, si hubiera mas estaticas modificar
+        if ( m_brand == "Cisco" && !route->via.isEmpty())
+        {
+            if ( m_red.contains(":") )
+                //IPV6
+                termSendText("sh route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" ipv6 "+route->via.first() );
+            else
+                //IPV4
+                termSendText("sh route "+( !m_vrf.isEmpty()?" vrf "+m_vrf:"" )+" "+route->via.first() );
+
+            routeStaticSended=true;
+        }
+        else
+        {
+            route=nullptr;
+            routeStaticSended=false;
+            m_individualSiguienteRed();
+        }
+    }
+    else
+    {
+        route=nullptr;
+        routeStaticSended=false;
+        m_individualSiguienteRed();
+    }
 }
 
 QDataStream& operator<<(QDataStream& out, const IPRouteInfo& info)
 {
     out << info.m_lstRoutes;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -375,6 +545,7 @@ QDataStream& operator>>(QDataStream& in, IPRouteInfo& info)
 {
     in >> info.m_lstRoutes;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 
@@ -395,7 +566,8 @@ QDebug operator<<(QDebug dbg, const IPRouteInfo &info)
 {
     dbg.nospace() << "IPRouteInfo:\n";
     foreach (SIpRouteInfo i, info.m_lstRoutes)
-        dbg.space() << i.vrf << i.network << i.mask << i.via << i.protocol << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << i.operativo << "\n";
+        dbg.space() << i.vrf << i.ipconsultar << i.network << i.mask << "via"
+                    << i.via << "via interfaces" << i.viainterfaces << i.protocol << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << i.operativo << "\n";
 
     dbg.nospace() << "\n";
 

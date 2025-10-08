@@ -24,6 +24,7 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_timer = nullptr;
     m_timerActivity = nullptr;
     ThreadWorker = nullptr;
+    m_agregarVecinosHastaNivel=0;
     _clear();    
 
     m_user = Properties::Instance()->user;
@@ -49,7 +50,7 @@ void QueriesThread::_emitNewInformation()
     qInfo() << "Equipos en consulta: " + QString::number( equiposEnConsulta().size() )+
                    " Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                    QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter );
-    // qInfo() << "Equipos en consulta" << m_equiposenconsulta;
+    qInfo() << "Equipos en consulta" << m_equiposenconsulta;
 
     emit status( m_uuid,"Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                  QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter ) );
@@ -122,6 +123,7 @@ void QueriesThread::verificarLstIPsQueriesConfiguration()
             }
         }
     }
+    m_lstIPsMismoEquipo.removeDuplicates();
     m_lstIPsMismoEquipoCounter = m_lstIPsMismoEquipo.size();
     m_lstIPsCounter = m_lstIP.size();
 
@@ -129,9 +131,8 @@ void QueriesThread::verificarLstIPsQueriesConfiguration()
                               "m_lstIPsMismoEquipo" << m_lstIPsMismoEquipo;
 }
 
-void QueriesThread::setOptions(QList<int> opciones)
+void QueriesThread::setOptions(QList<QueriesOpcion> opciones)
 {
-    opciones.removeAll( QueryOpcion::Null ); //unicamente opciones validas
     m_opciones = opciones;
     _clear();
 }
@@ -173,7 +174,7 @@ void QueriesThread::iniciar()
     connect(m_timer,SIGNAL(timeout()),SLOT(on_timer_timeOut()));
 
     m_timerActivity = new QTimer(this);
-    m_timerActivity->setInterval( 300000 );
+    m_timerActivity->setInterval( 600000 );
     m_timerActivity->setSingleShot(true);
     connect(m_timerActivity,SIGNAL(timeout()),SLOT(on_timerActivity_timeOut()));
 
@@ -375,6 +376,9 @@ void QueriesThread::siguienteEquipo(QString IP, bool gw)
     m_equiposenconsulta.append( ip );
     m_queriesenconsulta.append( query );
 
+    if ( m_agregarVecinosHastaNivel > 0)
+        query->_queriesthreadAgregarVecinoNivel=m_mapAgregarVecinosHastaNiveles.value(ip);
+
     _emitNewInformation();
 
     QThread *thr = new QThread;
@@ -416,6 +420,9 @@ void QueriesThread::equipoConsultado(Queries *qry)
 
     m_equiposenconsulta.removeOne( qry->ip() );
     m_queriesenconsulta.removeOne( qry );
+
+    if ( m_agregarVecinosHastaNivel )
+        m_mapAgregarVecinosHastaNiveles.remove( qry->ip() );
 
     if ( qry->gw().isEmpty() )
         m_equiposConsultados.append(qry->ip());
@@ -474,9 +481,12 @@ void QueriesThread::equipoConsultado(Queries *qry)
                         !qry->hostName().isEmpty() &&
                         qry->conexionID() == q->conexionID() )
                     {
-                        qCDebug(queriesthread) << qry->ip() <<
-                            "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
-                        qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry";
+                        qCDebug(queriesthread) <<
+                            "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry"
+                                               << qry->ip() << qry->hostName() << q->ip() << q->hostName();
+                        qCDebug(queriesthread) << qry->ip()
+                                               << "QueriesThread::equipoConsultado -- Ya existe un equipo en listado. Se elimina qry"
+                                               << qry->ip() << qry->hostName() << q->ip() << q->hostName();
                         encontrado=true;
                         eliminar=true;
                         break;
@@ -524,7 +534,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
             {
                 qCDebug(queriesthread) << qry->ip() << "QueriesThread::equipoConsultado -- No conexion";
                 qCDebug(queriesthread) << "QueriesThread::equipoConsultado -- No conexion" << qry->ip();
-                m_errorMap.insert( qry->ip(), "No alcanzable" );
+                m_errorMap.insert( qry->ip(), "No alcanzable"+(!qry->errorTxt().isEmpty()?" "+qry->errorTxt():"") );
                 m_sinconexion++;
                 eliminar=true;
             }
@@ -673,6 +683,14 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                                     << "m_soloequiposnuevos" << m_soloequiposnuevos
                                     << "\n";
 
+    //verificamos si se configuro hasta nivel de agregar vecinos y si ya se alcanzo
+    if ( m_agregarVecinosHastaNivel > 0 )
+    {
+        if ( qry->_queriesthreadAgregarVecinoNivel >= m_agregarVecinosHastaNivel )
+            //no agregamos vecinos a consulta, se alcanzó limite de niveles
+            return;
+    }
+
     //que no este en el listado actual a consultar
     //no pasa si solo equipos nuevos y ya esta en el listado de anteriores
     if ( !m_equiposConsultados.contains(ip) && !m_lstIP.contains(ip) &&
@@ -768,6 +786,8 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                                         << "Agregando vecino a la consulta" << ip << "interfaz siguiente equipo entrada"
                                         << interfazSiguienteEquipoEntrada;
         m_lstIP.append( ip );
+        if ( m_agregarVecinosHastaNivel )
+            m_mapAgregarVecinosHastaNiveles.insert( ip, qry->_queriesthreadAgregarVecinoNivel+1 );
         m_lstIPsCounter++;
         m_mapOSPFVecinosInterfazDondeVienen.insert( ip, interfazSiguienteEquipoEntrada );
 
@@ -805,6 +825,30 @@ Queries QueriesThread::queriesFromIP(QString ip)
         }
 
     return qrysalida;
+}
+
+Queries* QueriesThread::queriesFromIPPointer(QString ip)
+{
+    qDebug() << "QueriesThread::queriesFromIPPointer lst";
+    for (Queries *qry : m_lstQueries)
+        qDebug() << qry->ip() << qry->isConnected();
+
+    for ( Queries *qry : m_lstQueries )
+        if (qry->ip() == ip)
+            return qry;
+    return nullptr;
+}
+
+QString QueriesThread::erroresCSV()
+{
+    QString salida;
+    QMapIterator<QString,QString> imap(m_errorMap);
+    while ( imap.hasNext() )
+    {
+        imap.next();
+        salida.append( imap.key()+"\t"+imap.value()+"\n" );
+    }
+    return salida;
 }
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,

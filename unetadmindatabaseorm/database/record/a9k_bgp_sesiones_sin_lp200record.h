@@ -20,15 +20,21 @@ public:
 
 	void set_a9k_equipo_id(int a9k_equipo_id);
 	void set_date(QDate date);
+	void set_device_ip(QString device_ip);
+	void set_device_name(QString device_name);
 	void set_id(int id);
 	void set_neighbor(QString neighbor);
+	void set_pais(QString pais);
 	void set_prefixin(int prefixin);
 	void set_routepolicy(QString routepolicy);
 
 	int a9k_equipo_id();
 	QDate date();
+	QString device_ip();
+	QString device_name();
 	int id();
 	QString neighbor();
+	QString pais();
 	int prefixin();
 	QString routepolicy();
 

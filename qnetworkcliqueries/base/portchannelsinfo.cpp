@@ -74,6 +74,7 @@ PortChannelsInfo::PortChannelsInfo(const PortChannelsInfo &other):
     m_name = other.m_name;
     m_ip = other.m_ip;
     lstInfo = other.lstInfo;
+    m_queryName = other.m_queryName;
 }
 
 PortChannelsInfo::~PortChannelsInfo()
@@ -244,6 +245,7 @@ QDataStream& operator<<(QDataStream& out, const PortChannelsInfo& info)
 {
     out << info.lstInfo;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -251,6 +253,7 @@ QDataStream& operator>>(QDataStream& in, PortChannelsInfo& info)
 {
     in >> info.lstInfo;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 

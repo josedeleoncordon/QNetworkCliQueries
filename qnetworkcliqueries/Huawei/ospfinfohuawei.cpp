@@ -34,10 +34,11 @@ void OSPFInfoHuawei::on_term_receiveTextNeighbors()
     {
         line = line.simplified();
 
-        exp.setPattern("OSPF Process (\\d+) with Router");
+        exp.setPattern("OSPF Process (\\d+) with Router ID (\\S+)");
         if ( line.contains(exp,&match) )
         {
             proceso = match.captured(1);
+            m_lstRouterIDs.append(match.captured(2));
             continue;
         }
 
@@ -52,7 +53,8 @@ void OSPFInfoHuawei::on_term_receiveTextNeighbors()
 
         oii.id = lstColumns.at(2).simplified();
         oii.state = lstColumns.at(3).simplified();
-        oii.area = lstColumns.at(0).simplified();
+        bool ok;
+        oii.area = QString::number(IP2Binario(lstColumns.at(0).simplified()).toInt(&ok,2));
         oii.interfaz = estandarizarInterfaz( lstColumns.at(1).simplified() );
         oii.process = proceso;
 

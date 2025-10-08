@@ -25,6 +25,16 @@ void a9k_bgp_sesiones_sin_lp200Record::set_date(QDate date)
 	setProperty("date",date);
 }
 
+void a9k_bgp_sesiones_sin_lp200Record::set_device_ip(QString device_ip)
+{
+	setProperty("device_ip",device_ip);
+}
+
+void a9k_bgp_sesiones_sin_lp200Record::set_device_name(QString device_name)
+{
+	setProperty("device_name",device_name);
+}
+
 void a9k_bgp_sesiones_sin_lp200Record::set_id(int id)
 {
 	setProperty("id",id);
@@ -33,6 +43,11 @@ void a9k_bgp_sesiones_sin_lp200Record::set_id(int id)
 void a9k_bgp_sesiones_sin_lp200Record::set_neighbor(QString neighbor)
 {
 	setProperty("neighbor",neighbor);
+}
+
+void a9k_bgp_sesiones_sin_lp200Record::set_pais(QString pais)
+{
+	setProperty("pais",pais);
 }
 
 void a9k_bgp_sesiones_sin_lp200Record::set_prefixin(int prefixin)
@@ -55,6 +70,16 @@ QDate a9k_bgp_sesiones_sin_lp200Record::date()
 	return property("date").toDate();
 }
 
+QString a9k_bgp_sesiones_sin_lp200Record::device_ip()
+{
+	return property("device_ip").toString();
+}
+
+QString a9k_bgp_sesiones_sin_lp200Record::device_name()
+{
+	return property("device_name").toString();
+}
+
 int a9k_bgp_sesiones_sin_lp200Record::id()
 {
 	return property("id").toInt();
@@ -63,6 +88,11 @@ int a9k_bgp_sesiones_sin_lp200Record::id()
 QString a9k_bgp_sesiones_sin_lp200Record::neighbor()
 {
 	return property("neighbor").toString();
+}
+
+QString a9k_bgp_sesiones_sin_lp200Record::pais()
+{
+	return property("pais").toString();
 }
 
 int a9k_bgp_sesiones_sin_lp200Record::prefixin()

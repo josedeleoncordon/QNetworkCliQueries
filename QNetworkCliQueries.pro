@@ -1,8 +1,8 @@
 TEMPLATE  = subdirs
 CONFIG   += ordered
 
-SUBDIRS =   unetadmindatabaseorm/database \
-            qremoteshell \
+SUBDIRS =   qremoteshell \
+            unetadmindatabaseorm/database \
             qnetworkcliqueries \
 #            testapps \
             apps

@@ -28,6 +28,13 @@ BGPInfo *factoryNewBGPNeighborInfo(QString brandName, QString type, QRemoteShell
     return new BGPInfo(term,option);
 }
 
+BGPInfo *factoryNewBGPNeighborDetailInfo(QString brandName, QString type, QRemoteShell *term, int option)
+{
+    Q_UNUSED(brandName)
+    Q_UNUSED(type)
+    return new BGPInfo(term,option);
+}
+
 BGPInfo *factoryNewBGPNetworksInfo(QString brandName, QString type, QRemoteShell *term, int option)
 {
     Q_UNUSED(brandName)

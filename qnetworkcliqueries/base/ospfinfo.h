@@ -30,6 +30,7 @@ protected:
     int m_process;
     bool m_abr;
     bool m_asbr;
+    QStringList m_lstRouterIDs;
     QList<SOSPFInfo> m_lstOSPFInfo;
 
 public:
@@ -48,6 +49,7 @@ public:
     SOSPFInfo* interfaceOspfInfo(QString);
     bool isABR() { return m_abr; }
     bool isASBR() { return m_asbr; }
+    QStringList lstRouterIDs() { return m_lstRouterIDs; }
 
     //
     friend QDataStream& operator<<(QDataStream& out, const OSPFInfo& info);

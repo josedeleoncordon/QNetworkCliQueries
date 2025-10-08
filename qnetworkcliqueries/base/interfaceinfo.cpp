@@ -237,6 +237,7 @@ InterfaceInfo::InterfaceInfo(const InterfaceInfo &other):
     m_interfaces = other.m_interfaces;
     m_interfaceCurrent = other.m_interfaceCurrent;
     m_interfacesPos = other.m_interfacesPos;
+    m_queryName = other.m_queryName;
 }
 
 InterfaceInfo::~InterfaceInfo()
@@ -245,8 +246,9 @@ InterfaceInfo::~InterfaceInfo()
 void InterfaceInfo::getInterfacesInfo()
 {
     m_interfacesPos=-1;
-    m_interfaces = m_queriesConfiguration.values("InterfaceInfo_Interfaces",m_ip,m_os,m_conexionID);
-    m_onlyphysicalinterfaces = m_queriesConfiguration.state("InterfaceInfo_XRonlyPhisical",m_ip,m_os,m_conexionID);
+    m_interfaces = m_queriesConfiguration.values("InterfaceInfo_Interfaces",m_ip,m_os,m_conexionID,m_queryName);
+    m_onlyphysicalinterfaces = m_queriesConfiguration.state("InterfaceInfo_XRonlyPhisical",m_ip,m_os,
+                                                            m_conexionID,m_queryName);
 
     _getInterfacesInfoNextInteface();
 }
@@ -338,7 +340,7 @@ void InterfaceInfo::getInterfacesPermitedVlans()
 void InterfaceInfo::getInterfacesDescriptions()
 {
     m_interfacesPos=-1;
-    m_interfaces = m_queriesConfiguration.values("InterfaceDescription_Interfaces",m_ip,m_os,m_conexionID);
+    m_interfaces = m_queriesConfiguration.values("InterfaceDescription_Interfaces",m_ip,m_os,m_conexionID,m_queryName);
 
     _getInterfacesDescriptionNextInteface();
 }
@@ -971,57 +973,70 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
     if ( !allTextReceived() )
         return;
 
-    QStringList lines = txt.split("\n");    
+    QStringList lines = txt.split("\n");
 
+    QList<short> columnasPosiciones;
     for (QString line : lines)
     {
         if ( m_brand == "Cisco" )
         {
-            if (line.contains("Interface") || line.contains("Status") ||
-                    line.contains("interface descr") || line.contains("Description") ||
-                    !line.contains(QRegularExpression(" (up|down|admin) +(up|down) ")))
-                continue;                                    
+            if (line.contains("nterface") && line.contains("Status") &&
+                line.contains("Protocol") &&line.contains("Description"))
+            {
+                columnasPosiciones=columnsPosFromTxt(line,{"Interface","Status","Protocol","Description"});
+                continue;
+            }
+            if (columnasPosiciones.isEmpty())
+                continue;
+            if (!line.contains(QRegularExpression(" (up|down|admin) +(up|down) ")))
+                continue;
+
+            QStringList data = txt2Columns(line,columnasPosiciones);
+            if (data.size()<3)
+                continue;
+
+            // qDebug() << "data" << data;
+            // qDebug() << "columnasPosiciones" << columnasPosiciones;
 
             SInterfaceInfo id;
-
-            QStringList data = line.split("  ",Qt::SkipEmptyParts);
-
-            id.interfaz = estandarizarInterfaz( data.at(0).simplified() );
+            id.interfaz = estandarizarInterfaz( data.at(0) );
             id.datetime = QDateTime::currentDateTime();
             id.operativo = true;
-            QString status = data.at(1).simplified();
-            QString protocol = data.at(2).simplified();
+            QString status = data.at(1);
+            QString protocol = data.at(2);
             if ( status == "up" && protocol == "up" )
                 id.status = "up";
             else if ( status.contains("admin") )
                 id.status = "admin down";
             else
                 id.status = "down";
-            if ( data.size() >= 4 )
-            {
-                QStringList desc;
-                for ( int c=3; c<data.size(); c++ )
-                    desc.append(data.at(c).simplified());
+            if (data.size()>=4)
+                id.description=data.at(3).trimmed().replace("\"","").replace("'","");
 
-                id.description = desc.join(" ").replace("\"","").replace("'","");
-            }
             m_lstInterfacesInfo.append(id);
         }
         else if ( m_brand == "Huawei" )
         {
-            if ((line.contains("Interface",Qt::CaseInsensitive) && line.contains("Description",Qt::CaseInsensitive)) )
+            if (line.contains("Interface") && line.contains("PHY") &&
+                line.contains("Protocol") && line.contains("Description") )
+            {
+                columnasPosiciones=columnsPosFromTxt(line,{"Interface","PHY","Protocol","Description"});
+                continue;
+            }
+            if (columnasPosiciones.isEmpty())
+                continue;
+            if (!line.contains(QRegularExpression(" (up|\\**down) +(up|down) ")))
                 continue;
 
-            QStringList data = line.split("   ",Qt::SkipEmptyParts);
-
-            if ( data.size() < 2 )
+            QStringList data = txt2Columns(line,columnasPosiciones);
+            if (data.size()<3)
                 continue;
 
             SInterfaceInfo id;
-            id.interfaz = estandarizarInterfaz( data.at(0).simplified() );
+            id.interfaz = estandarizarInterfaz( data.at(0) );
             id.datetime = QDateTime::currentDateTime();
             id.operativo = true;
-            QString status = data.at(1).simplified();
+            QString status = data.at(1);
             QString protocol = data.at(2).simplified();
             if ( status == "up" && protocol == "up" )
                 id.status = "up";
@@ -1029,7 +1044,8 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
                 id.status = "admin down";
             else
                 id.status = "down";
-            id.description = data.at(3).simplified().replace("\"","").replace("'","");
+            if (data.size()>=4)
+                id.description = data.at(3).trimmed().replace("\"","").replace("'","");
 
             m_lstInterfacesInfo.append(id);
         }        
@@ -1136,6 +1152,7 @@ QDataStream& operator<<(QDataStream& out, const InterfaceInfo& ii)
     out << ii.m_lstInterfacesInfo;
     out << ii.m_lstInterfacesPermitedVlans;
     out << ii.m_queryoption;
+    out << ii.m_queryName;
     return out;
 }
 
@@ -1145,6 +1162,7 @@ QDataStream& operator>>(QDataStream& in, InterfaceInfo& ii)
     in >> ii.m_lstInterfacesInfo;
     in >> ii.m_lstInterfacesPermitedVlans;
     in >> ii.m_queryoption;
+    in >> ii.m_queryName;
     return in;
 }
 

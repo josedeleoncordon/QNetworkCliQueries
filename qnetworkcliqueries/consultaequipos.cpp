@@ -156,6 +156,10 @@ void ConsultaEquipos::consultarEquipos()
 
     qDebug() << "consultaequipos: IPs a consultar" << lstIP;
 
+    QList<QueriesOpcion> lstOpciones;
+    for ( int o: opciones )
+        lstOpciones.append( QueriesOpcion(o) );
+
     m_queriesThread->setConnectionProtocol( m_connectionprotocol );
     m_queriesThread->setGrupo(m_grupo);
     m_queriesThread->setLstIP( lstIP );
@@ -165,7 +169,7 @@ void ConsultaEquipos::consultarEquipos()
     m_queriesThread->setUser2( m_user2 );
     m_queriesThread->setPassword2( m_pwd2 );
     m_queriesThread->setLinuxPrompt( m_linuxprompt );
-	m_queriesThread->setOptions( opciones );
+    m_queriesThread->setOptions( lstOpciones );
     m_queriesThread->setEquipmentNeighborsConsultarVecinos( m_consultaAgregarVecinos );
     m_queriesThread->setEquipmentNeighborsOSPFMismoDominio( m_consultaOSPFMismoDominio );
 	m_queriesThread->setEquipmentNeighborsRegExpOSPFArea( m_consultaOSPFArea );

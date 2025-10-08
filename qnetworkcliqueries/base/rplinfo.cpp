@@ -64,46 +64,66 @@ QDataStream& operator>>(QDataStream& in, SRplCommunityInfo& data)
     return in;
 }
 
-void updateInfoList(QList<SRplRouteInfo> &lstDest, QList<SRplRouteInfo> &lstOrigin )
+QDataStream& operator<<(QDataStream& out, const SRplASPathInfo &data)
 {
-    //actualiza la lista anterior con la información de la nueva
-    //origen = nuevo
-    //destino = anterior
-
-    //borramos los datos anteriores que tengan mas de 30 dias
-    for ( int c=0; c<lstDest.size(); )
-    {
-        SRplRouteInfo &dest = lstDest[c];
-        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
-            lstDest.removeAt( c );
-        else
-        {
-            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
-            c++;
-        }
-    }
-
-    //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    for ( SRplRouteInfo &origin : lstOrigin )
-    {
-        bool encontrado=false;
-        for ( SRplRouteInfo &dest : lstDest )
-        {
-            if ( origin.nombre == dest.nombre )
-            {
-                //Si se encontro, actualizamos los datos
-                dest.nombre = origin.nombre;
-                dest.operativo = true;
-                dest.txt = origin.txt;
-                encontrado=true;
-                break;
-            }
-        }
-        if ( !encontrado )
-            //no se encontro, se agrega
-            lstDest.append( origin );
-    }
+    out << data.nombre;
+    out << data.lstASPath;
+    //infobase
+    out << data.datetime;
+    out << data.operativo;
+    return out;
 }
+
+QDataStream& operator>>(QDataStream& in, SRplASPathInfo& data)
+{
+    in >> data.nombre;
+    in >> data.lstASPath;
+    //infobase
+    in >> data.datetime;
+    in >> data.operativo;
+    return in;
+}
+
+// void updateInfoList(QList<SRplRouteInfo> &lstDest, QList<SRplRouteInfo> &lstOrigin )
+// {
+//     //actualiza la lista anterior con la información de la nueva
+//     //origen = nuevo
+//     //destino = anterior
+
+//     //borramos los datos anteriores que tengan mas de 30 dias
+//     for ( int c=0; c<lstDest.size(); )
+//     {
+//         SRplRouteInfo &dest = lstDest[c];
+//         if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
+//             lstDest.removeAt( c );
+//         else
+//         {
+//             dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+//             c++;
+//         }
+//     }
+
+//     //actualizamos los datos del anterior con la nueva, se agrega la nueva
+//     for ( SRplRouteInfo &origin : lstOrigin )
+//     {
+//         bool encontrado=false;
+//         for ( SRplRouteInfo &dest : lstDest )
+//         {
+//             if ( origin.nombre == dest.nombre )
+//             {
+//                 //Si se encontro, actualizamos los datos
+//                 dest.nombre = origin.nombre;
+//                 dest.operativo = true;
+//                 dest.txt = origin.txt;
+//                 encontrado=true;
+//                 break;
+//             }
+//         }
+//         if ( !encontrado )
+//             //no se encontro, se agrega
+//             lstDest.append( origin );
+//     }
+// }
 
 void updateInfoList(QList<SRplPrefixInfo> &lstDest, QList<SRplPrefixInfo> &lstOrigin )
 {
@@ -189,6 +209,47 @@ void updateInfoList(QList<SRplCommunityInfo> &lstDest, QList<SRplCommunityInfo> 
     }
 }
 
+void updateInfoList(QList<SRplASPathInfo> &lstDest, QList<SRplASPathInfo> &lstOrigin )
+{
+    //actualiza la lista anterior con la información de la nueva
+    //origen = nuevo
+    //destino = anterior
+
+    //borramos los datos anteriores que tengan mas de 30 dias
+    for ( int c=0; c<lstDest.size(); )
+    {
+        SRplASPathInfo &dest = lstDest[c];
+        if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
+            lstDest.removeAt( c );
+        else
+        {
+            dest.operativo=false; //se marca como no operativo, si en la consulta nueva esta se volvera a poner en true
+            c++;
+        }
+    }
+
+    //actualizamos los datos del anterior con la nueva, se agrega la nueva
+    for ( SRplASPathInfo &origin : lstOrigin )
+    {
+        bool encontrado=false;
+        for ( SRplASPathInfo &dest : lstDest )
+        {
+            if ( origin.nombre == dest.nombre )
+            {
+                //Si se encontro, actualizamos los datos
+                dest.nombre = origin.nombre;
+                dest.lstASPath = origin.lstASPath;
+                dest.operativo = true;
+                encontrado=true;
+                break;
+            }
+        }
+        if ( !encontrado )
+            //no se encontro, se agrega
+            lstDest.append( origin );
+    }
+}
+
 RplInfo::RplInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {
@@ -201,6 +262,8 @@ RplInfo::RplInfo(const RplInfo &other):
 {
     m_lstRplRoutes = other.m_lstRplRoutes;
     m_lstRplPrefixes = other.m_lstRplPrefixes;
+    m_lstRplASPath = other.m_lstRplASPath;
+    m_lstRplCommunities = other.m_lstRplCommunities;
 }
 
 RplInfo::~RplInfo()
@@ -217,6 +280,11 @@ void RplInfo::getRplRouteInfo()
     {
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplRoute()));
         termSendText("display current-configuration configuration xpl-filter");
+    }
+    else if ( m_os == "IOS" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplRouteMap()));
+        termSendText("show run");
     }
     else
         finished();
@@ -252,7 +320,55 @@ void RplInfo::on_term_receiveText_rplRoute()
             SRplRouteInfo s;
             s.nombre = lastRPL;
             s.txt = rpltxt;
-            m_lstRplRoutes.append(s);
+            s.type = SRplRouteInfo::Rpl;
+            m_lstRplRoutes[s.nombre] = s;
+            lastRPL.clear();
+            rpltxt.clear();
+        }
+    }
+
+    if ( m_os == "VRP" )
+    {
+        term->disconnectReceiveTextSignalConnections();
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplRouteMap()));
+        termSendText("display current-configuration configuration route-policy");
+    }
+    else
+        finished();
+}
+
+void RplInfo::on_term_receiveText_rplRouteMap()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    QRegularExpression exp("^(route-map|route-policy) (\\S+) \\S+ (node )*\\d+$");
+    QString lastRPL;
+    QString rpltxt;
+    for (QString line : lines)
+    {
+        line = line.simplified();
+        if ( line.contains(exp,&match) )
+        {
+            lastRPL = match.captured(2);
+            rpltxt.append( line+"\n" );
+            continue;
+        }
+
+        if ( lastRPL.isEmpty() )
+            continue;
+
+        rpltxt.append( line+"\n" );
+
+        if ( line.contains(QRegularExpression("^(!|#)$")) )
+        {
+            SRplRouteInfo s;
+            s.nombre = lastRPL;
+            s.txt = rpltxt;
+            s.type = SRplRouteInfo::RouteMap;
+            m_lstRplRoutes[s.nombre] = s;
             lastRPL.clear();
             rpltxt.clear();
         }
@@ -330,13 +446,13 @@ void RplInfo::on_term_receiveText_rplPrefix()
 
             if ( line.contains(QRegularExpression("^(end-set| end-list)$")) )
             {
-                // qDebug() << "Agregar rpl";
+                // qDebug() << "Agregar rpl prefix";
                 SRplPrefixInfo s;
                 s.nombre = lastName;
                 s.lstPrefixes = lst;
                 s.ipversion = lastVersion;
                 s.type = SRplPrefixInfo::Rpl;
-                m_lstRplPrefixes.append(s);
+                m_lstRplPrefixes[s.nombre] = s;
                 lastName.clear();
                 lst.clear();
                 continue;
@@ -406,8 +522,8 @@ void RplInfo::on_term_receiveText_rplPrefix()
                     QStringList lst;
                     lst.append( prefix );
                     s.lstPrefixes = lst;
-                    m_lstRplPrefixes.append(s);
-                    lastS = &m_lstRplPrefixes.last();
+                    m_lstRplPrefixes[s.nombre] = (s);
+                    lastS = &m_lstRplPrefixes[s.nombre];
                 }
                 else
                     lastS->lstPrefixes.append( prefix );
@@ -488,9 +604,9 @@ void RplInfo::on_term_receiveText_prefix_list()
                     s.lstPrefixes = lst;
                     s.type = SRplPrefixInfo::PrefixList;
                     s.ipversion = version;
-                    m_lstRplPrefixes.append(s);
                     lastName = name;
-                    lastS = &m_lstRplPrefixes[m_lstRplPrefixes.size()-1];
+                    m_lstRplPrefixes[s.nombre] = s;
+                    lastS = &m_lstRplPrefixes[s.nombre];
                     continue;
                 }
                 else
@@ -560,7 +676,7 @@ void RplInfo::on_term_receiveText_rplCommunity()
             SRplCommunityInfo s;
             s.nombre = lastName;
             s.lstComunities = lst;
-            m_lstRplCommunities.append(s);
+            m_lstRplCommunities[s.nombre] = s;
             lastName.clear();
             lst.clear();
             continue;
@@ -601,9 +717,9 @@ void RplInfo::on_term_receiveText_comunity_list()
                 SRplCommunityInfo s;
                 s.nombre = name;
                 s.lstComunities = lst;
-                m_lstRplCommunities.append(s);
+                m_lstRplCommunities[s.nombre] = s;
                 lastName = name;
-                lastS = &m_lstRplCommunities[m_lstRplCommunities.size()-1];
+                lastS = &m_lstRplCommunities[s.nombre];
                 continue;
             }
             else
@@ -618,11 +734,120 @@ void RplInfo::on_term_receiveText_comunity_list()
     finished();
 }
 
+void RplInfo::getRplASPathInfo()
+{
+    if ( m_os == "IOS" || m_os == "IOS NX" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_aspath_list()));
+        termSendText("show run | i ip as-path");
+    }
+    else if ( m_os == "IOS XR" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplASPath()));
+        termSendText("show rpl as-path-set");
+    }
+    else if ( m_os == "VRP" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_rplASPath()));
+        termSendText("display current-configuration configuration xpl-as");
+    }
+    else
+        finished();
+}
+
+void RplInfo::on_term_receiveText_rplASPath()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    QString lastName;
+    QStringList lst;
+    QRegularExpression exp("^(xpl as-path-list|as-path-set) (\\S+)$");
+    for (QString line : lines)
+    {
+        line = line.left( line.size()-1 );
+        // qDebug() << "line" << line;
+        if ( line.contains(exp,&match) )
+        {
+            lastName = match.captured(2);
+            continue;
+        }
+
+        if ( lastName.isEmpty() )
+            continue;
+
+        if ( line.contains(QRegularExpression("^(end-set| end-list)$")) )
+        {
+            // qDebug() << "Agregar rpl";
+            SRplASPathInfo s;
+            s.nombre = lastName;
+            s.lstASPath = lst;
+            m_lstRplASPath[s.nombre] = s;
+            lastName.clear();
+            lst.clear();
+            continue;
+        }
+
+        lst.append( line.replace(",","").simplified() );
+    }
+    finished();
+}
+
+void RplInfo::on_term_receiveText_aspath_list()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    QRegularExpression exp("ip as-path access-list (\\S+) permit (.+)$");
+    QString lastName;
+    SRplASPathInfo *lastS = nullptr;
+    for (QString line : lines)
+    {
+        line = line.left( line.size()-1 );
+        // qDebug() << "line2" << line;
+        if ( line.contains(exp,&match) )
+        {
+            QString name = match.captured(1);
+            QString aspath = match.captured(2);
+            // qDebug() << "entro" << name << lastName;
+            if ( lastName != name )
+            {
+                //nuevo aspath
+                QStringList lst;
+                lst.append(aspath);
+
+                // qDebug() << "agregando aspath" << name << match.captured(2);
+
+                SRplASPathInfo s;
+                s.nombre = name;
+                s.lstASPath = lst;
+                m_lstRplASPath[s.nombre] = s;
+                lastName = name;
+                lastS = &m_lstRplASPath[s.nombre];
+                continue;
+            }
+            else
+            {
+                //sigue siendo el mismo aspath
+                // qDebug() << "sigue el mismo";
+                lastS->lstASPath.append(aspath);
+            }
+        }
+    }
+
+    finished();
+}
+
 QDataStream& operator<<(QDataStream& out, const RplInfo& info)
 {
     out << info.m_lstRplRoutes;
     out << info.m_lstRplPrefixes;
     out << info.m_lstRplCommunities;
+    out << info.m_lstRplASPath;
     out << info.m_queryoption;
     return out;
 }
@@ -632,6 +857,7 @@ QDataStream& operator>>(QDataStream& in, RplInfo& info)
     in >> info.m_lstRplRoutes;
     in >> info.m_lstRplPrefixes;
     in >> info.m_lstRplCommunities;
+    in >> info.m_lstRplASPath;
     in >> info.m_queryoption;
     return in;
 }
@@ -662,6 +888,10 @@ QDebug operator<<(QDebug dbg, const RplInfo &info)
     dbg.nospace() << "RplCommunitiesInfo:\n";
     for (SRplCommunityInfo i : info.m_lstRplCommunities)
         dbg.space() << "------" << i.nombre << i.lstComunities << "\n";
+
+    dbg.nospace() << "RplASPathInfo:\n";
+    for (SRplASPathInfo i : info.m_lstRplASPath)
+        dbg.space() << "------" << i.nombre << i.lstASPath << "\n";
 
     dbg.nospace() << "\n";
 

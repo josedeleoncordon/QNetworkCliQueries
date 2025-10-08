@@ -78,6 +78,7 @@ VrfInfo::VrfInfo(const VrfInfo &other):
     m_lstVrfInfo = other.m_lstVrfInfo;
     m_vrf = other.m_vrf;
     m_rt = other.m_rt;
+    m_queryName = other.m_queryName;
 }
 
 VrfInfo::~VrfInfo()
@@ -85,7 +86,7 @@ VrfInfo::~VrfInfo()
 
 void VrfInfo::getVRFsFromVLans()
 {
-    m_vlans = m_queriesConfiguration.values("VRFfVlans_Vlans",m_ip,m_os,m_conexionID);
+    m_vlans = m_queriesConfiguration.values("VRFfVlans_Vlans",m_ip,m_os,m_conexionID,m_queryName);
 
     if ( m_vlans.size() == 0 )
     {
@@ -113,7 +114,7 @@ void VrfInfo::getVRFfromRT()
         return;
     }
 
-    m_rt = m_queriesConfiguration.value("VRFfRT_RT",m_ip,m_os,m_conexionID);
+    m_rt = m_queriesConfiguration.value("VRFfRT_RT",m_ip,m_os,m_conexionID,m_queryName);
 
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextFromRT()));
     if ( m_os == "IOS XR" )
@@ -449,6 +450,7 @@ QDataStream& operator<<(QDataStream& out, const VrfInfo& info)
     out << info.m_vrf;
     out << info.m_lstVrfInfo;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -458,6 +460,7 @@ QDataStream& operator>>(QDataStream& in, VrfInfo& info)
     in >> info.m_vrf;
     in >> info.m_lstVrfInfo;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 

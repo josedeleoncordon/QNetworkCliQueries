@@ -45,7 +45,6 @@ interfaz:
     interfaz_tipo_id:
       type: tinyint
       unsigned: true
-      notnull: true
     proveedor_id:
       type: string(3)
     interfaz:
@@ -454,6 +453,12 @@ a9k_slots:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -485,6 +490,12 @@ a9k_memoria:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -520,6 +531,12 @@ a9k_energia:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -543,6 +560,8 @@ a9k_energia:
       type: smallint
     cisco_caida_mitad_potencia_no_soportado:
       type: tinyint
+    a9k_energiacol:
+      type: string(45)
   relations:
     a9k_equipo_1:
       foreignType: many
@@ -565,6 +584,12 @@ a9k_sesiones_cola:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -598,6 +623,12 @@ a9k_bgp_sesiones_weight:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -629,6 +660,12 @@ a9k_bgp_sesiones_sin_lp200:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -660,6 +697,12 @@ a9k_mpls_label_table_summary:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -687,6 +730,12 @@ a9k_peer_caida_prefix_in:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -718,6 +767,12 @@ a9k_internet_redistribucion_estaticas_conectadas:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -749,6 +804,12 @@ a9k_vrf_sin_label_pervrf:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -778,6 +839,12 @@ a9k_bgp_inter_as:
       primary: true
       notnull: true
       autoincrement: true
+    pais:
+      type: string(45)
+    device_ip:
+      type: string(45)
+    device_name:
+      type: string(45)
     a9k_equipo_id:
       type: integer
       notnull: true
@@ -808,30 +875,30 @@ a9k_pais:
 
 ken_consulta:
   columns:
-    id:
-      type: bigint
-      primary: true
-      notnull: true
-      autoincrement: true
-    ken_equipo_id:
-      type: integer
-      notnull: true
     fecha:
       type: date
-    destino_ip:
+    equipo:
+      type: string(75)
+    interface:
       type: string(45)
+    pe_ip:
+      type: string(45)
+    pe_destino_ip:
+      type: string(45)
+    pe_destino_ip2:
+      type: string(45)
+    asn_origen:
+      type: string(150)
+    destino_ip:
+      type: string(150)
+    asn:
+      type: string(150)
     max_bps:
       type: double
-  relations:
-    ken_equipo_1:
-      foreignType: many
-      foreignAlias: ken_consultas
-      local: ken_equipo_id
-      foreign: id
-      class: ken_equipo
-      owningSide: true
-      onDelete: NO ACTION
-      onUpdate: NO ACTION
+    p95_bps:
+      type: double
+    interface_salida:
+      type: string(45)
 
 ken_equipo:
   columns:
@@ -846,6 +913,8 @@ ken_equipo:
     nombre:
       type: string(45)
       notnull: true
+    estado:
+      type: boolean
 
 red_consulta:
   columns:
@@ -875,6 +944,12 @@ red_consulta:
     conexion_error:
       type: integer
     total:
+      type: integer
+    bgp_total:
+      type: integer
+    bgp_ok:
+      type: integer
+    advertencias:
       type: integer
   relations:
     red_sector_1:
@@ -936,9 +1011,15 @@ red_consulta_detalle:
     Redundancia:
       type: string(20)
     Descripcion:
-      type: string(200)
+      type: string(1000)
     Detalle:
-      type: string(200)
+      type: string(1000)
+    con_bgp:
+      type: boolean
+    bgp_ok:
+      type: boolean
+    advertencia:
+      type: string(1000)
   relations:
     red_sector_1:
       foreignType: many
@@ -1014,37 +1095,6 @@ TB_Pais_anillos_cantidad:
       type: integer
     cantidad_en_buses:
       type: integer
-
-ken_consulta_detalle:
-  columns:
-    id:
-      type: bigint
-      primary: true
-      notnull: true
-      autoincrement: true
-    ken_equipo_id:
-      type: integer
-      notnull: true
-    fecha:
-      type: date
-    destino_ip:
-      type: string(45)
-    asn:
-      type: string(100)
-    red:
-      type: string(100)
-    max_bps:
-      type: double
-  relations:
-    ken_equipo_1:
-      foreignType: many
-      foreignAlias: ken_consulta_detalles
-      local: ken_equipo_id
-      foreign: id
-      class: ken_equipo
-      owningSide: true
-      onDelete: NO ACTION
-      onUpdate: NO ACTION
 
 TB_Pais_anillo_bus_detalle:
   columns:
@@ -1197,4 +1247,133 @@ bgp_serv_prin_bck_comunidades_faltantes:
     comunidades_faltantes:
       type: string(750)
       notnull: true
+
+bgp_publicaciones_a_proveedores:
+  columns:
+    grupo:
+      type: tinyint
+    red:
+      type: string(150)
+    asn:
+      type: string(15)
+    proveedor:
+      type: string(45)
+    pe_hostname:
+      type: string(45)
+    pe_ip:
+      type: string(45)
+    peer_ip:
+      type: string(45)
+    interface:
+      type: string(45)
+    peer_tipo:
+      type: string(45)
+    comunidad_base:
+      type: string(45)
+    prepends:
+      type: string(45)
+
+ken_flow_asn_summary:
+  columns:
+    fecha:
+      type: date
+    equipo:
+      type: string(75)
+    source_connectivity_type:
+      type: string(45)
+    pe_ip:
+      type: string(45)
+    asn_origen:
+      type: string(150)
+    asn_destino:
+      type: string(150)
+    max_bps:
+      type: double
+    p95_bps:
+      type: double
+
+interfaz_consumo:
+  columns:
+    fecha:
+      type: date
+      primary: true
+      notnull: true
+    id:
+      type: integer
+      primary: true
+      notnull: true
+      autoincrement: true
+    grupo:
+      type: string(45)
+    pe_ip:
+      type: string(45)
+    pe_nombre:
+      type: string(45)
+    interfaz:
+      type: string(45)
+    descripcion:
+      type: string(300)
+    bandwidth:
+      type: bigint
+    ratein:
+      type: bigint
+    rateout:
+      type: bigint
+
+servicios_homologados:
+  columns:
+    id:
+      type: bigint
+      primary: true
+      notnull: true
+      autoincrement: true
+    fecha:
+      type: date
+    pais:
+      type: string(45)
+    estandard_count:
+      type: integer
+    diagrama_completo:
+      type: integer
+    total:
+      type: integer
+
+servicios_bw_vs_crm:
+  columns:
+    id:
+      type: bigint
+      primary: true
+      notnull: true
+      autoincrement: true
+    fecha:
+      type: date
+    pais:
+      type: string(45)
+    porcentaje:
+      type: double
+
+bgp_pe_vpn_peer_comunities_in:
+  columns:
+    fecha:
+      type: date
+    pe_ip:
+      type: string(45)
+    peer:
+      type: string(45)
+    family:
+      type: string(15)
+    additional_paths_enabled:
+      type: boolean
+    prefix_in:
+      type: integer
+    rpl_in:
+      type: string(45)
+    comunidades_pri:
+      type: string(200)
+    comunidades_sec:
+      type: string(200)
+    comunidades_ter:
+      type: string(200)
+    comunidades_faltantes:
+      type: string(200)
 

@@ -5,10 +5,12 @@
 
 struct SIpRouteInfo : InfoBase
 {
+    QString ipconsultar; //consultado
     QString network;
     QString mask;
     QString protocol;
     QStringList via;
+    QStringList viainterfaces;
     QString vrf;
 };
 
@@ -23,6 +25,8 @@ class QNETWORKCLIQUERIES_EXPORT IPRouteInfo : public FuncionBase
 protected:
     QList<SIpRouteInfo> m_lstRoutes;
 
+    SIpRouteInfo *route = nullptr;
+
     QString m_protocol;
     int m_vrfsPos;
     int m_redPos;
@@ -30,6 +34,7 @@ protected:
     QString m_vrf;
     QStringList m_redes; //a consultar
     QString m_red;
+    bool routeStaticSended;
 
     void m_generalSiguienteVRF();
     void m_individualSiguienteRed();

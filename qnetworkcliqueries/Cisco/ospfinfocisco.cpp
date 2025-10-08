@@ -123,7 +123,31 @@ void OSPFInfoCisco::on_term_receiveTextInterfaces()
         termSendText("sh ospf "+ (m_process > 0 ? QString::number(m_process) : "") + " vrf all interface brief");
     }
     else
-        finished();
+    {
+        term->disconnectReceiveTextSignalConnections();
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextIRun()));
+        if ( m_os == "IOS XR" )
+            termSendText("sh run router ospf");
+        else
+            termSendText("sh run | sec router ospf");
+    }
+}
+
+void OSPFInfoCisco::on_term_receiveTextIRun()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    QRegularExpression exp(" router-id (\\S+)");
+    QRegularExpressionMatch match;
+    for (QString line : lines)
+    {
+        if ( line.contains(exp,&match) )
+            m_lstRouterIDs.append(match.captured(1));
+    }
+    emit finished();
 }
 
 

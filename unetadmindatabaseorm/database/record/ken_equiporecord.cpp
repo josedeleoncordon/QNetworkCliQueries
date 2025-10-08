@@ -15,6 +15,11 @@ ken_equipoRecord::ken_equipoRecord(const ken_equipoRecord &other):
 
 ken_equipoRecord::~ken_equipoRecord() {}
 
+void ken_equipoRecord::set_estado(bool estado)
+{
+	setProperty("estado",estado);
+}
+
 void ken_equipoRecord::set_id(int id)
 {
 	setProperty("id",id);
@@ -28,6 +33,11 @@ void ken_equipoRecord::set_ip(QString ip)
 void ken_equipoRecord::set_nombre(QString nombre)
 {
 	setProperty("nombre",nombre);
+}
+
+bool ken_equipoRecord::estado()
+{
+	return property("estado").toBool();
 }
 
 int ken_equipoRecord::id()

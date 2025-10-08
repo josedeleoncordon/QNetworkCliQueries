@@ -15,6 +15,7 @@ PlatformInfo::PlatformInfo(const PlatformInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
+    m_queryName = other.m_queryName;
 }
 
 void PlatformInfo::getPlatformInfo()

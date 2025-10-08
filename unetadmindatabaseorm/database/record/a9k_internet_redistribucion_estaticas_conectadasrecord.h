@@ -21,14 +21,20 @@ public:
 	void set_a9k_equipo_id(int a9k_equipo_id);
 	void set_date(QDate date);
 	void set_descripcion(QString descripcion);
+	void set_device_ip(QString device_ip);
+	void set_device_name(QString device_name);
 	void set_id(int id);
+	void set_pais(QString pais);
 	void set_routepolicy(QString routepolicy);
 	void set_tipo(QString tipo);
 
 	int a9k_equipo_id();
 	QDate date();
 	QString descripcion();
+	QString device_ip();
+	QString device_name();
 	int id();
+	QString pais();
 	QString routepolicy();
 	QString tipo();
 

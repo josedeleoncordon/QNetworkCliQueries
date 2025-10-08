@@ -25,6 +25,16 @@ void a9k_slotsRecord::set_date(QDate date)
 	setProperty("date",date);
 }
 
+void a9k_slotsRecord::set_device_ip(QString device_ip)
+{
+	setProperty("device_ip",device_ip);
+}
+
+void a9k_slotsRecord::set_device_name(QString device_name)
+{
+	setProperty("device_name",device_name);
+}
+
 void a9k_slotsRecord::set_id(int id)
 {
 	setProperty("id",id);
@@ -33,6 +43,11 @@ void a9k_slotsRecord::set_id(int id)
 void a9k_slotsRecord::set_node(QString node)
 {
 	setProperty("node",node);
+}
+
+void a9k_slotsRecord::set_pais(QString pais)
+{
+	setProperty("pais",pais);
 }
 
 void a9k_slotsRecord::set_state(QString state)
@@ -55,6 +70,16 @@ QDate a9k_slotsRecord::date()
 	return property("date").toDate();
 }
 
+QString a9k_slotsRecord::device_ip()
+{
+	return property("device_ip").toString();
+}
+
+QString a9k_slotsRecord::device_name()
+{
+	return property("device_name").toString();
+}
+
 int a9k_slotsRecord::id()
 {
 	return property("id").toInt();
@@ -63,6 +88,11 @@ int a9k_slotsRecord::id()
 QString a9k_slotsRecord::node()
 {
 	return property("node").toString();
+}
+
+QString a9k_slotsRecord::pais()
+{
+	return property("pais").toString();
 }
 
 QString a9k_slotsRecord::state()

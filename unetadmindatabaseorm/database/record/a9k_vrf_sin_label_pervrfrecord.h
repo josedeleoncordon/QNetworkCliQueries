@@ -21,13 +21,19 @@ public:
 	void set_a9k_equipo_id(int a9k_equipo_id);
 	void set_address_family(QString address_family);
 	void set_date(QDate date);
+	void set_device_ip(QString device_ip);
+	void set_device_name(QString device_name);
 	void set_id(int id);
+	void set_pais(QString pais);
 	void set_vrf(QString vrf);
 
 	int a9k_equipo_id();
 	QString address_family();
 	QDate date();
+	QString device_ip();
+	QString device_name();
 	int id();
+	QString pais();
 	QString vrf();
 
 	a9k_equipoRecord *r_a9k_equipo_id();

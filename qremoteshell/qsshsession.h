@@ -9,8 +9,13 @@ https://github.com/softengineer/qsshterm
 #define QSSHSESSION_H
 
 #include <QObject>
+
+//include de las cabeceras de la libreria compilada con soporte DSA
 #include </usr/local/include/libssh/libssh.h>
 #include </usr/local/include/libssh/callbacks.h>
+
+// #include </usr/include/libssh/libssh.h>
+// #include </usr/include/libssh/callbacks.h>
 
 class QTimer;
 class QSocketNotifier;
@@ -53,8 +58,17 @@ private slots:
 private :
     ssh_session session;
     ssh_channel channel;
+
+    // //utilizamos dlopen para abrir otra version de libssh en tiempo de ejecucion
+    // //se espera que esta otra libssh este compilada con soporte para DSA para conexion con equipos legacy
+    // void* handle;
+    // typedef const char *(*ssh_get_error_t)(void *error);
+    // typedef int (*ssh_channel_is_open_t)(ssh_channel channel);
+    // ssh_get_error_t ssh_get_error;
+    // ssh_channel_is_open_t ssh_channel_is_open;
+
     char buffer[1024];
-    QTimer    *timer;
+    QTimer  *timer;
     QString _host;
     QString _port;
     QString _user;

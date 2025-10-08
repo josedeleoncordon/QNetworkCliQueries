@@ -95,6 +95,7 @@ MacInfo::MacInfo(const MacInfo &other):
     m_mac = other.m_mac;
     m_vlan = other.m_vlan;
     m_lstMacs = other.m_lstMacs;
+    m_queryName = other.m_queryName;
 }
 
 MacInfo::~MacInfo()
@@ -119,6 +120,7 @@ QDataStream& operator<<(QDataStream& out, const MacInfo& info)
 {
     out << info.m_lstMacs;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -126,6 +128,7 @@ QDataStream& operator>>(QDataStream& in, MacInfo& info)
 {
     in >> info.m_lstMacs;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 

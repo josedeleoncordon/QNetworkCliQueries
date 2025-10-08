@@ -24,9 +24,32 @@
 
 class Host;
 
+class QNETWORKCLIQUERIES_EXPORT QueriesOpcion
+{
+public:
+    int _opcion;
+    QString _queryNombre;
+
+    QueriesOpcion(int opcion,QString queryNombre="");
+    QueriesOpcion(const QueriesConfigurationValue &other);
+    QueriesOpcion() {}
+    QueriesOpcion& operator =(const QueriesOpcion &other);
+    void clone(const QueriesOpcion &other);
+    bool operator==(const QueriesOpcion &other) const
+    {
+        if (_opcion==other._opcion &&
+            _queryNombre==other._queryNombre)
+            return true;
+        else
+            return false;
+    }
+};
+
 class QNETWORKCLIQUERIES_EXPORT Queries : public QObject
 {
     Q_OBJECT
+
+    friend class QueriesThread;
 
     Q_PROPERTY(QString hostName READ hostName )
     Q_PROPERTY(QString ip READ ip )
@@ -62,6 +85,7 @@ public:
     VrfInfo *vrfsQuery;
     ArpInfo *arpsQuery;
     BGPInfo *bgpNeighborsQuery;
+    BGPInfo *bgpNeighborsDetailQuery;
     BGPInfo *bgpNetworksQuery;
     BGPInfo *bgpNetworksBGPAttrQuery;
     IPRouteInfo *ipRoutesQuery;
@@ -70,6 +94,7 @@ public:
     RplInfo *rplRoutesQuery;
     RplInfo *rplPrefixesQuery;
     RplInfo *rplCommunitiesQuery;
+    RplInfo *rplASPathQuery;
     ExitInfo *exitQuery;
 
     bool isConnected() { return m_connected; }
@@ -128,16 +153,20 @@ public:
     QList<SIpInfo>& arpsInfo(int i=0);
     QList<SBGPNeighbor>& bgpNeighborsInfo(int i=0);
     QList<SBGPNeighbor>& bgpNeighborsInfo(QString name);
+    QList<SBGPNeighborDetail>& bgpNeighborsDetailInfo(int i=0);
+    QList<SBGPNeighborDetail>& bgpNeighborsDetailInfo(QString name);
     QList<SBGPNetwork>& bgpNetworksInfo(int i=0);
     QMap<QString,QList<SBGPNetwork>>& bgpMapNetworksInfo(int i=0);
     QList<SBGPNetwork>& bgpNetworksBGPAttrInfo(int i=0);
     QList<SIpRouteInfo>& ipRoutesInfo(int i=0);
-    QList<SRplRouteInfo>& rplRoutesInfo(int i=0);
-    QList<SRplRouteInfo>& rplRoutesInfo(QString name);
-    QList<SRplPrefixInfo>& rplPrefixesInfo(int i=0);
-    QList<SRplPrefixInfo>& rplPrefixesInfo(QString name);
-    QList<SRplCommunityInfo>& rplCommunitiesInfo(int i=0);
-    QList<SRplCommunityInfo>& rplCommunitiesInfo(QString name);
+    QMap<QString,SRplRouteInfo>& rplRoutesInfo(int i=0);
+    QMap<QString,SRplRouteInfo>& rplRoutesInfo(QString name);
+    QMap<QString,SRplPrefixInfo>& rplPrefixesInfo(int i=0);
+    QMap<QString,SRplPrefixInfo>& rplPrefixesInfo(QString name);
+    QMap<QString,SRplCommunityInfo>& rplCommunitiesInfo(int i=0);
+    QMap<QString,SRplCommunityInfo>& rplCommunitiesInfo(QString name);
+    QMap<QString,SRplASPathInfo>& rplASPathInfo(int i=0);
+    QMap<QString,SRplASPathInfo>& rplASPathInfo(QString name);
     QString funcionTxtInfo(int i=0);
     QString funcionTxtInfo(QString name);
     QStringList funcionLstTxtInfo(int i=0);
@@ -149,16 +178,16 @@ public:
     void setKeepAlive(bool enable);
     void setRemoteShell(QRemoteShell *remoteShell) { term = remoteShell; }
     void setRemoteShellUsersPasswords(QStringList lst) { lstRemoteShellUsersPasswords=lst; _userPwdusingList=true; }
-    void setOptions( QList<int> lst );
+    void setOptions(QList<QueriesOpcion> lst );
     void setOperativo(bool OPERATIVO) { m_operativo = OPERATIVO; }
     void setCountry(QString COUNTRY) { m_country = COUNTRY; }
     void setIP(QString IP) { m_ip = IP; }
     void setHostName(QString NAME) { m_name = NAME; }
     void setPlatform(QString PLATFORM) { m_platform=PLATFORM; }        
     void setIpOInterfazMismoDominioOSPFDondeSeViene( QString interfaz ) { m_ipOinterfazMismoDominioOSPFdondeSeViene=interfaz; }
-    void setQueriesConfiguration(QueriesConfiguration configuration) { m_queriesconfiguration=configuration; }
-    void setConexionID(QString ID) { m_conexionID=ID; }
-    void setQueryName(QString name) { m_queryname=name; }
+    void setQueriesConfiguration(QueriesConfiguration configuration);
+    void setQueryName(QString name);
+    void setConexionID(QString ID) { m_conexionID=ID; }    
     void setType(QString type) { m_type= type; }
     void setRecorridoEnArbol(bool recorrido) { _recorridoEnArbol=recorrido; }
 
@@ -202,7 +231,7 @@ signals:
 protected:
     QRemoteShell *term;
     bool _sshUseLibSsh;
-    QList<int> m_lstOpciones;
+    QList<QueriesOpcion> m_mapOpciones;
     int m_opcionActual;
     QMultiMap<QString,FuncionBase*> m_lstFunciones;
     FuncionBase *m_currentFuncion;
@@ -251,8 +280,10 @@ protected:
 
     QString m_ipOinterfazMismoDominioOSPFdondeSeViene;
 
+    int _queriesthreadAgregarVecinoNivel;
+
     //Node helper
-    bool _recorridoEnArbol;
+    bool _recorridoEnArbol;        
 
     //para regresar si un query no esta disponible
     QList<SEquipmentNeighborsInfo> _lstSEquipmentNeighborsInfo;
@@ -271,13 +302,15 @@ protected:
     QStringList _lstQStringList;
     QList<SVrfInfo> _lstSVrfInfo;
     QList<SBGPNeighbor> _lstSBGPNeighbor;
+    QList<SBGPNeighborDetail> _lstSBGPNeighborDetail;
     QList<SBGPNetwork> _lstSBGPNetwork;
     QMap<QString,QList<SBGPNetwork>> _mapNetworksInfo;
     QList<SBGPNetwork> _lstSBGPNetworkBGPAttr;
     QList<SIpRouteInfo> _lstSIpRouteInfo;
-    QList<SRplRouteInfo> _lstRplRoutesInfo;
-    QList<SRplPrefixInfo> _lstRplPrefixesInfo;
-    QList<SRplCommunityInfo> _lstRplCommunitiesInfo;
+    QMap<QString,SRplRouteInfo> _lstRplRoutesInfo;
+    QMap<QString,SRplPrefixInfo> _lstRplPrefixesInfo;
+    QMap<QString,SRplCommunityInfo> _lstRplCommunitiesInfo;
+    QMap<QString,SRplASPathInfo> _lstRplASPathInfo;
 
     void iniciar();
     FuncionBase* createQuerie(int option);

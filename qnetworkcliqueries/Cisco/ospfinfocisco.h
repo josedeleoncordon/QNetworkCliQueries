@@ -17,6 +17,7 @@ public:
 private slots:    
     void on_term_receiveTextNeighbors();
     void on_term_receiveTextInterfaces();
+    void on_term_receiveTextIRun();
 };
 
 #endif // OSPFINFOCISCO_H
