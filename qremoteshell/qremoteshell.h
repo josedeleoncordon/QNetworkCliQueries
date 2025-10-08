@@ -13,8 +13,6 @@
 
 #include "qremoteshell_global.h"
 
-class QTcpSocket;
-class QTimer;
 class QTelnet;
 class QSSHSession;
 
@@ -78,7 +76,7 @@ private:
     short m_consultaIntentos;
     bool m_lastlibsshfailed;
 
-    QString eliminarCaractaresNoImprimibles(QString txt);
+    QString eliminarCaractaresMenorASCII32(QString txt);
     void m_nextTry();
     void finalizado();
 

@@ -17,10 +17,12 @@ public:
 	ken_equipoRecord(const ken_equipoRecord &other);
 	~ken_equipoRecord();
 
+	void set_estado(bool estado);
 	void set_id(int id);
 	void set_ip(QString ip);
 	void set_nombre(QString nombre);
 
+	bool estado();
 	int id();
 	QString ip();
 	QString nombre();

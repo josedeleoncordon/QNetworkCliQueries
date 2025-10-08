@@ -18,6 +18,8 @@
 #include "record/a9k_slotsrecord.h"
 #include "record/a9k_vrf_sin_label_pervrfrecord.h"
 #include "record/arearecord.h"
+#include "record/bgp_pe_vpn_peer_comunities_inrecord.h"
+#include "record/bgp_publicaciones_a_proveedoresrecord.h"
 #include "record/bgp_serv_prin_bck_comunidades_faltantesrecord.h"
 #include "record/bgp_sesiones_clientes_sin_prefix_filtrorecord.h"
 #include "record/enlacerecord.h"
@@ -25,11 +27,12 @@
 #include "record/gruporecord.h"
 #include "record/grupo_equiporecord.h"
 #include "record/interfazrecord.h"
+#include "record/interfaz_consumorecord.h"
 #include "record/interfaz_estadorecord.h"
 #include "record/interfaz_tiporecord.h"
 #include "record/ken_consultarecord.h"
-#include "record/ken_consulta_detallerecord.h"
 #include "record/ken_equiporecord.h"
+#include "record/ken_flow_asn_summaryrecord.h"
 #include "record/paisrecord.h"
 #include "record/pcp_paisrecord.h"
 #include "record/pcp_perecord.h"
@@ -42,6 +45,8 @@
 #include "record/red_consulta_detallerecord.h"
 #include "record/red_paisrecord.h"
 #include "record/red_sectorrecord.h"
+#include "record/servicios_bw_vs_crmrecord.h"
+#include "record/servicios_homologadosrecord.h"
 
 using namespace QAnt;
 using namespace Dao;
@@ -84,6 +89,10 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new a9k_vrf_sin_label_pervrfRecord;
 	if ( table == "area" )
 		return new areaRecord;
+	if ( table == "bgp_pe_vpn_peer_comunities_in" )
+		return new bgp_pe_vpn_peer_comunities_inRecord;
+	if ( table == "bgp_publicaciones_a_proveedores" )
+		return new bgp_publicaciones_a_proveedoresRecord;
 	if ( table == "bgp_serv_prin_bck_comunidades_faltantes" )
 		return new bgp_serv_prin_bck_comunidades_faltantesRecord;
 	if ( table == "bgp_sesiones_clientes_sin_prefix_filtro" )
@@ -98,16 +107,18 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new grupo_equipoRecord;
 	if ( table == "interfaz" )
 		return new interfazRecord;
+	if ( table == "interfaz_consumo" )
+		return new interfaz_consumoRecord;
 	if ( table == "interfaz_estado" )
 		return new interfaz_estadoRecord;
 	if ( table == "interfaz_tipo" )
 		return new interfaz_tipoRecord;
 	if ( table == "ken_consulta" )
 		return new ken_consultaRecord;
-	if ( table == "ken_consulta_detalle" )
-		return new ken_consulta_detalleRecord;
 	if ( table == "ken_equipo" )
 		return new ken_equipoRecord;
+	if ( table == "ken_flow_asn_summary" )
+		return new ken_flow_asn_summaryRecord;
 	if ( table == "pais" )
 		return new paisRecord;
 	if ( table == "pcp_pais" )
@@ -132,5 +143,9 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new red_paisRecord;
 	if ( table == "red_sector" )
 		return new red_sectorRecord;
+	if ( table == "servicios_bw_vs_crm" )
+		return new servicios_bw_vs_crmRecord;
+	if ( table == "servicios_homologados" )
+		return new servicios_homologadosRecord;
 	return nullptr;
 }

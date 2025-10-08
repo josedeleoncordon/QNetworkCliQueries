@@ -18,6 +18,9 @@ public:
 	red_consultaRecord(const red_consultaRecord &other);
 	~red_consultaRecord();
 
+	void set_advertencias(int advertencias);
+	void set_bgp_ok(int bgp_ok);
+	void set_bgp_total(int bgp_total);
 	void set_conexion_error(int conexion_error);
 	void set_excepcion(int excepcion);
 	void set_fecha(QDate fecha);
@@ -30,6 +33,9 @@ public:
 	void set_red_sector_id(int red_sector_id);
 	void set_total(int total);
 
+	int advertencias();
+	int bgp_ok();
+	int bgp_total();
 	int conexion_error();
 	int excepcion();
 	QDate fecha();

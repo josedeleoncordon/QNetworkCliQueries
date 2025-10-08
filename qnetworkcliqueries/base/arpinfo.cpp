@@ -94,6 +94,7 @@ ArpInfo::ArpInfo(const ArpInfo &other):
     m_vrf = other.m_vrf;
     m_vrfsPos = other.m_vrfsPos;
     m_macip = other.m_macip;
+    m_queryName = other.m_queryName;
 }
 
 ArpInfo::~ArpInfo()
@@ -118,6 +119,7 @@ QDataStream& operator<<(QDataStream& out, const ArpInfo& info)
 {
     out << info.m_lstArp;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -125,6 +127,7 @@ QDataStream& operator>>(QDataStream& in, ArpInfo& info)
 {
     in >> info.m_lstArp;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 

@@ -13,8 +13,8 @@ ArpInfoCisco::~ArpInfoCisco()
 
 void ArpInfoCisco::getArpInfo()
 {
-    m_vrfs = m_queriesConfiguration.values("Arp_VRFs",m_ip,m_os,m_conexionID);
-    m_macip = m_queriesConfiguration.value("ARP_MacIP",m_ip,m_os,m_conexionID);
+    m_vrfs = m_queriesConfiguration.values("Arp_VRFs",m_ip,m_os,m_conexionID,m_queryName);
+    m_macip = m_queriesConfiguration.value("ARP_MacIP",m_ip,m_os,m_conexionID,m_queryName);
 
     if ( m_vrfs.isEmpty() )
         m_vrfs.append(""); //para la global
@@ -33,9 +33,9 @@ void ArpInfoCisco::m_siguienteVRF()
         if ( m_os == "IOS XR" )
             termSendText("sh arp "+ ( !m_vrf.isEmpty() ? " vrf "+m_vrf+" " : "" ) +
                          ( !m_macip.isEmpty() ? m_macip : "" ) + " | exclude Incomplete" );
-        else
+        else if ( m_os == "IOS" )
             termSendText("sh ip arp "+ ( !m_vrf.isEmpty() ? " vrf "+m_vrf+" " : "" ) +
-                         ( !m_macip.isEmpty() ? m_macip : "" ) + " | exclude Incomplete" );        
+                         ( !m_macip.isEmpty() ? m_macip : "" ) + " | exclude Incomplete" );
     }
     else
         finished();

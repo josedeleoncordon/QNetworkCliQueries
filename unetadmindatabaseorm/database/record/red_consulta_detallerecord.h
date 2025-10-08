@@ -33,6 +33,9 @@ public:
 	void set_VCID_Respaldo(QString VCID_Respaldo);
 	void set_VCID_Respaldo_Estado(QString VCID_Respaldo_Estado);
 	void set_VRF(QString VRF);
+	void set_advertencia(QString advertencia);
+	void set_bgp_ok(bool bgp_ok);
+	void set_con_bgp(bool con_bgp);
 	void set_fecha(QDate fecha);
 	void set_id(long long id);
 	void set_red_sector_id(int red_sector_id);
@@ -52,6 +55,9 @@ public:
 	QString VCID_Respaldo();
 	QString VCID_Respaldo_Estado();
 	QString VRF();
+	QString advertencia();
+	bool bgp_ok();
+	bool con_bgp();
 	QDate fecha();
 	long long id();
 	int red_sector_id();

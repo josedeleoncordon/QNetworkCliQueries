@@ -55,6 +55,7 @@ enum QueryOpcion {
     VRFs,
     Arp,
     BGPNeig,
+    BGPNeigDetail,
     IpRoutes,
     Configuration,
     Mplsl2Transport,
@@ -64,6 +65,7 @@ enum QueryOpcion {
     RplRoutes,
     RplPrefixes,
     RplCommunities,
+    RplASPath,
     Exit
 };
 
@@ -77,6 +79,7 @@ public:
     QString _IP;
     QString _Platform;
     QString _IDConexion;
+    QString _queryName;
     bool _appendValue;
 
     QueriesConfigurationValue(QString key,
@@ -84,6 +87,7 @@ public:
                               QString IP,
                               QString plataforma,
                               QString IDConexion,
+                              QString queryName,  //Nombre de la consulta. Para diferenciar por nombre si se desea agrupar
                               bool appendValue=true);
     QueriesConfigurationValue(const QueriesConfigurationValue &other);
     QueriesConfigurationValue() {}
@@ -97,20 +101,25 @@ public:
 
 class QNETWORKCLIQUERIES_EXPORT QueriesConfiguration
 {
+    friend class Queries;
 private:
     QList<QueriesConfigurationValue> m_lstQueryParameters;
     QList<QueriesConfigurationValue> m_lstConfiguration;
 
-    QVariant m_find(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains);
+    QVariant m_find(QString parameter, QString IP, QString platform,
+                    QString IDconexion, QString queryName, bool platformContains);
 
 public:
     QueriesConfiguration();
 
     void addQueryParameter(const QList<QueriesConfigurationValue>&);    
 
-    bool state(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains=false);
-    QString value(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains=false);
-    QStringList values(QString parameter, QString IP, QString platform, QString IDconexion,bool platformContains=false);
+    bool state(QString parameter, QString IP, QString platform,
+               QString IDconexion, QString queryName, bool platformContains=false);
+    QString value(QString parameter, QString IP, QString platform,
+                  QString IDconexion, QString queryName,bool platformContains=false);
+    QStringList values(QString parameter, QString IP, QString platform,
+                       QString IDconexion, QString queryName, bool platformContains=false);
 
     QList<QueriesConfigurationValue> lstQueryParameters() { return m_lstQueryParameters; }
 
@@ -142,6 +151,7 @@ protected:
     int m_queryoption;
     QueriesConfiguration m_queriesConfiguration;
     QString m_conexionID;
+    QString m_queryName;
 
     QString m_lastCommand;
 
@@ -157,6 +167,7 @@ public:
     ~FuncionBase();
 
     int queryOption() { return m_queryoption; }
+    QString queryName() { return m_queryName; }
 
     void setBrand(QString brand) { m_brand = brand; }
     void setPlatform(QString platform);
@@ -167,6 +178,7 @@ public:
     void setIp(QString ip) { m_ip = ip; }
     void setParentQuery(Queries *qry);
     void setQueryOption(int option) { m_queryoption=option; }
+    void setQueryName(QString name) { m_queryName=name; }
 
 private slots:
     void m_on_term_receiveText();

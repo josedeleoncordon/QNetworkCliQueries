@@ -14,13 +14,13 @@ Config::~Config() {}
 
 void Config::configApply()
 {
-    QString platformcontains = m_queriesConfiguration.value("ConfigPlatformType","","","");
+    QString platformcontains = m_queriesConfiguration.value("ConfigPlatformType","","","",m_queryName);
     qDebug() << "Config::configApply() platformcontains" << platformcontains;
     if ( platformcontains == "Contains" )
         m_lstComandos =
-                m_queriesConfiguration.value("ConfigTemplate",m_ip,m_platform,m_conexionID,true).split("\n",Qt::SkipEmptyParts);
+                m_queriesConfiguration.value("ConfigTemplate",m_ip,m_platform,m_conexionID,m_queryName,true).split("\n");
     else
-        m_lstComandos = m_queriesConfiguration.value("ConfigTemplate",m_ip,m_os,m_conexionID).split("\n",Qt::SkipEmptyParts);
+        m_lstComandos = m_queriesConfiguration.value("ConfigTemplate",m_ip,m_os,m_conexionID,m_queryName).split("\n");
 
     qDebug() << "Config::configApply() lstComandos" << m_lstComandos;
 
@@ -130,19 +130,49 @@ void Config::on_term_receiveText_finished()
     exp2.setPattern("^\\[.+\\]");
     exp3.setPattern("^\\S+#\\s*$");
 
-    if ( line.contains(exp,&match) || line.contains(exp2) || line.contains(exp3) )
+    if (line.contains(exp,&match) ||
+        line.contains(exp2) ||
+        line.contains(exp3) ||
+        line.contains("Uncommitted changes found, commit them before exiting") ||
+        line.contains("Uncommitted configurations found, commit them before exiting")
+        )
     {
-        //si verifica si se salio error al ejecutar el comando
-        if ( txt.contains("Unrecognized command") ||
-             txt.contains("Invalid input detected") ||
-             txt.contains("Error input in the position market by") )
+        if (m_error)
         {
-            m_error=true;            
-            m_lstComandosConErrores.append( m_lastCommand );
-             qDebug() << Q_FUNC_INFO << "m_lstComandosConErrores.size" << m_lstComandosConErrores.size() << m_lastCommand;
+            term->disconnectReceiveTextSignalConnections();
+            finished();
+            return;
         }
 
-        siguienteComando();
+        //si verifica si se salio error al ejecutar el comando
+        if (txt.contains("Unrecognized command") ||
+            txt.contains("Invalid input detected") ||
+            txt.contains("Error input in the position market by") ||
+            txt.contains("Error: ")
+            )
+        {
+            m_error=true;
+            m_lstComandosConErrores.append( m_lastCommand );
+            term->disconnectReceiveTextSignalConnections();
+            qDebug() << Q_FUNC_INFO << "m_lstComandosConErrores.size" << m_lstComandosConErrores.size() << m_lastCommand;
+            finished();
+        }
+        else if (txt.contains("Failed to commit one or more configuration items during a pseudo-atomic operation"))
+        {
+            m_error=true;
+            m_lstComandosConErrores.append( m_lastCommand );
+            qDebug() << Q_FUNC_INFO << "m_lstComandosConErrores.size" << m_lstComandosConErrores.size() << m_lastCommand;
+            termSendText( "sh configuration failed" );
+        }
+        else if (txt.contains("you may try the 'commit' command again"))
+            termSendText( "commit" );
+        else
+            siguienteComando();
+    }
+    else if (line.contains("Do you wish to proceed with this commit anyw"))
+    {
+        termSendText("yes");
+        m_guardado=true;
     }
 }
 
@@ -179,6 +209,11 @@ void Config::on_term_receiveText_exited()
     {
         //se esta grabando en un equipo Cisco
         termSendText("\n");
+        m_guardado=true;
+    }
+    else if ( line.contains("Do you wish to proceed with this commit anyw") )
+    {
+        termSendText("yes");
         m_guardado=true;
     }
     else if ( allTextReceived() )

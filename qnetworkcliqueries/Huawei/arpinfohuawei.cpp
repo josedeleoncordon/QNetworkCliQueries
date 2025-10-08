@@ -13,8 +13,8 @@ ArpInfoHuawei::~ArpInfoHuawei()
 
 void ArpInfoHuawei::getArpInfo()
 {
-    m_vrfs = m_queriesConfiguration.values("Arp_VRFs",m_ip,m_os,m_conexionID);
-    m_macip = m_queriesConfiguration.value("ARP_MacIP",m_ip,m_os,m_conexionID);
+    m_vrfs = m_queriesConfiguration.values("Arp_VRFs",m_ip,m_os,m_conexionID,m_queryName);
+    m_macip = m_queriesConfiguration.value("ARP_MacIP",m_ip,m_os,m_conexionID,m_queryName);
 
     qDebug() << "ArpInfoHuawei::getArpInfo()" << m_vrfs  << m_macip;
 
@@ -40,12 +40,9 @@ void ArpInfoHuawei::m_siguienteVRF()
     if ( m_vrfsPos < m_vrfs.size()-1 )
     {
         m_vrfsPos++;
-        m_vrf = m_vrfs.at( m_vrfsPos );        
+        m_vrf = m_vrfs.at( m_vrfsPos );
 
-        if ( m_macip.isEmpty() )
-            termSendText("display arp vpn-instance "+m_vrf+" slot 0 dynamic" );
-        else
-            termSendText("display arp network "+m_macip+" dynamic | i "+m_vrf );
+        termSendText("display arp all | include "+m_vrf+" | exclude Incomplete" );
     }
     else
         finished();
@@ -63,7 +60,8 @@ void ArpInfoHuawei::on_term_receiveText()
         line = line.simplified();
 
         //10.31.15.104    0020-d237-ac51  5         D-0         Vlanif115        ADMIN_RAD_ISLAS_METRO
-        exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}.+\\w{4}\\-\\w{4}\\-\\w{4} +\\d+ +D");
+        //10.35.188.46    -          802d.bf17.f729  Interface  ARPA  BVI600
+        exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}.+\\w{4}\\-\\w{4}\\-\\w{4} (\\d+)* *(D|I)");
         if ( !line.contains(exp,&match) )
             continue;
 
@@ -73,12 +71,17 @@ void ArpInfoHuawei::on_term_receiveText()
         QString _vlan;
         QString _age;
         QString _interfaz;
+        QRegularExpression expNum("^\\d+$");
 
         if ( m_os == "VRP" )
         {
             _ip = data.at(0).simplified();
             _mac = data.at(1).simplified().replace("-",".");
-            _age = data.at(2).simplified();
+            QString col3 = data.at(2);
+            if (col3.contains("I") || col3.contains("D") )
+                _age = "-";
+            else if (col3.contains(expNum))
+                _age = col3;
             _interfaz = estandarizarInterfaz( data.at(4).simplified() );
 
             QString vlan = _interfaz;
@@ -86,6 +89,8 @@ void ArpInfoHuawei::on_term_receiveText()
                 vlan.replace("Vlan","");
             else if ( vlan.contains(".") )
                 vlan = vlan.right( vlan.size() - vlan.indexOf(".") -1 );
+            else
+                vlan.clear();
 
             _vlan = vlan;
         }        

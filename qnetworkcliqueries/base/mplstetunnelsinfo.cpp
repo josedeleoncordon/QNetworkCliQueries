@@ -56,6 +56,7 @@ MplsTEtunnelsInfo::MplsTEtunnelsInfo(const MplsTEtunnelsInfo &other):
     m_name = other.m_name;
     m_ip = other.m_ip;
     m_lstMplsTEtunnels = other.m_lstMplsTEtunnels;
+    m_queryName = other.m_queryName;
 }
 
 MplsTEtunnelsInfo::~MplsTEtunnelsInfo()
@@ -63,15 +64,22 @@ MplsTEtunnelsInfo::~MplsTEtunnelsInfo()
 
 void MplsTEtunnelsInfo::getMplsTETunnels()
 {
-    if ( m_brand != "Cisco" )
+    if ( m_brand == "Cisco" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_MplsTETunnels()));
+        termSendText("sh mpls traffic-eng tunnels detail");
+    }
+    else if ( m_brand == "Huawei" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_MplsTETunnels()));
+        termSendText("display mpls te tunnel verbose");
+    }
+    else
     {
         qDebug() << "MplsTEtunnelsInfo::getMplsTETunnels()" << m_brand << "no soportado";
         finished();
         return;
     }
-
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_MplsTETunnels()));
-    termSendText("sh mpls traffic-eng tunnels detail");
 }
 
 void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
@@ -89,243 +97,313 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
         line = line.simplified();
         qCDebug(mplstetunnels) << "line" << line;
 
-        if ( m_os == "IOS XR" )
+        if ( m_brand == "Cisco" )
         {
-            //Name: tunnel-te50502  Destination: 172.16.30.235  Ifhandle:0x8000560
-            exp.setPattern("Name: (.+) Destination: (.+) ");
-            if ( line.contains(exp,&match) )
+            if ( m_os == "IOS XR" )
             {
-                //head
-                SMplsTETunnelInfo i;
-                i.datetime = QDateTime::currentDateTime();
-                i.operativo = true;
-                i.role = "Head";
-                i.TuID = match.captured(1).simplified();
-                i.destino = match.captured(2).simplified();
-                m_lstMplsTEtunnels.append( i );
-                tunel = &m_lstMplsTEtunnels.last();
-                continue;
-            }
-            //LSP Tunnel 172.16.30.2 1 [7603] is signalled, Signaling State: up
-            exp.setPattern("LSP Tunnel .+ signalled.+State: (.+)$");
-            if ( line.contains(exp,&match) )
-            {
-                //mid tail
-                SMplsTETunnelInfo i;
-                i.datetime = QDateTime::currentDateTime();
-                i.operativo = true;
-                i.status = match.captured(1).simplified();
-                m_lstMplsTEtunnels.append( i );
-                tunel = &m_lstMplsTEtunnels.last();
-                continue;
-            }
-
-            if ( !tunel )
-                continue;
-
-            if ( route )
-            {
-                if ( line.contains("Record Route") )
-                    route = false;
-                else
+                //Name: tunnel-te50502  Destination: 172.16.30.235  Ifhandle:0x8000560
+                exp.setPattern("Name: (.+) Destination: (.+) ");
+                if ( line.contains(exp,&match) )
                 {
-                    exp.setPattern(".+ (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})$");
-                    if ( line.contains(exp,&match) )
-                        tunel->route.append(" "+match.captured(1).replace("*",""));
+                    //head
+                    SMplsTETunnelInfo i;
+                    i.datetime = QDateTime::currentDateTime();
+                    i.operativo = true;
+                    i.role = "Head";
+                    i.TuID = match.captured(1).simplified();
+                    i.destino = match.captured(2).simplified();
+                    m_lstMplsTEtunnels.append( i );
+                    tunel = &m_lstMplsTEtunnels.last();
+                    continue;
                 }
-                continue;
+                //LSP Tunnel 172.16.30.2 1 [7603] is signalled, Signaling State: up
+                exp.setPattern("LSP Tunnel .+ signalled.+State: (.+)$");
+                if ( line.contains(exp,&match) )
+                {
+                    //mid tail
+                    SMplsTETunnelInfo i;
+                    i.datetime = QDateTime::currentDateTime();
+                    i.operativo = true;
+                    i.status = match.captured(1).simplified();
+                    m_lstMplsTEtunnels.append( i );
+                    tunel = &m_lstMplsTEtunnels.last();
+                    continue;
+                }
+
+                if ( !tunel )
+                    continue;
+
+                if ( route )
+                {
+                    if ( line.contains("Record Route") )
+                        route = false;
+                    else
+                    {
+                        exp.setPattern(".+ (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})$");
+                        if ( line.contains(exp,&match) )
+                            tunel->route.append(" "+match.captured(1).replace("*",""));
+                    }
+                    continue;
+                }
+
+                //Admin:    up Oper:   up   Path:  valid   Signalling: connected
+                exp.setPattern("Admin: (.+) Oper: (.+) Path:");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->status = match.captured(2).simplified();
+                    continue;
+                }
+
+                //Autoroute Destinations
+                exp.setPattern("Autoroute Destinations: (\\d+)$");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->autoRouteDestinationsCount = match.captured(1).toShort();
+                    continue;
+                }
+
+                //Signalled-Name: RO-NAP-COR9K-2_t50502
+                exp.setPattern("Signalled-Name: (.+)$");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->name = match.captured(1).simplified();
+                    continue;
+                }
+
+                //Router-IDs: local      172.16.30.254
+                exp.setPattern("Router-IDs: local (.+)$");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->origen = match.captured(1).simplified();
+                    continue;
+                }
+
+                //Outgoing Interface: TenGigE0/1/0
+                exp.setPattern("Outgoing Interface: (.+)( |,|$)");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->InterfaceOut = estandarizarInterfaz( match.captured(1).simplified() );
+                    continue;
+                }
+
+                //Hop0: 172.16.20.150
+                exp.setPattern("Hop\\d+: (.+)$");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->route.append(" "+match.captured(1).replace("*","").simplified());
+                    continue;
+                }
+
+
+                //LSPs:
+
+                //Tunnel Name: ASR_920_A.DATA_REDUNDANCIA_t5 Tunnel Role: Mid
+                exp.setPattern("Tunnel Name: (.+) Tunnel Role: (.+)$");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->name = match.captured(1).simplified();
+                    tunel->role = match.captured(2).simplified();
+                    continue;
+                }
+
+                //InLabel: TenGigE0/1/1/1, 514006
+                //OutLabel: TenGigE0/0/1/3, 760
+                exp.setPattern("InLabel: (.+), ");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->InterfaceIn = estandarizarInterfaz(match.captured(1).simplified());
+                    continue;
+                }
+                exp.setPattern("OutLabel: (.+), ");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->InterfaceOut = estandarizarInterfaz(match.captured(1).simplified());
+                    continue;
+                }
+
+                //Src 172.16.30.13 Dst 172.16.30.5, Tun_Id 57001, Tun_Instance 3205
+                exp.setPattern("Src (.+) Dst (.+), Tun ID (.+), Tun");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->origen = match.captured(1).simplified();
+                    tunel->destino = match.captured(2).simplified();
+                    tunel->TuID = match.captured(3).simplified();
+                    continue;
+                }
+
+                //Outgoing:
+                if ( line == "Outgoing:" )
+                {
+                    route = true;
+                    continue;
+                }
             }
-
-            //Admin:    up Oper:   up   Path:  valid   Signalling: connected
-            exp.setPattern("Admin: (.+) Oper: (.+) Path:");
-            if ( line.contains(exp,&match) )
+            else
             {
-                tunel->status = match.captured(2).simplified();
-                continue;
-            }
+                //Name: SITEL-COPA                          (Tunnel50757) Destination: 172.19.28.21
+                exp.setPattern("Name: (.+)\\(Tunnel\\d+\\) Des");
+                if ( line.contains(exp,&match) )
+                {
+                    SMplsTETunnelInfo i;
+                    i.datetime = QDateTime::currentDateTime();
+                    i.operativo = true;
+                    i.name = match.captured(1).simplified();
+                    i.role = "Head";
+                    m_lstMplsTEtunnels.append( i );
+                    tunel = &m_lstMplsTEtunnels.last();
+                    qCDebug(mplstetunnels) << "Nuevo tunnel" << i.name << i.role;
+                    continue;
+                }
+                //LSP Tunnel FROM-CMY3-TO-WBP is signalled, connection is up
+                exp2.setPattern("LSP Tunnel (.+) is .+ connection is (.+)$");
+                if ( line.contains(exp2,&match) )
+                {
+                    SMplsTETunnelInfo i;
+                    i.datetime = QDateTime::currentDateTime();
+                    i.operativo = true;
+                    i.name = match.captured(1).simplified();
+                    i.status = match.captured(2).simplified();
+                    m_lstMplsTEtunnels.append( i );
+                    tunel = &m_lstMplsTEtunnels.last();
+                    qCDebug(mplstetunnels) << "Nuevo tunnel" << i.name << i.role;
+                    continue;
+                }
 
-            //Autoroute Destinations
-            exp.setPattern("Autoroute Destinations: (\\d+)$");
-            if ( line.contains(exp,&match) )
-            {
-                tunel->autoRouteDestinationsCount = match.captured(1).toShort();
-                continue;
-            }
+                if ( !tunel )
+                    continue;
 
-            //Signalled-Name: RO-NAP-COR9K-2_t50502
-            exp.setPattern("Signalled-Name: (.+)$");
-            if ( line.contains(exp,&match) )
-            {
-                tunel->name = match.captured(1).simplified();
-                continue;
-            }
+                //Explicit Route: 172.16.20.81 172.16.20.90 172.16.20.106 172.16.20.157
+                //Record   Route:    <--- simplified() lo deja solo con un espacio
+                if ( route )
+                {
+                    if ( line.contains("Record Route") )
+                        route = false;
+                    else
+                        tunel->route.append( " "+line.replace("*","").simplified() );
+                    continue;
+                }
 
-            //Router-IDs: local      172.16.30.254
-            exp.setPattern("Router-IDs: local (.+)$");
-            if ( line.contains(exp,&match) )
-            {
-                tunel->origen = match.captured(1).simplified();
-                continue;
-            }
+                //Admin: up         Oper: up     Path: valid       Signalling: connected
+                exp.setPattern("Admin: (.+) Oper: (.+) Path: ");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->status = match.captured(2).simplified();
+                    continue;
+                }
 
-            //Outgoing Interface: TenGigE0/1/0
-            exp.setPattern("Outgoing Interface: (.+)( |,|$)");
-            if ( line.contains(exp,&match) )
-            {
-                tunel->InterfaceOut = estandarizarInterfaz( match.captured(1).simplified() );
-                continue;
-            }
+                //Src 172.16.30.13, Dst 172.16.30.5, Tun_Id 57001, Tun_Instance 3205
+                exp.setPattern("Src (.+), Dst (.+), Tun_Id (.+), Tun_Instance");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->origen = match.captured(1).simplified();
+                    tunel->destino = match.captured(2).simplified();
+                    tunel->TuID = (tunel->role=="Head"?"Tunnel":"")+match.captured(3).simplified();
+                    qCDebug(mplstetunnels) << "origen destino" << tunel->origen << tunel->destino;
+                    continue;
+                }
 
-            //Hop0: 172.16.20.150
-            exp.setPattern("Hop\\d+: (.+)$");
-            if ( line.contains(exp,&match) )
-            {
-                tunel->route.append(" "+match.captured(1).replace("*","").simplified());
-                continue;
-            }
+                //            Explicit Route: 172.16.20.81 172.16.20.90 172.16.20.106 172.16.20.157
+                //                                  172.16.30.5
+                exp.setPattern("Explicit Route: (.+)$");
+                if ( line.contains(exp,&match) )
+                {
+                    QString ro = match.captured(1);
 
+                    if ( !ro.contains("NONE") )
+                    {
+                        tunel->route.append(match.captured(1).replace("*",""));
+                        if ( tunel->role.isEmpty() ) tunel->role = "Mid";
+                        route=true;
+                    }
+                    else
+                        tunel->role = "Tail";
 
-            //LSPs:
+                    continue;
+                }
 
-            //Tunnel Name: ASR_920_A.DATA_REDUNDANCIA_t5 Tunnel Role: Mid
-            exp.setPattern("Tunnel Name: (.+) Tunnel Role: (.+)$");
-            if ( line.contains(exp,&match) )
-            {
-                tunel->name = match.captured(1).simplified();
-                tunel->role = match.captured(2).simplified();
-                continue;
-            }
+                //InLabel  : TenGigabitEthernet0/0/4, implicit-null
+                exp.setPattern("^InLabel : (.+), .+");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->InterfaceIn=estandarizarInterfaz(match.captured(1).simplified());
+                    qCDebug(mplstetunnels) << "interfaz in" << tunel->InterfaceIn;
+                    continue;
+                }
 
-            //InLabel: TenGigE0/1/1/1, 514006
-            //OutLabel: TenGigE0/0/1/3, 760
-            exp.setPattern("InLabel: (.+), ");
-            if ( line.contains(exp,&match) )
-            {
-                tunel->InterfaceIn = estandarizarInterfaz(match.captured(1).simplified());
-                continue;
-            }
-            exp.setPattern("OutLabel: (.+), ");
-            if ( line.contains(exp,&match) )
-            {
-                tunel->InterfaceOut = estandarizarInterfaz(match.captured(1).simplified());
-                continue;
-            }
-
-            //Src 172.16.30.13 Dst 172.16.30.5, Tun_Id 57001, Tun_Instance 3205
-            exp.setPattern("Src (.+) Dst (.+), Tun ID (.+), Tun");
-            if ( line.contains(exp,&match) )
-            {
-                tunel->origen = match.captured(1).simplified();
-                tunel->destino = match.captured(2).simplified();
-                tunel->TuID = match.captured(3).simplified();
-                continue;
-            }
-
-            //Outgoing:
-            if ( line == "Outgoing:" )
-            {
-                route = true;
-                continue;
+                //OutLabel : TenGigabitEthernet0/0/4, 1211
+                exp.setPattern("^OutLabel : (.+), .+");
+                if ( line.contains(exp,&match) )
+                {
+                    tunel->InterfaceOut=estandarizarInterfaz(match.captured(1).simplified());
+                    qCDebug(mplstetunnels) << "interfaz out" << tunel->InterfaceOut;
+                    continue;
+                }
             }
         }
-        else
+        else if ( m_brand == "Huawei" )
         {
-            //Name: SITEL-COPA                          (Tunnel50757) Destination: 172.19.28.21
-            exp.setPattern("Name: (.+)\\(Tunnel\\d+\\) Des");
+            //Tunnel-Name             :  COMGSMADIARPEDIA_SMA01_t115
+            exp.setPattern("Tunnel-Name : (.+)");
             if ( line.contains(exp,&match) )
             {
                 SMplsTETunnelInfo i;
                 i.datetime = QDateTime::currentDateTime();
                 i.operativo = true;
-                i.name = match.captured(1).simplified();
-                i.role = "Head";
+                i.name = match.captured(1);
                 m_lstMplsTEtunnels.append( i );
                 tunel = &m_lstMplsTEtunnels.last();
-                qCDebug(mplstetunnels) << "Nuevo tunnel" << i.name << i.role;
-                continue;
-            }
-            //LSP Tunnel FROM-CMY3-TO-WBP is signalled, connection is up
-            exp2.setPattern("LSP Tunnel (.+) is .+ connection is (.+)$");
-            if ( line.contains(exp2,&match) )
-            {
-                SMplsTETunnelInfo i;
-                i.datetime = QDateTime::currentDateTime();
-                i.operativo = true;
-                i.name = match.captured(1).simplified();
-                i.status = match.captured(2).simplified();
-                m_lstMplsTEtunnels.append( i );
-                tunel = &m_lstMplsTEtunnels.last();
-                qCDebug(mplstetunnels) << "Nuevo tunnel" << i.name << i.role;
                 continue;
             }
 
-            if ( !tunel )
-                continue;
-
-            //Explicit Route: 172.16.20.81 172.16.20.90 172.16.20.106 172.16.20.157
-            //Record   Route:    <--- simplified() lo deja solo con un espacio
-            if ( route )
-            {
-                if ( line.contains("Record Route") )
-                    route = false;
-                else
-                    tunel->route.append( " "+line.replace("*","").simplified() );
-                continue;
-            }
-
-            //Admin: up         Oper: up     Path: valid       Signalling: connected
-            exp.setPattern("Admin: (.+) Oper: (.+) Path: ");
+            //Tunnel Interface Name   :  Tunnel0/0/1481
+            exp.setPattern("Tunnel Interface Name : (\\S+)");
             if ( line.contains(exp,&match) )
             {
-                tunel->status = match.captured(2).simplified();
+                tunel->id = match.captured(1);
                 continue;
             }
 
-            //Src 172.16.30.13, Dst 172.16.30.5, Tun_Id 57001, Tun_Instance 3205
-            exp.setPattern("Src (.+), Dst (.+), Tun_Id (.+), Tun_Instance");
+            //LSR Role                :  Transit
+            exp.setPattern("LSR Role : (\\S+)");
             if ( line.contains(exp,&match) )
             {
-                tunel->origen = match.captured(1).simplified();
-                tunel->destino = match.captured(2).simplified();
-                tunel->TuID = (tunel->role=="Head"?"Tunnel":"")+match.captured(3).simplified();
-                qCDebug(mplstetunnels) << "origen destino" << tunel->origen << tunel->destino;
+                QString role = match.captured(1);
+                if (role == "Transit" ) role="Mid";
+                else if (role == "Egress") role="Tail";
+                else if (role == "Ingress") role="Head";
+                tunel->id = role;
                 continue;
             }
 
-//            Explicit Route: 172.16.20.81 172.16.20.90 172.16.20.106 172.16.20.157
-//                                  172.16.30.5
-            exp.setPattern("Explicit Route: (.+)$");
+            //Ingress LSR ID          :  172.17.28.233
+            exp.setPattern("Ingress LSR ID : (\\S+)");
             if ( line.contains(exp,&match) )
             {
-                QString ro = match.captured(1);
-
-                if ( !ro.contains("NONE") )
-                {
-                    tunel->route.append(match.captured(1).replace("*",""));
-                    if ( tunel->role.isEmpty() ) tunel->role = "Mid";
-                    route=true;
-                }
-                else
-                    tunel->role = "Tail";
-
+                tunel->origen=match.captured(1);
                 continue;
             }
 
-            //InLabel  : TenGigabitEthernet0/0/4, implicit-null
-            exp.setPattern("^InLabel : (.+), .+");
+            //Egress LSR ID           :  172.17.49.89
+            exp.setPattern("Egress LSR ID : (\\S+)");
+            if ( line.contains(exp,&match) )
+            {
+                tunel->destino=match.captured(1);
+                continue;
+            }
+
+            //In-Interface            :  GE2/0/13
+            exp.setPattern("In-Interface : (\\S+)");
             if ( line.contains(exp,&match) )
             {
                 tunel->InterfaceIn=estandarizarInterfaz(match.captured(1).simplified());
-                qCDebug(mplstetunnels) << "interfaz in" << tunel->InterfaceIn;
                 continue;
             }
 
-            //OutLabel : TenGigabitEthernet0/0/4, 1211
-            exp.setPattern("^OutLabel : (.+), .+");
+            //Out-Interface           :  100GE1/0/3
+            exp.setPattern("Out-Interface : (\\S+)");
             if ( line.contains(exp,&match) )
             {
                 tunel->InterfaceOut=estandarizarInterfaz(match.captured(1).simplified());
-                qCDebug(mplstetunnels) << "interfaz out" << tunel->InterfaceOut;
                 continue;
             }
         }
@@ -347,6 +425,7 @@ QDataStream& operator<<(QDataStream& out, const MplsTEtunnelsInfo& info)
 {
     out << info.m_lstMplsTEtunnels;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -354,6 +433,7 @@ QDataStream& operator>>(QDataStream& in, MplsTEtunnelsInfo& info)
 {
     in >> info.m_lstMplsTEtunnels;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 

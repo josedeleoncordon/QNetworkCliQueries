@@ -13,6 +13,16 @@ struct SBGPNeighbor : InfoBase
     QString vrf;
     QString addressfamily;
     QString prefixFilterIN; //por si el equipo junto a la informacion de BGP manda el filtro. MickoTik
+    QString prefixFilterOUT;
+    QString state;
+};
+
+struct SBGPNeighborDetail : SBGPNeighbor
+{
+    QString rplIN;
+    QString rplOUT;
+    bool additionalPathsEnabled;
+    SBGPNeighborDetail() { additionalPathsEnabled=false; }
 };
 
 struct SBGPNetwork : InfoBase
@@ -57,6 +67,7 @@ protected:
     QString m_community;
     bool m_BGPNetworkAttAddOnlyBest;
     QList<SBGPNeighbor> m_lstNeigbors;
+    QList<SBGPNeighborDetail> m_lstNeigborsDetail;
     QString m_vrf;
     QStringList m_vrfs;
     QList<SBGPNetwork> m_lstNetworks;        
@@ -80,11 +91,13 @@ public:
     virtual void getBGPNeighbors(); //listado summary de los vecinos de BGP
     virtual void getNetworks();  //consulta las redes que se reciben o envian a un vecino de BGP
     virtual void getNetworksBGPAttr(); //consulta los atributos de BGP de una red
+    virtual void getBGPNeighborsDetail();
 
     //
     QList<SBGPNeighbor>& bgpNeighborInfo() { return m_lstNeigbors; }
+    QList<SBGPNeighborDetail>& bgpNeighborDetailInfo() { return m_lstNeigborsDetail; }
     QList<SBGPNetwork>& bgpNetworksInfo() { return m_lstNetworks; }
-    QMap<QString,QList<SBGPNetwork>>& bgpMapNetworksInfo() { return m_mapNeighborLstNetworks; }
+    QMap<QString,QList<SBGPNetwork>>& bgpMapNetworksInfo() { return m_mapNeighborLstNetworks; }    
 
     //
 
@@ -101,6 +114,7 @@ private slots:
     void on_term_receiveText_networksv6();
     void on_term_receiveText_networksAttr();
     void on_term_receiveText_networksAttrVRPCommunityList();
+    void on_term_receiveText_BGPNeighborsDetail();
 
 private:
     void getBGPNeighbors_VRF_nextVRF();

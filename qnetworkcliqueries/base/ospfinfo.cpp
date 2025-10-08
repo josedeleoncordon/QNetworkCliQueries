@@ -97,6 +97,7 @@ OSPFInfo::OSPFInfo(const OSPFInfo &other):
     m_abr = other.m_abr;
     m_asbr = other.m_asbr;
     m_lstOSPFInfo = other.m_lstOSPFInfo;
+    m_lstRouterIDs = other.m_lstRouterIDs;
 }
 
 OSPFInfo::~OSPFInfo()
@@ -135,18 +136,22 @@ void OSPFInfo::addInterfaceOSPFInfo(SOSPFInfo s)
 QDataStream& operator<<(QDataStream& out, const OSPFInfo& info)
 {
     out << info.m_lstOSPFInfo;
+    out << info.m_lstRouterIDs;
     out << info.m_abr;
     out << info.m_asbr;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
 QDataStream& operator>>(QDataStream& in, OSPFInfo& info)
 {
     in >> info.m_lstOSPFInfo;
+    in >> info.m_lstRouterIDs;
     in >> info.m_abr;
     in >> info.m_asbr;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 
@@ -165,7 +170,7 @@ QDataStream& operator>>(QDataStream& in, OSPFInfo*& info)
 
 QDebug operator<<(QDebug dbg, const OSPFInfo &info)
 {
-    dbg.space() << "OSPFInfo" << "ABR:" << info.m_abr << "ASBR:" << info.m_asbr << ":\n";
+    dbg.space() << "OSPFInfo" << info.m_lstRouterIDs << "ABR:" << info.m_abr << "ASBR:" << info.m_asbr << ":\n";
     for (SOSPFInfo i : info.m_lstOSPFInfo)
         dbg.space() << "Id:" << i.id << i.interfaz << i.process << i.area << i.state << "Ad:" << i.address
                     << i.cost << i.operativo << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";

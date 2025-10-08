@@ -20,18 +20,20 @@ FuncionInfo::~FuncionInfo()
 
 void FuncionInfo::getTXT()
 {
-    qDebug() << "FuncionInfo::getTXT()" << m_ip << m_os << m_conexionID;
+    qDebug() << m_ip << "FuncionInfo::getTXT()" << m_os << m_conexionID;
+    qDebug() << "FuncionInfo::getTXT()" << m_ip << m_os << m_conexionID;    
 
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
 
     if ( m_os == "IOS XR" && m_xr64 )
         //si es XR de 64 bits vemos si hay configuraciones especificas para este. Si no abajo buscara configuraciones para XR general
-        _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,"IOS XR64",m_conexionID );
+        _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,"IOS XR64",m_conexionID,m_queryName );
 
     if ( _lstFunciones.isEmpty() )
-        _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,m_os,m_conexionID );
+        _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,m_os,m_conexionID,m_queryName );
 
     qDebug() << m_ip << "FuncionInfo::getTXT()" << _lstFunciones;
+    qDebug() << "FuncionInfo::getTXT()" << m_ip << _lstFunciones;
 
     _siguienteFuncion();
 }
@@ -58,6 +60,7 @@ QDataStream& operator<<(QDataStream& out, const FuncionInfo& info)
 {
     out << info._lstTxt;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -65,6 +68,7 @@ QDataStream& operator>>(QDataStream& in, FuncionInfo& info)
 {
     in >> info._lstTxt;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 

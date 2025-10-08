@@ -18,6 +18,7 @@ public:
 	a9k_energiaRecord(const a9k_energiaRecord &other);
 	~a9k_energiaRecord();
 
+	void set_a9k_energiacol(QString a9k_energiacol);
 	void set_a9k_equipo_id(int a9k_equipo_id);
 	void set_bandeja0fuentes(int bandeja0fuentes);
 	void set_bandeja1fuentes(int bandeja1fuentes);
@@ -26,12 +27,16 @@ public:
 	void set_cisco_caida_mitad_potencia_no_soportado(int cisco_caida_mitad_potencia_no_soportado);
 	void set_cisco_capacidad_no_cableada(int cisco_capacidad_no_cableada);
 	void set_date(QDate date);
+	void set_device_ip(QString device_ip);
+	void set_device_name(QString device_name);
 	void set_disponible(int disponible);
 	void set_id(int id);
 	void set_nmas1(int nmas1);
 	void set_no_soporta_caida_de_mas_de_una_fuente(int no_soporta_caida_de_mas_de_una_fuente);
+	void set_pais(QString pais);
 	void set_total_requerido(int total_requerido);
 
+	QString a9k_energiacol();
 	int a9k_equipo_id();
 	int bandeja0fuentes();
 	int bandeja1fuentes();
@@ -40,10 +45,13 @@ public:
 	int cisco_caida_mitad_potencia_no_soportado();
 	int cisco_capacidad_no_cableada();
 	QDate date();
+	QString device_ip();
+	QString device_name();
 	int disponible();
 	int id();
 	int nmas1();
 	int no_soporta_caida_de_mas_de_una_fuente();
+	QString pais();
 	int total_requerido();
 
 	a9k_equipoRecord *r_a9k_equipo_id();

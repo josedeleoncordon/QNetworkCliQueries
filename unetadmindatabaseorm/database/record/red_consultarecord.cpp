@@ -15,6 +15,21 @@ red_consultaRecord::red_consultaRecord(const red_consultaRecord &other):
 
 red_consultaRecord::~red_consultaRecord() {}
 
+void red_consultaRecord::set_advertencias(int advertencias)
+{
+	setProperty("advertencias",advertencias);
+}
+
+void red_consultaRecord::set_bgp_ok(int bgp_ok)
+{
+	setProperty("bgp_ok",bgp_ok);
+}
+
+void red_consultaRecord::set_bgp_total(int bgp_total)
+{
+	setProperty("bgp_total",bgp_total);
+}
+
 void red_consultaRecord::set_conexion_error(int conexion_error)
 {
 	setProperty("conexion_error",conexion_error);
@@ -68,6 +83,21 @@ void red_consultaRecord::set_red_sector_id(int red_sector_id)
 void red_consultaRecord::set_total(int total)
 {
 	setProperty("total",total);
+}
+
+int red_consultaRecord::advertencias()
+{
+	return property("advertencias").toInt();
+}
+
+int red_consultaRecord::bgp_ok()
+{
+	return property("bgp_ok").toInt();
+}
+
+int red_consultaRecord::bgp_total()
+{
+	return property("bgp_total").toInt();
 }
 
 int red_consultaRecord::conexion_error()

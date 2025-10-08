@@ -35,7 +35,7 @@ public:
     void setInterval(int interval) { m_interval = interval; }
     void setSimultaneos(int simultaneos) { m_simultaneos = simultaneos; }
     void setMaxParalelos(int max) { m_maxparalelos = max; }
-    void setOptions(QList<int> opciones);
+    void setOptions(QList<QueriesOpcion> opciones);
     void setEquipmentNeighborsConsultarVecinos(bool consultar) { m_equipmentNeighborsConsultarVecinos=consultar; }
     void setEquipmentNeighborsOSPFMismoDominio(bool consultar) { m_consultarVecinosOSPFMismoDominio=consultar; }
     void setEquipmentNeighborsOSPFEquipoRaizProceso(QString proceso) { m_consultarVecinosOSPFEquipoRaizProceso=proceso; }
@@ -43,6 +43,7 @@ public:
     void setNewThreadWorker(QueriesThreadWorker*(*ThreadWorker)(void));
     void setEliminarConsultasEquiposDuplicados(bool eliminar) { m_eliminarconsultasdeequiposduplicados=eliminar; }
     void setUUID(QString uuid) { m_uuid = uuid; }
+    void setAgregarVecinosHastaNivel(int nivel) { m_agregarVecinosHastaNivel=nivel; }
 
     void iniciar();
     void iniciarSync();
@@ -60,7 +61,9 @@ public:
     QList<Queries> lstQueries();
     QList<Queries*> lstQueriesPointers();
     Queries queriesFromIP(QString ip);
+    Queries* queriesFromIPPointer(QString ip);
     QMap<QString, QString> errorMap() { return m_errorMap; }
+    QString erroresCSV();
     QStringList lstIPsConectadosPorGW() { return m_lstIPsConectadosPorGW; }
 
 signals:
@@ -95,7 +98,7 @@ protected:
    QStringList lstIPsConsultaAnterior;
    QRemoteShell::ConnectionProtocol m_connectionprotocol;
    QStringList lstRemoteShellUsersPasswords;
-   QList<int> m_opciones;
+   QList<QueriesOpcion> m_opciones;
    int m_simultaneos; //cantidad de equipos se suman al mismo tiempo al grupo,
    QStringList m_equiposenconsulta;
    QStringList m_lstLinksEnSegmentos;
@@ -115,6 +118,9 @@ protected:
    bool m_equipmentNeighborsConsultarVecinos;
    bool m_eliminarconsultasdeequiposduplicados;
    QString m_uuid;
+
+   int m_agregarVecinosHastaNivel; //<=0 = sin limite
+   QMap<QString,int> m_mapAgregarVecinosHastaNiveles;
 
    //si el equipo por donde se empieza la consulta tiene mas de un proceso recorrera todos. ASBR UMPLS
    bool m_consultarVecinosOSPFMismoDominio;

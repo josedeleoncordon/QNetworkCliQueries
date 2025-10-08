@@ -75,6 +75,7 @@ MplsLdpInfo::MplsLdpInfo(const MplsLdpInfo &other):
     m_ip = other.m_ip;
     m_localID = other.m_localID;
     m_lstMplsLdpInfo = other.m_lstMplsLdpInfo;
+    m_queryName = other.m_queryName;
 }
 
 MplsLdpInfo::~MplsLdpInfo()
@@ -242,6 +243,7 @@ QDataStream& operator<<(QDataStream& out, const MplsLdpInfo& info)
     out << info.m_localID;
     out << info.m_lstMplsLdpInfo;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -250,6 +252,7 @@ QDataStream& operator>>(QDataStream& in, MplsLdpInfo& info)
     in >> info.m_localID;
     in >> info.m_lstMplsLdpInfo;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 

@@ -90,7 +90,8 @@ EquipmentNeighborsInfo::EquipmentNeighborsInfo(const EquipmentNeighborsInfo &oth
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_lstEquipos = other.m_lstEquipos;    
+    m_lstEquipos = other.m_lstEquipos;
+    m_queryName = other.m_queryName;
 }
 
 EquipmentNeighborsInfo::~EquipmentNeighborsInfo()
@@ -470,6 +471,7 @@ QDataStream& operator<<(QDataStream& out, const EquipmentNeighborsInfo& info)
 {
     out << info.m_lstEquipos;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -477,6 +479,7 @@ QDataStream& operator>>(QDataStream& in, EquipmentNeighborsInfo& info)
 {
     in >> info.m_lstEquipos;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 

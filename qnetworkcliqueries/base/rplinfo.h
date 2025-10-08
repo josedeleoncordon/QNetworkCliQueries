@@ -5,8 +5,18 @@
 
 struct SRplRouteInfo : InfoBase
 {
+    enum SRplRouteInfoType
+    {
+        None,
+        RouteMap,
+        Rpl
+    };
+
     QString nombre;
     QString txt;
+    SRplRouteInfoType type;
+
+    SRplRouteInfo() { type=None; }
 };
 struct SRplPrefixInfo : InfoBase
 {
@@ -23,15 +33,16 @@ struct SRplPrefixInfo : InfoBase
     QStringList lstPrefixes;
 
     SRplPrefixInfo() { type=None; ipversion=0; }
-    // SRplPrefixInfo(const SRplPrefixInfo &other);
 };
 struct SRplCommunityInfo : InfoBase
 {
     QString nombre;
     QStringList lstComunities;
-
-    // SRplCommunityInfo() {}
-    // SRplCommunityInfo(const SRplCommunityInfo &other);
+};
+struct SRplASPathInfo : InfoBase
+{
+    QString nombre;
+    QStringList lstASPath;
 };
 
 QDataStream& operator<<(QDataStream& out, const SRplRouteInfo &data);
@@ -43,17 +54,22 @@ QDataStream& operator>>(QDataStream& in, SRplPrefixInfo& data);
 QDataStream& operator<<(QDataStream& out, const SRplCommunityInfo &data);
 QDataStream& operator>>(QDataStream& in, SRplCommunityInfo& data);
 
-void updateInfoList(QList<SRplRouteInfo> &lstDest, QList<SRplRouteInfo> &lstOrigin );
-void updateInfoList(QList<SRplPrefixInfo> &lstDest, QList<SRplPrefixInfo> &lstOrigin );
-void updateInfoList(QList<SRplCommunityInfo> &lstDest, QList<SRplCommunityInfo> &lstOrigin );
+QDataStream& operator<<(QDataStream& out, const SRplASPathInfo &data);
+QDataStream& operator>>(QDataStream& in, SRplASPathInfo& data);
+
+// void updateInfoList(QList<SRplRouteInfo> &lstDest, QList<SRplRouteInfo> &lstOrigin );
+// void updateInfoList(QList<SRplPrefixInfo> &lstDest, QList<SRplPrefixInfo> &lstOrigin );
+// void updateInfoList(QList<SRplCommunityInfo> &lstDest, QList<SRplCommunityInfo> &lstOrigin );
+// void updateInfoList(QList<SRplASPathInfo> &lstDest, QList<SRplASPathInfo> &lstOrigin );
 
 class QNETWORKCLIQUERIES_EXPORT RplInfo : public FuncionBase
 {
     Q_OBJECT
 protected:
-    QList<SRplRouteInfo> m_lstRplRoutes;
-    QList<SRplPrefixInfo> m_lstRplPrefixes;
-    QList<SRplCommunityInfo> m_lstRplCommunities;
+    QMap<QString,SRplRouteInfo> m_lstRplRoutes;
+    QMap<QString,SRplPrefixInfo> m_lstRplPrefixes;
+    QMap<QString,SRplCommunityInfo> m_lstRplCommunities;
+    QMap<QString,SRplASPathInfo> m_lstRplASPath;
 public:
     RplInfo() {}
     RplInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
@@ -62,12 +78,13 @@ public:
     virtual void getRplRouteInfo();
     virtual void getRplPrefixInfo();
     virtual void getRplCommunityInfo();
+    virtual void getRplASPathInfo();
 
     //
-    QList<SRplRouteInfo>& rplRouteInfo() { return m_lstRplRoutes; }
-    QList<SRplPrefixInfo>& rplPrefixesInfo() { return m_lstRplPrefixes; }
-    QList<SRplCommunityInfo>& rplCommunitiesInfo() { return m_lstRplCommunities; }
-
+    QMap<QString,SRplRouteInfo>& rplRouteInfo() { return m_lstRplRoutes; }
+    QMap<QString,SRplPrefixInfo>& rplPrefixesInfo() { return m_lstRplPrefixes; }
+    QMap<QString,SRplCommunityInfo>& rplCommunitiesInfo() { return m_lstRplCommunities; }
+    QMap<QString,SRplASPathInfo>& rplASPathInfo() { return m_lstRplASPath; }
     //
 
     //
@@ -79,10 +96,13 @@ public:
 
 private slots:
     void on_term_receiveText_rplRoute();
+    void on_term_receiveText_rplRouteMap();
     void on_term_receiveText_rplPrefix();
     void on_term_receiveText_prefix_list();
     void on_term_receiveText_rplCommunity();
     void on_term_receiveText_comunity_list();
+    void on_term_receiveText_rplASPath();
+    void on_term_receiveText_aspath_list();
 
 private:
     bool vrp_xpl_ipv4_trabajado;

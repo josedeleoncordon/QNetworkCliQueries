@@ -77,6 +77,7 @@ PIMInfo::PIMInfo(const PIMInfo &other):
     m_lstPimInterfaces = other.m_lstPimInterfaces;
     m_lstRouterPim = other.m_lstRouterPim;
     m_lstMulticastRouting = other.m_lstMulticastRouting;
+    m_queryName = other.m_queryName;
 }
 
 PIMInfo::~PIMInfo()
@@ -292,6 +293,7 @@ QDataStream& operator<<(QDataStream& out, const PIMInfo& info)
 {
     out << info.m_lstPIMNeighbors;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -299,6 +301,7 @@ QDataStream& operator>>(QDataStream& in, PIMInfo& info)
 {
     in >> info.m_lstPIMNeighbors;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 

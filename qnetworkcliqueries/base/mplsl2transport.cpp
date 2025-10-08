@@ -1,4 +1,5 @@
 #include "mplsl2transport.h"
+#include "queries.h"
 
 QDataStream& operator<<(QDataStream& out, const SMplsL2PWInfo& data)
 {
@@ -7,6 +8,7 @@ QDataStream& operator<<(QDataStream& out, const SMplsL2PWInfo& data)
     out << data.preferredPath;
     out << data.remoteDescripcion;
     out << data.estado;
+    out << data.source;
     //infobase
     out << data.datetime;
     out << data.operativo;
@@ -20,6 +22,7 @@ QDataStream& operator>>(QDataStream& in, SMplsL2PWInfo& data)
     in >> data.preferredPath;
     in >> data.remoteDescripcion;
     in >> data.estado;
+    in >> data.source;
     //infobase
     in >> data.datetime;
     in >> data.operativo;
@@ -28,7 +31,7 @@ QDataStream& operator>>(QDataStream& in, SMplsL2PWInfo& data)
 
 QDebug operator<<(QDebug dbg, const SMplsL2PWInfo &info)
 {
-    dbg.space() << "(" << info.VCID << info.destino << info.estado
+    dbg.space() << "(" << info.VCID << info.source << info.destino << info.estado
                 << info.preferredPath << info.remoteDescripcion << ")";
     return dbg.maybeSpace();
 }
@@ -44,6 +47,7 @@ QDataStream& operator<<(QDataStream& out, const SMplsL2XconnectInfo& data)
     out << data.xc;
     out << data.descripcion;
     out << data.AC;
+    out << data.source;
     //infobase
     out << data.datetime;
     out << data.operativo;
@@ -61,6 +65,7 @@ QDataStream& operator>>(QDataStream& in, SMplsL2XconnectInfo& data)
     in >> data.xc;
     in >> data.descripcion;
     in >> data.AC;
+    in >> data.source;
     //infobase
     in >> data.datetime;
     in >> data.operativo;
@@ -131,6 +136,7 @@ void updateInfoList(QList<SMplsL2XconnectInfo> &lstDest, QList<SMplsL2XconnectIn
                 dest.estado = origin.estado;
                 dest.descripcion = origin.descripcion;
                 dest.AC = origin.AC;
+                dest.source = origin.source;
                 encontrado=true;
                 break;
             }
@@ -200,6 +206,7 @@ MplsL2TransportInfo::MplsL2TransportInfo(const MplsL2TransportInfo &other):
     m_ip = other.m_ip;
     m_lstMplsL2Xconnects = other.m_lstMplsL2Xconnects;
     m_lstMplsL2VFIs = other.m_lstMplsL2VFIs;
+    m_queryName = other.m_queryName;
 }
 
 MplsL2TransportInfo::~MplsL2TransportInfo()
@@ -212,7 +219,7 @@ void MplsL2TransportInfo::getMplsL2Transport()
         if ( m_os == "IOS XR" )
         {
             connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_XR_BD()));
-            termSendText("sh l2vpn bridge-domain detail | i \"Bridge group|Description|AC:|PWs:|VFI|PW: neighbor|Interface|Preferred\"");
+            termSendText("sh l2vpn bridge-domain detail | i \"Bridge group|Description|AC:|PWs:|VFI|PW: neighbor|Interface|Preferred|Source\"");
         }
         else
         {
@@ -257,7 +264,7 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_VFI()
         if ( line.contains(exp,&match) )
         {
             SMplsL2VFIInfo i;
-            i.vfi = match.captured( 1 );            
+            i.vfi = match.captured( 1 );
             m_lstMplsL2VFIs.append( i );
             mvi = &m_lstMplsL2VFIs[m_lstMplsL2VFIs.size()-1];
         }
@@ -277,6 +284,8 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_VFI()
         {
             SMplsL2PWInfo i;
             i.VCID = match.captured(2);
+
+            i.source = m_parentQuery->ip();
             i.destino = match.captured(1);
             mvi->lstPWs.append( i );
             continue;
@@ -324,6 +333,7 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_L2Transport()
 
             SMplsL2XconnectInfo i;
             i.AC = match.captured(1);
+            i.source = m_parentQuery->ip();
             m_lstMplsL2Xconnects.append(i);
             mxi = &m_lstMplsL2Xconnects.last();
 
@@ -486,6 +496,7 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
 //      List of VFIs:
 //        VFI VLAN1885 (up)
 //          PW: neighbor 172.19.24.53, PW ID 506188523, state is up ( established )
+//            Source address 172.19.16.42
 //            Preferred path Active : tunnel-te50601, Statically configured, fallback enabled
 //              Interface    VLAN1885                       CRCRCAB10039792I|CABLE_CENTRO|CIUDAD_NEILY
 //          PW: neighbor 172.19.24.88, PW ID 506188523, state is down ( all ready ) (Segment-down)
@@ -505,6 +516,8 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
 
         if ( !mvi )
             continue;
+
+
 
         exp.setPattern("Description: (\\S+)$");
         if ( line.contains(exp,&match) )
@@ -538,6 +551,13 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
             pw = &mvi->lstPWs.last();
         }
 
+        exp.setPattern("Source address (\\S+)");
+        if ( line.contains(exp,&match) )
+        {
+            if (pw) pw->source = match.captured(1);
+            continue;
+        }
+
         exp.setPattern("Preferred path Active : (\\S+),");
         if ( line.contains(exp,&match) )
         {
@@ -555,7 +575,7 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
 
     term->disconnectReceiveTextSignalConnections();
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_XR_Xconnect()));
-    termSendText("sh l2vpn xconnect detail | i \"Group|AC:|PW:|Interface\"");
+    termSendText("sh l2vpn xconnect detail | i \"Group|AC:|PW:|Interface|Source\"");
 }
 
 void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
@@ -573,6 +593,7 @@ void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
 //        Group L2VPN_SERVICES, XC Cabletica_CRCR04100019, state is up; Interworking none
 //          AC: TenGigE0/6/0/5.1001, state is up
 //          PW: neighbor 172.16.30.247, PW ID 506100101, state is up ( established )
+//            Source address 172.19.16.42
 //              Group ID     0x10000500                     0x4000340
 //              Interface    TenGigE0/6/0/5.1001            TenGigE0/0/0/4.1001
 
@@ -581,6 +602,7 @@ void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
         {
             SMplsL2XconnectInfo i;
             i.xc = match.captured(1);
+            i.source = m_parentQuery->ip();
             m_lstMplsL2Xconnects.append(i);
             xi = &m_lstMplsL2Xconnects.last();
             continue;
@@ -602,6 +624,13 @@ void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
             xi->destino = match.captured(1);
             xi->VCID = match.captured(2);
             xi->estado = match.captured(3);
+            continue;
+        }
+
+        exp.setPattern("Source address (\\S+)");
+        if ( line.contains(exp,&match) )
+        {
+            xi->source = match.captured(1);
             continue;
         }
 
@@ -655,6 +684,7 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI()
                 continue;
             SMplsL2PWInfo i;
             i.destino = data.at(0);
+            i.source = m_parentQuery->ip();
             i.VCID = data.at(1);
             i.estado = data.at(4);
             mvi->lstPWs.append( i );
@@ -736,6 +766,7 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_L2Transport()
         {
             SMplsL2XconnectInfo i;
             i.AC = match.captured(1);
+            i.source = m_parentQuery->ip();
             m_lstMplsL2Xconnects.append(i);
             xi = &m_lstMplsL2Xconnects.last();
             continue;
@@ -806,6 +837,7 @@ QDataStream& operator<<(QDataStream& out, const MplsL2TransportInfo& info)
     out << info.m_lstMplsL2Xconnects;
     out << info.m_lstMplsL2VFIs;
     out << info.m_queryoption;
+    out << info.m_queryName;
     return out;
 }
 
@@ -814,6 +846,7 @@ QDataStream& operator>>(QDataStream& in, MplsL2TransportInfo& info)
     in >> info.m_lstMplsL2Xconnects;
     in >> info.m_lstMplsL2VFIs;
     in >> info.m_queryoption;
+    in >> info.m_queryName;
     return in;
 }
 
@@ -837,13 +870,13 @@ QDebug operator<<(QDebug dbg, const MplsL2TransportInfo &info)
     dbg.nospace() << "XConnects:\n";
     for (SMplsL2XconnectInfo i : info.m_lstMplsL2Xconnects)
         dbg.space() << i.xc << i.AC << i.descripcion << i.VCID <<
-                       i.estado << i.destino << i.preferredPath << i.remoteDescripcion << "\n";
+                       i.estado << i.source << i.destino << i.preferredPath << i.remoteDescripcion << "\n";
 
     dbg.nospace() << "\n";
     dbg.nospace() << "VFIs:\n";
     for ( SMplsL2VFIInfo i : info.m_lstMplsL2VFIs )
     {
-        dbg.space() << i.vfi << i.bridge << i.descripcion << "\n";
+        dbg.space() << i.vfi << i.bridge << i.descripcion << i.descripcion << "\n";
         dbg.space() << " PWs:\n";
         for ( SMplsL2PWInfo pw : i.lstPWs )
             dbg.space() << " " << pw << "\n";

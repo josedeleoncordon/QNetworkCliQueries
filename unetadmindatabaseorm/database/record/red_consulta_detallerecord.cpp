@@ -90,6 +90,21 @@ void red_consulta_detalleRecord::set_VRF(QString VRF)
 	setProperty("VRF",VRF);
 }
 
+void red_consulta_detalleRecord::set_advertencia(QString advertencia)
+{
+	setProperty("advertencia",advertencia);
+}
+
+void red_consulta_detalleRecord::set_bgp_ok(bool bgp_ok)
+{
+	setProperty("bgp_ok",bgp_ok);
+}
+
+void red_consulta_detalleRecord::set_con_bgp(bool con_bgp)
+{
+	setProperty("con_bgp",con_bgp);
+}
+
 void red_consulta_detalleRecord::set_fecha(QDate fecha)
 {
 	setProperty("fecha",fecha);
@@ -178,6 +193,21 @@ QString red_consulta_detalleRecord::VCID_Respaldo_Estado()
 QString red_consulta_detalleRecord::VRF()
 {
 	return property("VRF").toString();
+}
+
+QString red_consulta_detalleRecord::advertencia()
+{
+	return property("advertencia").toString();
+}
+
+bool red_consulta_detalleRecord::bgp_ok()
+{
+	return property("bgp_ok").toBool();
+}
+
+bool red_consulta_detalleRecord::con_bgp()
+{
+	return property("con_bgp").toBool();
 }
 
 QDate red_consulta_detalleRecord::fecha()

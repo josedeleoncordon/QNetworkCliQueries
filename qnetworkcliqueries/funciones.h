@@ -60,7 +60,7 @@ Queries *buscarEquipoPorIP(QList<Queries> &lst, QString ip);
 Queries *buscarEquipoPorNombre(QList<Queries> &lst, QString nombre);
 
 //verifica si la ip indicada pertenece al equipo indicado
-bool validateIpQuery(Queries &qry, QString ip);
+bool validateIpQuery(Queries &qry, QString ip, bool compararOSPFRID=false);
 
 //valida que la plataforma del equipo sea valido. No equipos de clientes
 bool platformValidate(QString platform);
@@ -118,6 +118,9 @@ bool esIP1MayorQueIP2(QString ip1, QString ip2);
 //verifica si una IP pertenece a un segmento
 bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos);  //segmentoIP_mascara2digitos ej: 192.168.1.0/24
 
+//verifica si una red pertenece a un prefix:  172.16.30.0/25 en  172.16.30.0/22 ge 24
+bool validarSegmentoPerteneceAprefix(QString network, QString prefix);
+
 //indica si una red pertenece a una red privada
 bool isRedPrivada(QString);
 
@@ -131,7 +134,10 @@ Queries *buscarEquipoInterfazPorParejaDeIPMascara30(QList<Queries> &lst,
 bool existeEquipmentNeighborsOperativoHaciaEquipo( QList<SEquipmentNeighborsInfo> &lst, QString hostname );
 
 //elimina caractares menores al ascii 32
-QString eliminarCaractaresNoImprimibles(QString txt);
+QString eliminarCaractaresMenorASCII32(QString txt);
+
+//elimina caractares menores al ascii 32 y mayor 125
+QString convertirTXTcaracteresImprimibles(QString txt);
 
 ////Busqueda de ARP segun IP o MAC
 //SIpInfo* buscarARP(QList<Queries*> lstQueries, QString IPoMAc);
@@ -171,6 +177,9 @@ QString convertirMascaraMayorAmenor(QString red, int mascara);
 //convierte mascara octetos a dos numeros    255.255.255.0 -> 24
 QString convertirMascaraOctetosAdos(QString mascara);
 
+//convierte mascara dos numeros a octetos 24 -> 255.255.255.0
+QString convertirMascaraDosAOctetos(QString mascara);
+
 //Extrae datos en tabla por posiciones X y en diferentes lineas si un campo es muy largo
 //*  2a00:86c0:2008::/47
 //                      2001:504:40:108::1:10
@@ -190,7 +199,15 @@ QList<QStringList> tableMultiRow2Table(QString &txt,
 QString filasIndentadasSubirAanterior(QString txt);
 
 //Busca los IDs de un servicio en un texto
-QString buscarServicioID(QString txt);
+QString buscarServicioID(QString txt,bool IDU=true);
+
+//Para tablas
+//Regresa la posicion de una columna
+//Interface          Status      Protocol    Description
+//--------------------------------------------------------------------------------
+//BV100              down        down        INTERNET-IR_PRUEBAS-BVI100
+//BV101              down        down        FN:IBP-DE:INTERNET_UFINET (ns1.ufinet.com - IP 64.209.31.3)
+QList<short> columnsPosFromTxt(QString txt, QStringList lstColumnNames);
 
 //Node              Type                       State             Config state
 //--------------------------------------------------------------------------------
@@ -206,7 +223,7 @@ short numbertxt2short(QString);
 int numbertxt2int(QString);
 
 //Devuelve todas las coincidencias de un texto
-QStringList getRegExpAllMatches(QRegularExpression rx, QString txt);
+QStringList getRegExpAllMatches(QRegularExpression rx, QString txt,int matchIndex=0);
 
 //2.00658804295556E7 -> 20065880
 //20065880.4295556 -> 20065880
@@ -217,4 +234,37 @@ QString numberExp10Anumber(QString);
 //no para /32 o /128 explicitas
 bool prefixSetAllowsRange32_128(QString &pfxtxt);
 
+//double to txt 10G   10000000000 -> 10G
+QString doubleTo10GTxt(double num,bool agregarUnidadDeMedidaLetra=true);
+
+//double to txt. Depende del numero se convierte a Gigas o Megas ->  10G, 500M
+QString doubleToTxt(double num,bool agregarUnidadDeMedidaLetra=true);
+
+//simplifiedLast
+QString removeEOL(QString);
+
+//Devuelve la lista de IPs que este contenida en un prefix  172.16.30.0/24,. /24 -> /31
+QStringList lstIPsFromPrefix(QString prefixMask);
+
+//Devuelve rpl from xpl. Huawei a Cisco
+enum RplType
+{
+    RoutePolicy,
+    PrefixSet,
+    CommunitySet,
+    ASPathSet
+};
+QString rplFromXpl(QString,RplType);
+
+//Une una lista de lista en una sola lista
+//((1)(2)(3)(4)) -> (1,2,3,4)
+template <typename T> T joinList(QList<T> lst)
+{
+    T lstsalida;
+    for (T l: lst)
+        lstsalida.append(l);
+    return lstsalida;
+}
+
 #endif // FUNCIONES_H
+

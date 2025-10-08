@@ -17,7 +17,7 @@ QueriesThreadController::QueriesThreadController()
 {
     m_maxparalelos=40;
     m_maxparalelosfijos=25;
-    m_maxparalelosmismoequipo=4;
+    m_maxparalelosmismoequipo=5;
     m_maxparalelosuuiddescrubimiento=0;
 }
 
