@@ -2311,6 +2311,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator<<(QDataStream& out, const Querie
     out << query.m_operativo;
     out << query.m_ip;
     out << query.m_queryname;
+    out << query.m_equipmenttype;
 
     if ( query.equipmentNeighborsInfoQuery )
     {        
@@ -2529,6 +2530,7 @@ QNETWORKCLIQUERIES_EXPORT QDataStream& operator>>(QDataStream& in, Queries& quer
     in >> query.m_operativo;
     in >> query.m_ip;
     in >> query.m_queryname;
+    in >> query.m_equipmenttype;
 
     in >> a;
     if ( a )

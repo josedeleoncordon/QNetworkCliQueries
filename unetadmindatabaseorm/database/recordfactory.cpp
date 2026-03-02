@@ -8,19 +8,21 @@
 #include "record/a9k_bgp_sesiones_sin_lp200record.h"
 #include "record/a9k_bgp_sesiones_weightrecord.h"
 #include "record/a9k_energiarecord.h"
-#include "record/a9k_equiporecord.h"
 #include "record/a9k_internet_redistribucion_estaticas_conectadasrecord.h"
 #include "record/a9k_memoriarecord.h"
 #include "record/a9k_mpls_label_table_summaryrecord.h"
-#include "record/a9k_paisrecord.h"
 #include "record/a9k_peer_caida_prefix_inrecord.h"
 #include "record/a9k_sesiones_colarecord.h"
 #include "record/a9k_slotsrecord.h"
 #include "record/a9k_vrf_sin_label_pervrfrecord.h"
 #include "record/arearecord.h"
+#include "record/bgp_lu_sesion_hacia_rr_detallerecord.h"
+#include "record/bgp_pe_ipt_default_trackrecord.h"
 #include "record/bgp_pe_vpn_peer_comunities_inrecord.h"
+#include "record/bgp_prefix_in_refrecord.h"
 #include "record/bgp_publicaciones_a_proveedoresrecord.h"
 #include "record/bgp_serv_prin_bck_comunidades_faltantesrecord.h"
+#include "record/bgp_sesion_hacia_rrrecord.h"
 #include "record/bgp_sesiones_clientes_sin_prefix_filtrorecord.h"
 #include "record/enlacerecord.h"
 #include "record/equiporecord.h"
@@ -69,16 +71,12 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new a9k_bgp_sesiones_weightRecord;
 	if ( table == "a9k_energia" )
 		return new a9k_energiaRecord;
-	if ( table == "a9k_equipo" )
-		return new a9k_equipoRecord;
 	if ( table == "a9k_internet_redistribucion_estaticas_conectadas" )
 		return new a9k_internet_redistribucion_estaticas_conectadasRecord;
 	if ( table == "a9k_memoria" )
 		return new a9k_memoriaRecord;
 	if ( table == "a9k_mpls_label_table_summary" )
 		return new a9k_mpls_label_table_summaryRecord;
-	if ( table == "a9k_pais" )
-		return new a9k_paisRecord;
 	if ( table == "a9k_peer_caida_prefix_in" )
 		return new a9k_peer_caida_prefix_inRecord;
 	if ( table == "a9k_sesiones_cola" )
@@ -89,12 +87,20 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new a9k_vrf_sin_label_pervrfRecord;
 	if ( table == "area" )
 		return new areaRecord;
+	if ( table == "bgp_lu_sesion_hacia_rr_detalle" )
+		return new bgp_lu_sesion_hacia_rr_detalleRecord;
+	if ( table == "bgp_pe_ipt_default_track" )
+		return new bgp_pe_ipt_default_trackRecord;
 	if ( table == "bgp_pe_vpn_peer_comunities_in" )
 		return new bgp_pe_vpn_peer_comunities_inRecord;
+	if ( table == "bgp_prefix_in_ref" )
+		return new bgp_prefix_in_refRecord;
 	if ( table == "bgp_publicaciones_a_proveedores" )
 		return new bgp_publicaciones_a_proveedoresRecord;
 	if ( table == "bgp_serv_prin_bck_comunidades_faltantes" )
 		return new bgp_serv_prin_bck_comunidades_faltantesRecord;
+	if ( table == "bgp_sesion_hacia_rr" )
+		return new bgp_sesion_hacia_rrRecord;
 	if ( table == "bgp_sesiones_clientes_sin_prefix_filtro" )
 		return new bgp_sesiones_clientes_sin_prefix_filtroRecord;
 	if ( table == "enlace" )

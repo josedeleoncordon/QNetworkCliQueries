@@ -20,11 +20,6 @@ void a9k_energiaRecord::set_a9k_energiacol(QString a9k_energiacol)
 	setProperty("a9k_energiacol",a9k_energiacol);
 }
 
-void a9k_energiaRecord::set_a9k_equipo_id(int a9k_equipo_id)
-{
-	setProperty("a9k_equipo_id",a9k_equipo_id);
-}
-
 void a9k_energiaRecord::set_bandeja0fuentes(int bandeja0fuentes)
 {
 	setProperty("bandeja0fuentes",bandeja0fuentes);
@@ -60,6 +55,11 @@ void a9k_energiaRecord::set_date(QDate date)
 	setProperty("date",date);
 }
 
+void a9k_energiaRecord::set_detalle(QString detalle)
+{
+	setProperty("detalle",detalle);
+}
+
 void a9k_energiaRecord::set_device_ip(QString device_ip)
 {
 	setProperty("device_ip",device_ip);
@@ -75,11 +75,6 @@ void a9k_energiaRecord::set_disponible(int disponible)
 	setProperty("disponible",disponible);
 }
 
-void a9k_energiaRecord::set_id(int id)
-{
-	setProperty("id",id);
-}
-
 void a9k_energiaRecord::set_nmas1(int nmas1)
 {
 	setProperty("nmas1",nmas1);
@@ -88,6 +83,11 @@ void a9k_energiaRecord::set_nmas1(int nmas1)
 void a9k_energiaRecord::set_no_soporta_caida_de_mas_de_una_fuente(int no_soporta_caida_de_mas_de_una_fuente)
 {
 	setProperty("no_soporta_caida_de_mas_de_una_fuente",no_soporta_caida_de_mas_de_una_fuente);
+}
+
+void a9k_energiaRecord::set_ok(int ok)
+{
+	setProperty("ok",ok);
 }
 
 void a9k_energiaRecord::set_pais(QString pais)
@@ -103,11 +103,6 @@ void a9k_energiaRecord::set_total_requerido(int total_requerido)
 QString a9k_energiaRecord::a9k_energiacol()
 {
 	return property("a9k_energiacol").toString();
-}
-
-int a9k_energiaRecord::a9k_equipo_id()
-{
-	return property("a9k_equipo_id").toInt();
 }
 
 int a9k_energiaRecord::bandeja0fuentes()
@@ -145,6 +140,11 @@ QDate a9k_energiaRecord::date()
 	return property("date").toDate();
 }
 
+QString a9k_energiaRecord::detalle()
+{
+	return property("detalle").toString();
+}
+
 QString a9k_energiaRecord::device_ip()
 {
 	return property("device_ip").toString();
@@ -160,11 +160,6 @@ int a9k_energiaRecord::disponible()
 	return property("disponible").toInt();
 }
 
-int a9k_energiaRecord::id()
-{
-	return property("id").toInt();
-}
-
 int a9k_energiaRecord::nmas1()
 {
 	return property("nmas1").toInt();
@@ -175,6 +170,11 @@ int a9k_energiaRecord::no_soporta_caida_de_mas_de_una_fuente()
 	return property("no_soporta_caida_de_mas_de_una_fuente").toInt();
 }
 
+int a9k_energiaRecord::ok()
+{
+	return property("ok").toInt();
+}
+
 QString a9k_energiaRecord::pais()
 {
 	return property("pais").toString();
@@ -183,11 +183,6 @@ QString a9k_energiaRecord::pais()
 int a9k_energiaRecord::total_requerido()
 {
 	return property("total_requerido").toInt();
-}
-
-a9k_equipoRecord *a9k_energiaRecord::r_a9k_equipo_id()
-{
-	return dynamic_cast<a9k_equipoRecord*>( property("r_a9k_equipo_id").value<RecordBase*>() );
 }
 
 a9k_energiaRecord &a9k_energiaRecord::operator=(const a9k_energiaRecord &other)

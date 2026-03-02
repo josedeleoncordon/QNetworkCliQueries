@@ -15,14 +15,14 @@ a9k_mpls_label_table_summaryRecord::a9k_mpls_label_table_summaryRecord(const a9k
 
 a9k_mpls_label_table_summaryRecord::~a9k_mpls_label_table_summaryRecord() {}
 
-void a9k_mpls_label_table_summaryRecord::set_a9k_equipo_id(int a9k_equipo_id)
-{
-	setProperty("a9k_equipo_id",a9k_equipo_id);
-}
-
 void a9k_mpls_label_table_summaryRecord::set_date(QDate date)
 {
 	setProperty("date",date);
+}
+
+void a9k_mpls_label_table_summaryRecord::set_detalle(QString detalle)
+{
+	setProperty("detalle",detalle);
 }
 
 void a9k_mpls_label_table_summaryRecord::set_device_ip(QString device_ip)
@@ -40,9 +40,9 @@ void a9k_mpls_label_table_summaryRecord::set_etiquetas_asignadas(int etiquetas_a
 	setProperty("etiquetas_asignadas",etiquetas_asignadas);
 }
 
-void a9k_mpls_label_table_summaryRecord::set_id(int id)
+void a9k_mpls_label_table_summaryRecord::set_ok(int ok)
 {
-	setProperty("id",id);
+	setProperty("ok",ok);
 }
 
 void a9k_mpls_label_table_summaryRecord::set_pais(QString pais)
@@ -50,14 +50,14 @@ void a9k_mpls_label_table_summaryRecord::set_pais(QString pais)
 	setProperty("pais",pais);
 }
 
-int a9k_mpls_label_table_summaryRecord::a9k_equipo_id()
-{
-	return property("a9k_equipo_id").toInt();
-}
-
 QDate a9k_mpls_label_table_summaryRecord::date()
 {
 	return property("date").toDate();
+}
+
+QString a9k_mpls_label_table_summaryRecord::detalle()
+{
+	return property("detalle").toString();
 }
 
 QString a9k_mpls_label_table_summaryRecord::device_ip()
@@ -75,19 +75,14 @@ int a9k_mpls_label_table_summaryRecord::etiquetas_asignadas()
 	return property("etiquetas_asignadas").toInt();
 }
 
-int a9k_mpls_label_table_summaryRecord::id()
+int a9k_mpls_label_table_summaryRecord::ok()
 {
-	return property("id").toInt();
+	return property("ok").toInt();
 }
 
 QString a9k_mpls_label_table_summaryRecord::pais()
 {
 	return property("pais").toString();
-}
-
-a9k_equipoRecord *a9k_mpls_label_table_summaryRecord::r_a9k_equipo_id()
-{
-	return dynamic_cast<a9k_equipoRecord*>( property("r_a9k_equipo_id").value<RecordBase*>() );
 }
 
 a9k_mpls_label_table_summaryRecord &a9k_mpls_label_table_summaryRecord::operator=(const a9k_mpls_label_table_summaryRecord &other)

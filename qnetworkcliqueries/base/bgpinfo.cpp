@@ -82,6 +82,7 @@ BGPInfo::BGPInfo(QRemoteShell *terminal, int option):
 {
     m_BGPNetworkAttAddOnlyBest=true;
     _mikrotiksecondquery=false;
+    m_BGPNeighborsDetail_vrp_vpnv6_enviado=false;
 }
 
 BGPInfo::BGPInfo(const BGPInfo &other):
@@ -151,6 +152,8 @@ void BGPInfo::getBGPNeighbors()
 
         if ( m_type == "IPV4" || m_type == "IPV4LU" )
             termSendText("display bgp peer");
+        if ( m_type == "VPNV4" )
+            termSendText("display bgp vpnv4 all peer");
         else if ( m_type == "VRF" )
             getBGPNeighbors_VRF_nextVRF();
         else
@@ -208,6 +211,14 @@ void BGPInfo::on_term_receiveText_BGPNeighbors()
 
         line = line.left( line.size()-1 );
         // qDebug() << "line" << line;
+
+        if (m_os == "VRP")
+        {
+            exp.setPattern("^  VPN-Instance \\S+");
+            if (line.contains(exp))
+                //consulta de vecinos vpnv en VRF muestra los vecinos de las VRF luego de la global
+                break;
+        }
 
         if ( m_brand == "Cisco" || m_os == "VRP" )
         {
@@ -1088,8 +1099,14 @@ void BGPInfo::getBGPNeighborsDetail()
     }
     else if ( m_type == "VPNV4" )
     {
-        //TODO terminar
-        finished();
+        if ( m_os == "IOS XR" )
+            termSendText("show bgp vpnv4 unicast neighbor");
+        else if (m_os=="IOS")
+            //terminar
+            // termSendText("");
+            finished();
+        else if (m_os=="VRP")
+            termSendText("display bgp vpnv4 all peer verbose");
     }
     else if ( m_type == "VRF" )
         // getBGPNeighborsImportExportRPL_VRF_nextVRF();
@@ -1180,7 +1197,8 @@ void BGPInfo::on_term_receiveText_BGPNeighborsDetail()
                     continue;
 
                 if (m_type == "IPV4" && lastAF == "IPv4 Unicast" ||
-                    m_type == "IPV4LU" && lastAF == "IPv4 Labeled-unicast"
+                    m_type == "IPV4LU" && lastAF == "IPv4 Labeled-unicast" ||
+                    m_type == "VPNV4" && lastAF == "VPNv4 Unicast"
                     )
                 {
                     SBGPNeighborDetail s;
@@ -1288,6 +1306,11 @@ void BGPInfo::on_term_receiveText_BGPNeighborsDetail()
         }
         else if (m_os=="VRP")
         {
+            reg.setPattern("^  VPN-Instance \\S+");
+            if (line.contains(reg))
+                //consulta de vecinos vpnv en VRF muestra los vecinos de las VRF luego de la global
+                break;
+
             reg.setPattern("BGP Peer is (\\S+),  remote AS (\\d+)");
             if (line.contains(reg,&match))
             {
@@ -1381,7 +1404,14 @@ void BGPInfo::on_term_receiveText_BGPNeighborsDetail()
         }
     }
 
-    finished();
+    //TERMINAR VPNV6
+    // if (m_os=="VRP" || !m_BGPNeighborsDetail_vrp_vpnv6_enviado)
+    // {
+    //     termSendText("display bgp vpnv6 all peer verbose");
+    //     m_BGPNeighborsDetail_vrp_vpnv6_enviado=true;
+    // }
+    // else
+        finished();
 }
 
 QDataStream& operator<<(QDataStream& out, const BGPInfo& info)

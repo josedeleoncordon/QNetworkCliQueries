@@ -15,14 +15,14 @@ a9k_bgp_sesiones_sin_lp200Record::a9k_bgp_sesiones_sin_lp200Record(const a9k_bgp
 
 a9k_bgp_sesiones_sin_lp200Record::~a9k_bgp_sesiones_sin_lp200Record() {}
 
-void a9k_bgp_sesiones_sin_lp200Record::set_a9k_equipo_id(int a9k_equipo_id)
-{
-	setProperty("a9k_equipo_id",a9k_equipo_id);
-}
-
 void a9k_bgp_sesiones_sin_lp200Record::set_date(QDate date)
 {
 	setProperty("date",date);
+}
+
+void a9k_bgp_sesiones_sin_lp200Record::set_detalle(QString detalle)
+{
+	setProperty("detalle",detalle);
 }
 
 void a9k_bgp_sesiones_sin_lp200Record::set_device_ip(QString device_ip)
@@ -35,14 +35,14 @@ void a9k_bgp_sesiones_sin_lp200Record::set_device_name(QString device_name)
 	setProperty("device_name",device_name);
 }
 
-void a9k_bgp_sesiones_sin_lp200Record::set_id(int id)
-{
-	setProperty("id",id);
-}
-
 void a9k_bgp_sesiones_sin_lp200Record::set_neighbor(QString neighbor)
 {
 	setProperty("neighbor",neighbor);
+}
+
+void a9k_bgp_sesiones_sin_lp200Record::set_ok(int ok)
+{
+	setProperty("ok",ok);
 }
 
 void a9k_bgp_sesiones_sin_lp200Record::set_pais(QString pais)
@@ -60,14 +60,14 @@ void a9k_bgp_sesiones_sin_lp200Record::set_routepolicy(QString routepolicy)
 	setProperty("routepolicy",routepolicy);
 }
 
-int a9k_bgp_sesiones_sin_lp200Record::a9k_equipo_id()
-{
-	return property("a9k_equipo_id").toInt();
-}
-
 QDate a9k_bgp_sesiones_sin_lp200Record::date()
 {
 	return property("date").toDate();
+}
+
+QString a9k_bgp_sesiones_sin_lp200Record::detalle()
+{
+	return property("detalle").toString();
 }
 
 QString a9k_bgp_sesiones_sin_lp200Record::device_ip()
@@ -80,14 +80,14 @@ QString a9k_bgp_sesiones_sin_lp200Record::device_name()
 	return property("device_name").toString();
 }
 
-int a9k_bgp_sesiones_sin_lp200Record::id()
-{
-	return property("id").toInt();
-}
-
 QString a9k_bgp_sesiones_sin_lp200Record::neighbor()
 {
 	return property("neighbor").toString();
+}
+
+int a9k_bgp_sesiones_sin_lp200Record::ok()
+{
+	return property("ok").toInt();
 }
 
 QString a9k_bgp_sesiones_sin_lp200Record::pais()
@@ -103,11 +103,6 @@ int a9k_bgp_sesiones_sin_lp200Record::prefixin()
 QString a9k_bgp_sesiones_sin_lp200Record::routepolicy()
 {
 	return property("routepolicy").toString();
-}
-
-a9k_equipoRecord *a9k_bgp_sesiones_sin_lp200Record::r_a9k_equipo_id()
-{
-	return dynamic_cast<a9k_equipoRecord*>( property("r_a9k_equipo_id").value<RecordBase*>() );
 }
 
 a9k_bgp_sesiones_sin_lp200Record &a9k_bgp_sesiones_sin_lp200Record::operator=(const a9k_bgp_sesiones_sin_lp200Record &other)
