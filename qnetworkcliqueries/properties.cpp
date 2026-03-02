@@ -52,16 +52,55 @@ void Properties::loadSettings()
     QSettings settings;
     settings.setDefaultFormat(QSettings::NativeFormat);
 
+    SBDConnectionParameters sbdcp;
+
+    settings.beginGroup("BDConnection_msql");
+    odbclib = ped->decode(settings.value("ODBCLib").toString());
+    settings.endGroup();
+
+    settings.beginGroup("BDConnection_msql_regengadmin");
+    sbdcp.name = ped->decode(settings.value("Name").toString());
+    sbdcp.BDConnectionUser = ped->decode(settings.value("BDConnectionUser").toString());
+    sbdcp.BDConnectionPassword = ped->decode(settings.value("BDConnectionPassword").toString());
+    sbdcp.BD = ped->decode(settings.value("BD").toString());
+    sbdcp.BDHost = ped->decode(settings.value("BDHost").toString());
+    sbdcp.Driver = ped->decode(settings.value("Driver").toString());
+    mapBDConnectionParameters.insert(sbdcp.name,sbdcp);
+    settings.endGroup();
+
+    settings.beginGroup("BDConnection_mysql_unet");
+    sbdcp.name = ped->decode(settings.value("Name").toString());
+    sbdcp.BDConnectionUser = ped->decode(settings.value("BDConnectionUser").toString());
+    sbdcp.BDConnectionPassword = ped->decode(settings.value("BDConnectionPassword").toString());
+    sbdcp.BD = ped->decode(settings.value("BD").toString());
+    sbdcp.BDHost = ped->decode(settings.value("BDHost").toString());
+    sbdcp.Driver = ped->decode(settings.value("Driver").toString());
+    mapBDConnectionParameters.insert(sbdcp.name,sbdcp);
+    settings.endGroup();
+
+    settings.beginGroup("BDConnection_msql_UfinetProvisioning");
+    sbdcp.name = ped->decode(settings.value("Name").toString());
+    sbdcp.BDConnectionUser = ped->decode(settings.value("BDConnectionUser").toString());
+    sbdcp.BDConnectionPassword = ped->decode(settings.value("BDConnectionPassword").toString());
+    sbdcp.BD = ped->decode(settings.value("BD").toString());
+    sbdcp.BDHost = ped->decode(settings.value("BDHost").toString());
+    sbdcp.Driver = ped->decode(settings.value("Driver").toString());
+    mapBDConnectionParameters.insert(sbdcp.name,sbdcp);
+    settings.endGroup();
+
+    settings.beginGroup("BDConnection_mysql_Planning");
+    sbdcp.name = ped->decode(settings.value("Name").toString());
+    sbdcp.BDConnectionUser = ped->decode(settings.value("BDConnectionUser").toString());
+    sbdcp.BDConnectionPassword = ped->decode(settings.value("BDConnectionPassword").toString());
+    sbdcp.BD = ped->decode(settings.value("BD").toString());
+    sbdcp.BDHost = ped->decode(settings.value("BDHost").toString());
+    sbdcp.Driver = ped->decode(settings.value("Driver").toString());
+    mapBDConnectionParameters.insert(sbdcp.name,sbdcp);
+    settings.endGroup();
+
     settings.beginGroup("Connection");
     user = ped->decode(settings.value("ConnectionUser").toString());
     password = ped->decode(settings.value("ConnectionPassword").toString());
-    settings.endGroup();
-
-    settings.beginGroup("BDConnection");
-    bduser = ped->decode(settings.value("BDConnectionUser").toString());
-    bdpassword = ped->decode(settings.value("BDConnectionPassword").toString());
-    bd = ped->decode(settings.value("BD").toString());
-    bdhost = ped->decode(settings.value("BDHost").toString());
     settings.endGroup();
 
     settings.beginGroup("Queries");
@@ -96,12 +135,12 @@ void Properties::saveSettings()
     settings.setValue("ConnectionPassword",ped->encode(password));
     settings.endGroup();
 
-    settings.beginGroup("BDConnection");
-    settings.setValue("BDConnectionUser",ped->encode(bduser));
-    settings.setValue("BDConnectionPassword",ped->encode(bdpassword));
-    settings.setValue("BD",ped->encode(bd));
-    settings.setValue("BDHost",ped->encode(bdhost));
-    settings.endGroup();
+    // settings.beginGroup("BDConnection");
+    // settings.setValue("BDConnectionUser",ped->encode(bduser));
+    // settings.setValue("BDConnectionPassword",ped->encode(bdpassword));
+    // settings.setValue("BD",ped->encode(bd));
+    // settings.setValue("BDHost",ped->encode(bdhost));
+    // settings.endGroup();
 
     settings.beginGroup("Queries");
     settings.setValue("QueriesPath",ped->encode(queriespath));

@@ -15,11 +15,6 @@ a9k_internet_redistribucion_estaticas_conectadasRecord::a9k_internet_redistribuc
 
 a9k_internet_redistribucion_estaticas_conectadasRecord::~a9k_internet_redistribucion_estaticas_conectadasRecord() {}
 
-void a9k_internet_redistribucion_estaticas_conectadasRecord::set_a9k_equipo_id(int a9k_equipo_id)
-{
-	setProperty("a9k_equipo_id",a9k_equipo_id);
-}
-
 void a9k_internet_redistribucion_estaticas_conectadasRecord::set_date(QDate date)
 {
 	setProperty("date",date);
@@ -28,6 +23,11 @@ void a9k_internet_redistribucion_estaticas_conectadasRecord::set_date(QDate date
 void a9k_internet_redistribucion_estaticas_conectadasRecord::set_descripcion(QString descripcion)
 {
 	setProperty("descripcion",descripcion);
+}
+
+void a9k_internet_redistribucion_estaticas_conectadasRecord::set_detalle(QString detalle)
+{
+	setProperty("detalle",detalle);
 }
 
 void a9k_internet_redistribucion_estaticas_conectadasRecord::set_device_ip(QString device_ip)
@@ -40,9 +40,9 @@ void a9k_internet_redistribucion_estaticas_conectadasRecord::set_device_name(QSt
 	setProperty("device_name",device_name);
 }
 
-void a9k_internet_redistribucion_estaticas_conectadasRecord::set_id(int id)
+void a9k_internet_redistribucion_estaticas_conectadasRecord::set_ok(int ok)
 {
-	setProperty("id",id);
+	setProperty("ok",ok);
 }
 
 void a9k_internet_redistribucion_estaticas_conectadasRecord::set_pais(QString pais)
@@ -60,11 +60,6 @@ void a9k_internet_redistribucion_estaticas_conectadasRecord::set_tipo(QString ti
 	setProperty("tipo",tipo);
 }
 
-int a9k_internet_redistribucion_estaticas_conectadasRecord::a9k_equipo_id()
-{
-	return property("a9k_equipo_id").toInt();
-}
-
 QDate a9k_internet_redistribucion_estaticas_conectadasRecord::date()
 {
 	return property("date").toDate();
@@ -73,6 +68,11 @@ QDate a9k_internet_redistribucion_estaticas_conectadasRecord::date()
 QString a9k_internet_redistribucion_estaticas_conectadasRecord::descripcion()
 {
 	return property("descripcion").toString();
+}
+
+QString a9k_internet_redistribucion_estaticas_conectadasRecord::detalle()
+{
+	return property("detalle").toString();
 }
 
 QString a9k_internet_redistribucion_estaticas_conectadasRecord::device_ip()
@@ -85,9 +85,9 @@ QString a9k_internet_redistribucion_estaticas_conectadasRecord::device_name()
 	return property("device_name").toString();
 }
 
-int a9k_internet_redistribucion_estaticas_conectadasRecord::id()
+int a9k_internet_redistribucion_estaticas_conectadasRecord::ok()
 {
-	return property("id").toInt();
+	return property("ok").toInt();
 }
 
 QString a9k_internet_redistribucion_estaticas_conectadasRecord::pais()
@@ -103,11 +103,6 @@ QString a9k_internet_redistribucion_estaticas_conectadasRecord::routepolicy()
 QString a9k_internet_redistribucion_estaticas_conectadasRecord::tipo()
 {
 	return property("tipo").toString();
-}
-
-a9k_equipoRecord *a9k_internet_redistribucion_estaticas_conectadasRecord::r_a9k_equipo_id()
-{
-	return dynamic_cast<a9k_equipoRecord*>( property("r_a9k_equipo_id").value<RecordBase*>() );
 }
 
 a9k_internet_redistribucion_estaticas_conectadasRecord &a9k_internet_redistribucion_estaticas_conectadasRecord::operator=(const a9k_internet_redistribucion_estaticas_conectadasRecord &other)

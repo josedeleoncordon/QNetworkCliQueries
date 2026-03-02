@@ -70,8 +70,9 @@ protected:
     QList<SBGPNeighborDetail> m_lstNeigborsDetail;
     QString m_vrf;
     QStringList m_vrfs;
-    QList<SBGPNetwork> m_lstNetworks;        
+    QList<SBGPNetwork> m_lstNetworks;
     QMap<QString,QList<SBGPNetwork>> m_mapNeighborLstNetworks;
+    bool m_BGPNeighborsDetail_vrp_vpnv6_enviado;
 
     int m_neighborsPos;
     QString m_currentNeighbor;

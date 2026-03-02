@@ -15,6 +15,16 @@ public:
 
 PropertiesEncoderDecoder *newPropertiesEncoderDecoder();
 
+struct SBDConnectionParameters
+{
+    QString name;
+    QString BD;
+    QString BDConnectionPassword;
+    QString BDConnectionUser;
+    QString BDHost;
+    QString Driver;
+};
+
 class QNETWORKCLIQUERIES_EXPORT Properties
 {
     public:
@@ -34,10 +44,8 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QString topologiaconfpath;
         QString topologiaiconpath;
 
-        QString bduser;
-        QString bdpassword;
-        QString bd;
-        QString bdhost;
+        QMap<QString,SBDConnectionParameters> mapBDConnectionParameters;
+        QString odbclib;
 
         QMap<QString,QString> mapFuncionesArgumentos;
         QMap<QString,QVariant> mapGrupoRaizIP;

@@ -40,6 +40,16 @@ void bgp_pe_vpn_peer_comunities_inRecord::set_comunidades_ter(QString comunidade
 	setProperty("comunidades_ter",comunidades_ter);
 }
 
+void bgp_pe_vpn_peer_comunities_inRecord::set_detalle(QString detalle)
+{
+	setProperty("detalle",detalle);
+}
+
+void bgp_pe_vpn_peer_comunities_inRecord::set_estado(QString estado)
+{
+	setProperty("estado",estado);
+}
+
 void bgp_pe_vpn_peer_comunities_inRecord::set_family(QString family)
 {
 	setProperty("family",family);
@@ -50,14 +60,29 @@ void bgp_pe_vpn_peer_comunities_inRecord::set_fecha(QDate fecha)
 	setProperty("fecha",fecha);
 }
 
+void bgp_pe_vpn_peer_comunities_inRecord::set_ok(int ok)
+{
+	setProperty("ok",ok);
+}
+
+void bgp_pe_vpn_peer_comunities_inRecord::set_pais(QString pais)
+{
+	setProperty("pais",pais);
+}
+
 void bgp_pe_vpn_peer_comunities_inRecord::set_pe_ip(QString pe_ip)
 {
 	setProperty("pe_ip",pe_ip);
 }
 
-void bgp_pe_vpn_peer_comunities_inRecord::set_peer(QString peer)
+void bgp_pe_vpn_peer_comunities_inRecord::set_pe_nombre(QString pe_nombre)
 {
-	setProperty("peer",peer);
+	setProperty("pe_nombre",pe_nombre);
+}
+
+void bgp_pe_vpn_peer_comunities_inRecord::set_peer_ip(QString peer_ip)
+{
+	setProperty("peer_ip",peer_ip);
 }
 
 void bgp_pe_vpn_peer_comunities_inRecord::set_prefix_in(int prefix_in)
@@ -95,6 +120,16 @@ QString bgp_pe_vpn_peer_comunities_inRecord::comunidades_ter()
 	return property("comunidades_ter").toString();
 }
 
+QString bgp_pe_vpn_peer_comunities_inRecord::detalle()
+{
+	return property("detalle").toString();
+}
+
+QString bgp_pe_vpn_peer_comunities_inRecord::estado()
+{
+	return property("estado").toString();
+}
+
 QString bgp_pe_vpn_peer_comunities_inRecord::family()
 {
 	return property("family").toString();
@@ -105,14 +140,29 @@ QDate bgp_pe_vpn_peer_comunities_inRecord::fecha()
 	return property("fecha").toDate();
 }
 
+int bgp_pe_vpn_peer_comunities_inRecord::ok()
+{
+	return property("ok").toInt();
+}
+
+QString bgp_pe_vpn_peer_comunities_inRecord::pais()
+{
+	return property("pais").toString();
+}
+
 QString bgp_pe_vpn_peer_comunities_inRecord::pe_ip()
 {
 	return property("pe_ip").toString();
 }
 
-QString bgp_pe_vpn_peer_comunities_inRecord::peer()
+QString bgp_pe_vpn_peer_comunities_inRecord::pe_nombre()
 {
-	return property("peer").toString();
+	return property("pe_nombre").toString();
+}
+
+QString bgp_pe_vpn_peer_comunities_inRecord::peer_ip()
+{
+	return property("peer_ip").toString();
 }
 
 int bgp_pe_vpn_peer_comunities_inRecord::prefix_in()

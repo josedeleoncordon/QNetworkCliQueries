@@ -415,7 +415,7 @@ SMplsTETunnelInfo *MplsTEtunnelsInfo::mplsTEsFromTunnel(QString interfaz)
 {
     for ( SMplsTETunnelInfo &mi : m_lstMplsTEtunnels )
     {
-        if ( mi.TuID == interfaz )
+        if ( mi.TuID == interfaz || mi.name == interfaz)
             return &mi;
     }
     return nullptr;

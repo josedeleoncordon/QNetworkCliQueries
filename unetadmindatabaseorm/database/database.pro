@@ -12,19 +12,21 @@ HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/a9k_bgp_sesiones_sin_lp200record.h \
 		$$PWD/record/a9k_bgp_sesiones_weightrecord.h \
 		$$PWD/record/a9k_energiarecord.h \
-		$$PWD/record/a9k_equiporecord.h \
 		$$PWD/record/a9k_internet_redistribucion_estaticas_conectadasrecord.h \
 		$$PWD/record/a9k_memoriarecord.h \
 		$$PWD/record/a9k_mpls_label_table_summaryrecord.h \
-		$$PWD/record/a9k_paisrecord.h \
 		$$PWD/record/a9k_peer_caida_prefix_inrecord.h \
 		$$PWD/record/a9k_sesiones_colarecord.h \
 		$$PWD/record/a9k_slotsrecord.h \
 		$$PWD/record/a9k_vrf_sin_label_pervrfrecord.h \
 		$$PWD/record/arearecord.h \
+		$$PWD/record/bgp_lu_sesion_hacia_rr_detallerecord.h \
+		$$PWD/record/bgp_pe_ipt_default_trackrecord.h \
 		$$PWD/record/bgp_pe_vpn_peer_comunities_inrecord.h \
+		$$PWD/record/bgp_prefix_in_refrecord.h \
 		$$PWD/record/bgp_publicaciones_a_proveedoresrecord.h \
 		$$PWD/record/bgp_serv_prin_bck_comunidades_faltantesrecord.h \
+		$$PWD/record/bgp_sesion_hacia_rrrecord.h \
 		$$PWD/record/bgp_sesiones_clientes_sin_prefix_filtrorecord.h \
 		$$PWD/record/enlacerecord.h \
 		$$PWD/record/equiporecord.h \
@@ -62,19 +64,21 @@ SOURCES += $$PWD/record/a9k_bgp_inter_asrecord.cpp \
 		$$PWD/record/a9k_bgp_sesiones_sin_lp200record.cpp \
 		$$PWD/record/a9k_bgp_sesiones_weightrecord.cpp \
 		$$PWD/record/a9k_energiarecord.cpp \
-		$$PWD/record/a9k_equiporecord.cpp \
 		$$PWD/record/a9k_internet_redistribucion_estaticas_conectadasrecord.cpp \
 		$$PWD/record/a9k_memoriarecord.cpp \
 		$$PWD/record/a9k_mpls_label_table_summaryrecord.cpp \
-		$$PWD/record/a9k_paisrecord.cpp \
 		$$PWD/record/a9k_peer_caida_prefix_inrecord.cpp \
 		$$PWD/record/a9k_sesiones_colarecord.cpp \
 		$$PWD/record/a9k_slotsrecord.cpp \
 		$$PWD/record/a9k_vrf_sin_label_pervrfrecord.cpp \
 		$$PWD/record/arearecord.cpp \
+		$$PWD/record/bgp_lu_sesion_hacia_rr_detallerecord.cpp \
+		$$PWD/record/bgp_pe_ipt_default_trackrecord.cpp \
 		$$PWD/record/bgp_pe_vpn_peer_comunities_inrecord.cpp \
+		$$PWD/record/bgp_prefix_in_refrecord.cpp \
 		$$PWD/record/bgp_publicaciones_a_proveedoresrecord.cpp \
 		$$PWD/record/bgp_serv_prin_bck_comunidades_faltantesrecord.cpp \
+		$$PWD/record/bgp_sesion_hacia_rrrecord.cpp \
 		$$PWD/record/bgp_sesiones_clientes_sin_prefix_filtrorecord.cpp \
 		$$PWD/record/enlacerecord.cpp \
 		$$PWD/record/equiporecord.cpp \

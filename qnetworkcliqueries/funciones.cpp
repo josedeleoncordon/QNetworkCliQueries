@@ -539,6 +539,14 @@ bool sonIPsParejaMascara30_31(QString ip1, QString ip2 )
     QString ipuno = IP2Binario(ip1);
     QString ipdos = IP2Binario(ip2);
 
+    // qDebug() << "sonIPsParejaMascara30_31" << ip1 << ip2;
+    // qDebug() << "ipuno" << ipuno;
+    // qDebug() << "ipdos" << ipdos;
+    // qDebug() << "ipuno.left(30)" << ipuno.left(30);
+    // qDebug() << "ipuno.left(31)" << ipuno.left(31);
+    // qDebug() << "ipdos.left(30)" << ipuno.left(30);
+    // qDebug() << "ipdos.left(31)" << ipuno.left(31);
+
     if ( ipuno.left(30) == ipdos.left(30) ||
          ipuno.left(31) == ipdos.left(31) )
         return true;
@@ -726,6 +734,11 @@ bool esIP1MayorQueIP2(QString ip1, QString ip2)
 
 bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos)
 {
+    if (IP.contains(":") && segmentoIP_mascara2digitos.contains(".") ||
+        IP.contains(".") && segmentoIP_mascara2digitos.contains(":"))
+        //no comparar IPv4 con IPv6
+        return false;
+
     if (IP.contains("/"))
         IP = IP.split("/").first();
 
