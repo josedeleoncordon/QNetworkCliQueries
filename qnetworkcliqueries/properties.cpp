@@ -29,7 +29,11 @@ Properties * Properties::Instance()
 
 Properties::Properties()
 {
-    savelogs=false;   
+    savelogs=false;
+    sshjumpserver=false;
+    qthrinterval=0;
+    qthrsimultaneos=0;
+    qthrmaxparalelos=0;
     ed = &newPropertiesEncoderDecoder;
 }
 
@@ -101,6 +105,10 @@ void Properties::loadSettings()
     settings.beginGroup("Connection");
     user = ped->decode(settings.value("ConnectionUser").toString());
     password = ped->decode(settings.value("ConnectionPassword").toString());
+    sshjumpserver = settings.value("sshjumpserver").toBool();
+    qthrinterval = settings.value("qthrinterval").toInt();
+    qthrsimultaneos = settings.value("qthrsimultaneos").toInt();
+    qthrmaxparalelos = settings.value("qthrmaxparalelos").toInt();
     settings.endGroup();
 
     settings.beginGroup("Queries");

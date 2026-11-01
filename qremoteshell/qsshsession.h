@@ -5,6 +5,8 @@ softengineer/qsshterm
 https://github.com/softengineer/qsshterm
 */
 
+//Una conexion SSH directa al equipo
+
 #ifndef QSSHSESSION_H
 #define QSSHSESSION_H
 
@@ -21,7 +23,9 @@ class QTimer;
 class QSocketNotifier;
 
 class QSSHSession : public QObject {
+
     Q_OBJECT
+    friend class QRemoteShell;
 
 public:
 
@@ -54,10 +58,14 @@ signals:
 
 private slots:
     void select_loop();
+    void m_sendfirstrn();
 
 private :
     ssh_session session;
     ssh_channel channel;
+
+    //primera conexion hacia el GW de Salto en true. Luego se establece static gw_enabled en true para los siguientes
+    bool m_gwprimeraconexion;
 
     // //utilizamos dlopen para abrir otra version de libssh en tiempo de ejecucion
     // //se espera que esta otra libssh este compilada con soporte para DSA para conexion con equipos legacy

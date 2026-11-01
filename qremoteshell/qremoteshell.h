@@ -33,7 +33,12 @@ public:
     QRemoteShell( QString ip, QString user, QString pwd, QString platform, QString linuxprompt,QObject *parent=nullptr );
     ~QRemoteShell();
 
+    static bool connectToSSHGlobalGW(QString ip, QString port, QString user, QString pwd);
+    static void disconnectToSSHGlobalGW();
+
     void setConnectionProtocol( ConnectionProtocol cp );
+    void setPortTelnet(QString port);
+    void setPortSSH(QString port);
     void host_connect();
     void host_disconnect();
     void sendData(const QByteArray &data);
@@ -54,6 +59,8 @@ private:
     QList<ConnectionProtocol> m_lstConnectionProtocol;
     QList<ConnectionProtocol> m_lstConnectionProtocolgw;
     QString m_ip;
+    QString m_portssh;
+    QString m_porttelnet;
     QString m_user;
     QString m_pwd;
     QString m_platform;
@@ -63,9 +70,12 @@ private:
     QRegularExpressionMatch match;
     bool m_hostConnected;
     bool m_termle;
+    bool m_termnomonitor;
+    bool m_nokia_configure_private;
     bool m_enablesent;
     bool m_pwdsent;
     bool m_connectionRefused;
+    bool m_gwprimeraconexion;
     QString _errortxt;
     QString m_dataReceived;
     QRegularExpression m_localprompt;
@@ -75,6 +85,8 @@ private:
     bool m_sshmodelibssh;
     short m_consultaIntentos;
     bool m_lastlibsshfailed;
+
+    int idSShManagerClient;
 
     QString eliminarCaractaresMenorASCII32(QString txt);
     void m_nextTry();
@@ -88,7 +100,13 @@ private slots:
     void ssh_host_connected();
     void ssh_host_disconnected();
     void on_ssh_dataReceived();
+
     void m_terminal_detaReceived(QString);
+
+    //sshmanager
+    void ssh_sshmanager_host_connected(int id);
+    void ssh_sshmanager_host_disconnected(int id);
+    void on_sshmanager_readyRead(int id, QByteArray data);
 
 signals:
     void reachable();
@@ -96,6 +114,11 @@ signals:
     void disconnected();
     void readyRead();
     void working();
+
+    //sshmanager
+    void requestShell(int id);
+    void requestCommand(int id, QString cmd);
+    void requestClose(int id);
 };
 
 #endif // QREMOTESHELL_H

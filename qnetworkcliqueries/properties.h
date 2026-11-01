@@ -35,11 +35,15 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         bool savelogs;
         QString user;
         QString password;
+        bool sshjumpserver;
         QString queriespath;
         QString mnemonicspath;
         QString backupspath;
         QString logspath;
         QString linuxpromt;
+        int qthrinterval;
+        int qthrsimultaneos;
+        int qthrmaxparalelos;
 
         QString topologiaconfpath;
         QString topologiaiconpath;

@@ -34,7 +34,8 @@ unix {
 
     #do the rpath by hand since it's not possible to use ORIGIN in QMAKE_RPATHDIR
     # this expands to $ORIGIN (after qmake and make), it does NOT read a qmake var
-    QMAKE_RPATHDIR += /usr/local/lib64/
+
+    QMAKE_RPATHDIR += /usr/local/lib64/   #Buscar libssh compilado con soporte dss antes que el de /usr/lib64
     QMAKE_RPATHDIR += \$\$ORIGIN
     APP_RPATH = $$join(QMAKE_RPATHDIR, ":")
 
@@ -45,8 +46,9 @@ unix {
 SOURCES += \
     qremoteshelllogging.cpp \
     qsshsession.cpp \
-    qtelnet.cpp \    
-    qremoteshell.cpp #\
+    qtelnet.cpp \
+    sshmanager.cpp  \
+    qremoteshell.cpp \
     # terminal/Pty.cpp \
     # terminal/kprocess.cpp \
     # terminal/kpty.cpp \
@@ -57,9 +59,10 @@ SOURCES += \
 HEADERS += \
     qremoteshelllogging.h \
     qsshsession.h \
-    qtelnet.h \    
+    qtelnet.h \
+    sshmanager.h \
     qremoteshell.h\
-    qremoteshell_global.h #\
+    qremoteshell_global.h \
     # terminal/Pty.h \
     # terminal/kprocess.h \
     # terminal/kpty.h \
@@ -74,5 +77,7 @@ unix {
 }
 
 #Previamente compilar libssh con soporte de DSA
-LIBS *= -L/usr/local/lib64/ -lssh
+# LIBS *= -L/usr/local/lib64/ -lssh
+
+LIBS *= -lssh
 
