@@ -1,0 +1,39 @@
+A:admin@PE1-NOKIA# show router ospf all neighbor detail
+
+===============================================================================
+Rtr Base OSPFv2 Instance 0 Neighbors (detail)
+===============================================================================
+-------------------------------------------------------------------------------
+Neighbor Rtr Id : 10.255.0.2  Interface: to-PE2
+-------------------------------------------------------------------------------
+Neighbor IP Addr  : 10.1.12.2
+Local IF IP Addr  : 10.1.12.1
+Area Id           : 0.0.0.0
+Designated Rtr    : 0.0.0.0                  Backup Desig Rtr  : 0.0.0.0
+Neighbor State    : Full                     Priority          : 1
+Retrans Q Length  : 0                        Options           : -E--O-
+Events            : 5                        Last Event Time   : 03/14/2026 10:22:31
+Up Time           : 12d 03:11:45             Time Before Dead  : 34
+GR Helper         : Not Applicable           GR Helper Age     : 0
+GR Exit Reason    : None                     GR Restart Reason : Unknown
+Bad Nbr States    : 0                        LSA Inst fails    : 0
+Bad Seq Nums      : 0                        Bad MTUs          : 0
+Bad Packets       : 0                        LSA not in LSDB   : 0
+Option Mismatches : 0                        Nbr Duplicates    : 0
+Num Restarts      : 0                        Last Restart at   : Never
+
+-------------------------------------------------------------------------------
+Neighbor Rtr Id : 10.255.0.3  Interface: to-AGG3
+-------------------------------------------------------------------------------
+Neighbor IP Addr  : 10.1.13.2
+Local IF IP Addr  : 10.1.13.1
+Area Id           : 0.0.0.10
+Designated Rtr    : 0.0.0.0                  Backup Desig Rtr  : 0.0.0.0
+Neighbor State    : Full                     Priority          : 1
+Retrans Q Length  : 0                        Options           : -E--O-
+Events            : 5                        Last Event Time   : 03/14/2026 10:22:35
+Up Time           : 12d 03:11:41             Time Before Dead  : 37
+-------------------------------------------------------------------------------
+No. of Neighbors: 2
+===============================================================================
+A:admin@PE1-NOKIA#

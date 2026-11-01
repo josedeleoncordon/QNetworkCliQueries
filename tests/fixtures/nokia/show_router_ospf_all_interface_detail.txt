@@ -1,0 +1,39 @@
+A:admin@PE1-NOKIA# show router ospf all interface detail
+
+===============================================================================
+Rtr Base OSPFv2 Instance 0 Interfaces (Detailed)
+===============================================================================
+-------------------------------------------------------------------------------
+Interface : system
+-------------------------------------------------------------------------------
+IP Address       : 10.255.0.1
+Area Id          : 0.0.0.0                  Priority         : 1
+Hello Intrvl     : 10 sec                   Rtr Dead Intrvl  : 40 sec
+Retrans Intrvl   : 5 sec                    Poll Intrvl      : 120 sec
+Cfg Metric       : 0                        Advert Subnet    : True
+Transit Delay    : 1                        Cfg IF Type      : None
+Passive          : True                     Cfg MTU          : 0
+Admin Status     : Enabled                  Oper State       : Designated Rtr
+Oper Metric      : 0                        Oper MTU         : 1500
+
+-------------------------------------------------------------------------------
+Interface : to-PE2
+-------------------------------------------------------------------------------
+IP Address       : 10.1.12.1
+Area Id          : 0.0.0.0                  Priority         : 1
+Hello Intrvl     : 10 sec                   Rtr Dead Intrvl  : 40 sec
+Cfg Metric       : 10                       Advert Subnet    : True
+Admin Status     : Enabled                  Oper State       : Point To Point
+Oper Metric      : 10                       Oper MTU         : 9198
+
+-------------------------------------------------------------------------------
+Interface : to-AGG3
+-------------------------------------------------------------------------------
+IP Address       : 10.1.13.1
+Area Id          : 0.0.0.10                 Priority         : 1
+Hello Intrvl     : 10 sec                   Rtr Dead Intrvl  : 40 sec
+Cfg Metric       : 100                      Advert Subnet    : True
+Admin Status     : Enabled                  Oper State       : Point To Point
+Oper Metric      : 100                      Oper MTU         : 9198
+===============================================================================
+A:admin@PE1-NOKIA#
