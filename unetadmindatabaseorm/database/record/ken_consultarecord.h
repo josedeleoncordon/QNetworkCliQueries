@@ -29,6 +29,8 @@ public:
 	void set_pe_destino_ip(QString pe_destino_ip);
 	void set_pe_destino_ip2(QString pe_destino_ip2);
 	void set_pe_ip(QString pe_ip);
+	void set_proveedor(QString proveedor);
+	void set_tipo(QString tipo);
 
 	QString asn();
 	QString asn_origen();
@@ -42,6 +44,8 @@ public:
 	QString pe_destino_ip();
 	QString pe_destino_ip2();
 	QString pe_ip();
+	QString proveedor();
+	QString tipo();
 
 
 	ken_consultaRecord& operator=(const ken_consultaRecord &record);

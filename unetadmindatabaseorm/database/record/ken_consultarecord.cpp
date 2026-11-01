@@ -75,6 +75,16 @@ void ken_consultaRecord::set_pe_ip(QString pe_ip)
 	setProperty("pe_ip",pe_ip);
 }
 
+void ken_consultaRecord::set_proveedor(QString proveedor)
+{
+	setProperty("proveedor",proveedor);
+}
+
+void ken_consultaRecord::set_tipo(QString tipo)
+{
+	setProperty("tipo",tipo);
+}
+
 QString ken_consultaRecord::asn()
 {
 	return property("asn").toString();
@@ -133,6 +143,16 @@ QString ken_consultaRecord::pe_destino_ip2()
 QString ken_consultaRecord::pe_ip()
 {
 	return property("pe_ip").toString();
+}
+
+QString ken_consultaRecord::proveedor()
+{
+	return property("proveedor").toString();
+}
+
+QString ken_consultaRecord::tipo()
+{
+	return property("tipo").toString();
 }
 
 ken_consultaRecord &ken_consultaRecord::operator=(const ken_consultaRecord &other)

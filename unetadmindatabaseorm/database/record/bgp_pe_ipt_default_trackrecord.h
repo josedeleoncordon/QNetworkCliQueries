@@ -25,6 +25,7 @@ public:
 	void set_pe_ip(QString pe_ip);
 	void set_pe_nombre(QString pe_nombre);
 	void set_peer(QString peer);
+	void set_rpl_in(QString rpl_in);
 	void set_track(QString track);
 	void set_track_ok(int track_ok);
 
@@ -36,6 +37,7 @@ public:
 	QString pe_ip();
 	QString pe_nombre();
 	QString peer();
+	QString rpl_in();
 	QString track();
 	int track_ok();
 

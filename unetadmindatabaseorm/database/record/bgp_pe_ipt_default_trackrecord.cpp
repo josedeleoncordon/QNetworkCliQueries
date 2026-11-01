@@ -55,6 +55,11 @@ void bgp_pe_ipt_default_trackRecord::set_peer(QString peer)
 	setProperty("peer",peer);
 }
 
+void bgp_pe_ipt_default_trackRecord::set_rpl_in(QString rpl_in)
+{
+	setProperty("rpl_in",rpl_in);
+}
+
 void bgp_pe_ipt_default_trackRecord::set_track(QString track)
 {
 	setProperty("track",track);
@@ -103,6 +108,11 @@ QString bgp_pe_ipt_default_trackRecord::pe_nombre()
 QString bgp_pe_ipt_default_trackRecord::peer()
 {
 	return property("peer").toString();
+}
+
+QString bgp_pe_ipt_default_trackRecord::rpl_in()
+{
+	return property("rpl_in").toString();
 }
 
 QString bgp_pe_ipt_default_trackRecord::track()

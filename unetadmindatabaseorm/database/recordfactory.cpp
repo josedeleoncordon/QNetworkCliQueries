@@ -18,12 +18,14 @@
 #include "record/arearecord.h"
 #include "record/bgp_lu_sesion_hacia_rr_detallerecord.h"
 #include "record/bgp_pe_ipt_default_trackrecord.h"
+#include "record/bgp_pe_rrclient_hacia_arribarecord.h"
 #include "record/bgp_pe_vpn_peer_comunities_inrecord.h"
 #include "record/bgp_prefix_in_refrecord.h"
 #include "record/bgp_publicaciones_a_proveedoresrecord.h"
 #include "record/bgp_serv_prin_bck_comunidades_faltantesrecord.h"
 #include "record/bgp_sesion_hacia_rrrecord.h"
 #include "record/bgp_sesiones_clientes_sin_prefix_filtrorecord.h"
+#include "record/bgp_vpnv_nhs_rrclientrecord.h"
 #include "record/enlacerecord.h"
 #include "record/equiporecord.h"
 #include "record/gruporecord.h"
@@ -91,6 +93,8 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new bgp_lu_sesion_hacia_rr_detalleRecord;
 	if ( table == "bgp_pe_ipt_default_track" )
 		return new bgp_pe_ipt_default_trackRecord;
+	if ( table == "bgp_pe_rrclient_hacia_arriba" )
+		return new bgp_pe_rrclient_hacia_arribaRecord;
 	if ( table == "bgp_pe_vpn_peer_comunities_in" )
 		return new bgp_pe_vpn_peer_comunities_inRecord;
 	if ( table == "bgp_prefix_in_ref" )
@@ -103,6 +107,8 @@ RecordBase *RecordFactory::newRecord(QString table)
 		return new bgp_sesion_hacia_rrRecord;
 	if ( table == "bgp_sesiones_clientes_sin_prefix_filtro" )
 		return new bgp_sesiones_clientes_sin_prefix_filtroRecord;
+	if ( table == "bgp_vpnv_nhs_rrclient" )
+		return new bgp_vpnv_nhs_rrclientRecord;
 	if ( table == "enlace" )
 		return new enlaceRecord;
 	if ( table == "equipo" )

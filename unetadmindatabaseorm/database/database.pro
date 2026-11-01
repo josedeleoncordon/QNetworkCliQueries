@@ -22,12 +22,14 @@ HEADERS += $$PWD/record/a9k_bgp_inter_asrecord.h \
 		$$PWD/record/arearecord.h \
 		$$PWD/record/bgp_lu_sesion_hacia_rr_detallerecord.h \
 		$$PWD/record/bgp_pe_ipt_default_trackrecord.h \
+		$$PWD/record/bgp_pe_rrclient_hacia_arribarecord.h \
 		$$PWD/record/bgp_pe_vpn_peer_comunities_inrecord.h \
 		$$PWD/record/bgp_prefix_in_refrecord.h \
 		$$PWD/record/bgp_publicaciones_a_proveedoresrecord.h \
 		$$PWD/record/bgp_serv_prin_bck_comunidades_faltantesrecord.h \
 		$$PWD/record/bgp_sesion_hacia_rrrecord.h \
 		$$PWD/record/bgp_sesiones_clientes_sin_prefix_filtrorecord.h \
+		$$PWD/record/bgp_vpnv_nhs_rrclientrecord.h \
 		$$PWD/record/enlacerecord.h \
 		$$PWD/record/equiporecord.h \
 		$$PWD/record/grupo_equiporecord.h \
@@ -74,12 +76,14 @@ SOURCES += $$PWD/record/a9k_bgp_inter_asrecord.cpp \
 		$$PWD/record/arearecord.cpp \
 		$$PWD/record/bgp_lu_sesion_hacia_rr_detallerecord.cpp \
 		$$PWD/record/bgp_pe_ipt_default_trackrecord.cpp \
+		$$PWD/record/bgp_pe_rrclient_hacia_arribarecord.cpp \
 		$$PWD/record/bgp_pe_vpn_peer_comunities_inrecord.cpp \
 		$$PWD/record/bgp_prefix_in_refrecord.cpp \
 		$$PWD/record/bgp_publicaciones_a_proveedoresrecord.cpp \
 		$$PWD/record/bgp_serv_prin_bck_comunidades_faltantesrecord.cpp \
 		$$PWD/record/bgp_sesion_hacia_rrrecord.cpp \
 		$$PWD/record/bgp_sesiones_clientes_sin_prefix_filtrorecord.cpp \
+		$$PWD/record/bgp_vpnv_nhs_rrclientrecord.cpp \
 		$$PWD/record/enlacerecord.cpp \
 		$$PWD/record/equiporecord.cpp \
 		$$PWD/record/grupo_equiporecord.cpp \

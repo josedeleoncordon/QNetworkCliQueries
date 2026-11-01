@@ -364,19 +364,6 @@ pcp_pais:
     pais:
       type: string(45)
       notnull: true
-    pcp_region_id:
-      type: integer
-      notnull: true
-  relations:
-    pcp_region_1:
-      foreignType: many
-      foreignAlias: pcp_paiss
-      local: pcp_region_id
-      foreign: id
-      class: pcp_region
-      owningSide: true
-      onDelete: NO ACTION
-      onUpdate: NO ACTION
 
 pcp_proveedor:
   columns:
@@ -668,6 +655,10 @@ ken_consulta:
       type: string(75)
     interface:
       type: string(45)
+    tipo:
+      type: string(100)
+    proveedor:
+      type: string(100)
     pe_ip:
       type: string(45)
     pe_destino_ip:
@@ -1256,4 +1247,38 @@ bgp_pe_ipt_default_track:
       type: tinyint
     detalle:
       type: string(1000)
+    rpl_in:
+      type: string(100)
+
+bgp_vpnv_nhs_rrclient:
+  columns:
+    fecha:
+      type: date
+    pais:
+      type: string(45)
+    pe_ip:
+      type: string(45)
+    pe_nombre:
+      type: string(45)
+    peer:
+      type: string(45)
+    address_family:
+      type: string(45)
+    ok:
+      type: tinyint
+
+bgp_pe_rrclient_hacia_arriba:
+  columns:
+    fecha:
+      type: date
+    pais:
+      type: string(45)
+    pe_ip:
+      type: string(45)
+    pe_nombre:
+      type: string(45)
+    peer:
+      type: string(45)
+    ok:
+      type: tinyint
 
