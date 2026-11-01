@@ -24,6 +24,7 @@ private slots:
     void on_term_receiveText();
     void on_term_on_term_receiveText_xr_location();
     void on_term_on_term_receiveTextSnmpLocation();
+    void on_term_on_term_IPI_terminal_no_monitor();
 };
 
 #endif // PLATFORMINFO_H

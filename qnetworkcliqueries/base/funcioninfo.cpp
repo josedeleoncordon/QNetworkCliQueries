@@ -1,5 +1,19 @@
 #include "funcioninfo.h"
 
+QDataStream& operator<<(QDataStream& out, const SLabelTxtRcvd &data)
+{
+    out << data.label;
+    out << data.txt;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, SLabelTxtRcvd& data)
+{
+    in >> data.label;
+    in >> data.txt;
+    return in;
+}
+
 FuncionInfo::FuncionInfo(QRemoteShell *terminal, int option):
     FuncionBase(terminal,option)
 {}
@@ -27,23 +41,38 @@ void FuncionInfo::getTXT()
 
     if ( m_os == "IOS XR" && m_xr64 )
         //si es XR de 64 bits vemos si hay configuraciones especificas para este. Si no abajo buscara configuraciones para XR general
-        _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,"IOS XR64",m_conexionID,m_queryName );
+        _lstFuncionesLabeled = m_queriesConfiguration.valuesLabeled( "FuncionInfo_txt",m_ip,
+                                                             "IOS XR64",m_conexionID,m_queryName );
 
-    if ( _lstFunciones.isEmpty() )
-        _lstFunciones = m_queriesConfiguration.values( "FuncionInfo_txt",m_ip,m_os,m_conexionID,m_queryName );
+    if ( _lstFuncionesLabeled.isEmpty() )
+        _lstFuncionesLabeled = m_queriesConfiguration.valuesLabeled( "FuncionInfo_txt",m_ip,
+                                                             m_os,m_conexionID,m_queryName );
 
-    qDebug() << m_ip << "FuncionInfo::getTXT()" << _lstFunciones;
-    qDebug() << "FuncionInfo::getTXT()" << m_ip << _lstFunciones;
+    for (QueriesConfigurationValue cv : _lstFuncionesLabeled)
+        qDebug() << m_ip << "FuncionInfo::getTXT()" << cv._label << cv._value;
 
     _siguienteFuncion();
 }
 
 void FuncionInfo::_siguienteFuncion()
 {
-    if ( !_lstFunciones.isEmpty() )
-        termSendText( _lstFunciones.takeFirst() );
+    if ( _lstFunciones.isEmpty() )
+    {
+        if ( !_lstFuncionesLabeled.isEmpty() )
+        {
+            QueriesConfigurationValue cv = _lstFuncionesLabeled.takeFirst();
+            _label = cv._label;
+            _lstFunciones.append( cv._value.split(",",Qt::SkipEmptyParts) );
+            if ( _lstFunciones.isEmpty() )
+                finished();
+            else
+                termSendText( _lstFunciones.takeFirst() );
+        }
+        else
+            finished();
+    }
     else
-        finished();
+        termSendText( _lstFunciones.takeFirst() );
 }
 
 void FuncionInfo::on_term_receiveText()
@@ -53,12 +82,17 @@ void FuncionInfo::on_term_receiveText()
         return;
 
     _lstTxt.append(txt);
+    SLabelTxtRcvd s;
+    s.label = _label;
+    s.txt = txt;
+    _lstLabeledTxt.append(s);
     _siguienteFuncion();
 }
 
 QDataStream& operator<<(QDataStream& out, const FuncionInfo& info)
 {
     out << info._lstTxt;
+    out << info._lstLabeledTxt;
     out << info.m_queryoption;
     out << info.m_queryName;
     return out;
@@ -67,6 +101,7 @@ QDataStream& operator<<(QDataStream& out, const FuncionInfo& info)
 QDataStream& operator>>(QDataStream& in, FuncionInfo& info)
 {
     in >> info._lstTxt;
+    in >> info._lstLabeledTxt;
     in >> info.m_queryoption;
     in >> info.m_queryName;
     return in;

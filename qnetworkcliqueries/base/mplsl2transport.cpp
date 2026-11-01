@@ -3,12 +3,30 @@
 
 QDataStream& operator<<(QDataStream& out, const SMplsL2PWInfo& data)
 {
-    out << data.VCID;
-    out << data.destino;
+    out << data.pwid;
+    out << data.neighbor;
+    out << data.state;
     out << data.preferredPath;
     out << data.remoteDescripcion;
-    out << data.estado;
     out << data.source;
+    out << data.neighborbk;
+    out << data.pwidbk;
+    out << data.statebk;
+    out << data.srvid;
+    out << data.sdpprimary;
+    out << data.xc;
+    out << data.descripcion;
+    out << data.AC;
+    out << data.ACXEInterfaz;
+    out << data.ACXEServiceInstance;
+    out << data.mtu;
+    out << data.pwclass;
+    out << data.pwclassbck;
+    out << data.group;
+    out << data.controlword;
+    out << data.controlwordbck;
+    out << data.fat;
+    out << data.fatbck;
     //infobase
     out << data.datetime;
     out << data.operativo;
@@ -17,12 +35,30 @@ QDataStream& operator<<(QDataStream& out, const SMplsL2PWInfo& data)
 
 QDataStream& operator>>(QDataStream& in, SMplsL2PWInfo& data)
 {
-    in >> data.VCID;
-    in >> data.destino;
+    in >> data.pwid;
+    in >> data.neighbor;
+    in >> data.state;
     in >> data.preferredPath;
     in >> data.remoteDescripcion;
-    in >> data.estado;
     in >> data.source;
+    in >> data.neighborbk;
+    in >> data.pwidbk;
+    in >> data.statebk;
+    in >> data.srvid;
+    in >> data.sdpprimary;
+    in >> data.xc;
+    in >> data.descripcion;
+    in >> data.AC;
+    in >> data.ACXEInterfaz;
+    in >> data.ACXEServiceInstance;
+    in >> data.mtu;
+    in >> data.pwclass;
+    in >> data.pwclassbck;
+    in >> data.group;
+    in >> data.controlword;
+    in >> data.controlwordbck;
+    in >> data.fat;
+    in >> data.fatbck;
     //infobase
     in >> data.datetime;
     in >> data.operativo;
@@ -31,51 +67,15 @@ QDataStream& operator>>(QDataStream& in, SMplsL2PWInfo& data)
 
 QDebug operator<<(QDebug dbg, const SMplsL2PWInfo &info)
 {
-    dbg.space() << "(" << info.VCID << info.source << info.destino << info.estado
-                << info.preferredPath << info.remoteDescripcion << ")";
+    dbg.space() << "(" << info.pwid << info.source << info.neighbor << info.state << info.mtu
+                << info.preferredPath << info.remoteDescripcion << info.neighborbk << info.pwidbk << info.statebk << ")";
     return dbg.maybeSpace();
-}
-
-QDataStream& operator<<(QDataStream& out, const SMplsL2XconnectInfo& data)
-{
-    out << data.VCID;
-    out << data.AC;
-    out << data.destino;
-    out << data.preferredPath;
-    out << data.remoteDescripcion;
-    out << data.estado;
-    out << data.xc;
-    out << data.descripcion;
-    out << data.AC;
-    out << data.source;
-    //infobase
-    out << data.datetime;
-    out << data.operativo;
-    return out;
-}
-
-QDataStream& operator>>(QDataStream& in, SMplsL2XconnectInfo& data)
-{
-    in >> data.VCID;
-    in >> data.AC;
-    in >> data.destino;
-    in >> data.preferredPath;
-    in >> data.remoteDescripcion;
-    in >> data.estado;
-    in >> data.xc;
-    in >> data.descripcion;
-    in >> data.AC;
-    in >> data.source;
-    //infobase
-    in >> data.datetime;
-    in >> data.operativo;
-    return in;
 }
 
 QDataStream& operator<<(QDataStream& out, const SMplsL2VFIInfo& data)
 {
     out << data.vfi;
-    out << data.AC;
+    out << data.ACvfi;
     out << data.descripcion;
     out << data.bridge;
     out << data.lstPWs;
@@ -88,7 +88,7 @@ QDataStream& operator<<(QDataStream& out, const SMplsL2VFIInfo& data)
 QDataStream& operator>>(QDataStream& in, SMplsL2VFIInfo& data)
 {
     in >> data.vfi;
-    in >> data.AC;
+    in >> data.ACvfi;
     in >> data.descripcion;
     in >> data.bridge;
     in >> data.lstPWs;
@@ -98,7 +98,7 @@ QDataStream& operator>>(QDataStream& in, SMplsL2VFIInfo& data)
     return in;
 }
 
-void updateInfoList(QList<SMplsL2XconnectInfo> &lstDest, QList<SMplsL2XconnectInfo> &lstOrigin )
+void updateInfoList(QList<SMplsL2PWInfo> &lstDest, QList<SMplsL2PWInfo> &lstOrigin )
 {
     //actualiza la lista anterior con la información de la nueva
     //origen = nuevo
@@ -107,7 +107,7 @@ void updateInfoList(QList<SMplsL2XconnectInfo> &lstDest, QList<SMplsL2XconnectIn
     //borramos los datos anteriores que tengan mas de 30 dias
     for ( int c=0; c<lstDest.size(); )
     {
-        SMplsL2XconnectInfo &dest = lstDest[c];
+        SMplsL2PWInfo &dest = lstDest[c];
         if ( dest.datetime.date().daysTo( QDate::currentDate() )  > 30 && !dest.operativo )
              lstDest.removeAt( c );
         else
@@ -118,25 +118,40 @@ void updateInfoList(QList<SMplsL2XconnectInfo> &lstDest, QList<SMplsL2XconnectIn
     }
 
     //actualizamos los datos del anterior con la nueva, se agrega la nueva
-    for ( SMplsL2XconnectInfo &origin : lstOrigin )
+    for ( SMplsL2PWInfo &origin : lstOrigin )
     {
         bool encontrado=false;
-        for ( SMplsL2XconnectInfo &dest : lstDest )
+        for ( SMplsL2PWInfo &dest : lstDest )
         {
             if ( origin.xc == dest.xc )
             {
                 //Si se encontro, actualizamos los datos
                 dest.datetime = origin.datetime;
                 dest.operativo = true;
-                dest.VCID = origin.VCID;
+                dest.pwid = origin.pwid;
                 dest.AC = origin.AC;
-                dest.destino = origin.destino;
+                dest.ACXEInterfaz = origin.ACXEInterfaz;
+                dest.ACXEServiceInstance = origin.ACXEServiceInstance;
+                dest.neighbor = origin.neighbor;
+                dest.neighborbk = origin.neighborbk;
+                dest.pwidbk = origin.pwidbk;
                 dest.preferredPath = origin.preferredPath;
                 dest.remoteDescripcion = origin.remoteDescripcion;
-                dest.estado = origin.estado;
+                dest.state = origin.state;
+                dest.statebk = origin.statebk;
                 dest.descripcion = origin.descripcion;
-                dest.AC = origin.AC;
                 dest.source = origin.source;
+                dest.srvid = origin.srvid;
+                dest.sdpprimary = origin.sdpprimary;
+                dest.xc = origin.xc;
+                dest.mtu = origin.mtu;
+                dest.group = origin.group;
+                dest.pwclass = origin.pwclass;
+                dest.pwclassbck = origin.pwclassbck;
+                dest.controlword = origin.controlword;
+                dest.controlwordbck = origin.controlwordbck;
+                dest.fat = origin.fat;
+                dest.fatbck = origin.fatbck;
                 encontrado=true;
                 break;
             }
@@ -178,7 +193,7 @@ void updateInfoList(QList<SMplsL2VFIInfo> &lstDest, QList<SMplsL2VFIInfo> &lstOr
                 dest.datetime = origin.datetime;
                 dest.operativo = true;
                 dest.vfi = origin.vfi;
-                dest.AC = origin.AC;
+                dest.ACvfi = origin.ACvfi;
                 dest.descripcion = origin.descripcion;
                 dest.bridge = origin.bridge;
                 dest.lstPWs = origin.lstPWs;
@@ -204,7 +219,7 @@ MplsL2TransportInfo::MplsL2TransportInfo(const MplsL2TransportInfo &other):
     m_platform = other.m_platform;
     m_name = other.m_name;
     m_ip = other.m_ip;
-    m_lstMplsL2Xconnects = other.m_lstMplsL2Xconnects;
+    m_lstMplsL2PWs = other.m_lstMplsL2PWs;
     m_lstMplsL2VFIs = other.m_lstMplsL2VFIs;
     m_queryName = other.m_queryName;
 }
@@ -219,7 +234,7 @@ void MplsL2TransportInfo::getMplsL2Transport()
         if ( m_os == "IOS XR" )
         {
             connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_XR_BD()));
-            termSendText("sh l2vpn bridge-domain detail | i \"Bridge group|Description|AC:|PWs:|VFI|PW: neighbor|Interface|Preferred|Source\"");
+            termSendText("sh l2vpn bridge-domain detail | i \"Bridge group|Description|AC:|PWs:|VFI|PW: neighbor|Interface|Preferred|Source|Control word\"");
         }
         else
         {
@@ -231,6 +246,12 @@ void MplsL2TransportInfo::getMplsL2Transport()
     {
         connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_VRP_VSI()));
         termSendText("display vsi peer-info");
+    }
+    else if ( m_brand == "Nokia" )
+    {
+        index_nokia_services.clear();
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_SR_OS_SAP_USING()));
+        termSendText("show service sap-using");
     }
     else
     {
@@ -283,120 +304,11 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_VFI()
         if ( line.contains(exp,&match) )
         {
             SMplsL2PWInfo i;
-            i.VCID = match.captured(2);
+            i.pwid = match.captured(2);
 
             i.source = m_parentQuery->ip();
-            i.destino = match.captured(1);
+            i.neighbor = match.captured(1);
             mvi->lstPWs.append( i );
-            continue;
-        }
-    }
-
-    term->disconnectReceiveTextSignalConnections();
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_L2Transport()));
-    termSendText("sh mpls l2transport vc detail | i Local interface|Destination|Preferred|Remote interface");
-}
-
-void MplsL2TransportInfo::on_term_receiveText_IOS_L2Transport()
-{
-    txt.append(term->dataReceived());
-    if ( !allTextReceived() )
-        return;
-
-    QStringList lines = txt.split("\n");
-    QString lastVFI;
-    QString lastDestino;
-    QString lastVCID;
-    SMplsL2XconnectInfo *mxi = nullptr;
-    foreach (QString line, lines)
-    {
-        line = line.simplified();
-
-//        Local interface: Te0/0/4 up, line protocol up, Eth VLAN 2500 up
-//          Destination address: 172.16.30.11, VC ID: 57250001, VC status: up
-//            Preferred path: Tunnel5701,  active
-//            Remote interface description: COUS09820001|PGM|CALLZILLA_BOGOTA
-
-        QRegularExpression exp("Local interface: VFI (\\S+) \\S+");
-        if ( line.contains(exp,&match) )
-        {
-            lastVFI = match.captured(1);
-            continue;
-        }
-
-        exp.setPattern("Local interface: (\\S+) \\S+");
-        if ( line.contains(exp,&match) )
-        {
-            lastVFI.clear();
-            lastVCID.clear();
-            lastDestino.clear();
-
-            SMplsL2XconnectInfo i;
-            i.AC = match.captured(1);
-            i.source = m_parentQuery->ip();
-            m_lstMplsL2Xconnects.append(i);
-            mxi = &m_lstMplsL2Xconnects.last();
-
-            if ( !lstIosInterfaces.contains(i.AC) )
-                lstIosInterfaces.append(i.AC);
-        }
-
-        if ( !mxi && lastVFI.isEmpty() )
-            continue;
-
-
-
-        exp.setPattern("Destination address: (\\S+), VC ID: (\\d+), VC status: (\\S+)");
-        if ( line.contains(exp,&match) )
-        {
-            if ( lastVFI.isEmpty() )
-            {
-                //normal
-                mxi->destino = match.captured(1);
-                mxi->VCID = match.captured(2);
-                mxi->estado = match.captured(3);
-            }
-            else
-            {
-                //vfi
-                lastDestino = match.captured(1);
-                lastVCID = match.captured(2);
-                SMplsL2PWInfo *pw = buscarVFI_PW( lastVFI, lastDestino, lastVCID );
-                if ( pw )
-                    pw->estado = match.captured(3);
-            }
-            continue;
-        }
-
-        exp.setPattern("Preferred path: (\\S+), \\S+");
-        if ( line.contains(exp,&match) )
-        {
-            if ( lastVFI.isEmpty() )
-                //normal
-                mxi->preferredPath = match.captured(1);
-            else
-            {
-                //vfi
-                SMplsL2PWInfo *pw = buscarVFI_PW( lastVFI, lastDestino, lastVCID );
-                if ( pw )
-                    pw->estado = match.captured(1);
-            }
-            continue;
-        }
-
-        exp.setPattern("Remote interface description: (.+)$");
-        if ( line.contains(exp,&match) )
-        {
-            if ( lastVFI.isEmpty() )
-                //normal
-                mxi->remoteDescripcion = match.captured(1);
-            else
-            {
-                //vfi
-                SMplsL2PWInfo *pw = buscarVFI_PW( lastVFI, lastDestino, lastVCID );
-                if ( pw )
-                    pw->remoteDescripcion = match.captured(1);
-            }
             continue;
         }
     }
@@ -412,32 +324,161 @@ void MplsL2TransportInfo::on_term_receiveText_IOS_Xconnect()
     if ( !allTextReceived() )
         return;
 
+    QString ac;
+    QString acxeinterface;
+    QString acxeserviceinstance;
+    QString nei;
+    QString vfi;
+    QString pwid;
+    QString state;
+    QRegularExpression exp("\\S+ \\S+ +ac (\\S+):(\\d+)\\(.+ (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d+) +(\\S+)$");
+    QRegularExpression expvfi(".+ vfi (\\S+) .+ (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d+) +(\\S+)$");
+    QRegularExpressionMatch match;
+
     QStringList lines = txt.split("\n");
+    for ( int c=0; c<lines.size(); c++ )
+    {
+        QString line = lines.at(c);
+        line = line.mid(0,line.size()-1);
+
+        //UP pri ac Te0/0/4:307(Eth VLAN) UP mpls 172.17.22.79:502307 UP
+        if ( line.contains(exp,&match) )
+        {
+            ac = match.captured(1)+":"+match.captured(2);
+            acxeinterface = match.captured(1);
+            acxeserviceinstance = match.captured(2);
+            nei = match.captured(3);
+            pwid = match.captured(4);
+            state = match.captured(5);
+            SMplsL2PWInfo* pw = buscarPW(ac);
+            if (!pw)
+            {
+                //nuevo
+                SMplsL2PWInfo i;
+                i.AC = ac;
+                i.ACXEInterfaz = acxeinterface;
+                i.ACXEServiceInstance = acxeserviceinstance;
+                i.source = m_parentQuery->ip();
+                i.neighbor=nei;
+                i.pwid=pwid;
+                i.state=state;
+                m_lstMplsL2PWs.append(i);
+            }
+            else
+            {
+                //Agregando peerbck
+                //UP pri   ac Te0/0/26:1193(Eth VLAN)      UP mpls 172.16.30.240:503197201      UP
+                //IA sec   ac Te0/0/26:1193(Eth VLAN)      UP mpls 172.16.30.35:503197202       SB
+                pw->neighborbk = nei;
+                pw->statebk = state;
+                pw->pwidbk = pwid;
+            }
+        }
+        else if ( line.contains(expvfi,&match) )
+        {
+            // qDebug() << "IOS VFI LINE" << q->ip() << line;
+            // qDebug() << lastAC << lastNeighbor << lastPW << lastState;
+            // qDebug() << match.captured(1) << match.captured(2) << match.captured(3) << match.captured(4);
+
+            //VFIs
+            //UP pri  vfi GBM-BGP-4095                 UP mpls 172.16.30.250:502194501      UP
+            //UP pri  vfi GBM-BGP-4095                 UP mpls 172.19.8.9:502409501         UP
+            //UP pri  vfi GBM-BGP-CUSTOMERS-4094       UP mpls 172.16.30.250:502409401      UP
+
+            vfi = match.captured(1);
+            nei = match.captured(2);
+            pwid = match.captured(3);
+            state = match.captured(4);
+            SMplsL2PWInfo *pw = buscarVFI_PW(vfi,nei,pwid);
+            if (pw)
+                pw->state=state;
+        }
+    }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_L2Transport()));
+    termSendText("sh mpls l2transport vc detail | i Local interface|Destination|Preferred|Remote interface|MTU|Control Word");
+}
+
+void MplsL2TransportInfo::on_term_receiveText_IOS_L2Transport()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    QString lastVFI;
+    SMplsL2PWInfo *pw = nullptr;
     foreach (QString line, lines)
     {
         line = line.simplified();
 
-        //UP pri ac Te0/0/4:307(Eth VLAN) UP mpls 172.17.22.79:502307 UP
-        QRegularExpression exp("\\w{2} \\S+ ac (\\S+):(\\d+)\\(.+\\) \\w{2} mpls (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d+) \\w{2}");
+//        Local interface: Te0/0/4 up, line protocol up, Eth VLAN 2500 up
+//          Destination address: 172.16.30.11, VC ID: 57250001, VC status: up
+//            Preferred path: Tunnel5701,  active
+//            Remote interface description: COUS09820001|PGM|CALLZILLA_BOGOTA
+
+        exp.setPattern("Local interface: VFI (\\S+) vfi");
+        if (line.contains(exp,&match))
+        {
+            lastVFI=match.captured(1);
+            continue;
+        }
+        exp.setPattern("Local interface: .+, line protocol");
+        if (line.contains(exp))
+        {
+            lastVFI.clear();
+            continue;
+        }
+
+        exp.setPattern("Destination address: (\\S+), VC ID: (\\d+), VC status:");
         if ( line.contains(exp,&match) )
         {
-            for ( SMplsL2XconnectInfo &i : m_lstMplsL2Xconnects )
-            {
-                if ( i.AC == match.captured(1) && i.VCID == match.captured(4) && i.destino == match.captured(3) )
-                {
-                    i.AC.append( ":"+match.captured(2) );
-                    break;
-                }
-            }
+            if (lastVFI.isEmpty())
+                //xc
+                pw = buscarPW(match.captured(1),match.captured(2));
+            else
+                //vfi
+                pw = buscarVFI_PW(lastVFI,match.captured(1),match.captured(2));
+            continue;
+        }
+
+        if (!pw)
+            continue;
+
+        exp.setPattern("Preferred path: (\\S+), \\S+");
+        if ( line.contains(exp,&match) )
+        {
+            pw->preferredPath = match.captured(1);
+            continue;
+        }
+        exp.setPattern("Remote interface description: (.+)$");
+        if ( line.contains(exp,&match) )
+        {
+            pw->remoteDescripcion = match.captured(1);
+            continue;
+        }
+        exp.setPattern("MTU: local (\\d+)");
+        if ( line.contains(exp,&match) )
+        {
+            pw->mtu = match.captured(1);
+            continue;
+        }
+        exp.setPattern("Control Word: (\\S+)( |$)");
+        if ( line.contains(exp,&match) )
+        {
+            bool cw = false;
+            if ( match.captured(1) == "On") cw=true;
+            pw->controlword = cw;
         }
     }
 
     finished();
 
     //terminar on_term_receiveText_IOS_runInterfaces()
-//    term->disconnectReceiveTextSignalConnections();
-//    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_runInterfaces()));
-//    nextIOSrunInterfaces();
+    //    term->disconnectReceiveTextSignalConnections();
+    //    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IOS_runInterfaces()));
+    //    nextIOSrunInterfaces();
 }
 
 void MplsL2TransportInfo::nextIOSrunInterfaces()
@@ -499,8 +540,10 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
 //            Source address 172.19.16.42
 //            Preferred path Active : tunnel-te50601, Statically configured, fallback enabled
 //              Interface    VLAN1885                       CRCRCAB10039792I|CABLE_CENTRO|CIUDAD_NEILY
+//              Control word disabled                       unknown
 //          PW: neighbor 172.19.24.88, PW ID 506188523, state is down ( all ready ) (Segment-down)
 //              Interface    VLAN1885                       CRCRCAB10039792I|CABLE_CENTRO|CIUDAD_NEILY
+//              Control word disabled                       unknown
 //          VFI Statistics:
 //      List of Access VFIs:
 
@@ -517,8 +560,6 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
         if ( !mvi )
             continue;
 
-
-
         exp.setPattern("Description: (\\S+)$");
         if ( line.contains(exp,&match) )
         {
@@ -529,7 +570,7 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
         exp.setPattern("AC: (\\S+), state");
         if ( line.contains(exp,&match) )
         {
-            mvi->AC = match.captured(1);
+            mvi->ACvfi = match.captured(1);
             continue;
         }
 
@@ -544,9 +585,9 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
         if ( line.contains(exp,&match) )
         {
             SMplsL2PWInfo i;
-            i.destino = match.captured(1);
-            i.VCID = match.captured(2);
-            i.estado = match.captured(3);
+            i.neighbor = match.captured(1);
+            i.pwid = match.captured(2);
+            i.state = match.captured(3);
             mvi->lstPWs.append(i);
             pw = &mvi->lstPWs.last();
         }
@@ -568,14 +609,21 @@ void MplsL2TransportInfo::on_term_receiveText_XR_BD()
         exp.setPattern("Interface \\S+ (\\S+)");
         if ( line.contains(exp,&match) )
         {
-            pw->remoteDescripcion = match.captured(1);
+            if (pw) pw->remoteDescripcion = match.captured(1);
             continue;
+        }
+
+        exp.setPattern("Control word (\\S+) ");
+        if ( line.contains(exp,&match) )
+        {
+            if (match.captured(1) == "enabled")
+                if (pw) pw->controlword=true;
         }
     }
 
     term->disconnectReceiveTextSignalConnections();
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_XR_Xconnect()));
-    termSendText("sh l2vpn xconnect detail | i \"Group|AC:|PW:|Interface|Source\"");
+    termSendText("sh l2vpn xconnect detail | i \"Group|AC:|PW:|EVPN:|Backup PW:|Interface|Source|MTU|PW class|Control word|Flow Label\"");
 }
 
 void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
@@ -585,31 +633,47 @@ void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
         return;
 
     QStringList lines = txt.split("\n");
-    SMplsL2XconnectInfo *xi = nullptr;
-    foreach (QString line, lines)
+    SMplsL2PWInfo *xi = nullptr;
+    bool bk=false;
+    for (QString line : lines)
     {
         line = line.simplified();
 
-//        Group L2VPN_SERVICES, XC Cabletica_CRCR04100019, state is up; Interworking none
-//          AC: TenGigE0/6/0/5.1001, state is up
-//          PW: neighbor 172.16.30.247, PW ID 506100101, state is up ( established )
-//            Source address 172.19.16.42
-//              Group ID     0x10000500                     0x4000340
-//              Interface    TenGigE0/6/0/5.1001            TenGigE0/0/0/4.1001
+        //Group GT00040003, XC GT00040003, state is up; Interworking none
+        //  AC: TenGigE0/0/0/10.50, state is up
+        //  PW: neighbor 172.16.30.250, PW ID 502157751, state is up ( established )
+        //    Source address 172.17.22.132
+        //      Group ID     0x3c0000a8                     0xb
+        //      Interface    TenGigE0/0/0/10.50             VLAN50
+        //  Backup PW:
+        //  PW: neighbor 172.16.30.35, PW ID 502157751, state is standby ( all ready )
+        //    Source address 172.17.22.132
+        //      Group ID     0x3c0000a8                     0x6
+        //      Interface    TenGigE0/0/0/10.50             VLAN50
+        //      MTU          9198                           9198
 
-        QRegularExpression exp("Group \\S+, XC (\\S+), state");
+        QRegularExpression exp("Group (\\S+), XC (\\S+), state");
         if ( line.contains(exp,&match) )
         {
-            SMplsL2XconnectInfo i;
-            i.xc = match.captured(1);
+            SMplsL2PWInfo i;
+            i.group = match.captured(1);
+            i.xc = match.captured(2);
             i.source = m_parentQuery->ip();
-            m_lstMplsL2Xconnects.append(i);
-            xi = &m_lstMplsL2Xconnects.last();
+            m_lstMplsL2PWs.append(i);
+            xi = &m_lstMplsL2PWs[ m_lstMplsL2PWs.size()-1 ];
+            bk=false;
             continue;
         }
 
         if ( !xi  )
             continue;
+
+        exp.setPattern("^Backup PW");
+        if ( line.contains(exp) )
+        {
+            bk=true;
+            continue;
+        }
 
         exp.setPattern("AC: (\\S+), state");
         if ( line.contains(exp,&match) )
@@ -618,12 +682,28 @@ void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
             continue;
         }
 
-        exp.setPattern("PW: neighbor (\\S+), PW ID (\\d+), state is (\\S+) ");
+        exp.setPattern("(PW|EVPN): neighbor (\\S+), PW ID:* (.+), state is (\\S+) ");
         if ( line.contains(exp,&match) )
         {
-            xi->destino = match.captured(1);
-            xi->VCID = match.captured(2);
-            xi->estado = match.captured(3);
+            QString state=match.captured(4);
+            if ( state == "up" )
+                state = "UP";
+            else if ( state == "down" )
+                state = "DN";
+            else if ( state == "standby" )
+                state = "SB";
+            if (!bk)
+            {
+                xi->neighbor = match.captured(2);
+                xi->pwid = match.captured(3);
+                xi->state = state;
+            }
+            else
+            {
+                xi->neighborbk = match.captured(2);
+                xi->pwidbk = match.captured(3);
+                xi->statebk = state;
+            }
             continue;
         }
 
@@ -637,8 +717,49 @@ void MplsL2TransportInfo::on_term_receiveText_XR_Xconnect()
         exp.setPattern("Interface \\S+ (\\S+)");
         if ( line.contains(exp,&match) )
         {
+            //agregar remoteDescripcion bk
             xi->remoteDescripcion = match.captured(1);
             continue;
+        }
+
+        if (line.contains("MTU "))
+        {
+            QStringList data = line.split(" ",Qt::SkipEmptyParts);
+            if (data.size() == 3)
+                xi->mtu = data.at(1);
+            continue;
+        }
+
+        exp.setPattern("PW class (.+), ");
+        if (line.contains(exp,&match))
+        {
+            QString pwclass = match.captured(1);
+            if (pwclass == "not set") pwclass.clear();
+            if (!bk)
+                xi->pwclass=pwclass;
+            else
+                xi->pwclassbck=pwclass;
+            continue;
+        }
+
+        exp.setPattern("Control word (\\S+) ");
+        if ( line.contains(exp,&match) )
+        {
+            if (match.captured(1) == "enabled")
+            {
+                if (!bk)
+                    xi->controlword=true;
+                else
+                    xi->controlwordbck=true;
+            }
+        }
+
+        if ( line.contains("Flow Label flags configured (Tx=1,Rx=1)") )
+        {
+            if (!bk)
+                xi->fat=true;
+            else
+                xi->fatbck=true;
         }
     }
     finished();
@@ -652,17 +773,21 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI()
 
     QStringList lines = txt.split("\n");
     SMplsL2VFIInfo *mvi = nullptr;
+    bool agregarPrincipal=false;
+    bool agregarBk=false;
     foreach (QString line, lines)
     {
         line = line.simplified();
 
+        //display vsi peer-info
+        //
         //VSI Name: BRBRESP10097311C                            Signaling: ldp
         //--------------------------------------------------------------------
         //Peer                Transport  Local      Remote      VC
         //Addr                VC ID      VC Label   VC Label    State
         //--------------------------------------------------------------------
         //172.16.31.129       55248903   49804      18481       up
-        //172.17.38.18        55248903   49801      48065       up
+        //172.17.38.18        55248903   49801      48065       backup
 
         QRegularExpression exp("VSI Name: (\\S+) ");
         if ( line.contains(exp,&match) )
@@ -671,6 +796,8 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI()
             i.vfi = match.captured( 1 );
             m_lstMplsL2VFIs.append( i );
             mvi = &m_lstMplsL2VFIs[m_lstMplsL2VFIs.size()-1];
+            agregarPrincipal=false;
+            agregarBk=false;
         }
 
         if ( !mvi )
@@ -682,12 +809,71 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI()
             QStringList data = line.split(" ",Qt::SkipEmptyParts);
             if ( data.size() < 5 )
                 continue;
-            SMplsL2PWInfo i;
-            i.destino = data.at(0);
-            i.source = m_parentQuery->ip();
-            i.VCID = data.at(1);
-            i.estado = data.at(4);
-            mvi->lstPWs.append( i );
+
+            QString state = data.at(4);
+            if ( state == "up" )
+                state = "UP";
+            else if ( state == "down" )
+                state = "DN";
+            else if ( state == "backup" )
+                state = "SB";
+
+            //las dos primeras lineas las tomamos como principal y bck
+            //si hubiera mas como pw adicionales
+            //(esto no tendria que suceder en los equipos remotos)
+            if (mvi->lstPWs.isEmpty())
+            {
+                if (state=="SB")
+                {
+                    SMplsL2PWInfo i;
+                    i.neighborbk = data.at(0);
+                    i.source = m_parentQuery->ip();
+                    i.pwidbk = data.at(1);
+                    i.statebk = state;
+                    mvi->lstPWs.append( i );
+                    agregarPrincipal=true;
+                }
+                else
+                {
+                    SMplsL2PWInfo i;
+                    i.neighbor = data.at(0);
+                    i.source = m_parentQuery->ip();
+                    i.pwid = data.at(1);
+                    i.state = state;
+                    mvi->lstPWs.append( i );
+                    agregarBk=true;
+                }
+            }
+            else
+            {
+                if (agregarPrincipal)
+                {
+                    SMplsL2PWInfo &i = mvi->lstPWs[0];
+                    i.neighbor = data.at(0);
+                    i.source = m_parentQuery->ip();
+                    i.pwid = data.at(1);
+                    i.state = state;
+                    agregarPrincipal=false;
+                }
+                else if (agregarBk)
+                {
+                    SMplsL2PWInfo &i = mvi->lstPWs[0];
+                    i.neighborbk = data.at(0);
+                    i.source = m_parentQuery->ip();
+                    i.pwidbk = data.at(1);
+                    i.statebk = state;
+                    agregarBk=false;
+                }
+                else
+                {
+                    SMplsL2PWInfo i;
+                    i.neighbor = data.at(0);
+                    i.source = m_parentQuery->ip();
+                    i.pwid = data.at(1);
+                    i.state = state;
+                    mvi->lstPWs.append( i );
+                }
+            }
             continue;
         }
     }
@@ -715,8 +901,8 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI_SERVICES_ALL()
         line = line.simplified();
 
         //reemplazamos la lineas de Bridge-domain 3990 por Vbdif
-        QRegularExpression expbridge("Bridge-domain (\\d+)");
-        line.replace(expbridge,"Vbdif\\1");
+        // QRegularExpression expbridge("Bridge-domain (\\d+)");
+        // line.replace(expbridge,"Vbdif\\1");
 
         QStringList data=line.split(" ",Qt::SkipEmptyParts);
         if ( data.size() < 4 )
@@ -726,7 +912,7 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI_SERVICES_ALL()
         {
             if ( i.vfi == data.at(1) )
             {
-                i.AC=estandarizarInterfaz(data.at(0));
+                i.ACvfi=estandarizarInterfaz(data.at(0));
                 break;
             }
         }
@@ -734,7 +920,7 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_VSI_SERVICES_ALL()
 
     term->disconnectReceiveTextSignalConnections();
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_VRP_L2Transport()));
-    termSendText("display mpls l2vc brief");
+    termSendText("display mpls l2vc");
 }
 
 void MplsL2TransportInfo::on_term_receiveText_VRP_L2Transport()
@@ -744,7 +930,13 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_L2Transport()
         return;
 
     QStringList lines = txt.split("\n");
-    SMplsL2XconnectInfo *xi = nullptr;
+    QString lastAc;
+    QString lastNeighbor;
+    QString lastPW;
+    QString lastState;
+    QString lastPWclass;
+    bool lastControlWord = false;
+    SMplsL2PWInfo *lastSpwremoto = nullptr;
     foreach (QString line, lines)
     {
         line = line.simplified();
@@ -760,58 +952,381 @@ void MplsL2TransportInfo::on_term_receiveText_VRP_L2Transport()
 //        session state        : up
 //        Destination          : 172.16.31.129
 //        link state           : up
+//		  local VC MTU         : 9206         remote VC MTU        : 9206
 
-        QRegularExpression exp("Client Interface : (.*)$");
+        exp.setPattern("\\*client interface : (\\S+) ");
+        if (line.contains(exp,&match))
+        {
+            if ( lastAc != match.captured(1) )
+            {
+                lastAc = match.captured(1);
+                SMplsL2PWInfo i;
+                i.AC = lastAc;
+                m_lstMplsL2PWs.append(i);
+                lastSpwremoto = &m_lstMplsL2PWs[m_lstMplsL2PWs.size()-1];
+
+                lastNeighbor.clear();
+                lastPW.clear();
+                lastState.clear();
+                lastControlWord=false;
+                lastPWclass.clear();
+            }
+            continue;
+        }
+
+        exp.setPattern("local status code : (\\S+)");
+        if (line.contains(exp,&match))
+        {
+            QString state = match.captured(1);
+            if (state=="0x0") state="UP"; else if (state=="0x1") state="DN"; else if (state=="0x20") state="SB";
+            lastState = state;
+            continue;
+        }
+
+        exp.setPattern("VC ID : (\\S+)");
+        if (line.contains(exp,&match))
+        {
+            lastPW = match.captured(1);
+            continue;
+        }
+
+        exp.setPattern("destination : (\\S+)");
+        if (line.contains(exp,&match))
+        {
+            lastNeighbor = match.captured(1);
+            continue;
+        }
+
+        exp.setPattern("local VC MTU : (\\d+)( |$)");
+        if (line.contains(exp,&match))
+        {
+            lastSpwremoto->mtu = match.captured(1);
+            continue;
+        }
+
+        exp.setPattern("PW template name : (\\S+)");
+        if (line.contains(exp,&match))
+        {
+            lastPWclass = match.captured(1);
+            if (lastPWclass == "--") lastPWclass.clear();
+            continue;
+        }
+
+        exp.setPattern("control word : (\\S+)");
+        if (line.contains(exp,&match))
+        {
+            if (match.captured(1) == "enable")
+                lastControlWord=true;
+            continue;
+        }
+
+        exp.setPattern("primary or secondary : (\\S+)");
+        if (line.contains(exp,&match))
+        {
+            if (match.captured(1) == "primary")
+            {
+                lastSpwremoto->neighbor = lastNeighbor;
+                lastSpwremoto->pwid = lastPW;
+                lastSpwremoto->state = lastState;
+                lastSpwremoto->controlword = lastControlWord;
+                lastSpwremoto->pwclass = lastPWclass;
+            }
+            else
+            {
+                lastSpwremoto->neighborbk = lastNeighbor;
+                lastSpwremoto->pwidbk = lastPW;
+                lastSpwremoto->statebk = lastState;
+                lastSpwremoto->controlwordbck = lastControlWord;
+                lastSpwremoto->pwclassbck = lastPWclass;
+            }
+
+            continue;
+        }
+    }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_VRP_BGP_EVPN_EVPL()));
+    termSendText("display bgp evpn evpl | i \"EVPL ID|State|Interface|Peer IP\"");
+}
+
+void MplsL2TransportInfo::on_term_receiveText_VRP_BGP_EVPN_EVPL()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    SMplsL2PWInfo *xi = nullptr;
+    foreach (QString line, lines)
+    {
+        line = line.simplified();
+
+        //EVPL ID : 235
+        //State : up
+        //Interface : Eth-Trunk23.235
+        //Interface Status : up
+        //Ignore AcState : disable
+        //Local DF State : primary(-)
+        //Peer IP : 172.17.33.251
+        // DF State : primary
+        //Last Interface UP Timestamp: 2026-01-23 20:17:02-05:00
+
+        QRegularExpression exp("^EVPL ID : (.*)$");
         if ( line.contains(exp,&match) )
         {
-            SMplsL2XconnectInfo i;
-            i.AC = match.captured(1);
+            SMplsL2PWInfo i;
+            i.xc = match.captured(1);
+
+            //suponemos que el local-id y remote-id son iguales a la instancia
+            //evpl instance 1286
+            // evpn binding vpn-instance ECECVAS10330963C
+            // local-service-id 1286 remote-service-id 1286
+            i.pwid = "evi "+i.xc+", ac-id "+i.xc;
+
             i.source = m_parentQuery->ip();
-            m_lstMplsL2Xconnects.append(i);
-            xi = &m_lstMplsL2Xconnects.last();
+            m_lstMplsL2PWs.append(i);
+            xi = &m_lstMplsL2PWs.last();
             continue;
         }
 
         if ( !xi  )
             continue;
 
-        exp.setPattern("VC state : (.+)$");
+        exp.setPattern("^State : (.+)$");
         if ( line.contains(exp,&match) )
         {
-            xi->estado = match.captured(1);
+            xi->state = match.captured(1);
             continue;
         }
 
-        exp.setPattern("VC ID : (.+)$");
+        exp.setPattern("^Interface : (.+)$");
         if ( line.contains(exp,&match) )
         {
-            xi->VCID = match.captured(1);
+            xi->AC = match.captured(1);
             continue;
         }
 
-        exp.setPattern("Destination : (.+)$");
+        exp.setPattern("^Peer IP : (.+)$");
         if ( line.contains(exp,&match) )
         {
-            xi->destino = match.captured(1);
+            xi->neighbor = match.captured(1);
             continue;
         }
     }
+
     finished();
 }
 
-SMplsL2PWInfo* MplsL2TransportInfo::buscarVFI_PW(QString vfi, QString destino, QString vcid)
+void MplsL2TransportInfo::on_term_receiveText_SR_OS_SAP_USING()
 {
-    for ( SMplsL2VFIInfo &i : m_lstMplsL2VFIs )
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    bool ok=false;
+    for (QString line: lines)
     {
-        if ( i.vfi == vfi  )
+        //-------------------------------------------------------------------------------
+        //1/1/c28/1:18                    18         1     none          none   Up   Up
+        //1/1/c28/1:20                    20         1     none          none   Up   Up
+        //1/1/c28/1:21                    21         1     none          none   Up   Up
+        //-------------------------------------------------------------------------------
+        line = removeEOL(line);
+        if (line.contains("------------------------------------"))
         {
-           for ( SMplsL2PWInfo &p : i.lstPWs )
-           {
-               if ( p.VCID == vcid && p.destino == destino )
-                   return &p;
-           }
+            ok=!ok;
+            continue;
+        }
+        if (!ok) continue;
+
+        QStringList data=line.split(" ",Qt::SkipEmptyParts);
+        if (data.size()<7)
+            continue;
+
+        SMplsL2PWInfo i;
+        i.AC = data.at(0);
+        i.srvid = data.at(1);
+        m_lstMplsL2PWs.append(i);
+    }
+
+    //creamos index de srvid para busqueda rapida para las siguientes consultas
+    for (int i = 0; i < m_lstMplsL2PWs.size(); i++) {
+        index_nokia_services[m_lstMplsL2PWs[i].srvid] = i;
+    }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_SR_OS_info_service_epipe()));
+    termSendText("info full-context | match 'service epipe.+(service-id|endpoint precedence)'");
+}
+
+void MplsL2TransportInfo::on_term_receiveText_SR_OS_info_service_epipe()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    QString lastSrvid;
+    QRegularExpression exp;
+    QRegularExpressionMatch match;
+    for (QString line: lines)
+    {
+        ///configure service epipe "COCOS3S10263096C-852" service-id 852
+        ///configure service epipe "COCOS3S10263096C-852" spoke-sdp 9200:57085201 endpoint precedence primary
+        ///configure service epipe "COCOS3S10263096C-852" spoke-sdp 28216:57085201 endpoint precedence 2
+        line = removeEOL(line);
+        exp.setPattern("service epipe (\\S+) service-id (\\d+)");
+        if (line.contains(exp,&match))
+        {
+            lastSrvid=match.captured(2);
+            if (index_nokia_services.contains(lastSrvid))
+                m_lstMplsL2PWs[index_nokia_services[lastSrvid]].xc = match.captured(1).replace("\"","");
+            continue;
+        }
+        if (lastSrvid.isEmpty()) continue;
+
+        exp.setPattern("spoke-sdp (\\S+) endpoint precedence primary");
+        if (line.contains(exp,&match))
+        {
+            if (index_nokia_services.contains(lastSrvid))
+                m_lstMplsL2PWs[index_nokia_services[lastSrvid]].sdpprimary = match.captured(1);
+            lastSrvid.clear();
         }
     }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_SR_OS_SDP_USING()));
+    termSendText("show service sdp-using");
+}
+
+void MplsL2TransportInfo::on_term_receiveText_SR_OS_SDP_USING()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    bool ok=false;
+    for (QString line: lines)
+    {
+        //-------------------------------------------------------------------------------
+        //18         9109:57001823      Spok   172.17.49.109        Up    1048574 49061
+        //18         28209:57001823     Spok   172.17.28.209        Up    1047983 28479
+        //20         28227:10247128     Spok   172.17.28.227        Up    1047949 77468
+        //21         28227:10247188     Spok   172.17.28.227        Up    1047948 74397
+        //-------------------------------------------------------------------------------
+        line = removeEOL(line);
+        if (line.contains("------------------------------------"))
+        {
+            ok=!ok;
+            continue;
+        }
+        if (!ok) continue;
+
+        QStringList data=line.split(" ",Qt::SkipEmptyParts);
+        if (data.size()<7)
+            continue;
+
+        //si es el mismo srvid asumimos que la primera es el principal y el segundo el bck
+        QString srvid = data.at(0);
+        QString sdp = data.at(1);
+        QString neighbor = data.at(3);
+        QString state = data.at(4);
+        if (state=="Up")
+            state="UP";
+        else if (state=="Dn" || state=="Down")
+            state="DN";
+        QString pwid;
+        if (sdp.contains(":"))
+            pwid = sdp.split(":",Qt::SkipEmptyParts).at(1);
+
+        qDebug() << "line 33" << srvid << sdp << neighbor << state;
+
+        if (index_nokia_services.contains(srvid))
+        {
+            qDebug() << "index_nokia_services[srvid]" << index_nokia_services[srvid];
+            SMplsL2PWInfo &i = m_lstMplsL2PWs[index_nokia_services[srvid]];
+            if (i.sdpprimary.isEmpty())
+            {
+                //no hay configuracion de precedence primary los almacenamos en el orden en el que aparece
+                if (i.pwid.isEmpty())
+                {
+                    qDebug() << "agregando principal" << i.srvid;
+                    i.pwid = pwid;
+                    i.neighbor = neighbor;
+                    i.state = state;
+                }
+                else
+                {
+                    qDebug() << "agregando bck" << i.srvid;
+                    if (state=="UP")
+                        state="SB";
+                    i.pwidbk = pwid;
+                    i.neighborbk = neighbor;
+                    i.statebk = state;
+                }
+            }
+            else
+            {
+                //precedence configurado
+                if (sdp == i.sdpprimary)
+                {
+                    qDebug() << "agregando principal 2" << i.srvid;
+                    i.pwid = pwid;
+                    i.neighbor = neighbor;
+                    i.state = state;
+                }
+                else
+                {
+                    qDebug() << "agregando bck 2" << i.srvid;
+                    if (state=="UP")
+                        state="SB";
+                    i.pwidbk = pwid;
+                    i.neighborbk = neighbor;
+                    i.statebk = state;
+                }
+            }
+        }
+    }
+
+    finished();
+}
+
+SMplsL2PWInfo *MplsL2TransportInfo::buscarVFI_PW(QString vfi, QString destino, QString vcid)
+{
+    for ( SMplsL2VFIInfo &i : m_lstMplsL2VFIs )
+        if ( i.vfi == vfi )
+        {
+            for (SMplsL2PWInfo &p : i.lstPWs)
+                if (p.pwid == vcid && p.neighbor == destino)
+                    return &p;
+            break;
+        }
+    return nullptr;
+}
+
+SMplsL2VFIInfo *MplsL2TransportInfo::buscarVFI(QString vfi)
+{
+    for ( SMplsL2VFIInfo &i : m_lstMplsL2VFIs )
+        if ( i.vfi == vfi  )
+            return &i;
+    return nullptr;
+}
+
+SMplsL2PWInfo *MplsL2TransportInfo::buscarPW(QString destino, QString vcid)
+{
+    for (SMplsL2PWInfo &i : m_lstMplsL2PWs)
+        if (i.pwid == vcid && i.neighbor == destino)
+            return &i;
+    return nullptr;
+}
+
+SMplsL2PWInfo* MplsL2TransportInfo::buscarPW(QString AC)
+{
+    for (SMplsL2PWInfo &i : m_lstMplsL2PWs)
+        if (i.AC == AC)
+            return &i;
     return nullptr;
 }
 
@@ -825,7 +1340,7 @@ SMplsL2PWInfo* MplsL2TransportInfo::mplsL2PWfromPreferredPath(QString pp)
             if ( p.preferredPath == pp )
                 return &p;
 
-    for ( SMplsL2XconnectInfo &i : m_lstMplsL2Xconnects )
+    for ( SMplsL2PWInfo &i : m_lstMplsL2PWs )
         if ( i.preferredPath == pp )
             return &i;
 
@@ -834,7 +1349,7 @@ SMplsL2PWInfo* MplsL2TransportInfo::mplsL2PWfromPreferredPath(QString pp)
 
 QDataStream& operator<<(QDataStream& out, const MplsL2TransportInfo& info)
 {
-    out << info.m_lstMplsL2Xconnects;
+    out << info.m_lstMplsL2PWs;
     out << info.m_lstMplsL2VFIs;
     out << info.m_queryoption;
     out << info.m_queryName;
@@ -843,7 +1358,7 @@ QDataStream& operator<<(QDataStream& out, const MplsL2TransportInfo& info)
 
 QDataStream& operator>>(QDataStream& in, MplsL2TransportInfo& info)
 {
-    in >> info.m_lstMplsL2Xconnects;
+    in >> info.m_lstMplsL2PWs;
     in >> info.m_lstMplsL2VFIs;
     in >> info.m_queryoption;
     in >> info.m_queryName;
@@ -867,10 +1382,32 @@ QDebug operator<<(QDebug dbg, const MplsL2TransportInfo &info)
 {
     dbg.nospace() << "MplsL2TransportInfo:\n";
 
-    dbg.nospace() << "XConnects:\n";
-    for (SMplsL2XconnectInfo i : info.m_lstMplsL2Xconnects)
-        dbg.space() << i.xc << i.AC << i.descripcion << i.VCID <<
-                       i.estado << i.source << i.destino << i.preferredPath << i.remoteDescripcion << "\n";
+    dbg.nospace() << "PWs:\n";
+    for (SMplsL2PWInfo i : info.m_lstMplsL2PWs)
+        dbg.space() << "--- group" << i.group
+                    << "xc" << i.xc
+                    << "srvid" << i.srvid
+                    << "AC" << i.AC
+                    << "ACXEInterface" << i.ACXEInterfaz
+                    << "ACXEServiceInstance" << i.ACXEServiceInstance
+                    << "mtu" << i.mtu
+                    << "descripcion" << i.descripcion
+                    << "source" << i.source
+                    << "pwid" << i.pwid
+                    << "neighbor" << i.neighbor
+                    << "pwclass" << i.pwclass
+                    << "controlword" << i.controlword
+                    << "state" << i.state
+                    << "preferredPath" << i.preferredPath
+                    << "remoteDescripcion" << i.remoteDescripcion
+                    << "neighborbk" << i.neighborbk
+                    << "pwidbk" << i.pwidbk
+                    << "statebk" << i.statebk
+                    << "pwclassbck" << i.pwclassbck
+                    << "controlwordbck" << i.controlwordbck
+                    << "FAT" << i.fat
+                    << "FATBck" << i.fatbck
+                    << "\n";
 
     dbg.nospace() << "\n";
     dbg.nospace() << "VFIs:\n";

@@ -25,6 +25,7 @@ struct SInterfaceInfo : InfoBase
     QString speed;
     QString opticalRx;
     QString mediaType;
+    QString port; // Nokia. puerto fisico, interfaz la nombrada
 };
 
 struct SInterfaceVlans : InfoBase
@@ -114,6 +115,16 @@ private slots:
     void on_term_receiveText_PermitedVlansAccess();
     void on_term_receiveText_Descriptions();
     void on_term_receiveText_ServiceInstances();
+
+    void on_term_receiveText_Nokia_port();
+    void on_term_receiveText_Nokia_port_descripcion();
+    void on_term_receiveText_Nokia_router_interface();
+    void on_term_receiveText_Nokia_lag();
+
+    void on_term_receiveText_Nokia_IpAddresses();
+
+private:
+    QHash<QString, int> index_nokia_interfaces;
 };
 
 Q_DECLARE_METATYPE(SInterfaceInfo)

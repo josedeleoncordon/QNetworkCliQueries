@@ -179,10 +179,10 @@ void MplsTEtunnelsInfo::on_term_receiveText_MplsTETunnels()
                 }
 
                 //Outgoing Interface: TenGigE0/1/0
-                exp.setPattern("Outgoing Interface: (.+)( |,|$)");
+                exp.setPattern("Outgoing Interface: (\\S+)( |,|$)");
                 if ( line.contains(exp,&match) )
                 {
-                    tunel->InterfaceOut = estandarizarInterfaz( match.captured(1).simplified() );
+                    tunel->InterfaceOut = estandarizarInterfaz( match.captured(1).simplified().replace(",","") );
                     continue;
                 }
 

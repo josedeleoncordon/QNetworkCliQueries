@@ -115,6 +115,17 @@ QString ArpInfo::macFromIP(QString ip)
     return "";
 }
 
+QList<SIpInfo> ArpInfo::arpFromInterfaz(QString interfaz)
+{
+    QList<SIpInfo> lst;
+    for (SIpInfo &m : m_lstArp)
+    {
+        if ( m.interfaz == interfaz )
+            lst.append(m);
+    }
+    return lst;
+}
+
 QDataStream& operator<<(QDataStream& out, const ArpInfo& info)
 {
     out << info.m_lstArp;

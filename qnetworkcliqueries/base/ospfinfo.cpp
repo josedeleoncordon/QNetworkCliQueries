@@ -3,7 +3,7 @@
 
 QDataStream& operator<<(QDataStream& out, const SOSPFInfo& data)
 {
-    out << data.address;
+    out << data.remoteaddress;
     out << data.cost;
     out << data.id;
     out << data.interfaz;
@@ -18,7 +18,7 @@ QDataStream& operator<<(QDataStream& out, const SOSPFInfo& data)
 
 QDataStream& operator>>(QDataStream& in, SOSPFInfo& data)
 {
-    in >> data.address;
+    in >> data.remoteaddress;
     in >> data.cost;
     in >> data.id;
     in >> data.interfaz;
@@ -64,7 +64,7 @@ void updateInfoList(QList<SOSPFInfo> &lstDest, QList<SOSPFInfo> &lstOrigin )
                 dest.cost = origin.cost;
                 dest.id = origin.id;
                 dest.state = origin.state;
-                dest.address = origin.address;
+                dest.remoteaddress = origin.remoteaddress;
                 dest.process = origin.process;
                 dest.area = origin.area;
                 encontrado=true;
@@ -172,7 +172,7 @@ QDebug operator<<(QDebug dbg, const OSPFInfo &info)
 {
     dbg.space() << "OSPFInfo" << info.m_lstRouterIDs << "ABR:" << info.m_abr << "ASBR:" << info.m_asbr << ":\n";
     for (SOSPFInfo i : info.m_lstOSPFInfo)
-        dbg.space() << "Id:" << i.id << i.interfaz << i.process << i.area << i.state << "Ad:" << i.address
+        dbg.space() << "Id:" << i.id << i.interfaz << i.process << i.area << i.state << "Ad:" << i.remoteaddress
                     << i.cost << i.operativo << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     dbg.nospace() << "\n";

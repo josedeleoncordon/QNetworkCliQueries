@@ -12,6 +12,7 @@ QDataStream& operator<<(QDataStream& out, const SInterfaceInfo& data)
     out << data.ratein;
     out << data.rateout;
     out << data.bandwidth;
+    out << data.port;
     //infobase
     out << data.datetime;
     out << data.operativo;
@@ -28,6 +29,7 @@ QDataStream& operator>>(QDataStream& in, SInterfaceInfo& data)
     in >> data.ratein;
     in >> data.rateout;
     in >> data.bandwidth;
+    in >> data.port;
     //infobase
     in >> data.datetime;
     in >> data.operativo;
@@ -116,6 +118,7 @@ void updateInfoList(QList<SInterfaceInfo> &lstDest, QList<SInterfaceInfo> &lstOr
                 dest.ratein = origin.ratein;
                 dest.rateout = origin.rateout;
                 dest.bandwidth = origin.bandwidth;
+                dest.port = origin.port;
                 encontrado=true;
                 break;
             }
@@ -293,16 +296,25 @@ void InterfaceInfo::_getInterfacesInfoNextInteface()
 void InterfaceInfo::getInterfacesIpAddresses()
 {
     term->disconnectReceiveTextSignalConnections();
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IpAddresses()));
-    if ( m_brand == "Cisco" )
+
+    if ( m_brand == "Cisco" || m_brand == "IP Infusion" )
     {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IpAddresses()));
         if ( m_os == "IOS XR" )
             termSendText("show ipv4 interface brief");
         else
             termSendText("show ip interface brief");
     }
     else if ( m_brand == "Huawei" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_IpAddresses()));
         termSendText("display ip interface brief");
+    }
+    else if ( m_brand == "Nokia" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Nokia_IpAddresses()));
+        termSendText("show router interface");
+    }
     else
     {
         emit finished();
@@ -348,15 +360,26 @@ void InterfaceInfo::getInterfacesDescriptions()
 void InterfaceInfo::_getInterfacesDescriptionNextInteface()
 {
     term->disconnectReceiveTextSignalConnections();
-    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Descriptions()));
 
     if ( m_interfaces.isEmpty() )
     {
         //se consultan todas las interfaces
-        if ( m_brand == "Cisco" )
+        if ( m_brand == "Cisco" || m_brand == "IP Infusion" )
+        {
+            connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Descriptions()));
             termSendText("show interface description " );
+        }
         else if ( m_brand == "Huawei" )
+        {
+            connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Descriptions()));
             termSendText("display interface description");
+        }
+        else if ( m_brand == "Nokia" )
+        {
+            index_nokia_interfaces.clear();
+            connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Nokia_port()));
+            termSendText("show port");
+        }
         else
             finished();
     }
@@ -371,7 +394,10 @@ void InterfaceInfo::_getInterfacesDescriptionNextInteface()
             else if ( m_brand == "Huawei" )
                 termSendText("display interface "+m_interfaceCurrent+" description");
             else
+            {
+                qDebug() << "InterfaceInfo::_getInterfacesDescriptionNextInteface() consulta inteface descriptio no soportado";
                 finished();
+            }
         }
         else
             //ya no hay mas interfaces que buscar, se finaliza
@@ -711,6 +737,55 @@ void InterfaceInfo::on_term_receiveText_IpAddresses()
     finished();
 }
 
+void InterfaceInfo::on_term_receiveText_Nokia_IpAddresses()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    SIpInfo *ii = nullptr;
+    bool ok=false;
+    for (QString line : lines)
+    {
+        //system                           Up        Up/Down     Network system
+        //   172.17.28.127/32                                            n/a
+        //to_172.17.28.213_1               Up        Up/Down     Network 1/1/c25/1
+        //    172.21.131.249/30                                           n/a
+        //to_172.17.49.109_1               Up        Up/Down     Network 1/1/c26/1
+        //    172.20.130.74/30                                            n/a
+        line = removeEOL(line);
+        if (line.contains("---------------------------------"))
+        {
+            ok=!ok;
+            continue;
+        }
+        if (!ok) continue;
+
+        QStringList data=line.split(" ",Qt::SkipEmptyParts);
+        if (data.size() == 5)
+        {
+            SIpInfo id;
+            id.datetime = QDateTime::currentDateTime();
+            id.operativo = true;
+            id.interfaz = data.at(0);
+            m_lstInterfacesIPAddresses.append(id);
+            ii = &m_lstInterfacesIPAddresses[m_lstInterfacesIPAddresses.size()-1];
+            continue;
+        }
+        if (!ii) continue;
+
+        exp.setPattern("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}");
+        if (line.contains(exp,&match))
+        {
+            ii->ip = match.captured(0);
+            continue;
+        }
+    }
+
+    finished();
+}
+
 void InterfaceInfo::on_term_receiveText_PermitedVlansTrunk()
 {
     txt.append(term->dataReceived());
@@ -978,8 +1053,10 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
     QList<short> columnasPosiciones;
     for (QString line : lines)
     {
-        if ( m_brand == "Cisco" )
+        if ( m_brand == "Cisco" || m_brand == "IP Infusion" )
         {
+            line.replace("administratively down","admin-down"); // IPI
+
             if (line.contains("nterface") && line.contains("Status") &&
                 line.contains("Protocol") &&line.contains("Description"))
             {
@@ -1055,6 +1132,224 @@ void InterfaceInfo::on_term_receiveText_Descriptions()
         finished();
     else
         _getInterfacesDescriptionNextInteface();
+}
+
+void InterfaceInfo::on_term_receiveText_Nokia_port()
+{
+    txt.append(term->dataReceived());
+
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    bool ok = false;
+    for (QString line : lines)
+    {
+        //1/1/c23       Down       Down                             conn
+        //1/1/c24       Up         Link Up                          conn   10GBASE-LR  *
+        //1/1/c24/1     Up    Yes  Up      9216 9216    - hybr dotq xgige
+
+        line = line.simplified();
+        if (line.contains("---------------------------------"))
+        {
+            ok=true;
+            continue;
+        }
+        if (line.contains("========================"))
+        {
+            ok=false;
+            continue;
+        }
+        if (!ok) continue;
+
+        QStringList data = line.split(" ",Qt::SkipEmptyParts);
+        if (data.size()<3)
+            continue;
+
+        if (data.at(2) == "Link")
+            continue;
+
+        QString status;
+        if (data.at(1)=="Up" && data.at(2) == "Yes" && data.at(3) == "Up" )
+            status="up";
+        else if (data.at(1) == "Down")
+            status="admin down";
+        else if (data.at(3) == "Down")
+            status="down";
+
+        SInterfaceInfo id;
+        id.interfaz = data.at(0);
+        id.status = status;
+        m_lstInterfacesInfo.append(id);
+    }
+
+    //creamos index de nombre de interfaz para busqueda rapida para las siguientes consultas
+    for (int i = 0; i < m_lstInterfacesInfo.size(); i++) {
+        index_nokia_interfaces[m_lstInterfacesInfo[i].interfaz] = i;
+    }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Nokia_port_descripcion()));
+    termSendText("show port description");
+}
+
+void InterfaceInfo::on_term_receiveText_Nokia_port_descripcion()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    QString lastInterface;
+    for (QString line : lines)
+    {
+        //1/1/c24        NNI-FN:TRK-TC:FO-EV:COCDBOGSUBSWAUFN01-PV:port52-DE:10.247.129.21
+        //1/1/c24/1      NNI-FN:TRK-TC:FO-EV:COCDBOGSUBSWAUFN01-PV:port52-DE:10.247.129.2
+        //               1
+
+        line = removeEOL(line);
+        QList<short int> lstI;
+        lstI << 0 << 15;
+        QStringList data = txt2Columns(line,lstI);
+        if (data.size()<2)
+            continue;
+
+        if (!data.at(0).isEmpty())
+        {
+            lastInterface=data.at(0);
+            if (index_nokia_interfaces.contains(lastInterface))
+                m_lstInterfacesInfo[index_nokia_interfaces.value(lastInterface)].description = data.at(1);
+        }
+        else if (data.at(0).isEmpty() && !data.at(1).isEmpty())
+        {
+            //continuacion de la descripcion viene en otra linea
+            //               1
+            if (index_nokia_interfaces.contains(lastInterface))
+                m_lstInterfacesInfo[index_nokia_interfaces.value(lastInterface)].description.append(data.at(1));
+        }
+    }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Nokia_lag()));
+    termSendText("show lag description");
+}
+
+void InterfaceInfo::on_term_receiveText_Nokia_lag()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    SInterfaceInfo *ii=nullptr;
+    bool ok=false;
+    for (QString line : lines)
+    {
+        line = removeEOL(line);
+        if (line.contains("-----------------"))
+        { ok=true; continue; }
+        if (line.contains("========================"))
+        { ok=false; continue; }
+        if (!ok) continue;
+
+        QList<short int> lstI;
+        lstI << 0 << 38 << 44;
+        QStringList data = txt2Columns(line,lstI);
+        if (data.size()<3)
+            continue;
+
+        if (!data.at(0).isEmpty() &&
+            data.at(1).isEmpty() &&
+            data.at(2).isEmpty())
+        {
+            //lag-13
+            SInterfaceInfo id;
+            id.interfaz = data.at(0);
+            m_lstInterfacesInfo.append(id);
+            ii = &m_lstInterfacesInfo[m_lstInterfacesInfo.size()-1];
+            continue;
+        }
+
+        if (!data.at(0).isEmpty() &&
+            !data.at(1).isEmpty() &&
+            !data.at(2).isEmpty() &&
+            ii)
+        {
+            //lag-13
+            //(13(e))                  up             (up)    (NNI-FN:REG-TC:FO-)      <--
+            ii->status = estandarizarStatus(data.at(1));
+            ii->description = data.at(2);
+            continue;
+        }
+
+        if (data.at(0).isEmpty() &&
+            data.at(1).isEmpty() &&
+            !data.at(2).isEmpty() &&
+            ii)
+        {
+            //                                            EV:HNCRSPSCAMRTCREG01-PV:Hu0/6/0/5-
+            ii->description.append(data.at(2));
+            continue;
+        }
+    }
+
+    //volvemos a crear el index de nombre de interfaz para busqueda rapida para las siguientes consultas
+    index_nokia_interfaces.clear();
+    for (int i = 0; i < m_lstInterfacesInfo.size(); i++) {
+        index_nokia_interfaces[m_lstInterfacesInfo[i].interfaz] = i;
+    }
+
+    term->disconnectReceiveTextSignalConnections();
+    connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_Nokia_router_interface()));
+    termSendText("show router interface");
+}
+
+void InterfaceInfo::on_term_receiveText_Nokia_router_interface()
+{
+    txt.append(term->dataReceived());
+    if ( !allTextReceived() )
+        return;
+
+    QStringList lines = txt.split("\n");
+    bool ok=false;
+    for (QString line : lines)
+    {
+        //system                           Up        Up/Down     Network system
+        //   172.17.28.127/32                                            n/a
+        //to_172.17.28.213_1               Up        Up/Down     Network 1/1/c25/1
+        //    172.21.131.249/30                                           n/a
+        //to_172.17.49.109_1               Up        Up/Down     Network 1/1/c26/1
+        //    172.20.130.74/30                                            n/a
+        //to_172.17.24.152_2               Up        Up/Down     Network lag-13:300
+        //    172.18.79.209/30                                            n/a
+        line = removeEOL(line);
+        if (line.contains("-----------------"))
+        { ok=true; continue; }
+        if (line.contains("========================"))
+        { ok=false; continue; }
+        if (!ok) continue;
+
+        QStringList data=line.split(" ",Qt::SkipEmptyParts);
+        if (data.size()<5) continue;
+
+        SInterfaceInfo id;
+        id.interfaz = data.at(0);
+        QString port = data.at(4);
+        QString port2 = port;
+        if (port2.contains(":")) port2 = port2.split(":").first(); //por si es un lag
+        //copiamos el estado del port al de la interfaz
+        id.port = port;
+        id.status = m_lstInterfacesInfo.at( index_nokia_interfaces.value(port2) ).status;
+        m_lstInterfacesInfo.append(id);
+    }
+
+    //volvemos a crear el index de nombre de interfaz para busqueda rapida para las siguientes consultas
+    index_nokia_interfaces.clear();
+    for (int i = 0; i < m_lstInterfacesInfo.size(); i++) {
+        index_nokia_interfaces[m_lstInterfacesInfo[i].interfaz] = i;
+    }
+
+    finished();
 }
 
 void InterfaceInfo::on_term_receiveText_ServiceInstances()
@@ -1186,7 +1481,7 @@ QDebug operator<<(QDebug dbg, const InterfaceInfo &info)
         dbg.space() << i.interfaz << i.ip << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";
 
     for (SInterfaceInfo i: info.m_lstInterfacesInfo)
-        dbg.space() << i.interfaz << i.status << i.mac << i.description <<
+        dbg.space() << i.interfaz << i.port << i.status << i.mac << i.description <<
                        i.ratein << i.rateout << i.dropsin << i.dropsout << i.errorsin << i.errorsout <<
                        i.CRC << i.overrun << i.collisions << i.bandwidth << i.mtu << i.duplex << i.speed <<
                        i.opticalRx << i.mediaType << i.datetime.toString("yyyy-MM-dd_hh:mm:ss") << "\n";

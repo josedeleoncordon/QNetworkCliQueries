@@ -118,6 +118,9 @@ bool esIP1MayorQueIP2(QString ip1, QString ip2);
 //verifica si una IP pertenece a un segmento
 bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos);  //segmentoIP_mascara2digitos ej: 192.168.1.0/24
 
+//verificar si la IP pertenece a algun segmento del listado
+bool validarIPperteneceAalgunSegmento(QString IP,QStringList lstSegmentos);
+
 //verifica si una red pertenece a un prefix:  172.16.30.0/25 en  172.16.30.0/22 ge 24
 bool validarSegmentoPerteneceAprefix(QString network, QString prefix);
 
@@ -244,7 +247,7 @@ QString doubleToTxt(double num,bool agregarUnidadDeMedidaLetra=true);
 QString removeEOL(QString);
 
 //Devuelve la lista de IPs que este contenida en un prefix  172.16.30.0/24,. /24 -> /31
-QStringList lstIPsFromPrefix(QString prefixMask);
+QStringList lstIPsFromPrefix(QString prefixMask,bool networkBroadcast=false);
 
 //Devuelve rpl from xpl. Huawei a Cisco
 enum RplType
@@ -265,6 +268,14 @@ template <typename T> T joinList(QList<T> lst)
         lstsalida.append(l);
     return lstsalida;
 }
+
+//Up -> up
+//Dw -> down
+//Down -> down
+QString estandarizarStatus(QString);
+
+//50m 50mb -> 50000
+QString convertirTXT2Pir(QString);
 
 #endif // FUNCIONES_H
 

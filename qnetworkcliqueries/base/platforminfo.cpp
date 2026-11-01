@@ -22,7 +22,7 @@ void PlatformInfo::getPlatformInfo()
 {
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
 
-    if ( m_brand == "Cisco" )
+    if ( m_brand == "Cisco" ) //Cisco IP . InInfusion viene con el mismo prompt y mismo comando show version
     {        
         //Como en esta funcion estamos consultando la plataforma no hay manera de saber que version de comando mandar
         //la unica manera de por el nombre, si es un XR tendra la informacion de procesador, etc
@@ -41,6 +41,10 @@ void PlatformInfo::getPlatformInfo()
         term->disconnectReceiveTextSignalConnections();
         finished();
     }
+    else if ( m_brand == "Nokia" )
+    {
+        termSendText( "show version" );
+    }
     else
     {
         qDebug() << "PlatformInfo::getPlatformInfo()" << m_brand << "no soportado";
@@ -55,7 +59,7 @@ void PlatformInfo::on_term_receiveText()
         return;
 
     QStringList lines = txt.split("\n");
-    if ( m_brand == "Cisco" )
+    if ( m_brand == "Cisco" ) //Cisco IP . InInfusion viene con el mismo prompt y mismo comando show version
     {
         //si el equipo es un NCS6000 fallara el comando, le mandamos un show version
         if (m_name.contains(QRegularExpression("RP(_|/)0.+(_|:)")) &&
@@ -73,6 +77,7 @@ void PlatformInfo::on_term_receiveText()
         foreach (QString line, lines)
         {
             line = line.simplified();
+            // qDebug() << "line ----- " << line;
 
             if ( ! line.contains(exp,&match) && !line.contains(exp2) && !line.contains(exp3) && !line.contains(exp4) )
                 continue;                        
@@ -80,7 +85,7 @@ void PlatformInfo::on_term_receiveText()
             QStringList data = line.split(" ",Qt::SkipEmptyParts);
             m_platform = data.at(1).simplified();
 
-            qDebug() << m_ip << Q_FUNC_INFO << m_platform;
+            qDebug() << m_ip << Q_FUNC_INFO << "Plataforma" << m_platform;
 
             break;
         }
@@ -111,6 +116,19 @@ void PlatformInfo::on_term_receiveText()
             }
         }
 
+        //InInfusion viene con el mismo prompt y mismo comando show version
+        exp.setPattern("Hardware Model: (.+)$");
+        foreach (QString line, lines)
+        {
+            line = line.simplified();
+            if (line.contains(exp,&match))
+            {
+                m_platform = match.captured(1);
+                if ( m_platform.contains(QRegularExpression("Ufi Space|IP Infusion")) )
+                    m_brand="IP Infusion";
+                break;
+            }
+        }
     }
     else if ( m_brand == "Huawei" )
     {
@@ -124,7 +142,20 @@ void PlatformInfo::on_term_receiveText()
                 break;
             }
         }
-    }    
+    }
+    else if ( m_brand == "Nokia" )
+    {
+        exp.setPattern("TiMOS.+ (Nokia .+) Copyright");
+        foreach (QString line, lines)
+        {
+            line = line.simplified();
+            if ( line.contains(exp,&match) )
+            {
+                m_platform = match.captured( 1 );
+                break;
+            }
+        }
+    }
 
     //si es xr verificamos el location a utilizar para comandos como la consulta de tablas de mac
     if ( equipmentOSFromPlatform(m_platform) == "IOS XR" )
@@ -143,10 +174,7 @@ void PlatformInfo::on_term_receiveText()
             termSendText("show snmp location");
         }
         else
-        {
-            qDebug() << m_ip << "CLI SNMP Location no soportado" << m_brand;
             finished();
-        }
     }
 }
 
@@ -202,5 +230,10 @@ void PlatformInfo::on_term_on_term_receiveTextSnmpLocation()
             m_location = lines.last().simplified();
     }
 
+    finished();
+}
+
+void PlatformInfo::on_term_on_term_IPI_terminal_no_monitor()
+{
     finished();
 }

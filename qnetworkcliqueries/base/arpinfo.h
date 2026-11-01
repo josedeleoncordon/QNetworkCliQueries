@@ -37,6 +37,7 @@ public:
 
     //
     QString macFromIP(QString ip);
+    QList<SIpInfo> arpFromInterfaz(QString interfaz);
 
     //
     friend QDataStream& operator<<(QDataStream& out, const ArpInfo& info);

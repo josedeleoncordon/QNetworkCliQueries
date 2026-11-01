@@ -83,6 +83,7 @@ BGPInfo::BGPInfo(QRemoteShell *terminal, int option):
     m_BGPNetworkAttAddOnlyBest=true;
     _mikrotiksecondquery=false;
     m_BGPNeighborsDetail_vrp_vpnv6_enviado=false;
+    m_BGPNeighborsIPv6=false;
 }
 
 BGPInfo::BGPInfo(const BGPInfo &other):
@@ -167,6 +168,18 @@ void BGPInfo::getBGPNeighbors()
         else
             finished();
     }
+    else if ( m_os == "SR OS" )
+    {
+        connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_BGPNeighbors()));
+        if ( m_type == "IPV4LU" )
+            termSendText("show router bgp summary family label-ipv4\r");
+        else if ( m_type == "VPNV4" )
+            termSendText("show router bgp summary family vpn-ipv4\r");
+        else if ( m_type == "VRF" )
+            getBGPNeighbors_VRF_nextVRF();
+        else
+            finished();
+    }
     else
     {
         qDebug() << "BGPInfo::getBGPNeighbors():" << m_brand << "no soportado";
@@ -185,6 +198,8 @@ void BGPInfo::getBGPNeighbors_VRF_nextVRF()
             termSendText("sh bgp vpnv4 unicast vrf "+m_vrf_currentVRF+" summary");
         else if (m_os == "VRP")
             termSendText("display bgp vpnv4 vpn-instance "+m_vrf_currentVRF+" peer");
+        else if (m_os == "SR OS")
+            termSendText("show router service-name "+m_vrf_currentVRF+" bgp summary family ipv4");
     }
     else
         finished();
@@ -199,115 +214,203 @@ void BGPInfo::on_term_receiveText_BGPNeighbors()
     QStringList lines = txt.split("\n");
     QStringList data;
     SBGPNeighbor *lastS=nullptr;
-    bool append=false;
-    for (QString line : lines)
+    bool appendsiguientelinea=false;
+
+    if (m_os == "SR OS")
     {
-        //en una linea
-        //172.16.148.210  4 52468    1306    1306        4    0    0 21:42:44 1
-        //
-        //o en varias filas indentadas
-        //172.17.145.101  4 273068
-        //                              0       0        0    0    0 21:42:53 Idle
+        QList<short> lstIndex;
+        lstIndex << 0;
+        lstIndex << 15;
 
-        line = line.left( line.size()-1 );
-        // qDebug() << "line" << line;
-
-        if (m_os == "VRP")
+        QString txtnew;
+        bool add=false;
+        for (QString line : txt.split("\n",Qt::SkipEmptyParts))
         {
-            exp.setPattern("^  VPN-Instance \\S+");
-            if (line.contains(exp))
-                //consulta de vecinos vpnv en VRF muestra los vecinos de las VRF luego de la global
-                break;
-        }
-
-        if ( m_brand == "Cisco" || m_os == "VRP" )
-        {
-            exp.setPattern("^ *(\\d+\\.\\d+\\.\\d+\\.\\d+).+");
-            if ( line.contains(exp,&match) )
+            if (line.contains("-------------------------------------------"))
             {
-                data.clear();
-                append=true;
-            }
-            if ( append )
-                data.append( line.split(" ",Qt::SkipEmptyParts) );
-
-            if ( data.isEmpty() )
+                add=true;
                 continue;
-
-            if ( m_brand == "Cisco" )
-            {
-                if ( data.size() == 10 )
-                {
-                    SBGPNeighbor s;
-                    s.neighborip = data.at(0).simplified().toLower();
-                    s.as = data.at(2).simplified();
-                    s.upDownTime = data.at(8).simplified();
-                    s.prfxRcd = data.at(9).simplified();
-                    s.vrf = m_vrf_currentVRF;
-                    s.addressfamily = m_type;
-
-                    m_lstNeigbors.append(s);
-                }
             }
-            else if ( m_os == "VRP" )
-            {
-                if ( data.size() == 9 )
-                {
-                    SBGPNeighbor s;
-                    s.neighborip = data.at(0).simplified().toLower();
-                    s.as = data.at(2).simplified();
-                    s.upDownTime = data.at(6).simplified();
-                    if ( data.at(7) != "Established" )
-                        s.prfxRcd = "Active";
-                    else
-                        s.prfxRcd = data.at(8).simplified();
-                    s.vrf = m_vrf_currentVRF;
-                    s.addressfamily = m_type;
-
-                    m_lstNeigbors.append(s);
-                }
-            }
+            if (add)
+                txtnew.append(line+"\n");
         }
-        else if ( m_os == "RouterOS" )
-        {
-            //MikroTik
-            QRegularExpression exp("remote.address=(\\S+) ");
-            if ( line.contains(exp,&match) )
-            {
-                SBGPNeighbor s;
-                s.neighborip = match.captured(1);
-                m_lstNeigbors.append(s);
-                lastS = &m_lstNeigbors.last();
-            }
-            if ( !lastS ) continue;
 
-            exp.setPattern("remote-as=(\\S+) ");
-            if ( line.contains(exp,&match) )
-                lastS->as = match.captured(1);
-            exp.setPattern("remote.+ \\.as=(\\S+) ");
-            if ( line.contains(exp,&match) )
-                lastS->as = match.captured(1);
-            exp.setPattern("in-filter=(\\S+) ");
-            if ( line.contains(exp,&match) )
+        QString lines = filasIndentadasSubirAanterior(txtnew);
+        //"172.17.38.1                52468  176277    0 10d10h41m 1/0/2040 (Lbl-IPv4)             186572    0           "
+        for (QString line : lines.split("\n"))
+        {
+            QStringList data = line.split(" ",Qt::SkipEmptyParts);
+            if (data.size() < 8) continue;
+
+            SBGPNeighbor s;
+            s.neighborip = data.at(0).simplified();
+            s.as = data.at(1).simplified();
+            s.upDownTime = data.at(6).simplified();
+            if (!data.at(7).contains("/"))
             {
-                QString str = match.captured(1);
-                str.replace("\"","");
-                str.replace("\\","");
-                lastS->prefixFilterIN = str;
+                s.state = data.at(7);
+                s.prfxRcd = data.at(7);
             }
-            exp.setPattern("input.+ .filter=(\\S+) ");
-            if ( line.contains(exp,&match) )
+            else
+                s.prfxRcd = data.at(7).split("/").at(0);
+            s.vrf = m_vrf_currentVRF;
+            s.addressfamily = m_type;
+
+            QString pattern = QRegularExpression::anchoredPattern("\\d+");
+            QRegularExpression re(pattern);
+            QRegularExpressionMatch match = re.match(s.as);
+            if (match.hasMatch())
+                m_lstNeigbors.append(s);
+        }
+    }
+    else
+    {
+        for (QString line : lines)
+        {
+            //en una linea
+            //172.16.148.210  4 52468    1306    1306        4    0    0 21:42:44 1
+            //
+            //o en varias filas indentadas
+            //172.17.145.101  4 273068
+            //                              0       0        0    0    0 21:42:53 Idle
+
+            line = removeEOL(line);
+            // qDebug() << "line" << line;
+
+            if (m_os == "VRP" && m_type != "VRF" )
             {
-                QString str = match.captured(1);
-                str.replace("\"","");
-                str.replace("\\","");
-                lastS->prefixFilterIN = str;
+                exp.setPattern("^  VPN-Instance \\S+");
+                if (line.contains(exp))
+                    //consulta de vecinos vpnv en VRF muestra los vecinos de las VRF luego de la global
+                    break;
+            }
+
+            if ( m_brand == "Cisco" || m_os == "VRP" )
+            {
+                if (!appendsiguientelinea)
+                {
+                    exp.setPattern("^ *\\d+\\.\\d+\\.\\d+\\.\\d+$");
+                    exp2.setPattern("^ *(\\d|[a-f]|[A-F]|\\:)+$");
+                    if ( line.contains(exp) || line.contains(exp2) )
+                    {
+                        data.clear();
+                        data.append( line.simplified() );
+                        appendsiguientelinea=true;
+                        continue;
+                    }
+
+                    exp.setPattern("^ *\\d+\\.\\d+\\.\\d+\\.\\d+ .+");
+                    exp2.setPattern("^ *(\\d|[a-f]|[A-F]|\\:)+ .+");
+                    if ( line.contains(exp) || line.contains(exp2) )
+                    {
+                        data.clear();
+                        data.append( line.split(" ",Qt::SkipEmptyParts) );
+                    }
+                }
+                else
+                {
+                    data.append( line.split(" ",Qt::SkipEmptyParts) );
+                    appendsiguientelinea=false;
+                }
+
+                if ( data.isEmpty() )
+                    continue;
+
+                if ( m_brand == "Cisco" )
+                {
+                    if ( data.size() == 10 )
+                    {
+                        SBGPNeighbor s;
+                        s.neighborip = data.at(0).simplified().toLower();
+                        s.as = data.at(2).simplified();
+                        s.upDownTime = data.at(8).simplified();
+                        s.prfxRcd = data.at(9).simplified();
+                        s.vrf = m_vrf_currentVRF;
+                        s.addressfamily = m_type;
+
+                        m_lstNeigbors.append(s);
+                    }
+                }
+                else if ( m_os == "VRP" )
+                {
+                    if ( data.size() == 9 )
+                    {
+                        SBGPNeighbor s;
+                        s.neighborip = data.at(0).simplified().toLower();
+                        s.as = data.at(2).simplified();
+                        s.upDownTime = data.at(6).simplified();
+                        if ( data.at(7) != "Established" )
+                            s.prfxRcd = "Active";
+                        else
+                            s.prfxRcd = data.at(8).simplified();
+                        s.vrf = m_vrf_currentVRF;
+                        s.addressfamily = m_type;
+
+                        m_lstNeigbors.append(s);
+                    }
+                }
+            }
+            else if ( m_os == "RouterOS" )
+            {
+                //MikroTik
+                QRegularExpression exp("remote.address=(\\S+) ");
+                if ( line.contains(exp,&match) )
+                {
+                    SBGPNeighbor s;
+                    s.neighborip = match.captured(1);
+                    m_lstNeigbors.append(s);
+                    lastS = &m_lstNeigbors.last();
+                }
+                if ( !lastS ) continue;
+
+                exp.setPattern("remote-as=(\\S+) ");
+                if ( line.contains(exp,&match) )
+                    lastS->as = match.captured(1);
+                exp.setPattern("remote.+ \\.as=(\\S+) ");
+                if ( line.contains(exp,&match) )
+                    lastS->as = match.captured(1);
+                exp.setPattern("in-filter=(\\S+) ");
+                if ( line.contains(exp,&match) )
+                {
+                    QString str = match.captured(1);
+                    str.replace("\"","");
+                    str.replace("\\","");
+                    lastS->prefixFilterIN = str;
+                }
+                exp.setPattern("input.+ .filter=(\\S+) ");
+                if ( line.contains(exp,&match) )
+                {
+                    QString str = match.captured(1);
+                    str.replace("\"","");
+                    str.replace("\\","");
+                    lastS->prefixFilterIN = str;
+                }
             }
         }
     }
 
     if ( m_type == "VRF" )
-        getBGPNeighbors_VRF_nextVRF();
+    {
+        if (!m_BGPNeighborsIPv6)
+        {
+            m_BGPNeighborsIPv6=true;
+            if ( m_os == "IOS XR" )
+                termSendText("sh bgp vrf "+m_vrf_currentVRF+" ipv6 unicast summary");
+            else if (m_os == "VRP")
+                termSendText("display bgp vpnv6 vpn-instance "+m_vrf_currentVRF+" peer");
+            else
+            {
+                //AGREGAR LOS OTROS OS y eliminar estas 2 lineas
+                m_BGPNeighborsIPv6=false;
+                getBGPNeighbors_VRF_nextVRF();
+            }
+        }
+        else
+        {
+            m_BGPNeighborsIPv6=false;
+            getBGPNeighbors_VRF_nextVRF();
+        }
+    }
     else if ( m_os == "RouterOS" && !_mikrotiksecondquery )
     {
         _mikrotiksecondquery=true;
@@ -1076,41 +1179,73 @@ void BGPInfo::on_term_receiveText_networksAttrVRPCommunityList()
 
 void BGPInfo::getBGPNeighborsDetail()
 {
-    m_type = m_queriesConfiguration.value("BGPNeig_Type",m_ip,m_os,m_conexionID,m_queryName);
+    m_afs = m_queriesConfiguration.value("BGPNeig_Type",m_ip,m_os,m_conexionID,m_queryName).split("_");
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText_BGPNeighborsDetail()));
-    if ( m_type.isEmpty() )
-        m_type = "IPV4";
+    if ( m_afs.isEmpty() )
+        m_afs.append("IPV4");
 
-    if ( m_type == "IPV4" )
+    getBGPNeighborsDetail_nextAF();
+}
+
+void BGPInfo::getBGPNeighborsDetail_nextAF()
+{
+    qDebug() << Q_FUNC_INFO << m_afs;
+    txt.clear();
+    if (!m_afs.isEmpty())
     {
-        if ( m_os == "IOS XR" || m_os == "IOS" )
-            termSendText("sh bgp neighbor");
-        else if ( m_os == "VRP" )
-            termSendText("display bgp peer verbose");
-    }
-    else if ( m_type == "IPV4LU" )
-    {
-        if ( m_os == "IOS XR" )
-            termSendText("show bgp ipv4 labeled-unicast neighbor");
-        else if (m_os=="IOS")
-            termSendText("sh bgp neighbor");
-        else if (m_os=="VRP")
-            termSendText("display bgp peer verbose");
-    }
-    else if ( m_type == "VPNV4" )
-    {
-        if ( m_os == "IOS XR" )
-            termSendText("show bgp vpnv4 unicast neighbor");
-        else if (m_os=="IOS")
-            //terminar
-            // termSendText("");
+        m_type = m_afs.takeFirst();
+        if ( m_type == "IPV4" )
+        {
+            if ( m_os == "IOS XR" || m_os == "IOS" )
+                termSendText("sh bgp neighbor");
+            else if ( m_os == "VRP" )
+                termSendText("display bgp peer verbose");
+            else
+                finished();
+        }
+        else if ( m_type == "IPV4LU" )
+        {
+            if ( m_os == "IOS XR" )
+                termSendText("show bgp ipv4 labeled-unicast neighbor");
+            else if (m_os=="IOS")
+                termSendText("sh bgp neighbor");
+            else if (m_os=="VRP")
+                termSendText("display bgp peer verbose");
+            else
+                finished();
+        }
+        else if ( m_type == "VPNV4" )
+        {
+            if ( m_os == "IOS XR" )
+                termSendText("show bgp vpnv4 unicast neighbor");
+            else if (m_os=="IOS")
+                //terminar
+                // termSendText("");
+                finished();
+            else if (m_os=="VRP")
+                termSendText("display bgp vpnv4 all peer verbose");
+            else
+                finished();
+        }
+        else if ( m_type == "VPNV6" )
+        {
+            if ( m_os == "IOS XR" )
+                termSendText("show bgp vpnv6 unicast neighbor");
+            else if (m_os=="IOS")
+                //terminar
+                // termSendText("");
+                finished();
+            else if (m_os=="VRP")
+                termSendText("display bgp vpnv6 all peer verbose");
+            else
+                finished();
+        }
+        else if ( m_type == "VRF" )
+            // getBGPNeighborsImportExportRPL_VRF_nextVRF();
             finished();
-        else if (m_os=="VRP")
-            termSendText("display bgp vpnv4 all peer verbose");
+        else
+            finished();
     }
-    else if ( m_type == "VRF" )
-        // getBGPNeighborsImportExportRPL_VRF_nextVRF();
-        finished();
     else
         finished();
 }
@@ -1120,8 +1255,6 @@ void BGPInfo::on_term_receiveText_BGPNeighborsDetail()
     txt.append(term->dataReceived());
     if ( !allTextReceived() )
         return;
-
-    term->disconnectReceiveTextSignalConnections();
 
     QStringList lines = txt.split("\n");
 
@@ -1155,6 +1288,9 @@ void BGPInfo::on_term_receiveText_BGPNeighborsDetail()
             if (line.contains(reg,&match))
             {
                 lastState=match.captured(1).simplified().replace(",","");
+                if (lastState!="Established")
+                    if (line.contains("shutdown"))
+                        lastState="Admin";
                 continue;
             }
             reg.setPattern("Remote AS (\\d+)");
@@ -1196,9 +1332,10 @@ void BGPInfo::on_term_receiveText_BGPNeighborsDetail()
                 if (lastNeighbor.isEmpty() || lastAS.isEmpty())
                     continue;
 
-                if (m_type == "IPV4" && lastAF == "IPv4 Unicast" ||
-                    m_type == "IPV4LU" && lastAF == "IPv4 Labeled-unicast" ||
-                    m_type == "VPNV4" && lastAF == "VPNv4 Unicast"
+                if ((m_type == "IPV4" && lastAF == "IPv4 Unicast") ||
+                    (m_type == "IPV4LU" && lastAF == "IPv4 Labeled-unicast") ||
+                    (m_type == "VPNV4" && lastAF == "VPNv4 Unicast") ||
+                    (m_type == "VPNV6" && lastAF == "VPNv6 Unicast")
                     )
                 {
                     SBGPNeighborDetail s;
@@ -1322,6 +1459,8 @@ void BGPInfo::on_term_receiveText_BGPNeighborsDetail()
             if (line.contains(reg,&match))
             {
                 lastState=match.captured(1);
+                if (lastState.contains("Admin"))
+                    lastState="Admin";
                 continue;
             }
             reg.setPattern("Received total routes: (\\d+)");
@@ -1342,6 +1481,8 @@ void BGPInfo::on_term_receiveText_BGPNeighborsDetail()
                 else if (family=="IPv4-Label" && m_type=="IPV4LU")
                     lastAPenabled=ap;
                 else if (family=="VPNv4" && m_type=="VPNV4")
+                    lastAPenabled=ap;                
+                else if (family=="VPNv6" && m_type=="VPNV6")
                     lastAPenabled=ap;
                 continue;
             }
@@ -1411,7 +1552,8 @@ void BGPInfo::on_term_receiveText_BGPNeighborsDetail()
     //     m_BGPNeighborsDetail_vrp_vpnv6_enviado=true;
     // }
     // else
-        finished();
+
+    getBGPNeighborsDetail_nextAF();
 }
 
 QDataStream& operator<<(QDataStream& out, const BGPInfo& info)

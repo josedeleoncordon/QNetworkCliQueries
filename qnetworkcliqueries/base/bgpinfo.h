@@ -62,6 +62,7 @@ protected:
     QStringList m_networks;
     QString m_type;
     QStringList m_vrf_vrfs;
+    QStringList m_afs;
     QString m_vrf_currentVRF;
     QString m_neighbor_int_out;
     QString m_community;
@@ -73,6 +74,7 @@ protected:
     QList<SBGPNetwork> m_lstNetworks;
     QMap<QString,QList<SBGPNetwork>> m_mapNeighborLstNetworks;
     bool m_BGPNeighborsDetail_vrp_vpnv6_enviado;
+    bool m_BGPNeighborsIPv6;
 
     int m_neighborsPos;
     QString m_currentNeighbor;
@@ -119,6 +121,7 @@ private slots:
 
 private:
     void getBGPNeighbors_VRF_nextVRF();
+    void getBGPNeighborsDetail_nextAF();
 
     bool _mikrotiksecondquery;
 };

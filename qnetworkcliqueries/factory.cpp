@@ -3,9 +3,11 @@
 #include "Cisco/macinfocisco.h"
 #include "Cisco/ospfinfocisco.h"
 #include "Cisco/arpinfocisco.h"
+#include "IPI/ospfinfoipi.h"
 #include "Huawei/macinfohuawei.h"
 #include "Huawei/ospfinfohuawei.h"
 #include "Huawei/arpinfohuawei.h"
+#include "Nokia/ospfinfonokia.h"
 #include "RAD/macinforad.h"
 #include "funciones.h"
 
@@ -114,6 +116,10 @@ OSPFInfo *factoryNewOSPFInfo(QString brandName, QString type, QRemoteShell *term
         return new OSPFInfoCisco(term,option);
     else if ( brandName == "Huawei" )
         return new OSPFInfoHuawei(term,option);
+    else if ( brandName == "Nokia" )
+        return new OSPFInfoNokia(term,option);
+    else if ( brandName == "IP Infusion" )
+        return new OSPFInfoIPI(term,option);
     else
         return new OSPFInfo(term,option);
 }

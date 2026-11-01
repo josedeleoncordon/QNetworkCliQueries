@@ -130,12 +130,14 @@ void QueriesThreadController::m_calcularMaxParalelosUUID()
 
 void QueriesThreadController::emitStatus()
 {
+    // qDebug() << "QueriesThreadController::emitStatus()";
     short int mapsize = m_mapUUIDParalelosFijo.size() + m_mapUUIDParalelosDescubrimiento.size();
     emit status("Servidor consultando equipos de "+QString::number(mapsize)+" solicitud"+(mapsize==1?"":"es"));
 }
 
 void QueriesThreadController::serverstatus()
 {
+    // qDebug() << "QueriesThreadController::serverstatus()";
     emitStatus();
 }
 

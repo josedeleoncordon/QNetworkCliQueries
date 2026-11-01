@@ -10,7 +10,7 @@ struct SOSPFInfo : InfoBase
    QString cost;
    QString id;
    QString state;
-   QString address;
+   QString remoteaddress;
    QString process;
    QString area;
 };
@@ -38,7 +38,7 @@ public:
     OSPFInfo(QRemoteShell *terminal, int option=QueryOpcion::Null);
     OSPFInfo(const OSPFInfo &other);
     ~OSPFInfo();
-    void setProcess(int p) { m_process = p; }
+    // void setProcess(int p) { m_process = p; }
     virtual void getOSPFInfo();
 
     //

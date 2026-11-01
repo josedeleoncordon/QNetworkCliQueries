@@ -20,6 +20,7 @@ void OSPFInfoCisco::getOSPFInfo()
 {
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveTextNeighbors()));
     if ( m_os == "IOS XR" )
+        //cambiar process a txt
         termSendText("sh ospf "+ (m_process > 0 ? QString::number(m_process) : "") + " neighbor");
     else
         termSendText("sh ip ospf "+ (m_process > 0 ? QString::number(m_process) : "") + " neighbor");
@@ -48,7 +49,7 @@ void OSPFInfoCisco::on_term_receiveTextNeighbors()
 
         oii.id = lstColumns.at(0).simplified();
         oii.state = lstColumns.at(2).simplified();
-        oii.address = lstColumns.at( lstColumns.size()-2 ).simplified();
+        oii.remoteaddress = lstColumns.at( lstColumns.size()-2 ).simplified();
         oii.interfaz = estandarizarInterfaz( lstColumns.last().simplified() );
 
         m_lstOSPFInfo.append(oii);

@@ -98,7 +98,7 @@ void ArpInfoHuawei::on_term_receiveText()
         SIpInfo mac;
         mac.ip = _ip;
         mac.vlan = _vlan;
-        mac.interfaz = _interfaz;
+        mac.interfaz = estandarizarInterfaz(_interfaz);
         mac.age = _age;
         mac.mac = _mac;
         mac.operativo = true;

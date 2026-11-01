@@ -72,6 +72,12 @@ QString equipmentOSFromPlatform(QString platform)
     else if ( platform.contains("MikroTik")
              )
         return "RouterOS";
+    else if ( platform.contains("Nokia")
+             )
+        return "SR OS";
+    else if ( platform.contains("Ufi Space S9600")
+             )
+        return "OcNOS";
     else
         return "";
 }
@@ -108,7 +114,10 @@ void saveFile(QString txt, QString path, QIODevice::OpenModeFlag openmode)
 {
     QFile file(path);
     if (!file.open( openmode | QIODevice::Text|QIODevice::WriteOnly ))
+    {
+        qDebug() << "saveFile error" << file.errorString();
         return;
+    }
 
     QTextStream out(&file);
     out << txt;
@@ -180,6 +189,15 @@ QStringList numberRangeToLST(QString str)
 Queries *buscarEquipoPorIPnombre(QList<Queries> &lst, QString ip, QString nombre)
 {
     // bool nom=false;
+
+    //primero IP loopback directo
+    if (nombre == "**porOSPF**")
+        for (Queries &qry : lst)
+        {
+            if (qry.ip() == ip)
+                return &qry;
+        }
+
     for (Queries &qry : lst)
     {
         //si no habia informacion de cdp/lldp y fue agregado por ospf
@@ -222,8 +240,12 @@ Queries* buscarEquipoPorIP(QList<Queries> &lst, QString ip)
 {
     for (Queries &qry : lst)
     {
+        qDebug() << "buscarEquipoPorIP" << qry.ip() << ip;
         if ( validateIpQuery( qry,ip ) )
+        {
+            qDebug() << "encontrado";
             return &qry;
+        }
     }
     return nullptr;
 }
@@ -252,18 +274,18 @@ bool validateIpQuery(Queries &qry, QString ip, bool compararOSPFRID)
             return true;
     }
 
-    else if ( qry.interfacesIpAddressesQuery )
-    {
-        //el query tiene informacion de las ips del equipo. Validamos la IP
-        for (SIpInfo &i : qry.interfacesIpAddressesInfo())
-        {
-            if ( i.ip == ip )
-                return true;
-        }
+    // else if ( qry.interfacesIpAddressesQuery )
+    // {
+    //     //el query tiene informacion de las ips del equipo. Validamos la IP
+    //     for (SIpInfo &i : qry.interfacesIpAddressesInfo())
+    //     {
+    //         if ( i.ip == ip )
+    //             return true;
+    //     }
 
-        //TODO dependiendo del contexto de los Nexus puede o no salir la IP con show ip int brief
-        //pero no quiere decir que no sea esa ip de ese equipo. Hay que trabajar los Nexus de diferente forma.
-    }
+    //     //TODO dependiendo del contexto de los Nexus puede o no salir la IP con show ip int brief
+    //     //pero no quiere decir que no sea esa ip de ese equipo. Hay que trabajar los Nexus de diferente forma.
+    // }
 
     return false;
 }
@@ -547,10 +569,18 @@ bool sonIPsParejaMascara30_31(QString ip1, QString ip2 )
     // qDebug() << "ipdos.left(30)" << ipuno.left(30);
     // qDebug() << "ipdos.left(31)" << ipuno.left(31);
 
-    if ( ipuno.left(30) == ipdos.left(30) ||
-         ipuno.left(31) == ipdos.left(31) )
-        return true;
+    //verificando /30
+    if (ipuno.left(30) == ipdos.left(30))
+    {
+        if (ipuno.right(2) != "00" && ipuno.right(2) != "11" &&
+            ipdos.right(2) != "00" && ipdos.right(2) != "11")
+            //misma /30 y ninguna es network o bradcast
+            return true;
 
+        //verificando /31 que por logica esta dentro de la /30
+        if (ipuno.left(31) == ipdos.left(31))
+            return true;
+    }
     return false;
 }
 
@@ -774,6 +804,18 @@ bool validarIPperteneceAsegmento(QString IP, QString segmentoIP_mascara2digitos)
     }
 
     // qDebug() << "validarIPperteneceAsegmento" << IP <<  segmentoIP_mascara2digitos << "false";
+    return false;
+}
+
+bool validarIPperteneceAalgunSegmento(QString IP, QStringList lstSegmentos)
+{
+    for ( QString segmento : lstSegmentos )
+    {
+        if (IP.isEmpty() || segmento.isEmpty())
+            continue;
+        if ( validarIPperteneceAsegmento( IP, segmento ) )
+            return true;
+    }
     return false;
 }
 
@@ -1149,10 +1191,11 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
     }
 
     qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF" << interfazOipDondeViene << interfazSiguienteEquipo;
+    qCDebug(queriesthreadNeighbors) << "continuarPorsiguienteInterfazMismoDominioOSPF" << q.ip() << interfazOipDondeViene << interfazSiguienteEquipo;
 
     QString ospfProceso;
     QString interfazDeDondeSeViene;
-    QRegularExpression expIP("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+    QRegularExpression expIP("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(/\\d{1,2})*$");
     if ( !interfazOipDondeViene.contains(expIP) )
         //se paso una interfaz de informacion de cdp
         interfazDeDondeSeViene = interfazOipDondeViene;
@@ -1172,6 +1215,8 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
         {
             //no se encontro la interfaz por medio de la ip
             qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF: No se encontro la interfaz de donde se viene";
+            //no se encontro la interfaz por medio de la ip
+            qCDebug(queriesthreadNeighbors) << "continuarPorsiguienteInterfazMismoDominioOSPF: No se encontro la interfaz de donde se viene" << q.ip();
             return false;
         }
     }
@@ -1193,6 +1238,7 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
     if ( ospfProceso.isEmpty() )
     {
         qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF: no se encuentra proceso de la interfaz de donde se viene";
+        qCDebug(queriesthreadNeighbors) << "continuarPorsiguienteInterfazMismoDominioOSPF: no se encuentra proceso de la interfaz de donde se viene" << q.ip();
         return false;
     }
 
@@ -1203,17 +1249,21 @@ bool continuarPorsiguienteInterfazMismoDominioOSPF(Queries &q,
 
     qCDebug(queriesthreadNeighbors) << q.ip() << "interfazdedondeseviene" << interfazDeDondeSeViene
                                     << "interfazSiguienteEquipo" << interfazSiguienteEquipo;
+    qCDebug(queriesthreadNeighbors) << "interfazdedondeseviene" << q.ip() << interfazDeDondeSeViene
+                                    << "interfazSiguienteEquipo" << interfazSiguienteEquipo;
 
     for ( SOSPFInfo &oi : q.ospfInfo() )
     {
         if ( oi.interfaz == interfazSiguienteEquipo )
-        {            
+        {
+            qDebug() << "Proceso proceso" << ospfProceso << oi.process;
             if ( ospfProceso == oi.process )
                 return true;
             else
             {
                 qCDebug(queriesthreadNeighbors) << q.ip() << "continuarPorsiguienteInterfazMismoDominioOSPF: proceso no es igual del de entrada y salida"
                          << interfazDeDondeSeViene << interfazSiguienteEquipo;
+                qCDebug(queriesthreadNeighbors) << "continuarPorsiguienteInterfazMismoDominioOSPF: proceso no es igual del de entrada y salida"  << q.ip() << interfazDeDondeSeViene << interfazSiguienteEquipo;
                 return false;
             }
         }
@@ -1447,12 +1497,12 @@ QStringList txt2Columns(QString txt, QList<short> lstIndex)
         if ( lstIndex.size()-1 >= c+1 )
             b=lstIndex.at(c+1);
         else
-            b=txt.size()-1;
+            b=txt.size();
 
-//        qDebug() << "txt size" << txt.size() << "c" << c << "a" << a << "b" << b;
+       // qDebug() << "txt" << txt << "size" << txt.size() << "c" << c << "a" << a << "b" << b;
 
         QString column = txt.mid( a,b-a).trimmed();
-        if ( !column.isEmpty() )
+        // if ( !column.isEmpty() )
             lst.append( column );
     }
     return lst;
@@ -1605,7 +1655,7 @@ QString removeEOL(QString txt)
     return txt.remove('\n').remove('\r');
 }
 
-QStringList lstIPsFromPrefix(QString prefixMask)
+QStringList lstIPsFromPrefix(QString prefixMask, bool networkBroadcast)
 {
     if (prefixMask.contains(":")) QStringList(); //solo ipv4
     if (!prefixMask.contains("/"))
@@ -1629,13 +1679,26 @@ QStringList lstIPsFromPrefix(QString prefixMask)
     QStringList salida;
     for (int c=0; c<lstNumeros.size(); c++)
     {
-        if ((!c || c==lstNumeros.size()-1) && mask<31 ) //quitamos red y broadcast para mascara < 31
-            continue;
+        bool agregar=false;
+        if (mask==31 || mask==32)
+            agregar=true;
+        else if (mask<31)
+        {
+            bool nb=false;
+            if (!c || c==lstNumeros.size()-1)
+                nb=true;
 
-        int num = lstNumeros.at(c);
-        QString numbinario = QString("%1").arg(num, 32-mask, 2, QChar('0'));
-        QString ipbinario = redbinario+numbinario;
-        salida.append( binario2IP(ipbinario) );
+            if (networkBroadcast == nb)
+                agregar=true;
+        }
+
+        if (agregar)
+        {
+            int num = lstNumeros.at(c);
+            QString numbinario = QString("%1").arg(num, 32-mask, 2, QChar('0'));
+            QString ipbinario = redbinario+numbinario;
+            salida.append( binario2IP(ipbinario) );
+        }
     }
     return salida;
 }
@@ -1648,6 +1711,7 @@ QString rplFromXpl(QString txt,RplType type)
     {
         txt.replace("xpl route-filter ","route-policy ");
         txt.replace("ip route-destination in ","destination in ");
+        txt.replace("ipv6 route-destination in ","destination in ");
         txt.replace("refuse","drop");
         txt.replace("approve","pass");
         txt.replace("finish","done");
@@ -1691,5 +1755,34 @@ QString rplFromXpl(QString txt,RplType type)
         break;
     }
     }
+    return txt;
+}
+
+QString estandarizarStatus(QString status)
+{
+    if (status=="Up")
+        status="up";
+    else if (status == "admin-down")
+        status="admin down";
+    else if (status == "Down" || status == "Dn")
+        status="down";
+    return status;
+}
+
+QString convertirTXT2Pir(QString txt)
+{
+    QRegularExpression expd("\\d+");
+    QRegularExpression expt("[a-zA-Z]+");
+    QRegularExpressionMatch match;
+    QString num;
+    QString med;
+    if ( txt.contains(expd,&match) )
+        num=match.captured(0);
+    if ( txt.contains(expt,&match) )
+        med=match.captured(0);
+    if (med.contains("m",Qt::CaseInsensitive))
+        return num+"000";
+    if (med.contains("g",Qt::CaseInsensitive))
+        return num+"000000";
     return txt;
 }

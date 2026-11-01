@@ -4,13 +4,24 @@
 #include <QObject>
 #include "funcionbase.h"
 
+struct SLabelTxtRcvd
+{
+    QString label;
+    QString txt;
+};
+
+QDataStream& operator<<(QDataStream& out, const SLabelTxtRcvd &data);
+QDataStream& operator>>(QDataStream& in, SLabelTxtRcvd& data);
+
 class QNETWORKCLIQUERIES_EXPORT FuncionInfo : public FuncionBase
 {
     Q_OBJECT
 protected:
     QStringList _lstTxt;
+    QList<QueriesConfigurationValue> _lstFuncionesLabeled;
     QStringList _lstFunciones;
-
+    QList<SLabelTxtRcvd> _lstLabeledTxt;
+    QString _label;
     void _siguienteFuncion();
 
 public:
@@ -23,7 +34,7 @@ public:
     //
     QString txtReceived() { return _lstTxt.join("\n"); }
     QStringList lstTxtReceived() { return _lstTxt; }
-
+    QList<SLabelTxtRcvd> lstLabeledTxtReceived() { return _lstLabeledTxt; }
     //
 
     //

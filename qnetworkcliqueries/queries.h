@@ -45,6 +45,8 @@ public:
     }
 };
 
+class QueriesThread;
+
 class QNETWORKCLIQUERIES_EXPORT Queries : public QObject
 {
     Q_OBJECT
@@ -122,6 +124,8 @@ public:
     QString& type() { return m_type; }
     bool recorridoEnArbol() { return _recorridoEnArbol; }
 
+    bool continuarConfig();
+
     bool existsQueryInformation(int option,int i=0);
     //busqueda para un nombre de consulta nula e ir insertando nuevas consultas a la general
     //busqueda por valor numerico, el numero de consulta q coincida con el numero
@@ -139,7 +143,7 @@ public:
     QList<SOSPFInfo>& ospfInfo(int i=0);
     QString& mplsLdpLocalIDInfo(int i=0);
     QList<SMplsTETunnelInfo>& mplsTETunnelsInfo(int i=0);
-    QList<SMplsL2XconnectInfo>& mplsL2TransportXconnectsInfo(int i=0);
+    QList<SMplsL2PWInfo>& mplsL2TransportPWsInfo(int i=0);
     QList<SMplsL2VFIInfo>& mplsL2TransportVFIsInfo(int i=0);
     QList<SMplsLdpInfo>& mplsLdpDiscoveryInfo(int i=0);
     QList<SMplsLdpInfo>& mplsLdpNeighborsInfo(int i=0);
@@ -171,9 +175,10 @@ public:
     QString funcionTxtInfo(QString name);
     QStringList funcionLstTxtInfo(int i=0);
     QStringList funcionLstTxtInfo(QString name);
+    QList<SLabelTxtRcvd> funcionLstLabeledTxtInfo(int i=0);
+    QList<SLabelTxtRcvd> funcionLstLabeledTxtInfo(QString name);
 
     void setId(QString id) { m_id = id; }
-    void setGW(QString GW);
     void updateDate() { m_datetime = QDateTime::currentDateTime(); }
     void setKeepAlive(bool enable);
     void setRemoteShell(QRemoteShell *remoteShell) { term = remoteShell; }
@@ -191,6 +196,8 @@ public:
     void setType(QString type) { m_type= type; }
     void setRecorridoEnArbol(bool recorrido) { _recorridoEnArbol=recorrido; }
 
+    void setUser(QString user) { m_user = user; }
+    void setPassword(QString password) { m_pwd=password; }
     void setUser2(QString user) { m_user2=user; }
     void setPassword2(QString pwd) { m_pwd2=pwd; }
     void startSync();
@@ -239,9 +246,12 @@ protected:
     QTimer *queryTimer;
     bool m_connected;
     bool m_error;
+    bool m_errorconfig;
     bool m_ipreachable;
     bool m_contieneconsultas;
     QString _errortxt;
+
+    QueriesThread *qthreadParent;
 
     short int m_consultaIntentos;
     bool m_reintentandoConsulta;
@@ -251,6 +261,7 @@ protected:
     QString m_name;
     QString m_fullName;
     QString m_id;
+    QString m_gw;
     QString m_country;
     QString m_platform;
     QString m_equipmenttype;
@@ -269,7 +280,6 @@ protected:
     QString m_ip;
     QString m_conexionID; //ID de conexion, para que las funciones puedan ubicar los parapemtros en m_queriesConfiguration
 
-    QString m_gw;
     QString m_user;
     QString m_user2;
     QString m_pwd;
@@ -293,7 +303,7 @@ protected:
     QList<SOSPFInfo> _lstSOSPFInfo;
     QString _qstring;
     QList<SMplsTETunnelInfo> _lstSMplsTETunnelInfo;
-    QList<SMplsL2XconnectInfo> _lstSMplsL2XconnectInfo;
+    QList<SMplsL2PWInfo> _lstSMplsL2PWsInfo;
     QList<SMplsL2VFIInfo> _lstSMplsL2VFIInfo;
     QList<SMplsLdpInfo> _lstSMplsLdpInfo;
     QList<SPIMInfo> _lstSPIMInfo;

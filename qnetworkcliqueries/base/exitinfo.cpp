@@ -12,8 +12,14 @@ void ExitInfo::exit()
     connect(term,SIGNAL(readyRead()),SLOT(on_term_receiveText()));
     if ( m_brand == "Huawei" || m_brand == "MikroTik" )
         termSendText("quit");
+    else if ( m_brand == "Nokia" )
+        termSendText("logout");
     else
         termSendText("exit");
+}
+
+ExitInfo::~ExitInfo()
+{
 }
 
 void ExitInfo::on_term_receiveText()
@@ -33,7 +39,7 @@ void ExitInfo::on_term_receiveText()
     //     return;
     // }
 
-    qDebug() << "ExitInfo::on_term_receiveText()" << txt;
+    // qDebug() << "ExitInfo::on_term_receiveText()" << txt;
 
     connect(term,SIGNAL(disconnected()),SLOT(on_term_disconnected()));
     term->host_disconnect();
@@ -41,5 +47,7 @@ void ExitInfo::on_term_receiveText()
 
 void ExitInfo::on_term_disconnected()
 {
+    qDebug() << m_ip << "ExitInfo::on_term_disconnected()";
+    qDebug() << "ExitInfo::on_term_disconnected()" << m_ip;
     finished();
 }

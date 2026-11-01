@@ -42,8 +42,10 @@ public:
     void setEquipmentNeighborsRegExpOSPFArea(QString area) { m_consultaOSPFArea=area; }
     void setNewThreadWorker(QueriesThreadWorker*(*ThreadWorker)(void));
     void setEliminarConsultasEquiposDuplicados(bool eliminar) { m_eliminarconsultasdeequiposduplicados=eliminar; }
-    void setUUID(QString uuid) { m_uuid = uuid; }
+    void setUUID(QString uuid,bool cancelIfNotAlive=true) { m_uuid = uuid; m_uuidcancelIfNotAlive=cancelIfNotAlive; }
     void setAgregarVecinosHastaNivel(int nivel) { m_agregarVecinosHastaNivel=nivel; }
+    void setStatusNotificarConfigurando(bool enable) { m_notifyConfigurating=enable; }
+    void setCancelarConfiguracionInmediatamenteEnError(bool enable) {m_cancelarConfiguracionInmediatemanteEnError=enable;}
 
     void iniciar();
     void iniciarSync();
@@ -65,6 +67,8 @@ public:
     QMap<QString, QString> errorMap() { return m_errorMap; }
     QString erroresCSV();
     QStringList lstIPsConectadosPorGW() { return m_lstIPsConectadosPorGW; }
+
+    bool continuarConfig();
 
 signals:
     void newInformation();
@@ -101,6 +105,7 @@ protected:
    QList<QueriesOpcion> m_opciones;
    int m_simultaneos; //cantidad de equipos se suman al mismo tiempo al grupo,
    QStringList m_equiposenconsulta;
+   QStringList m_equiposvecinosagregados;
    QStringList m_lstLinksEnSegmentos;
    QStringList m_lstLoopbacksEnSegmentos;
    QList<Queries*> m_queriesenconsulta;
@@ -118,6 +123,11 @@ protected:
    bool m_equipmentNeighborsConsultarVecinos;
    bool m_eliminarconsultasdeequiposduplicados;
    QString m_uuid;
+   bool m_uuidcancelIfNotAlive;
+   bool m_notifyConfigurating;
+
+   bool m_cancelarConfiguracionInmediatemanteEnError;
+   bool m_configerror;
 
    int m_agregarVecinosHastaNivel; //<=0 = sin limite
    QMap<QString,int> m_mapAgregarVecinosHastaNiveles;
@@ -135,6 +145,8 @@ protected:
    int m_consultaSimultaneos;   
    QStringList m_equiposConsultados;
    QMutex m_mutex;
+   QMutex m_mutex2;
+   QMutex m_mutex3;
    QMap<QString,QString> m_mapOSPFVecinosInterfazDondeVienen;
    QueriesConfiguration m_queriesconfiguration;
 
@@ -157,6 +169,9 @@ protected:
    //verifica si las configuraciones de parametros trae equipos con consultas en diferentes conexiones para actualizar
    //la lista de IPs
    void verificarLstIPsQueriesConfiguration();
+
+
+   void m_setQueryConfigError();
 };
 
 QMap<QString, QString> updateInfoMapError(QMap<QString, QString> &ant, QMap<QString, QString> &nue,

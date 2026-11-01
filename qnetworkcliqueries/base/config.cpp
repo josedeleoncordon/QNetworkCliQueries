@@ -77,6 +77,17 @@ void Config::on_term_receiveText_configMode()
 
 void Config::siguienteComando()
 {
+    if (m_parentQuery)
+        if (!m_parentQuery->continuarConfig())
+        {
+            qDebug() << Q_FUNC_INFO << m_parentQuery->ip() <<
+                "Se cancela configuracion por error de config en otro equipo";
+            qDebug() << m_parentQuery->ip() << Q_FUNC_INFO <<
+                "Se cancela configuracion por error de config en otro equipo";
+            finished();
+            return;
+        }
+
     txt.clear();
     if ( m_lstComandosPos < m_lstComandos.size()-1 )
     {
@@ -129,10 +140,12 @@ void Config::on_term_receiveText_finished()
     exp.setPattern("^.+\\(config(\\-\\w+)*\\)#\\s*$");
     exp2.setPattern("^\\[.+\\]");
     exp3.setPattern("^\\S+#\\s*$");
+    exp4.setPattern("^\\w\\:\\w+@(\\S+)#\\s*$");
 
     if (line.contains(exp,&match) ||
         line.contains(exp2) ||
         line.contains(exp3) ||
+        line.contains(exp4) ||
         line.contains("Uncommitted changes found, commit them before exiting") ||
         line.contains("Uncommitted configurations found, commit them before exiting")
         )
@@ -148,6 +161,10 @@ void Config::on_term_receiveText_finished()
         if (txt.contains("Unrecognized command") ||
             txt.contains("Invalid input detected") ||
             txt.contains("Error input in the position market by") ||
+            txt.contains("Unknown element") ||
+            txt.contains("Exiting private configuration mode") ||
+            txt.contains("Command authorization failed") ||
+            txt.contains("do not have permission to run the command") ||
             txt.contains("Error: ")
             )
         {
@@ -174,6 +191,8 @@ void Config::on_term_receiveText_finished()
         termSendText("yes");
         m_guardado=true;
     }
+    else if (line.contains("This operation will reset the peer session. Continue"))
+        termSendText("Y");
 }
 
 void Config::on_term_receiveText_exited()

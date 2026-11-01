@@ -26,6 +26,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 HEADERS += \
+    IPI/ospfinfoipi.h \
+    Nokia/ospfinfonokia.h \
     base/exitinfo.h \
     base/mplsl2transport.h \
     base/mplstetunnelsinfo.h \
@@ -67,6 +69,8 @@ HEADERS += \
     wcuuids.h
 
 SOURCES += \
+    IPI/ospfinfoipi.cpp \
+    Nokia/ospfinfonokia.cpp \
     base/exitinfo.cpp \
     base/mplsl2transport.cpp \
     base/mplstetunnelsinfo.cpp \

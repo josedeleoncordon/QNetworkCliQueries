@@ -80,6 +80,7 @@ public:
     QString _Platform;
     QString _IDConexion;
     QString _queryName;
+    QString _label;
     bool _appendValue;
 
     QueriesConfigurationValue(QString key,
@@ -87,7 +88,7 @@ public:
                               QString IP,
                               QString plataforma,
                               QString IDConexion,
-                              QString queryName,  //Nombre de la consulta. Para diferenciar por nombre si se desea agrupar
+                              QString label,  //Nombre de la consulta. Para diferenciar por nombre si se desea agrupar
                               bool appendValue=true);
     QueriesConfigurationValue(const QueriesConfigurationValue &other);
     QueriesConfigurationValue() {}
@@ -106,7 +107,7 @@ private:
     QList<QueriesConfigurationValue> m_lstQueryParameters;
     QList<QueriesConfigurationValue> m_lstConfiguration;
 
-    QVariant m_find(QString parameter, QString IP, QString platform,
+    QList<QueriesConfigurationValue> m_find(QString parameter, QString IP, QString platform,
                     QString IDconexion, QString queryName, bool platformContains);
 
 public:
@@ -119,6 +120,8 @@ public:
     QString value(QString parameter, QString IP, QString platform,
                   QString IDconexion, QString queryName,bool platformContains=false);
     QStringList values(QString parameter, QString IP, QString platform,
+                       QString IDconexion, QString queryName, bool platformContains=false);
+    QList<QueriesConfigurationValue> valuesLabeled(QString parameter, QString IP, QString platform,
                        QString IDconexion, QString queryName, bool platformContains=false);
 
     QList<QueriesConfigurationValue> lstQueryParameters() { return m_lstQueryParameters; }

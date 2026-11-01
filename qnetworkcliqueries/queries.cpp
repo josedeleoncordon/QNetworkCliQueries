@@ -9,6 +9,8 @@
 #include "properties.h"
 #include "qnetworkquerieslogging.h"
 
+#include "queriesthread.h"
+
 QueriesOpcion::QueriesOpcion(int opcion,QString queryNombre)
 {
     _opcion=opcion;
@@ -117,6 +119,7 @@ void Queries::iniciar()
     m_opcionActual = QueryOpcion::Null;
     m_connected=false;
     m_error=false;
+    m_errorconfig=false;
     m_currentFuncion=nullptr;
     m_ipreachable=false;    
     m_conectionSecondTriedOtherUserPassword=false;    
@@ -130,6 +133,8 @@ void Queries::iniciar()
     _userPwdusingList=false;
     _sshUseLibSsh=true;
     _queriesthreadAgregarVecinoNivel=0;
+
+    qthreadParent=nullptr;
 
     queryTimer = new QTimer(this);
     queryTimer->setInterval( 30000 );
@@ -154,7 +159,6 @@ void Queries::clone(const Queries& other)
     m_location = other.m_location;
     m_ip = other.m_ip;
     m_user = other.m_user;
-    m_gw = other.m_gw;
     m_pwd = other.m_pwd;
     m_mapOpciones = other.m_mapOpciones;
     m_queryname = other.m_queryname;
@@ -570,11 +574,6 @@ void Queries::setOptions(QList<QueriesOpcion> lst )
         qDebug() << s._queryNombre << s._opcion;
 }
 
-void Queries::setGW(QString GW)
-{
-    m_gw = GW;
-}
-
 void Queries::setQueriesConfiguration(QueriesConfiguration configuration)
 {
     if (!m_queryname.isEmpty())
@@ -600,7 +599,6 @@ void Queries::conectarAequipo(QString ip, QString user, QString pwd,
     term = new QRemoteShell(ip,user,pwd,platform,linuxprompt,this);
     term->setConnectionProtocol( m_connectionprotol );
     term->setSshModeLibSshEnabled(sshUseLibSsh);
-    // term->setGW(m_gw);
     // term->setUser2( m_user2 );
     // term->setPassword2( m_pwd2 );
     connect(term,SIGNAL(reachable()),SLOT(processConnectToHostReachable()));
@@ -716,11 +714,11 @@ QList<SMplsTETunnelInfo>& Queries::mplsTETunnelsInfo(int i)
     return dynamic_cast<MplsTEtunnelsInfo*>(f)->mplsTEtunnelsInfo();
 }
 
-QList<SMplsL2XconnectInfo>& Queries::mplsL2TransportXconnectsInfo(int i)
+QList<SMplsL2PWInfo> &Queries::mplsL2TransportPWsInfo(int i)
 {
     FuncionBase *f = getQuery(Mplsl2Transport,i);
-    if ( !f ) return _lstSMplsL2XconnectInfo;
-    return dynamic_cast<MplsL2TransportInfo*>(f)->mplsL2XconnectsInfo();
+    if ( !f ) return _lstSMplsL2PWsInfo;
+    return dynamic_cast<MplsL2TransportInfo*>(f)->mplsL2PWsInfo();
 }
 
 QList<SMplsL2VFIInfo>& Queries::mplsL2TransportVFIsInfo(int i)
@@ -940,6 +938,28 @@ QStringList Queries::funcionLstTxtInfo(QString name)
     return dynamic_cast<FuncionInfo*>(f)->lstTxtReceived();
 }
 
+QList<SLabelTxtRcvd> Queries::funcionLstLabeledTxtInfo(int i)
+{
+    FuncionBase *f = getQuery(Funcion,i);
+    QList<SLabelTxtRcvd> lst;
+    if ( !f ) return lst;
+    return dynamic_cast<FuncionInfo*>(f)->lstLabeledTxtReceived();
+}
+
+QList<SLabelTxtRcvd> Queries::funcionLstLabeledTxtInfo(QString name)
+{
+    FuncionBase *f = getQuery(Funcion,name);
+    QList<SLabelTxtRcvd> lst;
+    if ( !f ) return lst;
+    return dynamic_cast<FuncionInfo*>(f)->lstLabeledTxtReceived();
+}
+
+bool Queries::continuarConfig()
+{
+    if (!qthreadParent) return true;
+    return qthreadParent->continuarConfig();
+}
+
 void Queries::nextProcess()
 {
     qCDebug(queries) << m_ip  << "Queries::nextProcess()";
@@ -1027,7 +1047,7 @@ void Queries::nextProcess()
 
     if ( m_opcionActual == Connect )
     {
-        qCDebug(queries) << m_ip  << "creando term" << m_ip << m_user << m_pwd;
+        qCDebug(queries) << m_ip  << "creando term" << m_ip << m_user;
         conectarAequipo(m_ip,m_user,m_pwd,m_platform,m_linuxprompt,_sshUseLibSsh);
         return;
     }
@@ -1628,7 +1648,6 @@ void Queries::nextProcess()
         f->setHostName(m_fullName);
         f->setModel(m_model);
         f->setIp(m_ip);
-        f->setConnectedByGW( !m_gw.isEmpty() );
         f->setParentQuery(this);
         connect(f,SIGNAL(processFinished()),SLOT(processExit()));
         connect(f,SIGNAL(working()),SLOT(processKeepWorking()));
@@ -1767,7 +1786,7 @@ void Queries::processConnectToHostDisconnected()
 
                     m_user = data.first();
                     m_pwd = data.last();
-                    qCDebug(queries) << m_ip << "User Password a Probar" << m_user << m_pwd;
+                    qCDebug(queries) << m_ip << "Usuario a probar" << m_user;
                     probar=true;
                 }
                 else
@@ -1894,13 +1913,9 @@ void Queries::processPlatform()
 
 void Queries::processConfigFinished()
 {
-//    Config *configQuery=dynamic_cast<Config*>(m_currentFuncion);
-//    if ( configQuery->error() )
-//    {
-//        m_error = true;
-//        finished(this);
-//        return;
-//    }
+   Config *configQuery=dynamic_cast<Config*>(m_currentFuncion);
+   if ( configQuery->error() )
+       m_errorconfig = true;
 
     m_contieneconsultas=true;
     queryTimer->stop();
@@ -2121,7 +2136,7 @@ void Queries::updateInfoQueries(QList<Queries> &lstDest, QList<Queries> &lstOrig
                 {
                     if ( dest.mplsL2TransportQuery )
                     {
-                        updateInfoList( dest.mplsL2TransportXconnectsInfo(), origin.mplsL2TransportXconnectsInfo() );
+                        updateInfoList( dest.mplsL2TransportPWsInfo(), origin.mplsL2TransportPWsInfo() );
                         updateInfoList( dest.mplsL2TransportVFIsInfo(), origin.mplsL2TransportVFIsInfo() );
                     }
                     else

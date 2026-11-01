@@ -97,7 +97,7 @@ void OSPFInfoHuawei::on_term_receiveTextInterfaces()
             if ( oii.interfaz == estandarizarInterfaz( lstColumns.at(0).simplified() ) )
             {
                 oii.cost = lstColumns.at(4).simplified();
-                oii.address = lstColumns.at(1).simplified();
+                oii.remoteaddress = lstColumns.at(1).simplified();
             }
         }
     }

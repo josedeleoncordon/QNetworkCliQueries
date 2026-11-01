@@ -4,14 +4,15 @@
 #include "qnetworkquerieslogging.h"
 #include "queriesthreadcontroller.h"
 #include "wcuuids.h"
+#include "properties.h"
 
 #include <QEventLoop>
 
 QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
 {
-    m_interval=1000;
-    m_simultaneos=3;
-    m_maxparalelos=20;
+    m_interval=Properties::Instance()->qthrinterval;
+    m_simultaneos=Properties::Instance()->qthrsimultaneos;
+    m_maxparalelos=Properties::Instance()->qthrmaxparalelos;
     m_maxparalelosmismoequipo=1;
     m_lstIPsMismoEquipoCounter=0;
     m_lstIPsCounter=0;
@@ -21,9 +22,13 @@ QueriesThread::QueriesThread(QObject *parent) : QObject(parent)
     m_consultarVecinosOSPFMismoDominio=false;
     m_equipmentNeighborsConsultarVecinos=false;
     m_eliminarconsultasdeequiposduplicados=true;
+    m_uuidcancelIfNotAlive=true;
     m_timer = nullptr;
     m_timerActivity = nullptr;
     ThreadWorker = nullptr;
+    m_notifyConfigurating = false;
+    m_cancelarConfiguracionInmediatemanteEnError=false;
+    m_configerror=false;
     m_agregarVecinosHastaNivel=0;
     _clear();    
 
@@ -51,8 +56,11 @@ void QueriesThread::_emitNewInformation()
                    " Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
                    QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter );
     qInfo() << "Equipos en consulta" << m_equiposenconsulta;
+    qDebug() << "Equipos en consulta" << m_equiposenconsulta;
 
-    emit status( m_uuid,"Equipos consultados: "+ QString::number( equiposConsultados() )+" de "+
+    QString mode;
+    if (!m_notifyConfigurating) mode="consultados"; else mode="configurados";
+    emit status( m_uuid,"Equipos "+mode+": "+ QString::number( equiposConsultados() )+" de "+
                  QString::number( m_lstIPsMismoEquipoCounter + m_lstIPsCounter ) );
 }
 
@@ -94,6 +102,8 @@ void QueriesThread::_clear()
 void QueriesThread::setLstIP(QStringList lst)
 {
     m_lstIP = lst;
+    m_lstIP.removeDuplicates();
+    m_lstIP.removeAll("");
     verificarLstIPsQueriesConfiguration();
 }
 
@@ -193,6 +203,7 @@ void QueriesThread::iniciarSync()
     connect(this, SIGNAL(finished(bool)), &loop, SLOT(quit()));
     iniciar();
     loop.exec();
+    qInfo() << Q_FUNC_INFO << "saliendo del loop";
     qDebug() << Q_FUNC_INFO << "saliendo del loop";
 }
 
@@ -338,7 +349,8 @@ bool QueriesThread::conectarSiguienteMismoEquipo(QString IP)
 
 void QueriesThread::siguienteEquipo(QString IP, bool gw)
 {
-    qCDebug(queriesthread) << IP << "QueriesThread::siguienteEquipo()"
+    qCDebug(queriesthread) << "QueriesThread::siguienteEquipo()"
+                           << IP
                            << "GW" << gw
                            << "m_consultarVecinosOSPFMismoDominio" << m_consultarVecinosOSPFMismoDominio;
 
@@ -354,8 +366,8 @@ void QueriesThread::siguienteEquipo(QString IP, bool gw)
 
     Queries *query = new Queries(ip,m_user,m_password,m_linuxprompt);    
     query->setCountry( m_grupo );
-    if ( gw )
-        query->setGW( m_gw );
+    // if ( gw )
+        // query->setGW( m_gw );
     if ( m_consultarVecinosOSPFMismoDominio )
     {
         qCDebug(queriesthreadNeighbors) << ip << "Nuevo Query, agregando ip o interfaz donde viene:"
@@ -370,6 +382,7 @@ void QueriesThread::siguienteEquipo(QString IP, bool gw)
     query->setPassword2( m_pwd2 );
     query->setQueriesConfiguration( m_queriesconfiguration );
     query->setOptions(m_opciones);
+    query->qthreadParent = this;
 
     m_consultaSimultaneos++;    
 
@@ -442,6 +455,10 @@ void QueriesThread::equipoConsultado(Queries *qry)
                      << m_equipmentNeighborsConsultarVecinos;
 
             m_equiposExitosos++;
+
+            //verificamos si hubo error en aplicar configuracion
+            if ( qry->m_errorconfig )
+                m_setQueryConfigError();
 
             if ( m_equipmentNeighborsConsultarVecinos )
             {
@@ -553,7 +570,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
 
     if ( !m_uuid.isEmpty() )
     {
-        if ( !WCUUIDs::Instance()->isAlive( m_uuid ) && !m_detener )
+        if ( !WCUUIDs::Instance()->isAlive( m_uuid ) && !m_detener && m_uuidcancelIfNotAlive)
         {
             qCDebug(queriesthread) << "QueriesThread uuid no sigue vivo. Se cancela";
             cancelar();
@@ -646,6 +663,7 @@ void QueriesThread::equipoConsultado(Queries *qry)
                         {
                             m_lstIP.removeAt(0);
                             qCDebug(queriesthread) << ip << "siguiente conexion normal";
+                            qCDebug(queriesthread) << "siguiente conexion normal" << ip;
                             siguienteEquipo( ip );
                         }
                     }
@@ -673,7 +691,23 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                                                    QString interfazEsteEquipoSalida,
                                                    QString interfazSiguienteEquipoEntrada)
 {
+    if ( m_equiposvecinosagregados.contains(ip) )
+    {
+        qCDebug(queriesthreadNeighbors) << "QueriesThread::validarYagregarVecinoAconsulta" << qry->ip()
+                                        << "Agregar vecino" << ip << "NO Se agrega. Agregado en anterior";
+        return;
+    }
+
     qCDebug(queriesthreadNeighbors) << qry->ip() << "QueriesThread::validarYagregarVecinoAconsulta"
+                                    << "ip" << ip
+                                    << "ipOinterfazDondeSeViene" << ipOinterfazDondeSeViene
+                                    << "interfazEsteEquipoSalida" << interfazEsteEquipoSalida
+                                    << "interfazSiguienteEquipoEntrada" << interfazSiguienteEquipoEntrada
+                                    << "ospf area" << m_consultaOSPFArea
+                                    << "m_consultarVecinosOSPFMismoDominio" << m_consultarVecinosOSPFMismoDominio
+                                    << "m_soloequiposnuevos" << m_soloequiposnuevos
+                                    << "\n";
+    qCDebug(queriesthreadNeighbors) << "QueriesThread::validarYagregarVecinoAconsulta" << qry->ip()
                                     << "ip" << ip
                                     << "ipOinterfazDondeSeViene" << ipOinterfazDondeSeViene
                                     << "interfazEsteEquipoSalida" << interfazEsteEquipoSalida
@@ -738,7 +772,10 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                 QRegularExpressionMatch match = exp.match(oi.area);
                 if (oi.interfaz == interfazEsteEquipoSalida &&
                     !match.hasMatch())
+                {
+                    qCDebug(queriesthreadNeighbors) << "No se agrega vecino a consulta. Area no igual";
                     return;
+                }
             }
         }
 
@@ -749,6 +786,7 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
             {
                 qCDebug(queriesthreadNeighbors) << qry->ip()
                                                 << "Activada consulta OSPF mismo dominio pero no se tiene interfazSiguienteEquipoEntrada. Si viene de OSPF hay que agregar a la consulta las IPs de las interfaces";
+                qCDebug(queriesthreadNeighbors) << "Activada consulta OSPF mismo dominio pero no se tiene interfazSiguienteEquipoEntrada. Si viene de OSPF hay que agregar a la consulta las IPs de las interfaces" << qry->ip();
                 return;
             }
 
@@ -758,6 +796,7 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
 
                 qCDebug(queriesthreadNeighbors) << qry->ip()
                                                 << "m_consultarVecinosOSPFMismoDominio. Se establecio Proceso inicial y es primer equipo";
+                qCDebug(queriesthreadNeighbors) << "m_consultarVecinosOSPFMismoDominio. Se establecio Proceso inicial y es primer equipo" << qry->ip();
 
                 QString interfazHaciaSiguienteEquipo = interfaceToPortChannelInterface(qry->portChannelInfo(),
                                                                                        interfazEsteEquipoSalida,
@@ -766,13 +805,17 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
                 {
                     if ( oi.interfaz == interfazHaciaSiguienteEquipo )
                         if ( oi.process != m_consultarVecinosOSPFEquipoRaizProceso )
+                        {
+                            qCDebug(queriesthreadNeighbors) << "No se agrega vecino. Proceso diferente";
                             return;
+                        }
                 }
             }
             else
             {
                 qCDebug(queriesthreadNeighbors) << qry->ip()
                                                 << "m_consultarVecinosOSPFMismoDominio. Verificando si interfaces entrada y salida pertenecen al mismo proceso" << ipOinterfazDondeSeViene << interfazEsteEquipoSalida;
+                qCDebug(queriesthreadNeighbors) << "m_consultarVecinosOSPFMismoDominio. Verificando si interfaces entrada y salida pertenecen al mismo proceso" << qry->ip() << ipOinterfazDondeSeViene << interfazEsteEquipoSalida ;
 
                 if ( !continuarPorsiguienteInterfazMismoDominioOSPF( *qry,
                                                                  ipOinterfazDondeSeViene,
@@ -785,7 +828,10 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
         qCDebug(queriesthreadNeighbors) << qry->ip()
                                         << "Agregando vecino a la consulta" << ip << "interfaz siguiente equipo entrada"
                                         << interfazSiguienteEquipoEntrada;
+        qCDebug(queriesthreadNeighbors) << "Agregando vecino a la consulta" << qry->ip() << ip << "interfaz siguiente equipo entrada"
+                                        << interfazSiguienteEquipoEntrada;
         m_lstIP.append( ip );
+        m_equiposvecinosagregados.append( ip );
         if ( m_agregarVecinosHastaNivel )
             m_mapAgregarVecinosHastaNiveles.insert( ip, qry->_queriesthreadAgregarVecinoNivel+1 );
         m_lstIPsCounter++;
@@ -793,6 +839,7 @@ void QueriesThread::validarYagregarVecinoAconsulta(Queries *qry,
 
         qCDebug(queriesthreadNeighbors) << qry->ip()
                                         << "Se agrego al listado. Queda asi" << m_lstIP;
+        qCDebug(queriesthreadNeighbors) << "Se agrego al listado. Queda asi" << qry->ip() << m_lstIP;
     }
 }
 
@@ -837,6 +884,19 @@ Queries* QueriesThread::queriesFromIPPointer(QString ip)
         if (qry->ip() == ip)
             return qry;
     return nullptr;
+}
+
+void QueriesThread::m_setQueryConfigError()
+{
+    QMutexLocker locker(&m_mutex2);
+    m_configerror=true;
+}
+
+bool QueriesThread::continuarConfig()
+{
+    QMutexLocker locker(&m_mutex3);
+    if (!m_cancelarConfiguracionInmediatemanteEnError) return true;
+    return !m_configerror;
 }
 
 QString QueriesThread::erroresCSV()
