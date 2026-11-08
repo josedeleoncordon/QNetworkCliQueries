@@ -1,5 +1,0 @@
-<RCC>
-	<qresource prefix="/QAnt">
-		<file>schema.yml</file>
-	</qresource>
-</RCC>
