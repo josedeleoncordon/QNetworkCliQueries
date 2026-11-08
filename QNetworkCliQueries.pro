@@ -5,5 +5,5 @@ SUBDIRS =   qremoteshell \
             unetadmindatabaseorm/database \
             qnetworkcliqueries \
 #            testapps \
-            apps
+            uftapps
 

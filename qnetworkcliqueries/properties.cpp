@@ -1,6 +1,7 @@
 #include "properties.h"
 #include "funciones.h"
 #include <QTextStream>
+#include <memory>
 
 QString PropertiesEncoderDecoder::encode(QString txt)
 {
@@ -49,9 +50,22 @@ void Properties::setNewEnconderDecoder(PropertiesEncoderDecoder*(*encoderdecoder
     ed = encoderdecoder;
 }
 
+QString Properties::secreto(const QString &nombre)
+{
+    std::unique_ptr<PropertiesEncoderDecoder> ped((*ed)());
+
+    QSettings settings;
+    const QString valor = settings.value(QStringLiteral("Secretos/") + nombre).toString();
+    if (!valor.isEmpty())
+        return ped->decode(valor);
+
+    return qEnvironmentVariable(nombre.toUtf8().constData());
+}
+
 void Properties::loadSettings()
 {
-    PropertiesEncoderDecoder *ped = (*ed)();
+    // PropertiesEncoderDecoder *ped = (*ed)();
+    std::unique_ptr<PropertiesEncoderDecoder> ped((*ed)());
 
     QSettings settings;
     settings.setDefaultFormat(QSettings::NativeFormat);
@@ -133,7 +147,8 @@ void Properties::loadSettings()
 
 void Properties::saveSettings()
 {
-    PropertiesEncoderDecoder *ped = (*ed)();
+    // PropertiesEncoderDecoder *ped = (*ed)();
+    std::unique_ptr<PropertiesEncoderDecoder> ped((*ed)());
 
     QSettings settings;
     settings.setDefaultFormat(QSettings::NativeFormat);

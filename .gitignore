@@ -44,9 +44,15 @@ CMakeLists.txt.user*
 
 *~
 *build*/
-apps/
+uftapps/
 .directory
 *.o
 
 *.cert
+*.crt
 *.key
+*.bak
+*.pem
+
+log/
+

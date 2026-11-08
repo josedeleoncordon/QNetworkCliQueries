@@ -9,6 +9,7 @@
 class QNETWORKCLIQUERIES_EXPORT PropertiesEncoderDecoder
 {
 public:
+    virtual ~PropertiesEncoderDecoder() = default;
     virtual QString encode(QString);
     virtual QString decode(QString);
 };
@@ -55,6 +56,7 @@ class QNETWORKCLIQUERIES_EXPORT Properties
         QMap<QString,QVariant> mapGrupoRaizIP;
 
         void setNewEnconderDecoder(PropertiesEncoderDecoder*(*encoderdecoder)(void));
+        QString secreto(const QString &nombre);
 
     private:
         static Properties *m_instance;
